@@ -75,6 +75,19 @@ These defaults are worth a second look before you accept them:
 
 [Testing a Custom Plugin](/development/testing-plugins) covers getting the built bundle into a running app and reading the failure if it does not load.
 
+## Optional protocols
+
+Adopt these on top of `PluginDatabaseDriver` to reach more of the UI. The app finds them with a runtime cast, so leaving one out costs nothing.
+
+| Protocol | What adopting it gets you |
+|----------|---------------------------|
+| `PluginDiagnosticProvider` | A driver-written explanation in front of a raw connection error |
+| `PluginProcedureFunctionSupport` | Stored procedures and functions in the structure tab |
+| `PluginDefaultSortProvider` | Per-table control of default sorting: `.useAppDefault`, `.suppress`, or `.forceColumns([String])` |
+| `PluginPrincipalManagement` | Users, roles, and grants in the Users & Roles tab |
+| `PluginBrowseFilterProvider` | Control of the sidebar object filter: glob syntax, case sensitivity, type scopes |
+| `SettablePlugin` | A settings pane of your own under **Settings > Plugins** |
+
 ## ABI compatibility
 
 TableProPluginKit builds with Swift Library Evolution, so a plugin built against an older PluginKit keeps loading under a newer app: the runtime fills requirements it never implemented from their defaults. Adding a requirement that has a default costs nothing.
@@ -84,7 +97,7 @@ Two changes look additive and are not. Both have shipped, and both surface the s
 - **Removing a published requirement, even one that defaulted to `nil`.** Library Evolution rescues a requirement added after a plugin was built, never one removed out from under it. Removing one deletes its method descriptor and its default-implementation symbol, and every shipped plugin hard-references both in its witness table. If the app stops using a requirement, leave it in place with its default. (0.58, #1917: MongoDB, Oracle, Cassandra, Elasticsearch.)
 - **Adding a parameter to an existing public initializer or function, even with a default value.** It replaces the mangled symbol. Add a new overload for the new field and mark the old one `@_disfavoredOverload`, so new code gets the full initializer and old binaries keep theirs.
 
-`CLAUDE.md` carries the full additive-versus-breaking list and the checklist a breaking bump obliges you to run, including re-releasing every registry plugin before the app ships.
+[`.claude/rules/plugin-system.md`](https://github.com/TableProApp/TablePro/blob/main/.claude/rules/plugin-system.md) in the app repository carries the full additive-versus-breaking list and the checklist a breaking bump obliges you to run, including re-releasing every registry plugin before the app ships.
 
 ```bash
 scripts/check-pluginkit-abi.sh [base-ref]

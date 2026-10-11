@@ -45,6 +45,26 @@
   },
   "redirects": [
     {
+      "source": "/development/setup",
+      "destination": "/development/overview"
+    },
+    {
+      "source": "/development/architecture",
+      "destination": "/development/overview"
+    },
+    {
+      "source": "/development/building",
+      "destination": "/development/overview"
+    },
+    {
+      "source": "/development/releasing",
+      "destination": "/development/overview"
+    },
+    {
+      "source": "/development/code-style",
+      "destination": "/development/overview"
+    },
+    {
       "source": "/features/csv-inspector",
       "destination": "/features/data-files"
     },
@@ -423,12 +443,7 @@
           {
             "group": "Build TablePro",
             "pages": [
-              "development/overview",
-              "development/setup",
-              "development/architecture",
-              "development/building",
-              "development/releasing",
-              "development/code-style"
+              "development/overview"
             ]
           },
           {
