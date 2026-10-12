@@ -16,22 +16,27 @@ Any [connection URL](/connections/urls) works, including its query parameters. T
 connection when one matches on type, host, port, database and user; otherwise the session is
 temporary and never written to disk. Running `tablepro` with no argument opens the app and nothing else.
 
-## Install the tablepro command
+## Add the tablepro command to your PATH
 
-Open **Settings > General**, find **Command Line**, and click **Install**. It writes a small script at
-`/usr/local/bin/tablepro` whose whole body is `exec open -b com.TablePro "$@"`.
+The command ships inside the app at `TablePro.app/Contents/SharedSupport/bin/tablepro`, a script
+whose whole body is `exec open -b com.TablePro "$@"`. Link it into `/usr/local/bin` once:
+
+```bash
+sudo mkdir -p /usr/local/bin && sudo ln -sf /Applications/TablePro.app/Contents/SharedSupport/bin/tablepro /usr/local/bin/tablepro
+```
+
+`sudo` asks for your password in Terminal. TablePro itself never writes outside its own folders and
+never asks for an administrator password. **Settings > General > Command Line** prints the same line
+with the path of the copy you are running, and reads **Linked** once the link is in place. Any other
+directory on your `PATH` works too, and one you own needs no `sudo`.
 
 <Frame caption="The Command Line section in Settings > General">
-  <img className="block dark:hidden" src="/images/command-line-install.png" alt="Command Line install section in TablePro settings" />
-  <img className="hidden dark:block" src="/images/command-line-install-dark.png" alt="Command Line install section in TablePro settings" />
+  <img className="block dark:hidden" src="/images/command-line-link.png" alt="Command Line section in TablePro settings with the Terminal command to link tablepro" />
+  <img className="hidden dark:block" src="/images/command-line-link-dark.png" alt="Command Line section in TablePro settings with the Terminal command to link tablepro" />
 </Frame>
 
-That directory is root-owned on a stock macOS install, so expect an administrator password prompt.
-Cancel it and nothing is written. If the write fails anyway, Settings prints the exact `sudo` command
-to paste into Terminal; run it, switch back, and the status updates itself.
-
-**Uninstall** removes the script again. When something else already occupies that path, **Install**
-is dimmed and Settings says *"A different file already exists at …"*: remove that file first.
+To remove it, run `sudo rm /usr/local/bin/tablepro`. The link follows the app, so updating TablePro
+updates the command; move the app and the link needs making again.
 
 ## Open a file
 
