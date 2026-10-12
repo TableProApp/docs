@@ -75,7 +75,7 @@ Provider API keys live in the keychain, never in `connections.json` and never in
 
 Signing in to ChatGPT opens a second local listener on port 1455 for the OAuth redirect. It runs only during that sign-in and closes after it.
 
-Two provider paths run a program rather than call an endpoint. **Claude Agent** runs the `claude` command line tool, which talks to Anthropic under your own subscription. **GitHub Copilot** downloads its language server from `registry.npmjs.org` on first use, and its provider sheet has **Send telemetry to GitHub**, which is on when you add the provider. Turning it off sets the language server's telemetry level to `off`.
+Two provider paths run a program rather than call an endpoint. **Claude Agent** runs the `claude` command line tool, which talks to Anthropic under your own subscription. **GitHub Copilot** downloads its language server from `registry.npmjs.org` and starts it on first use or when **Settings > AI** lists the provider, never at launch. It stops when AI is turned off or the Copilot provider is removed. Its provider sheet has **Send telemetry to GitHub**, which is on when you add the provider. Turning it off sets the language server's telemetry level to `off`.
 
 ## iCloud sync
 
@@ -142,7 +142,7 @@ There are none. The app links no crash reporting SDK, its only remote packages b
 
 The largest thing leaving your Mac is the traffic you asked for: the connection to your own server, plus whatever hops you configured, such as an SSH tunnel, a Cloudflare tunnel, a SOCKS proxy, or Cloud SQL Proxy. Cloud drivers reach their vendor's endpoint by design, so BigQuery talks to `bigquery.googleapis.com`, Spanner to `spanner.googleapis.com`, DynamoDB to AWS, and Microsoft Entra authentication to `login.microsoftonline.com`.
 
-Two helpers download on first use, and each is verified before it runs: the Cloud SQL Proxy binary from `storage.googleapis.com` against a pinned SHA-256, and the Copilot language server tarball against the integrity hash npm publishes with it.
+Two helpers download on first use, and each is verified before it runs: the Cloud SQL Proxy binary from `storage.googleapis.com` against a pinned SHA-256, and the Copilot language server at a pinned version, against pinned SHA-256 digests of the archive and the binary.
 
 ## What stays local
 

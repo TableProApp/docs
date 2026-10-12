@@ -22,7 +22,7 @@ Open **Settings > AI** (`Cmd+,`). **Enable AI Features** at the top gates the wh
     Paste the API base from the server's own documentation, version segment included: `https://api.openai.com/v1`, `https://api.z.ai/api/paas/v4`, `http://localhost:1234/v1`. Under the field is the URL a request resolves to. A full chat completions URL works as well and is used as it stands.
   </Step>
   <Step title="Authenticate">
-    Paste an API key, or sign in for GitHub Copilot, ChatGPT, Cursor, and xAI. Leave the key empty for a Custom provider whose server checks none, such as a self-hosted vLLM or LM Studio with authentication off.
+    Paste an API key, or sign in for GitHub Copilot and ChatGPT. Leave the key empty for a Custom provider whose server checks none, such as a self-hosted vLLM or LM Studio with authentication off.
   </Step>
   <Step title="Pick a model and test">
     Type a model name or pick one from the fetched list, then click **Test Connection**. A provider that lists several models with no default starts on **Other…** with an empty **Model ID**, so pick one before saving.
@@ -35,10 +35,9 @@ With no preference, start with Claude or OpenAI on an API key: both take a key, 
 
 | Provider | Sign-in | Worth knowing |
 |---|---|---|
-| GitHub Copilot | GitHub device flow | Runs its own tool loop, so the tool call limit never applies |
+| GitHub Copilot | GitHub device flow | Runs its own tool loop, so the tool call limit never applies. Its language server starts on first use or when **Settings > AI** lists the provider, and stops when AI is turned off or the provider is removed |
 | ChatGPT | Your ChatGPT account, on the Codex quota from Plus, Pro, Business, and Enterprise plans. **Import from Codex CLI** reuses an existing login | Unofficial interface, may change |
-| Cursor | API key, or **Sign in with Cursor** with the Cursor CLI installed | Runs as an agent, not a chat-completions endpoint, so it cannot call TablePro's tools: Edit and Agent modes run no queries through it |
-| xAI | API key, or **Sign in with xAI** on a SuperGrok or X Premium+ subscription | Sign-in opens a Grok Build consent screen and is unofficial. Presets: Grok 4.5, Grok 4.3 |
+| xAI | API key from the xAI Console | Presets: Grok 4.5, Grok 4.3 |
 | Requesty | API key | An OpenAI-compatible router. The Base URL is filled in; set it to `https://router.eu.requesty.ai` for EU routing |
 | Ollama, llama.cpp, MLX | None. Start the server first | Presets fill in `http://localhost:11434` for Ollama and `http://localhost:8080` for `llama-server` and `mlx_lm.server`. Start `llama-server` with `--jinja` for tool calling |
 | Claude Agent | Claude Code's `claude` command, no key | Bills against a Claude subscription, with tradeoffs |
@@ -66,7 +65,7 @@ Type a question and press Return. Code blocks carry **Copy** and **Insert**, and
 
 Conversations save themselves and take their title from your first message. The ellipsis menu at the trailing end of the pane's header holds **New Conversation**, **Conversation History** with the current conversation ticked, and **Clear Recents**, which asks before it deletes every one of them. **File > Session** carries the same three, so they work with the pane closed and in [Agent mode](/features/agent-mode). Editing a message you already sent puts its text and attachments back in the composer and drops that turn and everything after it.
 
-Paste or drag images into the composer on any provider that takes them, which is all of them except GitHub Copilot, Cursor, ChatGPT, and Claude Agent. On OpenRouter and Requesty the model decides: one the router lists as text-only takes no images. A drop that carries files the composer cannot read attaches the rest and says how many it kept.
+Paste or drag images into the composer on any provider that takes them, which is all of them except GitHub Copilot, ChatGPT, and Claude Agent. On OpenRouter and Requesty the model decides: one the router lists as text-only takes no images. A drop that carries files the composer cannot read attaches the rest and says how many it kept.
 
 The focused composer carries a colored highlight. Right-click it and turn **Highlight When Focused** off for the standard macOS focus ring instead. The choice is app-wide and survives restarts. Reduce Transparency and Increase Contrast, both under **System Settings > Accessibility > Display**, also replace the highlight with the focus ring.
 
@@ -93,7 +92,7 @@ In Edit and Agent modes each tool call appears as a card in the reply. Read-only
 
 Safe Mode **Silent** auto-approves write tools and **Read-Only** auto-denies them. Destructive operations are the exception: `confirm_destructive_operation` always needs a click, Silent does not auto-approve it, **Always for this connection** is refused for it, and the model must pass the verbatim phrase `I understand this is irreversible`.
 
-Every provider except Cursor can call tools. Claude Agent reaches them through the MCP server, so that has to be on, and local models depend on the model.
+Every provider can call tools. Claude Agent reaches them through the MCP server, so that has to be on, and local models depend on the model.
 
 A reply pauses after 25 tool calls, keeps everything it has done, and offers **Continue** for a fresh budget or **Adjust Limit** to change the number, 5 to 200, under **Agent** in **Settings > AI**. Every call is another request with the schema attached, so a higher limit costs tokens.
 
