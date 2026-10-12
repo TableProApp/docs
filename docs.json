@@ -246,6 +246,7 @@
               "databases/duckdb",
               "databases/elasticsearch",
               "databases/etcd",
+              "databases/firebase",
               "databases/bigquery",
               "databases/kafka",
               "databases/libsql",

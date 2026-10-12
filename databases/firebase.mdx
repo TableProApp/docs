@@ -1,0 +1,178 @@
+---
+title: Firebase
+description: Connect to Cloud Firestore and the Firebase Realtime Database, browse collections and nodes, and edit documents
+---
+
+import RegistryPlugin from "/snippets/registry-plugin.mdx";
+
+One plugin serves two connection types. **Cloud Firestore** shows collections as tables and documents as rows. **Firebase Realtime Database** shows the children of a node as rows. Both talk to the REST APIs, and neither has SQL: the editor takes request lines such as `GET users/alice`.
+
+<RegistryPlugin name="Cloud Firestore" plugin="Firebase Driver" />
+
+## Quick setup
+
+Click **New Connection…**, select **Cloud Firestore** or **Firebase Realtime Database**, pick an **Auth Method**, then click **Save & Connect**.
+
+With a service account key, **Project ID** can stay empty: the project comes from the key. For the Realtime Database, **Database URL** can stay empty too. The plugin asks Firebase for the project's instances and opens the default one.
+
+## Connection settings
+
+| Field | Description |
+|-------|-------------|
+| **Auth Method** | Service Account Key, Application Default Credentials, or Emulator |
+| **Service Account Key** | A path to the JSON key file, or the JSON pasted in. Stored in the Keychain |
+| **Project ID** | The Google Cloud project. Taken from the key or from Application Default Credentials when empty |
+| **Database** | Firestore only. `(default)` when empty. Other databases in the project are in the database switcher |
+| **Database URL** | Realtime Database only, such as `https://<name>.<region>.firebasedatabase.app`. Must be a `firebaseio.com` or `firebasedatabase.app` address |
+| **Emulator Host** | Shown for the Emulator method, as `host:port` |
+
+## Authentication
+
+| Auth Method | What is sent |
+|-------------|--------------|
+| **Service Account Key** | An OAuth token signed with the key. The account needs a role that reads the data, such as Cloud Datastore Viewer for Firestore or Firebase Realtime Database Viewer |
+| **Application Default Credentials** | The token from `gcloud auth application-default login`, or from the file `GOOGLE_APPLICATION_CREDENTIALS` names |
+| **Emulator** | The token `owner`, which the Firebase emulators accept as an administrator |
+
+A service account and a signed-in Google account both act as administrators to the Realtime Database, so its security rules do not limit them. When IAM or the rules refuse an operation, the error says **Permission denied** and names the operation, rather than showing an empty table.
+
+## Cloud Firestore
+
+### Browsing collections
+
+The sidebar lists the root collections. Subcollections are found under the first documents of each root collection and listed as collection groups, such as `*/orders`, which reads every `orders` collection at any depth.
+
+Every grid has `__name__` first: the document ID, or the full path in a collection group. The other columns are the fields the documents on the page hold. A field a document does not have shows as missing, not as NULL. Maps and arrays show as JSON.
+
+### Filtering and sorting
+
+Filters and sorts become a structured query. A filter value is read by the type the field holds, so `age = 30` matches the integer 30 and `zip = 02134` matches the string when `zip` is a string field.
+
+| Operators | What Firestore runs |
+|----------|--------------------|
+| equals, not equals | `EQUAL`, `NOT_EQUAL` |
+| greater than, greater or equal, less than, less or equal | Range filters |
+| in list, not in list | `IN`, `NOT_IN`, from 1 to 30 values |
+| between | Two bounds, both inclusive |
+| starts with | A range from the prefix up to the prefix followed by `` |
+| contains | `ARRAY_CONTAINS`, on an array field only |
+| is NULL, is not NULL | `IS_NULL`, `IS_NOT_NULL` |
+
+Firestore has no text search, so **contains** on a string field, **ends with**, the empty checks and **REGEX** report why instead of running. The raw filter takes a `Filter` object from the Firestore REST API, such as `{"fieldFilter": {"field": {"fieldPath": "address.city"}, "op": "EQUAL", "value": {"stringValue": "Milan"}}}`, which reaches nested fields. A filter that needs a composite index returns Firestore's error with the link that creates it.
+
+### Editing
+
+Grid edits are REST calls. An edited cell keeps the type the field had: a string stays a string even when the new text is a number, and a timestamp takes RFC 3339 text such as `2026-10-12T08:00:00Z`.
+
+| Change | Request |
+|--------|---------|
+| New row | `POST users`, with `documentId` when `__name__` is set |
+| Edited cells | `PATCH users/alice?updateMask=age`, only the fields you changed |
+| Removed field | The field in `updateMask` and not in the body |
+| Deleted row | `DELETE users/alice` |
+
+**Edit Document** opens the whole document as JSON. Types JSON lacks are written as one-key objects:
+
+```json
+{
+  "__name__": "users/alice",
+  "age": 31,
+  "since": {"$timestamp": "2026-10-12T08:00:00Z"},
+  "owner": {"$ref": "teams/core"},
+  "home": {"$geo": {"latitude": 45.46, "longitude": 9.19}},
+  "avatar": {"$bytes": "aGk="},
+  "ratio": {"$double": 2}
+}
+```
+
+Saving checks that the stored document still matches what you opened, and writes with its update time as a precondition. If someone changed it in between, the save is refused.
+
+### Request editor
+
+| Request | What it does |
+|---------|--------------|
+| `GET users` | The first 100 documents of a collection. `?pageSize=` sets another number |
+| `GET users/alice` | One document |
+| `GET /` | The root collection IDs. `GET users/alice?collections` lists a document's subcollections |
+| `QUERY {"structuredQuery": {...}}` | A structured query from the REST reference. `QUERY users/alice {...}` runs it under a document |
+| `POST users {"name": "Bob"}` | Creates a document with a generated ID |
+| `PATCH users/alice?updateMask=age {"age": 31}` | Changes the named fields. Without `updateMask` the body replaces the document |
+| `DELETE users/alice` | Deletes a document |
+
+Bodies use the same JSON as **Edit Document**.
+
+## Realtime Database
+
+### Browsing nodes
+
+The sidebar lists `/`, the root, and the root's children when there are 500 or fewer. Open `/` for a root with more.
+
+Every grid has `$key` first. Children that are objects add their fields as columns; children that are plain values go in `$value`. Nested objects show as JSON. The database switcher lists the project's instances.
+
+### Filtering and sorting
+
+The REST API filters on one field at a time and has no offset, so the plugin asks for the first offset plus limit children in order and drops the offset.
+
+| Operators | What the Realtime Database runs |
+|----------|--------------------|
+| equals | `equalTo` |
+| greater than, greater or equal | `startAfter`, `startAt` |
+| less than, less or equal | `endBefore`, `endAt` |
+| between | `startAt` and `endAt` |
+| starts with | `startAt` and `endAt` with `` |
+| is NULL | `equalTo=null` |
+
+Filter or sort on `$key`, `$value`, or a child field. A second filter, an OR, or a sort on another column than the filter is refused with the reason. Ordering by a child field needs `.indexOn` in the rules, and Firebase's own error names the rule to add. The raw filter takes a query string as written, such as `orderBy="age"&startAt=18`.
+
+### Editing
+
+| Change | Request |
+|--------|---------|
+| New row | `PUT` under the key you typed, or `POST` for a generated key |
+| Edited cells | `PATCH` on the child with the changed fields |
+| Edited `$value` | `PUT` on the child |
+| Removed field | The field set to `null` in the `PATCH` |
+| Deleted row | `DELETE` on the child |
+
+**Edit Document** opens a child as `{"$key": "<path>", "$value": <JSON>}`. Saving sends the node's ETag with `if-match`, so a node that changed after you opened it is not overwritten.
+
+### Request editor
+
+```http
+GET /chats?orderBy="$key"&limitToFirst=20
+```
+
+`GET`, `PUT`, `PATCH`, `POST` and `DELETE` take a path and, for writes, a JSON body on the same line or the lines under it. Query parameters are passed through. `DELETE /` is refused.
+
+## The emulators
+
+Pick **Emulator**, enter the project the emulators run, and set **Emulator Host** to the Firestore or Database emulator, by default `127.0.0.1:8080` and `127.0.0.1:9000`.
+
+## Limitations
+
+- No real-time listeners. Grids show what was read and refresh on request.
+- Firestore paging uses `offset`, which Firestore bills as one read per skipped document. Export pages with a cursor instead.
+- Realtime Database paging downloads the skipped children, so late pages of a large node are slow.
+- Export fixes its columns from the first page. Fields that appear only later go into an `__extra__` column as JSON.
+- Datastore-mode databases are not listed. Use a Firestore Native database.
+- Collection groups come from the first two documents of up to 30 root collections. Open any other path from the request editor.
+- The plugin is registry-only. It is not on iPhone or iPad.
+
+## Troubleshooting
+
+### Permission denied: …
+
+The credential's IAM role does not cover the operation, or a security rule blocks it. The message names what was attempted.
+
+### Database lives in a different region
+
+The Database URL points at the wrong host. Leave it empty and the plugin finds the instance, or copy the URL from the Firebase console.
+
+### No project to connect to
+
+The error reads "Enter a Project ID, or use a service account key that names one". Application Default Credentials from a user login name no project. Fill in **Project ID**.
+
+## Related
+
+- [Filtering](/features/filtering)
+- [Import & Export](/features/import-export)

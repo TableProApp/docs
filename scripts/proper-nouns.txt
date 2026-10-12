@@ -13,9 +13,11 @@ Beancount
 Cloud
 Code
 Connector
+Database
 Drive
 Entra
 Finder
+Firestore
 Homebrew
 Insights
 Instant
@@ -30,6 +32,7 @@ Microsoft
 Mode
 Proxy
 Quack
+Realtime
 Safe
 Shortcuts
 Studio
