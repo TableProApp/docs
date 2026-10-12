@@ -247,7 +247,7 @@ Right-click tables in the sidebar and choose **Transfer To…** to copy their ro
     Then tick the tables to copy.
   </Step>
   <Step title="Transfer">
-    Each table is wrapped in its own transaction by default, so a table that fails leaves its own rows untouched and the ones before it committed.
+    The destination's [Safe Mode](/features/safe-mode) covers the whole transfer, with one confirmation and one Touch ID prompt where its level asks for them. Each table is wrapped in its own transaction by default, so a table that fails leaves its own rows untouched and the ones before it committed.
   </Step>
 </Steps>
 
@@ -283,7 +283,7 @@ The extension picks the format, so one command covers all of them. A file no for
     Encoding, transaction wrapping, and error handling for SQL; parsing and column mapping for CSV and JSON. TablePro remembers the options from your last successful import, and **Reset to Defaults** restores the stock ones.
   </Step>
   <Step title="Review and import">
-    Check the preview, statement count, and file size, then click **Import**.
+    Check the preview, statement count, and file size, then click **Import**. The connection's [Safe Mode](/features/safe-mode) asks once for the whole file where its level calls for a confirmation or Touch ID.
   </Step>
 </Steps>
 

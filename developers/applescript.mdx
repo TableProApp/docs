@@ -133,7 +133,9 @@ run query "SELECT 1" in connection "Production" ¬
 ```
 
 Runs one statement and returns a `query result`. No window opens and no tab is disturbed; the
-connection opens first if it is closed, which can prompt for a password.
+connection opens first if it is closed, which can prompt for a password or ask to run the
+connection's pre-connect script. A script prompt nobody answers in 60 seconds closes, and the command
+fails with error -10000.
 
 `row limit` defaults to 500 and caps at 10000. `timeout` defaults to 30 seconds and caps at 600.
 Several statements in one call are refused, as are statements that read files or run server-side

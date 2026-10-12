@@ -88,7 +88,9 @@ session picks it up.
   <img className="hidden dark:block" src="/images/connection-timeouts-dark.png" alt="PostgreSQL connection Options pane in dark appearance with Connect timeout and Query timeout fields using their inherited defaults" />
 </Frame>
 
-A pre-connect script never runs unprompted. A **Pre-Connect Script** alert shows the script itself and waits for **Run Script**, every time. At launch it is not prompted for at all: a restored window whose connection carries a script waits with a **Connect** button.
+A pre-connect script never runs unprompted. A **Pre-Connect Script** alert shows the script itself and waits for **Run Script**, every time, whatever opens the connection: its window, a link, Compare, **Copy To**, the AI assistant, an MCP client or a script. With no answer in 60 seconds the alert closes as **Cancel**.
+
+A connect you did not start never runs the script. A restored window at launch, a table loading on its own and a reconnect after a tunnel drops all stop at a **Connect** button instead.
 
 ## Appearance
 
