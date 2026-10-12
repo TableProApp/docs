@@ -1,6 +1,6 @@
 ---
 title: Notifications
-description: Which finished operations notify you, how long work has to run first, and what the notification carries
+description: When finished work notifies you, how long it has to run first, and what the notification carries
 ---
 
 You only get told when the result is somewhere you are not. That means TablePro behind another window or in another Space, the window minimized, or the tab that ran the work not the one on screen. Work you cancelled yourself never notifies, and neither does anything that finished faster than the threshold.
@@ -14,19 +14,10 @@ You only get told when the result is somewhere you are not. That means TablePro 
 
 | Setting | Default | Covers |
 | --- | --- | --- |
-| **Notify when long-running work finishes** | On | The master switch for every kind in this table |
+| **Notify when long-running work finishes** | On | Every kind of work below |
 | **Only after** | 20 seconds | How long work has to run to count: 5, 10, 20 or 30 seconds, or 1, 2, 5 or 10 minutes |
-| **Queries** | On | Editor queries, including Explain |
-| **Statement batches** | On | Execute All Statements, as one notification for the batch |
-| **Row edits** | On | Saving edited rows |
-| **Structure changes** | On | Applying table structure changes |
-| **Imports** | On | File imports |
-| **Exports** | On | Exports, including streaming exports |
-| **Object copies** | On | Copy To and Duplicate Database |
-| **Backups** | On | Database dumps |
-| **Fetch all rows** | On | Loading every row of a truncated result |
-| **AI and MCP queries** | On | Queries an AI assistant or MCP client runs |
-| **AppleScript queries** | On | Queries [a script](/developers/applescript) runs |
+
+The kinds that count: editor queries including Explain, Execute All Statements as one notification for the batch, saving edited rows, structure changes, imports, exports, Copy To and Duplicate Database, database dumps, fetching every row of a truncated result, and queries an AI assistant, an MCP client or [a script](/developers/applescript) runs.
 
 Keep **Only after** below the [query timeout](/customization/general-settings#query-timeout), or a query that times out finishes before its notification is due.
 

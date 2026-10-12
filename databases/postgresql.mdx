@@ -24,7 +24,7 @@ Any server from 9.1 on works. A feature the server predates stays out of the sid
 |---|---|
 | Materialized views | 9.3 |
 | BRIN indexes, the **Bypass row level security** role attribute | 9.5 |
-| Declarative partitioning, identity columns, renaming an enum label | 10 |
+| Declarative partitioning, identity columns | 10 |
 | Generated columns | 12 |
 
 <Frame caption="PostgreSQL connection form">
@@ -104,7 +104,7 @@ A value the list cannot represent opens the text editor instead: a multi-dimensi
 
 ## User-defined types
 
-Enums, composites, domains and ranges are listed under **Types** in each schema, the `CREATE` statement rebuilt from `pg_type`. An enum's labels are edited in place with `ALTER TYPE … ADD VALUE` and, from PostgreSQL 10, `RENAME VALUE`; PostgreSQL has no statement that drops or reorders a label. The structure editor's type picker offers the schema's types under **User-Defined**. See [User-Defined Types](/features/user-defined-types).
+Enums, composites, domains and ranges are listed under **Types** in each schema, the `CREATE` statement rebuilt from `pg_type`. The structure editor's type picker offers the schema's types under **User-Defined**. See [User-Defined Types](/features/user-defined-types).
 
 ## Views and comments
 

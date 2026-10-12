@@ -70,7 +70,7 @@ A table whose primary key is made of two foreign keys, `user_roles` and its like
 
 **Export as PNG** renders the whole diagram at twice screen resolution with 40 points of padding, whatever the current zoom and scroll position, and saves it as `er-diagram.png`. `Cmd+C` puts the same image on the clipboard. Compact mode and expanded junction tables carry into the render, so set the view up first.
 
-**Export as SQL** opens a query tab with `CREATE TABLE` and foreign key statements for the diagram's tables in the connection's dialect. SQLite inlines the foreign keys; other engines add them afterwards with `ALTER TABLE … ADD CONSTRAINT`, so the script survives circular references.
+For the tables' DDL, choose **File > Export > Export Tables…**, pick SQL and leave **Structure** on. See [Import & Export](/features/import-export).
 
 ## Database support
 
