@@ -157,7 +157,8 @@ The sheet names the client and counts down the five minutes the request is good 
 the link asked for, movable in either direction), **Allowed Connections** (all, or a checked subset),
 and **Expiration** (never, 1, 7, 30 or 90 days). A link that asks for `connections:display` adds
 **List connections hidden from AI**, off until the user ticks it. The link's parameters are a
-request, not a grant.
+request, not a grant. **Deny** is the default button: Return and Escape both deny, and **Approve**
+takes a click. The sheet does not take focus from another app; TablePro's Dock icon bounces instead.
 
 Approving mints the token, holds the plaintext against a one-time code for 5 minutes, and opens the
 redirect. Pairing again mints a second token rather than replacing the first, so an extension that

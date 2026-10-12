@@ -85,7 +85,7 @@ tablepro://connect/<connection-uuid>/query?sql=<percent-encoded-sql>
 ```
 
 A dialog titled **Open Query from Link** appears first, previewing the first 300 characters of the
-SQL; **Open Query** opens the tab. Nothing executes, the user runs it from the editor. A tab already
+SQL; **Open Query** opens the tab, and Return or Escape cancels. Nothing executes, the user runs it from the editor. A tab already
 holding exactly this SQL comes to front instead of a second one opening.
 
 `sql` is required and caps at 51,200 UTF-16 units. Longer than that and the link is dropped.
