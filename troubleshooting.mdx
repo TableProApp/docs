@@ -41,11 +41,11 @@ A handshake failure names the cause and the SSL Mode to switch to, with the driv
 
 ## A plugin will not install or load
 
-A plugin that fails any of its checks appears as a banner in **Settings > Plugins > Installed** with the reason.
+A plugin that fails any of its checks appears as a banner in **Settings > Plugins** with the reason.
 
 ### "Plugin code signature verification failed: …"
 
-The bundle is unsigned, ad-hoc signed, or altered after signing, and there is no override. Download it again from the registry or from its developer.
+The bundle is not signed by TablePro, is unsigned or ad-hoc signed, or was altered after signing, and there is no override. Download it again from the registry.
 
 ### "Plugin checksum does not match expected value"
 
@@ -63,7 +63,7 @@ A network problem, not a bad plugin. Retry once you are online.
 
 A saved connection's driver is missing. The failure screen offers **Install Plugin…**.
 
-Removing a plugin needs a relaunch, offered as **Quit & Reopen**. Plugins you installed live in `~/Library/Application Support/TablePro/Plugins`. See [Plugins & Themes](/features/plugins).
+Removing a plugin needs a relaunch, offered as **Quit & Reopen**. Plugins you installed live in `~/Library/Application Support/TablePro/Plugins`. See [Plugins](/features/plugins).
 
 ## SSH tunnel failures
 
@@ -114,6 +114,6 @@ Neither copy button includes a password. **Copy Details** carries the host, the 
 **Help > Report an Issue** opens the [issue tracker](https://github.com/TableProApp/TablePro/issues). A report that gets fixed quickly carries:
 
 - The version from **TablePro > About TablePro**, your macOS version, and whether the Mac is Apple Silicon or Intel
-- The engine and server version, plus the plugin version from **Settings > Plugins > Installed**
+- The engine and server version, plus the plugin version from **Settings > Plugins**
 - The error pasted from **Copy Details** or **Copy Diagnostic Info**, not retyped
 - What you ran, what happened, and what you expected. Add the log lines when the failure left no dialog

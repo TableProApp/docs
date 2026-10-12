@@ -22,9 +22,9 @@ The editor on the right edits the theme selected in the slot named by **Editing*
 |--------|--------|
 | **+** menu | **Duplicate Selected** copies the selected theme; **Import…** reads a theme JSON file |
 | **-** button | Deletes the selected theme. Custom themes only |
-| **Gear** menu | **Duplicate** and **Export…** act on the selected theme; **Uninstall** removes the selected registry theme |
+| **Gear** menu | **Duplicate** and **Export…** act on the selected theme |
 
-A built-in or registry theme is read-only and shows a **Duplicate Theme** button, which makes "Name (Copy)" for you to edit.
+A built-in theme is read-only and shows a **Duplicate Theme** button, which makes "Name (Copy)" for you to edit.
 
 Fonts are not part of a theme. Editor Font lives in [Editor settings](/customization/editor-settings) and Data Grid Font in [Data settings](/customization/data-settings), and both stay on the Mac you set them on.
 
@@ -32,7 +32,7 @@ A theme file the app cannot read is listed under **Not Loaded** with the reason,
 
 ## Colors
 
-Custom themes get color wells here. A built-in or registry theme shows a lock and a **Duplicate Theme** button instead.
+Custom themes get color wells here. A built-in theme shows a lock and a **Duplicate Theme** button instead.
 
 | Group | Controls |
 |-------|----------|
@@ -48,12 +48,12 @@ A theme colors the panes that show database content. The sidebar, the toolbar, t
 
 ## Theme files
 
-A theme is one JSON file. **Export…** in the gear menu writes every color the selected theme sets, which is the shortest way to start a new one; **Import…** in the **+** menu reads one back into `~/Library/Application Support/TablePro/Themes/`. Themes published to the [plugin registry](/features/plugins#themes) install from **Settings > Plugins > Browse**, Themes category.
+A theme is one JSON file. **Export…** in the gear menu writes every color the selected theme sets, which is the shortest way to start a new one; **Import…** in the **+** menu reads one back into `~/Library/Application Support/TablePro/Themes/`.
 
 | Key | Holds |
 |-----|-------|
 | `schema` | Format version. `2` is the version this release reads |
-| `id`, `name`, `author` | Identity. An `id` that collides with a built-in, a registry theme, or one you already have is replaced on import |
+| `id`, `name`, `author` | Identity. An `id` that collides with a built-in or with one you already have is replaced on import |
 | `appearance` | `light` or `dark`. Decides which slot lists the theme |
 | `content.editor` | Editor colors, with syntax colors nested under `syntax` |
 | `content.dataGrid` | Grid colors |

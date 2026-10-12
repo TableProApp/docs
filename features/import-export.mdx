@@ -199,28 +199,8 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
 
     Column widths come from the header and the first 200 rows, so a wide value later in a long table is written whole rather than widening every row before it. A pipe or a line break inside a value is neutralised: both would end the cell early.
   </Tab>
-  <Tab title="HTML">
-    | Option | Default |
-    |--------|---------|
-    | Write a full HTML document | Yes |
-    | Write each table's name as a heading | Yes |
-    | Mark NULL cells | Yes |
-
-    A full document carries its own stylesheet and follows the reader's light or dark setting. Turn it off to paste bare `<table>` elements into a page that has its own styling.
-  </Tab>
-  <Tab title="XML">
-    One element per row, one child element per column.
-
-    | Option | Default |
-    |--------|---------|
-    | Pretty print | Yes |
-    | Mark NULL with `xsi:nil` | Yes |
-    | Row element | `row` |
-
-    A column name that is not a legal XML element name is rewritten: a leading digit gains an underscore, an illegal character becomes one, and a name starting `xml` is prefixed. Control characters XML 1.0 forbids are dropped, so a binary column cannot make the document unparseable.
-  </Tab>
   <Tab title="Parquet">
-    Install the Parquet plugin from **Settings > Plugins** first. It carries its own copy of DuckDB, which does the encoding, and is too large to ship in the app.
+    Choose **Install Parquet…** at the end of the format menu the first time. The plugin downloads, then Parquet is selected. It carries its own copy of DuckDB, which does the encoding, and is too large to ship in the app.
 
     | Option | Default |
     |--------|---------|

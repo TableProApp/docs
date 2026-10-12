@@ -120,7 +120,7 @@ Updates download from the GitHub release named in the feed, and Sparkle checks e
 
 At launch the app fetches `https://raw.githubusercontent.com/TableProApp/plugins/main/plugins.json` when its cached copy is more than five minutes old, and again when it reconciles a plugin that a newer app version rejected. The request adds no header of its own; GitHub sees the IP address and the user agent URLSession sends. The response is cached on disk.
 
-Installing a plugin or a theme downloads its ZIP over HTTPS from the URL in that catalog and checks it against the SHA-256 the catalog declares. The plugin browser also calls `https://api.github.com/repos/TableProApp/TablePro/releases?per_page=100` for download counts, at most once every five minutes, and only while that pane is open.
+Installing a plugin downloads its ZIP over HTTPS from the URL in that catalog and checks it against the SHA-256 the catalog declares.
 
 There is no setting that turns the catalog fetch off.
 

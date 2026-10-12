@@ -133,4 +133,4 @@ Two steps put a plugin in TablePro's own registry, and both happen in this repos
   </Step>
 </Steps>
 
-CI signs with TablePro's certificate, so a plugin published there arrives through a pull request, not a tag of your own. The other route stays outside this repository: sign the bundle with your own Developer ID and serve it from a registry URL you host, and the app installs it once the user agrees to trust your team by name. [Plugin Registry](/development/plugin-registry) has the manifest format, the `metadata` block that renders your connection form before the download finishes, and how to point the app at a private registry.
+CI signs with TablePro's certificate, so a plugin published there arrives through a pull request, not a tag of your own. The app loads only bundles TablePro signed. [Plugin Registry](/development/plugin-registry) has the manifest format, the `metadata` block that renders your connection form before the download finishes, and how to point the app at a private registry.

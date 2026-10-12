@@ -16,7 +16,7 @@ A plugin's signature is checked only outside the app's own `PlugIns` directory. 
 
 The version keys go first either way: a plugin whose `TableProPluginKitVersion` falls outside the app's compatible range, or whose `TableProMinAppVersion` is newer than the running app, is rejected before anything looks at its signature.
 
-The signature check has two passes. A bundle signed by the same Apple team as the running app loads with no further question, which is why your own debug build accepts what your own Xcode signed. A bundle carrying any other Developer ID loads only if the user has trusted that team by name, and that consent is collected during an install through a registry, nowhere else ([Plugins & Themes](/features/plugins#plugins-from-other-developers)). Hand-copy such a bundle into the user plugins directory and it fails to load, because nothing on that path asks.
+The signature check accepts one signer: the Apple team that signed the running app, which for a release is TablePro. Your own debug build accepts what your own Xcode signed for the same reason. Every other signature, ad-hoc signing and an unsigned bundle are refused, and nothing asks.
 
 Do not reuse a built-in plugin's bundle ID. Installing over one fails outright, and at discovery the higher version wins, with the built-in taking a tie and the losing user copy deleted from disk.
 
@@ -56,16 +56,16 @@ Then run `scripts/generate-project.sh` and build. XcodeGen puts the bundle in an
 
 A Debug build skips signature verification altogether when `TABLEPRO_ALLOW_UNSIGNED_PLUGINS` is set to `1`. Set it under **Product > Scheme > Edit Scheme > Run > Arguments**, in the environment variables list.
 
-This is the route for a bundle built on another machine, or for testing your own Developer ID signing before there is any registry entry to install from, since it also bypasses the developer-trust prompt. The bundle still has to be validly signed for dyld to load it at all. The escape hatch is compiled out of Release builds, so it cannot mask a signing problem that would reach a user.
+This is the route for a bundle built on another machine or signed by another team. The bundle still has to be validly signed for dyld to load it at all. The escape hatch is compiled out of Release builds, so it cannot mask a signing problem that would reach a user.
 
 ## When it does not load
 
-The reason lands in a **Plugin Installation Failed** alert when installing, and in the plugin's row under **Settings > Plugins > Installed** otherwise.
+The reason lands in a **Plugin Installation Failed** alert when installing, and in the banner in **Settings > Plugins** otherwise.
 
 | Message | What it means | What to do |
 |---------|---------------|------------|
-| **Plugin code signature verification failed: …** | Unsigned, ad-hoc signed, modified after signing, or signed by a certificate that is neither your app's team nor a Developer ID | Rebuild rather than patch. Any edit to a signed bundle breaks the seal |
-| **This plugin is signed by …, a developer you have not trusted yet.** | A valid Developer ID that this Mac has not consented to | Install it through a registry so the trust prompt runs, or set `TABLEPRO_ALLOW_UNSIGNED_PLUGINS=1` in a Debug build |
+| **Plugin code signature verification failed: bundle is not signed by TablePro** | A valid signature from a team other than the running app's | Sign with the app's team, or set `TABLEPRO_ALLOW_UNSIGNED_PLUGINS=1` in a Debug build |
+| **Plugin code signature verification failed: …** | Unsigned, ad-hoc signed, modified after signing, or a symbolic link that points outside the bundle | Rebuild rather than patch. Any edit to a signed bundle breaks the seal |
 | **Plugin was built for PluginKit version …; this release of TablePro needs version …** | The bundle predates a breaking ABI bump | Rebuild the plugin against the current TableProPluginKit |
 | **Plugin requires app version … or later, but current version is …** | `TableProMinAppVersion` is ahead of the app | Raise `MARKETING_VERSION` in `Configs/Version.xcconfig` and rebuild |
 | **A built-in plugin "…" already provides this bundle ID** | The bundle ID collides with a bundled plugin | Give your plugin its own bundle ID |
