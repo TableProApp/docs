@@ -104,7 +104,7 @@ Click **Connect a Client…** in **Settings > MCP**. The sheet covers Claude Des
 
 ## What the config leaves out
 
-TablePro does not have to be open first. Finding no trusted handshake, the bridge runs `open -g tablepro://integrations/start-mcp` and polls for one every 200ms for up to 10 seconds. A TablePro started that way stays out of the Dock, the app switcher and the menu bar until it has a window to show; open the app yourself and it behaves normally for the rest of that run.
+TablePro does not have to be open first, but **Enable MCP Server** has to be on. Finding no trusted handshake, the bridge runs `open -g tablepro://integrations/start-mcp` and polls for one every 200ms for up to 10 seconds. With the toggle off, TablePro refuses the start and the bridge exits with that error at once. A TablePro started that way stays out of the Dock, the app switcher and the menu bar until it has a window to show; open the app yourself and it behaves normally for the rest of that run.
 
 The token is not yours to manage either. Each server start mints one named `__stdio_bridge__`, writes it into the handshake file, and rotates it 15 minutes before its one-hour expiry. It is **Read & Write**, so an agent on the bridge can read and write but cannot call `confirm_destructive_operation`.
 
@@ -152,6 +152,10 @@ Clients see the full [tool catalog](/developers/mcp-tools), the [resources](/dev
 ## When it does not work
 
 The bridge writes its failure to stderr and as a JSON-RPC error, so the message in the client names the layer that refused.
+
+### The TablePro MCP server is turned off
+
+**Enable MCP Server** is off in **Settings > MCP**. Turn it on, then relaunch the client.
 
 ### TablePro is not running
 

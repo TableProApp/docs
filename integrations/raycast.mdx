@@ -20,7 +20,7 @@ It defaults to `/Applications/TablePro.app`, so change it only for a build that 
 
 ## Pair
 
-Run **Pair with TablePro**. An approval sheet opens in TablePro where you pick the scope (read-only
+Turn on **Enable MCP Server** in **Settings > MCP** first; with it off, pairing stops at an error. Then run **Pair with TablePro**. An approval sheet opens in TablePro where you pick the scope (read-only
 to start), the connections the token may reach, and an optional expiry. Approving sends a one-time
 code back to Raycast, which exchanges it for a token over localhost. [Pairing](/developers/pairing)
 documents the protocol.
@@ -74,6 +74,6 @@ under Raycast's [privacy policy](https://www.raycast.com/privacy).
 | Symptom | What to do |
 |---|---|
 | Paired, but the connection list is empty | TablePro omits every connection the token cannot reach. Either the allowlist you approved left it out, or its **External Clients** level is **Blocked**. Re-pair with the connection selected, or raise the level in the [connection form's Options tab](/connections/connection-form#options). |
-| Commands hang on a running TablePro | The MCP server is stopped. The extension opens `tablepro://integrations/start-mcp` and retries on its own; give it a moment. |
+| Commands hang on a running TablePro | The MCP server is stopped. Turn on **Enable MCP Server** in **Settings > MCP**; the extension retries on its own. |
 | `401` | The token was revoked or has expired. Run **Pair with TablePro** again. |
 | `403` and other MCP errors | See [MCP client troubleshooting](/integrations/mcp-clients#when-it-does-not-work). |

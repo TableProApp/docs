@@ -12,7 +12,7 @@ Three requests leave a stock install without you asking: one usage heartbeat a d
 | [Plugin catalog](#the-plugin-catalog) | `raw.githubusercontent.com` | Yes | None |
 | [AI provider](#ai-providers) | whichever provider you add | No provider is configured on a fresh install | Delete the provider, or turn off **Enable AI Features** |
 | [iCloud sync](#icloud-sync) | your own iCloud account | No | **Settings > Sync** |
-| [MCP clients](#the-mcp-server) | nowhere: it listens on `127.0.0.1` | Off, but starts on demand | **Settings > MCP** |
+| [MCP clients](#the-mcp-server) | nowhere: it listens on `127.0.0.1` | No | **Settings > MCP** |
 | [License and team library](#license-checks-and-the-team-library) | `api.tablepro.app` | Only after you activate a license | Do not activate one |
 | [Your databases](#your-database-connections) | the hosts you type into the connection form | Only what you connect to | Do not connect |
 | Crash reports | Nowhere. The app has no crash reporter. | - | - |
@@ -95,7 +95,7 @@ With password sync off, secrets are written `kSecAttrAccessibleAfterFirstUnlockT
 
 The server listens on `127.0.0.1` and nothing else. Its listener sets `requiredLocalEndpoint` to the IPv4 loopback address, so there is no remote mode and no setting that opens it to your network. Default port 23508.
 
-It is off by default, but it starts on demand: the bundled bridge and the pairing flow both start it. What a paired client can reach is real data, so four gates stack:
+It is off by default, and nothing starts it while **Enable MCP Server** is off: not the bundled bridge, not the pairing flow, not a `tablepro://integrations/start-mcp` link. What a paired client can reach is real data, so four gates stack:
 
 1. **Require authentication**, on by default. With it on, a request that arrives without an `Authorization` header is refused. Turn it off and a loopback caller with no header is allowed instead, capped at `tools:read` and `resources:read` however much it asks for.
 2. The token's scope and its connection allowlist.
