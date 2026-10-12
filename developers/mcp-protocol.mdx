@@ -274,7 +274,7 @@ Present the form, then repeat the **same** call with the answer and the state ec
 
 A call that carries `inputResponses` or `requestState` is never cached, whatever the method's normal hint says.
 
-An accepted form stands in for TablePro's own dialog only on a `fullAccess` token. On a `readOnly` or `readWrite` token, and on the anonymous loopback principal, Safe Mode still puts its dialog on the Mac afterwards, so a write is confirmed twice: once in your interface, once in TablePro's. Ask for `fullAccess` at [pairing](/developers/pairing) if the second prompt is not what you want.
+An accepted form stands in for TablePro's own dialog only on a `fullAccess` token. On a `readOnly` or `readWrite` token, Safe Mode still puts its dialog on the Mac afterwards, so a write is confirmed twice: once in your interface, once in TablePro's. Ask for `fullAccess` at [pairing](/developers/pairing) if the second prompt is not what you want.
 
 ## Errors
 

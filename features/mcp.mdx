@@ -82,9 +82,7 @@ Tokens that hold this grant read **Lists connections hidden from AI** in the tok
 
 ## Authentication
 
-**Require authentication** is on by default. Turning it on for the first time with no tokens yet generates a full-access "Default token" and shows the plaintext once, so copy it then. Create, scope, allowlist, expire and revoke tokens in the same section, described in [Tokens](/developers/tokens).
-
-With the toggle off, a caller on your own machine is accepted without a token, but only as a read-only caller: schema reads and `SELECT`. Anything beyond reading needs a token you issued.
+Every request needs a token, including one from your own Mac. The bundled bridge mints its own, so a client set up through **Connect a Client…** needs nothing from you; an HTTP client or a launcher needs a token you generate or pair. Create, scope, allowlist, expire and revoke tokens in this section, described in [Tokens](/developers/tokens).
 
 ## Activity and connected clients
 
