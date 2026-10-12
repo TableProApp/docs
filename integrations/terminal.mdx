@@ -22,7 +22,7 @@ The command ships inside the app at `TablePro.app/Contents/SharedSupport/bin/tab
 whose whole body is `exec open -b com.TablePro "$@"`. Link it into `/usr/local/bin` once:
 
 ```bash
-sudo mkdir -p /usr/local/bin && sudo ln -sf /Applications/TablePro.app/Contents/SharedSupport/bin/tablepro /usr/local/bin/tablepro
+sudo mkdir -p /usr/local/bin && sudo rm -f /usr/local/bin/tablepro && sudo ln -s /Applications/TablePro.app/Contents/SharedSupport/bin/tablepro /usr/local/bin/tablepro
 ```
 
 `sudo` asks for your password in Terminal. TablePro itself never writes outside its own folders and
