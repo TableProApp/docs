@@ -169,24 +169,42 @@ The SSL mode offers no certificate rows there, so **Verify Identity** checks the
 
 ## Troubleshooting
 
-**PROCEDURE … was created with compilation errors**: the unit is stored but does not compile. Each line after the first gives the line and column in the unit's source and the `PLS-` error there. Fix the source and run the `CREATE OR REPLACE` again.
+### ORA-28002: the password will expire within … days
 
-**Connection refused**: check the listener is up with `lsnrctl status`, that port 1521 is open, and, on Docker, that the container is running (`docker start oracle-xe`).
+The login worked, and the password is in its grace period. Oracle AI Database 26ai sends `ORA-28098: Profile limits PASSWORD_LIFE_TIME and PASSWORD_GRACE_TIME are not unlimited, password will expire within … days.` instead. The message stays in a yellow banner above the editor until you dismiss it, and comes back on every connect. Change the password with `ALTER USER name IDENTIFIED BY "new password"`, or ask the DBA to, before the grace period ends: after that the login fails with ORA-28001.
 
-**Invalid service name**: the listener does not answer for that name. List what it does answer for with `lsnrctl services`.
+### PROCEDURE … was created with compilation errors
 
-**Unsupported Password Verifier**: the account's verifier is one the driver cannot use, usually a new one such as 23ai. Read `password_versions` for that user and file an issue with the verifier flag the dialog shows.
+The unit is stored but does not compile. Each line after the first gives the line and column in the unit's source and the `PLS-` error there. Fix the source and run the `CREATE OR REPLACE` again.
 
-**Server Version Not Supported**: the server is 10g or earlier. Nothing on this side helps; the database has to be 11.1 or later.
+### Connection refused
 
-**Login Handshake Timed Out**: TCP connected but the login never finished, so the attempt stops when
-the connection's **Connect timeout** expires. An empty field under **Options** uses 30 seconds. The
-dialog names the step the server stopped answering at. If that step is network encryption, set
-**Network Encryption** to Rejected and connect again. Otherwise confirm the host and port reach the
-listener, and look for a firewall, VPN, or proxy that stalls traffic once the TCP handshake is done.
+Check the listener is up with `lsnrctl status`, that port 1521 is open, and, on Docker, that the container is running (`docker start oracle-xe`).
 
-**Connection Dropped During Handshake**: the server closed the connection mid-login, and the dialog names the phase it stopped at (`advancedNegotiation`, `dataTypeNegotiation`, `authentication`). Look for a firewall, VPN, or proxy that resets traffic, and confirm the host and port reach the listener itself.
+### Invalid service name
 
-**Native Network Encryption Not Completed**: the server requires an encryption or checksum algorithm the driver does not offer. Ask the DBA which ones are set and file an issue with the reason the dialog shows. TLS is the alternative: set an SSL mode instead.
+The listener does not answer for that name. List what it does answer for with `lsnrctl services`.
 
-**Native Network Encryption Required**: the server requires the negotiation but did not offer it on this connection. Ask the DBA to enable it for this client, or set an SSL mode and use TLS instead.
+### Unsupported Password Verifier
+
+The account's verifier is one the driver cannot use, usually a new one such as 23ai. Read `password_versions` for that user and file an issue with the verifier flag the dialog shows.
+
+### Server Version Not Supported
+
+The server is 10g or earlier. Nothing on this side helps; the database has to be 11.1 or later.
+
+### Login Handshake Timed Out
+
+TCP connected but the login never finished, so the attempt stops when the connection's **Connect timeout** expires. An empty field under **Options** uses 30 seconds. The dialog names the step the server stopped answering at. If that step is network encryption, set **Network Encryption** to Rejected and connect again. Otherwise confirm the host and port reach the listener, and look for a firewall, VPN, or proxy that stalls traffic once the TCP handshake is done.
+
+### Connection Dropped During Handshake
+
+The server closed the connection mid-login, and the dialog names the phase it stopped at (`advancedNegotiation`, `dataTypeNegotiation`, `authentication`). Look for a firewall, VPN, or proxy that resets traffic, and confirm the host and port reach the listener itself.
+
+### Native Network Encryption Not Completed
+
+The server requires an encryption or checksum algorithm the driver does not offer. Ask the DBA which ones are set and file an issue with the reason the dialog shows. TLS is the alternative: set an SSL mode instead.
+
+### Native Network Encryption Required
+
+The server requires the negotiation but did not offer it on this connection. Ask the DBA to enable it for this client, or set an SSL mode and use TLS instead.
