@@ -3,85 +3,76 @@ title: Appearance
 description: Themes, color customization, theme files, and connection colors
 ---
 
-Light and Dark each hold their own theme. The **Editing** control at the top of the tab says which of the two the theme list writes to, so setting your dark theme never means leaving Light mode; **Appearance** beside it picks the one in use, or **Auto** to follow the system.
+**Appearance** picks Light, Dark, or **System** to follow macOS. **Light theme** and **Dark theme** each hold the theme used in that appearance, so setting your dark theme never means leaving Light mode.
 
-<Frame caption="Appearance settings with theme list and editor">
+<Frame caption="Appearance settings with the theme pickers and custom themes">
   <img className="block dark:hidden" src="/images/settings-appearance.png" alt="Appearance settings" />
   <img className="hidden dark:block" src="/images/settings-appearance-dark.png" alt="Appearance settings" />
 </Frame>
 
 ## Themes
 
-Four ship with the app: Default Light, Default Dark, and two more dark ones, Dracula and Nord. A theme carries the editor and syntax colors, the data grid colors, and the status colors.
+A theme colors the SQL editor, the other code views (JSON editor, DDL, triggers, previews, query history, AI code blocks) and the data grid. Every other pane, the sidebar, the toolbar and the window frame keep the macOS colors under every theme.
 
-A theme declares whether it is light or dark, and only appears in the matching slot, plus whatever that slot already holds. Click a row to assign it; it applies at once if that slot is the one in use.
+Default Light and Default Dark draw the editor and the grid in the macOS colors, so selection, the cursor, the current line and the focus ring follow your Accent and Highlight colors in System Settings > Appearance, and Increase Contrast. Their syntax colors are Xcode's defaults, and switch to Xcode's high-contrast palette when Increase Contrast is on. Dracula and Nord ship as dark themes.
 
-The editor on the right edits the theme selected in the slot named by **Editing**, so a change always lands on the theme you can see highlighted.
+A theme only appears in the picker for its own appearance. If the theme a picker holds is missing on this Mac, for example one chosen on another Mac, the picker shows the theme in use and says why.
+
+## Custom themes
+
+Custom themes are listed under **Custom Themes**.
 
 | Control | What it does |
 |--------|--------|
-| **+** menu | **Duplicate Selected** copies the selected theme; **Import…** reads a theme JSON file |
-| **-** button | Deletes the selected theme. Custom themes only |
-| **Gear** menu | **Duplicate** and **Export…** act on the selected theme |
+| **+** menu | **New Theme Based On** copies any theme, built-in ones included; **Import…** reads a theme JSON file |
+| **-** button | Deletes the selected theme after you confirm. A picker that held it goes back to Default Light or Default Dark |
+| **...** menu | **Edit…**, **Rename…**, **Duplicate**, **Export…** and **Show in Finder** for the selected theme |
 
-A built-in theme is read-only and shows a **Duplicate Theme** button, which makes "Name (Copy)" for you to edit.
+Double-click a theme or press Return to edit it, and press Delete to delete it. The same actions are in its right-click menu.
+
+**Edit…** opens a sheet with a live preview, the theme's name and a color well for each color. A color you have not set draws in the macOS color shown in its well; once you set one, the arrow beside it puts the default back. Changes save as you make them.
+
+| Group | Colors |
+|-------|----------|
+| Editor | Background, text, cursor, selection, current line, current statement, line number, invisibles |
+| Syntax | Keyword, string, number, comment, NULL, operator, function, type |
+| Data Grid | Background, text, alternate row, header background, header text, grid line, selection, selected text, inactive selection, focus border, NULL value, bool true and false, row number, modified, inserted and deleted rows, deleted text |
+
+A theme file that cannot be read is listed under **Not Loaded** with the reason. Right-click it and choose **Show in Finder** to fix or remove the file.
 
 Fonts are not part of a theme. Editor Font lives in [Editor settings](/customization/editor-settings) and Data Grid Font in [Data settings](/customization/data-settings), and both stay on the Mac you set them on.
 
-A theme file the app cannot read is listed under **Not Loaded** with the reason, rather than dropped without a word.
-
-## Colors
-
-Custom themes get color wells here. A built-in theme shows a lock and a **Duplicate Theme** button instead.
-
-| Group | Controls |
-|-------|----------|
-| Editor | Background, text, cursor, selection, current line, current statement, line number, invisibles |
-| Syntax Colors | Keyword, string, number, comment, NULL, operator, function, type |
-| Data Grid | Background, text, alternate row, header background, header text, grid line, selection, selected text, inactive selection, focus border, NULL value, bool true/false, row number, modified/inserted/deleted rows, deleted text |
-| Panels | Pane background, field background, pane text, secondary text, tertiary text, separator |
-| Status | Success, warning, error |
-
-A slot holds either a hex color or the name of a macOS system color. Default Light and Default Dark keep the data grid surrounds on system colors, which is why an untouched theme follows your system accent and its Increase Contrast setting. Right-click a well that a built-in leaves on a system color to put that system color back.
-
-A theme colors the panes that show database content. The sidebar, the toolbar, the tab strip and the window frame stay on the macOS appearance, which is what the **Appearance** control at the top of the tab sets: pick a dark theme and the window frame goes dark with it.
-
 ## Theme files
 
-A theme is one JSON file. **Export…** in the gear menu writes every color the selected theme sets, which is the shortest way to start a new one; **Import…** in the **+** menu reads one back into `~/Library/Application Support/TablePro/Themes/`.
+A theme is one JSON file in `~/Library/Application Support/TablePro/Themes/`. **Export…** writes the colors the selected theme sets, which is the shortest way to start one.
 
 | Key | Holds |
 |-----|-------|
-| `schema` | Format version. `2` is the version this release reads |
-| `id`, `name`, `author` | Identity. An `id` that collides with a built-in or with one you already have is replaced on import |
-| `appearance` | `light` or `dark`. Decides which slot lists the theme |
-| `content.editor` | Editor colors, with syntax colors nested under `syntax` |
-| `content.dataGrid` | Grid colors |
-| `content.panel` | Colors of the panes around the editor and the grid: results, inspector, structure, compare, query plan |
-| `content.status` | Success, warning and error colors |
+| `schema` | Format version. `3` is the version this release reads |
+| `id`, `name`, `author` | Identity. An `id` that collides with a built-in theme or one you already have is replaced on import |
+| `appearance` | `light` or `dark`. Decides which picker lists the theme |
+| `editor` | Editor colors, with syntax colors nested under `syntax` |
+| `dataGrid` | Data grid colors |
 
 ```json
 {
-  "schema": 2,
+  "schema": 3,
   "id": "user.midnight",
   "name": "Midnight",
   "author": "You",
   "appearance": "dark",
-  "content": {
-    "editor": {
-      "background": "#2E3440",
-      "text": "#D8DEE9",
-      "syntax": { "keyword": "#81A1C1", "string": "#A3BE8C" }
-    },
-    "dataGrid": { "background": "system:textBackground" },
-    "status": { "error": "#BF616A" }
-  }
+  "editor": {
+    "background": "#2E3440",
+    "text": "#D8DEE9",
+    "syntax": { "keyword": "#81A1C1", "string": "#A3BE8C" }
+  },
+  "dataGrid": { "background": "#2E3440", "selection": "#434C5E" }
 }
 ```
 
-A color is sRGB hex, `#RRGGBB` or `#RRGGBBAA` for a translucent overlay such as a selection band, or `system:` followed by a macOS system color name such as `system:textBackground`.
+A color is sRGB hex, `#RRGGBB`, or `#RRGGBBAA` for a translucent band such as a selection. Every color is optional. One you leave out draws in the macOS color for that spot, and a syntax color you leave out takes the Default Light or Default Dark value.
 
-Every color a theme declares must be one TablePro reads, and every color TablePro reads must be present. A file that misses one, names one TablePro does not use, carries a color the app cannot parse, or declares a `schema` this release does not read is refused and listed under **Not Loaded** with the reason. Themes written for an earlier version of TablePro are not read and need to be written again.
+A file that names a color TablePro does not use, sets one twice, carries a color the app cannot parse, or declares a `schema` this release does not read is listed under **Not Loaded** with the reason. Themes written for earlier versions of TablePro need to be written again.
 
 ## Connection colors
 
