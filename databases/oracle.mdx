@@ -165,6 +165,7 @@ The SSL mode offers no certificate rows there, so **Verify Identity** checks the
 - BFILE columns show the directory and file name, never the file's contents.
 - SQL*Plus commands such as `SET SERVEROUTPUT ON`, `SHOW ERRORS` and `EXEC` are not SQL and fail when sent. Delete them, and write `EXEC p` as `BEGIN p; END;`. Output needs no `SET SERVEROUTPUT ON`.
 - No Users & Roles pane. Manage accounts with `CREATE USER` and `GRANT` in the editor.
+- A view definition longer than 4000 bytes cannot be read. **Show DDL**, **Copy DDL**, **Edit View Definition** and SQL export report it instead of showing cut text. Read the full definition in SQL*Plus or SQLcl.
 - On a database whose character set is not Unicode, filters, imports, Copy To and copied SQL still send NCHAR, NVARCHAR2 and NCLOB text through that character set, so a character it lacks becomes `¿`. Write such values with `UNISTR` in the editor.
 
 ## Troubleshooting
