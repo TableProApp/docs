@@ -12,7 +12,9 @@ description: Themes, color customization, theme files, and connection colors
 
 ## Themes
 
-A theme colors the SQL editor, the other code views (JSON editor, DDL, triggers, previews, query history, AI code blocks) and the data grid. Every other pane, the sidebar, the toolbar and the window frame keep the macOS colors under every theme.
+A theme colors what a window shows: the SQL editor and the other code views, the data grid, value viewers and inspector fields, JSON and PHP trees, diffs, ER diagrams, query plans and charts. Its window background fills the space behind them. On macOS 26 and later the sidebar, inspector and toolbar take on that background through the system glass, while controls and Settings keep the system look. The welcome window and the connection form keep it too, apart from the connection form's **Startup Commands** and **Pre-Connect Script** fields.
+
+With Increase Contrast on, the window background goes back to the macOS color and the rest of the theme stays.
 
 Default Light and Default Dark draw the editor and the grid in the macOS colors, so selection, the cursor, the current line and the focus ring follow your Accent and Highlight colors in System Settings > Appearance, and Increase Contrast. Their syntax colors are Xcode's defaults, and switch to Xcode's high-contrast palette when Increase Contrast is on. Dracula and Nord ship as dark themes.
 
@@ -34,6 +36,7 @@ Double-click a theme or press Return to edit it, and press Delete to delete it. 
 
 | Group | Colors |
 |-------|----------|
+| Window | Background |
 | Editor | Background, text, cursor, selection, current line, current statement, line number, invisibles |
 | Syntax | Keyword, string, number, comment, NULL, operator, function, type |
 | Data Grid | Background, text, alternate row, header background, header text, grid line, selection, selected text, inactive selection, focus border, NULL value, bool true and false, row number, modified, inserted and deleted rows, deleted text |
@@ -51,6 +54,7 @@ A theme is one JSON file in `~/Library/Application Support/TablePro/Themes/`. **
 | `schema` | Format version. `3` is the version this release reads |
 | `id`, `name`, `author` | Identity. An `id` that collides with a built-in theme or one you already have is replaced on import |
 | `appearance` | `light` or `dark`. Decides which picker lists the theme |
+| `window` | Window background, under `background` |
 | `editor` | Editor colors, with syntax colors nested under `syntax` |
 | `dataGrid` | Data grid colors |
 
@@ -61,6 +65,7 @@ A theme is one JSON file in `~/Library/Application Support/TablePro/Themes/`. **
   "name": "Midnight",
   "author": "You",
   "appearance": "dark",
+  "window": { "background": "#242933" },
   "editor": {
     "background": "#2E3440",
     "text": "#D8DEE9",
