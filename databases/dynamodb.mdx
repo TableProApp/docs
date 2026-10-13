@@ -50,7 +50,7 @@ Set **Auth Method** to **DynamoDB Local (no credentials)**. With **Custom Endpoi
 
 ## How a table is read
 
-Opening a table, filtering it and paging it all go through one planner. It picks the cheapest read your filters allow and names it at the start of the status bar, followed by how many items came back, how many DynamoDB read to find them, and the read capacity units it charged: `Query on index byStatus · 50 returned · 212 read · 26.5 RCU`.
+Opening a table, filtering it and paging it all go through one planner. It picks the cheapest read your filters allow and names it at the start of the status bar, followed by how many items came back, how many DynamoDB read to find them, and the read capacity units it charged: `Query on index byStatus, 50 returned, 212 read, 26.5 RCU`.
 
 | Filters | Read |
 |---------|------|
