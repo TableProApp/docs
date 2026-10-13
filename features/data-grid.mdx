@@ -138,7 +138,7 @@ A table tab pages. The status bar offers 5, 10, 20, 100, 500 or 1,000 rows per p
 
 A large table shows an estimated total prefixed with `~` instead of running a slow `COUNT(*)`. **Count Exactly** beside it runs the real count in the background, and `Cmd+.` cancels that. While a total is an estimate, **Last** and **All rows…** stay unavailable and **Next** works as long as the last page came back full.
 
-Cassandra and ScyllaDB have no estimate, and their count reads every partition, so a table there shows no total until you click **Count Exactly**.
+Cassandra, ScyllaDB and the Firebase Realtime Database have no estimate, and their count reads every partition or key, so a table there shows no total until you click **Count Exactly**.
 
 A query tab does not page. It stops at the [row cap](/customization/data-settings) instead and offers **Fetch All** to load the rest, and a query carrying its own `LIMIT`, `FETCH FIRST`, or `TOP` is never capped. `Cmd+.` cancels a running query or a Fetch All.
 
