@@ -248,6 +248,7 @@
               "databases/etcd",
               "databases/firebase",
               "databases/bigquery",
+              "databases/bigtable",
               "databases/kafka",
               "databases/libsql",
               "databases/mariadb",
