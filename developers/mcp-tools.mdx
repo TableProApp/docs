@@ -56,6 +56,8 @@ Statements that read or write files, or that run server-side code, are refused o
 | `switch_database` | `connection_id`, `database` | `status` (`switched`), `connection_id`, `current_database` |
 | `switch_schema` | `connection_id`, `schema` | `status` (`switched`), `connection_id`, `current_schema` |
 
+`switch_database` and `switch_schema` move what the user sees: the sidebar, and the tab strip, which lists the tabs of the database or schema the connection is on. The user's other tabs stay open under their own database.
+
 `list_connections` omits connections blocked for external clients, connections whose AI policy is **Never**, and connections outside the token's allowlist. Its `database` is the session's browsed database when connected, the saved default otherwise.
 
 The labels the user gave a connection come with it, so a client can show the list the way the app does:
@@ -235,7 +237,7 @@ These read and drive the TablePro app itself, and none of them bypasses the conn
 
 Starred tables are a good hint at what matters in a database. `list_recent_tabs` covers every readable connection when `connection_id` is omitted, its `limit` runs 1 to 500, default 20, and `tab_type` is one of `query`, `table`, `createTable`, `erDiagram`, `serverDashboard`, `insights`, `usersRoles`.
 
-`open_connection_window` and `open_table_tab` connect first if they have to, and return once the window has a tab or fail after 8 seconds.
+`open_connection_window` and `open_table_tab` connect first if they have to, and return once the window has a tab or fail after 8 seconds. `open_table_tab` without `database_name` or `schema_name` means the ones the connection is on, and its `tab_id` is that table's tab, never a table of the same name elsewhere.
 
 `search_query_history` searches the history TablePro keeps on this Mac. Pass `""` to match everything and filter by date alone; `since` and `until` are Unix epoch seconds, and `limit` runs 1 to 500, default 50. Results cover only connections this client may reach, with or without `connection_id`.
 

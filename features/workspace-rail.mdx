@@ -3,7 +3,7 @@ title: Connections strip
 description: Switch between every connection and database you have open from a narrow strip on the leading edge of the window
 ---
 
-Click an icon in the strip down the leading edge and you land back where you left off, on the tab you last used there. Each icon is one connection plus the database you are browsing in it, so two connections make two icons and moving one to a second database makes three. Clicking an entry returns you to it on the tab you last used there, and closes nothing.
+Click an icon in the strip down the leading edge and you land back where you left off, on the tab you last used there. Each icon is one connection plus a database in it, and each has its own tabs, so two connections make two icons and moving one to a second database makes three. Clicking an entry shows its tabs, returns you to the one you last used there, and closes nothing.
 
 <Frame caption="The connections strip beside the object browser, with two connections open">
   <img className="block dark:hidden" src="/images/workspace-rail.png" alt="Connections strip" />
@@ -40,11 +40,13 @@ Switching database adds an entry and keeps the one you are leaving, so both data
 | Back to `app` from the strip | Both stay, `app` is current |
 | `logs` is already listed | The existing `logs` entry activates |
 
-Closing an entry's last tab leaves the entry where it is: tabs and entries close separately. The set is per session, so relaunching starts from the database each connection opens on, plus the databases your restored tabs have work in.
+Closing an entry's last tab leaves the entry where it is, with no tabs: tabs and entries close separately. A database with a tab open is always listed, since its entry is the only way to that tab. The set is per session, so relaunching starts from the database each connection opens on, plus every database your restored tabs are in.
 
 ## Switching
 
-Between two connections, the window switches connection and returns you to the tab you last used there; between two databases of one connection, the sidebar moves and the tabs stay. An entry with nothing open moves the sidebar only, and clicking the entry you are in does nothing. No tab is ever closed or retargeted by a switch: each one keeps querying the database it was opened against.
+Each entry keeps its own tabs. Clicking one shows its tabs and returns you to the one you last used there, and the sidebar follows to its database; the other entries keep their tabs until you come back. An entry with no tabs shows the empty tab area. Switching database from the toolbar, **Database > Open Database…** or the sidebar lands on that database's entry the same way, and picking a tab of another database, from `Ctrl+Tab` or **File > Reopen Closed Tab**, takes you to its entry. No tab is ever closed or retargeted by a switch: each one keeps querying the database it was opened against.
+
+Moving between schemas inside one database, such as PostgreSQL's, keeps the entry and its tabs. Tables of the same name in two schemas are told apart by their schema-qualified tab titles.
 
 On PostgreSQL, Redshift, and CockroachDB every database entry keeps its own server connection, so moving between two entries reconnects nothing and leaves each database's open transaction and temp tables where they were. Closing an entry closes its connection and rolls back a transaction still open there, so it asks first when there is one.
 
@@ -54,7 +56,7 @@ More entries than fit the window means the strip scrolls, and it settles on whol
 
 ## Windows
 
-One window hosts every connection you have open, and the tab strip below the toolbar lists only the current connection's tabs. Opening a table or query on a connection already open adds a tab there rather than opening a second window.
+One window hosts every connection you have open, and the tab strip below the toolbar lists only the tabs of the entry you are on: one connection and one database, or one schema on servers that group objects by schema. Opening a table or query on a connection already open adds a tab there rather than opening a second window.
 
 To put two connections side by side, right-click an entry and choose **Open in New Window**. It moves with its tabs, its session, and anything unsaved. The item is absent when the window has no other connection left to show.
 
@@ -62,7 +64,7 @@ A first window opens at 1200x800 and goes no smaller than 720x480; later windows
 
 ## Closing and disconnecting
 
-Right-click an entry and choose **Close Database “\<name\>”** to close that database: its tabs go, its entry goes, and the connection keeps everything it has open elsewhere. Unsaved work in those tabs is confirmed first, and the strip lands on the next entry. Middle-clicking does the same without the menu, and so does `Cmd+W` while the strip holds the keyboard. On servers that group objects by schema the item reads **Close Schema “\<name\>”**.
+Right-click an entry and choose **Close Database “\<name\>”** to close that database: its tabs go, its entry goes, and the connection keeps everything it has open elsewhere. Unsaved work in those tabs is confirmed first, and the strip lands on the next entry. Middle-clicking does the same without the menu, and so does `Cmd+W` while the strip holds the keyboard, or while the entry you are on has no tab left. On servers that group objects by schema the item reads **Close Schema “\<name\>”**.
 
 **Close Connection “\<name\>”**, below it, closes the whole connection: every tab across every database it has open, its session, and all of its entries. The window closes too if that was its last connection, and **File > Close Connection** does the same for the connection on screen. A connection down to one entry has nothing else left, so closing that entry closes it. Nothing is lost for good: reopen the connection, from the connection list or **Database > Switch Connection…**, and its tabs come back as they were.
 
