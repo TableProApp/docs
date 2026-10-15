@@ -265,7 +265,7 @@ def check_heading_case(root: Path, docs: Path) -> list[str]:
     the app's own strings, so a renamed control never leaves a stale allowlist behind.
     """
     ui = set()
-    sources = [root / "TablePro", root / "Plugins", root / "Packages" / "TableProCore" / "Sources"]
+    sources = [root / "TablePro", root / "Plugins", *sorted((root / "Packages").glob("*/Sources"))]
     for swift in (path for source in sources for path in source.rglob("*.swift")):
         ui |= set(re.findall(r'String\(\s*localized:\s*"((?:[^"\\]|\\.)*)"', swift.read_text()))
     ui |= {re.sub(r"%(?:\d+\$)?(?:@|l{0,2}d)", "…", s) for s in ui}
