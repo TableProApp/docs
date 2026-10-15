@@ -181,6 +181,12 @@ between two of those writes every column as the source declares it and reports n
 of them. Its indexes follow the [index rules](#what-each-object-carries) for two database types, so a
 copy from Redshift leaves out `DISTKEY` and `SORTKEY` and names both in the review step.
 
+Between two MySQL or MariaDB databases, a zero date, a partial date, an AUTO_INCREMENT value of 0
+and a TIMESTAMP arrive as they were on the source. Everything else the target session's SQL mode
+checks, such as a value too long for its column, is checked as it would be in a query tab. A table
+with a row filter is copied under the session's own settings, which the filter is written for.
+Procedures, functions and triggers keep the SQL mode they were created with.
+
 ## When both sides are one connection
 
 A copy whose source and target are the same connection is done by the server: one

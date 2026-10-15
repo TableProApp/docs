@@ -136,7 +136,7 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
     All three are on by default, so an SQL export carries `DROP TABLE IF EXISTS` unless you untick **Drop**. Run that file against the wrong database and it drops the tables first.
     </Warning>
 
-    A multi-table export orders the tables by their foreign keys, so a parent is created and filled before the rows that reference it and dropped after them. Foreign keys between two tables that reference each other leave no such order: those tables keep the order the export listed them in, the file says so in a comment, and the summary repeats it. Import that one with **Disable foreign key checks** ticked.
+    A multi-table export orders the tables by their foreign keys, so a parent is created and filled before the rows that reference it and dropped after them. Foreign keys between two tables that reference each other leave no such order: those tables keep the order the export listed them in, the file says so in a comment, and the summary repeats it. A MySQL or MariaDB dump turns foreign key checks off itself; on other engines, import that one with **Disable foreign key checks** ticked.
 
     The last two exclusions cover MySQL and MariaDB, and pass every other engine through untouched.
 
@@ -152,11 +152,19 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
 
     | Engine | Each part opens with |
     |---|---|
-    | MySQL, MariaDB | `SET NAMES utf8mb4`, and ends by putting the session's character set back |
+    | MySQL, MariaDB | `SET NAMES utf8mb4`, `TIME_ZONE='+00:00'`, `FOREIGN_KEY_CHECKS=0` and `SQL_MODE='NO_AUTO_VALUE_ON_ZERO'`, and ends by putting each one back |
     | PostgreSQL, CockroachDB, PGlite | `SET client_encoding = 'UTF8';` |
     | Amazon Redshift | Nothing. Set `PGCLIENTENCODING=UTF8` before restoring it into a database that is not UTF-8 |
 
     `mysql < dump.sql` and `psql < dump.sql` then restore Japanese, emoji and other non-Latin text intact, even into a `LATIN1` or `EUC_JP` database or from a client whose default is Latin 1.
+
+    The MySQL lines are the ones `mysqldump` writes. A zero date such as `0000-00-00`, a partial date such as `2020-00-15` and an AUTO_INCREMENT value of 0 restore as they were, even on a server whose own SQL mode refuses them, and a backslash in a string survives a server set to `NO_BACKSLASH_ESCAPES`. TIMESTAMP values are read and written in UTC, so they restore to the same moment on a server in another time zone. Each procedure, function, trigger and event is created under the SQL mode it was created with on the source, and an event under its time zone too.
+
+    A table with a row filter leaves the session's time zone and SQL mode alone, because the filter is written for them. That dump carries no `TIME_ZONE` line, its TIMESTAMP values are in the session's time zone, and its `SQL_MODE` line keeps `ANSI_QUOTES` when the session uses it.
+
+    PostgreSQL rows are read with ISO dates, `postgres` intervals and full float precision, whatever `DateStyle`, `IntervalStyle` and `extra_float_digits` the session has.
+
+    A dump from an earlier version of TablePro has no `SQL_MODE` line. To restore its zero dates on a strict server, run `SET SESSION sql_mode = 'NO_AUTO_VALUE_ON_ZERO';` in a query tab on that connection before importing it.
 
     One snapshot opens `START TRANSACTION WITH CONSISTENT SNAPSHOT` on MySQL, `BEGIN ISOLATION LEVEL REPEATABLE READ` on PostgreSQL, and a deferred transaction on SQLite. It holds that transaction open for the whole export.
 
@@ -231,7 +239,7 @@ Right-click tables in the sidebar and choose **Transfer To…** to copy their ro
   </Step>
 </Steps>
 
-Rows only, into a destination table that already exists. A per-table row filter set in the export tree is not carried over; narrow the transfer by transferring fewer tables.
+Rows only, into a destination table that already exists. A per-table row filter set in the export tree is not carried over; narrow the transfer by transferring fewer tables. Between two MySQL or MariaDB databases, zero dates, AUTO_INCREMENT values of 0 and TIMESTAMPs arrive as they were on the source, unless a table has a row filter.
 
 <Warning>
 **Delete existing rows first** empties each destination table before writing. There is no undo.
@@ -283,13 +291,15 @@ The extension picks the format, so one command covers all of them. A file no for
 
 | Mode | What happens on a failed statement |
 |------|-----------|
-| **Stop and Rollback** | Stops there. With the transaction on, everything rolls back |
+| **Stop and Rollback** | Stops there. With the transaction on, everything rolls back, except on MySQL and MariaDB after a `CREATE`, `ALTER` or `DROP`: those commit as they run, and the error says some statements were kept |
 | **Stop and Commit** | Stops there, keeping what already succeeded |
 | **Skip and Continue** | Logs it and carries on, including a line the parser cannot read. No transaction |
 
 **UTF-16** reads the byte order from the mark at the start of the file and falls back to big-endian, which is what a file with no mark means. Pick **UTF-16 LE** or **UTF-16 BE** for a file that has no mark and is not big-endian. Latin-1 and Windows-1252 differ over the bytes `0x80` to `0x9F`: a dump written by MySQL keeps its curly quotes, en dashes and euro sign there, so Windows-1252 is the one to pick for it.
 
 When the preview cannot read the file in the chosen encoding, the dialog switches to the encoding the dump declares in its `SET NAMES` or `SET client_encoding`, or else to the encoding the text matches. It picks Shift JIS, GB 18030 or Big5 only when the dump declares it, because a byte in those encodings can hide a quote's escaping backslash; choose one by hand for a script that declares nothing. A switch the dialog made is not remembered for the next import. A dump read in any encoding but UTF-8 or ASCII reaches the server as UTF-8, so its `SET NAMES cp932` or `SET client_encoding = 'SJIS'` does not run as written: MySQL and MariaDB keep the connection's own character set, and PostgreSQL gets `SET client_encoding = 'UTF8'`. On MySQL and MariaDB, a `_binary` value in a Latin-1 or Windows-1252 dump is sent as the bytes it held. Any other non-UTF-8 dump stops at a `_binary` value holding non-ASCII bytes, since those cannot be read back exactly; export it with `--hex-blob` instead.
+
+The import runs on the connection's own session, and afterwards puts back the session settings a dump changes: on MySQL and MariaDB the SQL mode, time zone, character set, `autocommit` and the foreign key and unique checks; on PostgreSQL the ones `pg_dump` sets, `search_path` among them. A file that stopped early with `autocommit` off while a transaction is still open keeps `autocommit` off, so commit or roll back that transaction yourself.
 
 On SQL Server a file that holds a `GO` line runs a batch at a time, cut at its `GO` lines the way `sqlcmd` cuts it, so every count and failure here is a batch rather than a statement. A file with no `GO` line runs a statement at a time. See [Scripts and batches](/databases/mssql#scripts-and-batches).
 
