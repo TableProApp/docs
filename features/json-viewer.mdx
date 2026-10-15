@@ -160,7 +160,7 @@ The text box, the JSON editor and the map each carry a drag handle under them, w
 
 **Open in Window** detaches a JSON, PHP or text value into its own resizable window; on an editable row, edits there join the same pending changes as the field. An image and a map detach read-only. The expand button on a JSON, PHP, long text or geometry field grows it to fill the inspector's height with the other fields still listed around it; click it again to shrink it back. Binary and image fields draw at a fixed height and carry no expand button, and neither does a geometry field stored as bytes, whose map still takes the drag handle.
 
-Every field carries a menu at its trailing edge, and right-clicking the field opens the same one. **Set NULL**, **Set DEFAULT**, **Set EMPTY** and **SQL Functions** need an editable field; `Ctrl+Option+N` and `Ctrl+Option+D` reach the first two from the keyboard. **Copy Value** is always there, and a read-only field keeps its text selectable.
+Every field carries a menu at its trailing edge, and right-clicking the field opens the same one. **Set NULL**, **Set DEFAULT**, **Set EMPTY** and **SQL Functions** need an editable field, and **Set EMPTY** a text, `SET` or binary one; `Ctrl+Option+N` and `Ctrl+Option+D` reach the first two from the keyboard. **Copy Value** is always there, and a read-only field keeps its text selectable.
 
 With no row selected, the inspector describes the table the tab is bound to: data, index and total size, row count, average row size, engine, collation, and creation and update dates, as far as the database reports them. A tab with no table of its own, such as a query, leaves it empty. On a Structure tab it follows the structure grid and names the selected column.
 

@@ -18,7 +18,7 @@ A queued change also marks the value itself, so it stays legible once the row is
 
 ## Editing a cell
 
-Double-click a cell, or press `Enter` on it. `Enter` commits the edit to the queue, `Escape` cancels. Setting a value back to what it was drops it from the queue again. Some types open an editor of their own:
+Double-click a cell, or press `Enter` on it. `Enter` commits the edit to the queue, `Escape` cancels. Setting a value back to what it was drops it from the queue again. Delete the text of a date, number, boolean, JSON or array cell to store NULL. In a NOT NULL column of those types the cell keeps its value, and an emptied text cell stores an empty string. Some types open an editor of their own:
 
 | Column type | Editor |
 |---|---|
@@ -36,7 +36,7 @@ Double-click a cell, or press `Enter` on it. `Enter` commits the edit to the que
   <img className="hidden dark:block" src="/images/date-picker-editor-dark.png" alt="Cell editor" />
 </Frame>
 
-Right-click an editable cell and open **Set Value** for the common ones without typing: **Empty**, **NULL** on a nullable column, **Default** on a column the server fills in, and date functions such as `NOW()` or `CURRENT_DATE` on date columns.
+Right-click an editable cell and open **Set Value** for the common ones without typing: **Empty** on text, `SET` and binary columns, **NULL** on a nullable column, **Default** on a column the server fills in, and date functions such as `NOW()` or `CURRENT_DATE` on date columns.
 
 On MongoDB, Firestore and the Firebase Realtime Database a document can lack a field altogether, and on Bigtable a row can lack a cell; the grid shows either as **No Field**. **Remove Field** on the same right-click menu deletes the field rather than storing NULL. Bigtable stores no NULL, so **NULL** and **Remove Field** both delete the cell. See [missing fields and null](/databases/mongodb#missing-fields-and-null).
 
