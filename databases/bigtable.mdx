@@ -1,11 +1,11 @@
 ---
-title: Bigtable
+title: Google Cloud Bigtable
 description: Connect to Google Cloud Bigtable, browse rows by key, filter on keys and cells, and edit cells
 ---
 
 import RegistryPlugin from "/snippets/registry-plugin.mdx";
 
-Tables show as tables and rows as grid rows, with the row key in `_key` and one column per `family:qualifier`. The plugin talks to the Bigtable REST API. The editor takes request lines such as `GET events/user#42`, not SQL.
+Every row comes back in ascending key order, with its key in `_key` and one column per `family:qualifier`.
 
 <RegistryPlugin name="Google Cloud Bigtable" plugin="Bigtable Driver" />
 
@@ -13,106 +13,129 @@ Tables show as tables and rows as grid rows, with the row key in `_key` and one 
 
 Click **New Connection…**, select **Google Cloud Bigtable**, pick an **Auth Method**, then click **Save & Connect**.
 
-With a service account key, **Project ID** can stay empty: the project comes from the key. With **Instance ID** empty, the connection opens the project's first instance, and the database switcher lists the others.
+The toolbar's **Instance** switcher moves between the project's instances without reconnecting, and an open tab stays on the instance it opened on. See [Tabs](/features/tabs#where-a-tab-points).
 
 ## Connection settings
 
 | Field | Description |
 |-------|-------------|
-| **Auth Method** | Service Account Key, or Application Default Credentials |
+| **Auth Method** | **Service Account Key**, the default, or **Application Default Credentials** |
 | **Service Account Key** | A path to the JSON key file, or the JSON pasted in. Stored in the Keychain |
-| **Project ID** | The Google Cloud project. Taken from the key or from Application Default Credentials when empty |
-| **Instance ID** | The Bigtable instance. The first one in the project when empty |
+| **Project ID** | The Google Cloud project. Empty takes the project the key names. Under Application Default Credentials, empty takes the credentials file's project, then `GOOGLE_CLOUD_PROJECT` |
+| **Instance ID** | The Bigtable instance. Empty opens the instance whose ID sorts first |
 | **App Profile ID** | Options tab. Routes reads and writes through that app profile. The instance's default profile when empty |
+
+**Project ID** and **Instance ID** stand in for a host, a port and the Database field. Any instance connects, no connection URL opens one, and [SSH Tunnel](/connections/ssh-tunneling) is not offered.
 
 ## Authentication
 
 | Auth Method | What is sent |
 |-------------|--------------|
-| **Service Account Key** | An OAuth token signed with the key. Reading needs the Bigtable Reader role, editing the Bigtable User role |
+| **Service Account Key** | An OAuth token signed with the key |
 | **Application Default Credentials** | The token from `gcloud auth application-default login`, or from the file `GOOGLE_APPLICATION_CREDENTIALS` names |
 
-When IAM refuses an operation, the error says **Permission denied** and names the operation, rather than showing an empty table.
+Reading needs the Bigtable Reader role and editing the Bigtable User role, granted on the project or on the instance.
 
 ## Browsing tables
 
-The sidebar lists the instance's tables. Bigtable has no fixed columns, so the columns are the `family:qualifier` pairs found in the first rows. A cell a row does not have shows as missing, not as NULL. Each cell shows its newest version.
+The sidebar lists the instance's tables. A grid page has a column for each `family:qualifier` its rows hold, so two pages can show different columns; the **Structure** tab lists the columns of the first 50 rows. In a column where the row has no cell, the grid reads **No Field** ([Editing a cell](/features/change-tracking#editing-a-cell)). Each cell shows its newest version.
 
-Keys, qualifiers and values are bytes. Text shows as itself. Anything else shows as `b64:` followed by base64, which reads back to the same bytes, so a binary key can still be filtered on and edited. A value that is not text goes to the grid as bytes and shows as hex.
+Keys, qualifiers and values are bytes. UTF-8 text with no control characters other than tab and newline shows as itself. A key or qualifier that is anything else, or text that starts with `b64:`, shows as `b64:` and its base64, and that form reads back to the same bytes: type it that way in a filter, a request line or a new row's `_key`. A value of that kind shows as hex. To filter on it, type it as `b64:` and its base64.
 
-Rows come in ascending key order. Clicking a column header sorts the rows on screen, since the REST API has no other order. A later page starts after the last key of the page before; a page jumped to directly skips the rows before it by reading their keys alone.
+A table's grid keeps key order: clicking a column header does not sort it. A request's results in the editor sort on screen when you click a header. A later page starts after the last key of the page before, and a page jumped to directly skips the rows before it by reading their keys alone.
 
-Bigtable keeps no row count. Counting reads every key, so it runs only when you ask for the count.
+The status bar's total stays blank until **Count Exactly** reads the key of every row the filters admit. See [Pages and row counts](/features/data-grid#pages-and-row-counts).
 
 ## Filtering
 
-A filter on `_key` becomes a row range, which reads only the rows it names:
+Most filters on `_key` read only the keys they name:
 
 | Operators on `_key` | What Bigtable reads |
 |----------|--------------------|
-| equals, in list | Exact keys |
+| equals, in list | Exact keys. A list splits on commas, or takes a JSON array such as `["a,b", "c"]` |
 | starts with | The key range of that prefix |
 | greater than, greater or equal, less than, less or equal, between | A key range |
-| not equals, contains, not contains, ends with, REGEX | A row key regex, over every row |
+| not equals, not in list, contains, not contains, ends with, matches regex | A row key regex, over every row |
 
-A filter on a `family:qualifier` column keeps or drops whole rows by that cell's newest value:
+With **Match Case** off, equals, in list and starts with on `_key` run as a row key regex over every row too.
+
+A filter on a `family:qualifier` column keeps or drops whole rows by that cell's newest value. A row without the cell matches only is NULL, so not equals, not contains and not in list leave it out too:
 
 | Operators on a column | What Bigtable runs |
 |----------|--------------------|
-| equals, not equals, contains, not contains, starts with, ends with, in list | A value regex |
-| REGEX | The pattern as written, in RE2 syntax |
+| equals, not equals, contains, not contains, starts with, ends with, in list, not in list | A value regex |
+| matches regex | The pattern as written, in RE2 syntax. It has to match the whole value: `.*ann.*` finds `ann` anywhere, `ann` only the value `ann` |
 | greater than, greater or equal, less than, less or equal, between | A value range, compared byte by byte |
 | is empty, is not empty | An empty value regex |
 | is NULL, is not NULL | Whether the row has the cell |
 
-Values are compared as bytes, so `9` sorts after `10`. Several filters combine with AND or OR. Key ranges cannot be ORed with column filters; use `=`, starts with or REGEX on `_key` there. The raw filter takes a `RowFilter` from the Bigtable REST reference, with bytes in base64.
+Values are compared as bytes, so `9` sorts after `10`. Under **Match any**, filters that are all equals, in list, starts with or a range on `_key` read only the keys each one names. Mix in any other filter and a range on `_key` is refused, while equals, in list and starts with on `_key` run as a row key regex over every row.
+
+In a **Raw Filter** row, write a `RowFilter` as the Bigtable REST reference shows it, bytes in base64; it runs unchanged. A cell filter such as `valueRegexFilter` trims each row to the matching cells and drops rows left with none. To keep or drop whole rows, wrap it in a `condition` whose `trueFilter` is `{"passAllFilter": true}`.
 
 ## Editing
 
-Grid edits are row mutations, one per row, applied atomically.
+Each changed row is one request, and its cells change together. A save has no transaction: when one row fails, the rows written before it stay written.
 
 | Change | Request |
 |--------|---------|
-| New row | `PUT` with the key you typed in `_key` and every cell you filled |
+| New, duplicated or pasted row | `INSERT` with the key you typed in `_key` and every cell you filled. Refused when a row already has that key |
 | Edited cells | `PUT` with the changed cells |
-| Removed cell | The cell set to `null` in the `PUT` |
+| Cell set to NULL, or **Remove Field** | The cell set to `null` in the `PUT`, which deletes every version of it |
 | Deleted row | `DELETE` on the key |
 
-A new row needs a `_key` and at least one cell, and a cell needs a column family the table already has. Cells are written with the server's clock.
+A new row needs a `_key` and at least one cell. **Duplicate** and pasted rows copy every cell but `_key`, which shows DEFAULT until you type a key. The grid offers only the columns the rows on the page hold, so an empty table shows `_key` alone: write a table's first row, or a cell under a column the page does not show, with `INSERT` or `PUT` in the request editor. The column family must already exist, and the **DDL** tab of the Structure tab lists them under `columnFamilies`.
+
+An existing row's key cannot change. The save is refused, so duplicate the row, give the copy the new key, and delete the old one. **Set DEFAULT** in the row inspector is refused on an existing row too; set the cell to NULL to delete it, or enter a value. Text typed into a cell or into `_key` that starts with `b64:` is written as the bytes its base64 decodes to. Cells are written with the server's clock.
 
 ## Request editor
 
 | Request | What it does |
 |---------|--------------|
 | `GET events/user#42` | One row |
-| `SCAN events/user#?limit=20` | Rows whose key starts with the prefix, 100 when no limit is given |
-| `READ events {"rowsLimit": "10"}` | A ReadRows body from the REST reference, sent as written |
-| `PUT events/user#42 {"profile:name": "Ann"}` | Sets cells. `null` deletes a cell, and `b64:` text writes bytes |
+| `SCAN events/user#?limit=20` | Rows whose key starts with the prefix: 100, or the `?limit=` given. `SCAN events` reads from the table's first row |
+| `READ events {"rowsLimit": "10"}` | A ReadRows body from the REST reference |
+| `INSERT events/user#42 {"profile:name": "Ann"}` | Creates the row. Refused when the key already has a row, and refuses `null` |
+| `PUT events/user#42 {"profile:name": "Ann"}` | Sets cells, and creates the row when the key has none. `null` deletes a cell, and `b64:` text writes bytes |
 | `DELETE events/user#42` | Deletes the row |
-| `DELETE events/user#42 profile:name` | Deletes one column of the row |
+| `DELETE events/user#42 profile:name` | Deletes that cell, every version of it |
 
-The table goes before the first slash. A key with spaces or a slash goes in JSON quotes, `GET events/"a b/c"`, and a binary key as `b64:<base64>`.
+The table goes before the first slash, and the key is everything after it up to a space or a `?`. A key holding either goes in JSON quotes, `GET events/"a b?c"`, and a binary key as `b64:<base64>`. A column after `DELETE` runs to the end of the line, so it may hold spaces.
+
+A request does not get the row cap in [Settings > Data](/customization/data-settings): a `READ` without `rowsLimit` returns up to 5,000,000 rows, so give it one.
+
+For [Safe Mode](/features/safe-mode), `GET`, `SCAN` and `READ` are reads and every other request is a write. A `DELETE`, or a `PUT` that sets a cell to `null`, also raises the dangerous query warning on **Silent**.
+
+## SSL/TLS
+
+Rows go to `bigtable.googleapis.com` and instances and tables to `bigtableadmin.googleapis.com`, both over HTTPS only. [Per-driver defaults](/connections/ssl#per-driver-defaults) lists Bigtable among the drivers with no **SSL Mode**.
 
 ## Limitations
 
 - No GoogleSQL. Use the request editor.
-- No reverse scans: the REST API reads rows in ascending key order only.
-- Only the newest version of each cell is shown or written.
-- Tables and column families are not created or changed from TablePro.
-- Export fixes its columns from the first page. Columns that appear only later go into an `__extra__` column as JSON.
-- The plugin is registry-only. It is not on iPhone or iPad.
+- No reverse scans. Rows come in ascending key order only; to start late in a table, filter `_key` with greater than.
+- Only the newest version of each cell shows, in a `READ` result too. An edit adds a new version; removing a cell deletes every version of it.
+- Tables and column families cannot be created, changed, truncated or dropped. Use the Google Cloud console or `cbt`.
+- Export fixes its columns from the first 500 rows. Columns that appear only later go into an `__extra__` column as JSON, with bytes as `b64:` and base64.
+- Import is not available. Write rows with `INSERT` or `PUT` in the request editor.
+- A Bigtable connection synced to iPhone or iPad appears in the list but does not open there; open it on the Mac. See [Supported databases](/ios#supported-databases).
 
 ## Troubleshooting
 
-### Permission denied: …
+### Permission denied: ….
 
-The credential's IAM role does not cover the operation. Reading needs Bigtable Reader, editing Bigtable User.
+The message names what was refused, such as "read events" or "list instances". Grant Bigtable Reader to read or Bigtable User to edit. A refused "list instances" means the role sits on one instance, not the project: fill in **Instance ID** so the connection skips the listing.
 
-### No instance in the project
+### Project … has no Bigtable instance.
 
-The error reads "Project … has no Bigtable instance". The project in **Project ID** or in the key has none. Check the project, or fill in **Instance ID**.
+The project in the message lists no Bigtable instance. With **Project ID** empty, that project came from the key or the Application Default Credentials, which need not be the one holding Bigtable. Set **Project ID** to the project with the instance.
+
+### Row … already exists. Edit that row, or give the new one another key.
+
+A new, duplicated or pasted row, or an `INSERT` line, names a key another row already has. Change `_key` on the new row, or edit the existing row instead.
 
 ## Related
 
 - [Filtering](/features/filtering)
+- [Safe Mode](/features/safe-mode)
 - [Import & Export](/features/import-export)

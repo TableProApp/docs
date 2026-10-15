@@ -65,7 +65,7 @@ The statement runs at once instead of joining the drop and truncate queue, so **
 | SAP HANA | No | No | No |
 | MongoDB | Yes | No | No |
 
-No other engine has a rename, so the item never appears on Cassandra, DynamoDB, Elasticsearch, etcd, Firestore, the Firebase Realtime Database, Kafka, Redis, SurrealDB, Typesense or Beancount. What resembles one there is a copy followed by a delete, and it changes record identity.
+No other engine has a rename, so the item never appears on Bigtable, Cassandra, DynamoDB, Elasticsearch, etcd, Firestore, the Firebase Realtime Database, Kafka, Redis, SurrealDB, Typesense or Beancount. What resembles one there is a copy followed by a delete, and it changes record identity.
 
 **Rename Database** and **Rename Schema** are absent on the container the connection is browsing. Switch to another one first, then rename the one you left.
 
@@ -119,7 +119,7 @@ A MariaDB table declared `WITH SYSTEM VERSIONING` stays an ordinary table: row e
 
 ## Databases and schemas
 
-`Cmd+K` switches database, covered in [Managing Connections](/connections#switch-connections-and-databases). The switcher takes the engine's own vocabulary: Schema on Oracle and Spanner, Keyspace on Cassandra, Dataset on BigQuery, Namespace on SurrealDB. SQLite is file-based, so it points at the welcome window to open a different file.
+`Cmd+K` switches database, covered in [Managing Connections](/connections#switch-connections-and-databases). The switcher takes the engine's own vocabulary: Schema on Oracle and Spanner, Keyspace on Cassandra, Dataset on BigQuery, Instance on Bigtable, Namespace on SurrealDB. SQLite is file-based, so it points at the welcome window to open a different file.
 
 <Frame caption="Database switcher with search">
   <img className="block dark:hidden" src="/images/database-switcher.png" alt="Database switcher popover" />
