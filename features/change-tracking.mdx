@@ -36,17 +36,25 @@ Double-click a cell, or press `Enter` on it. `Enter` commits the edit to the que
   <img className="hidden dark:block" src="/images/date-picker-editor-dark.png" alt="Cell editor" />
 </Frame>
 
-Right-click an editable cell and open **Set Value** for the common ones without typing: **Empty** on text, `SET` and binary columns, **NULL** on a nullable column, **Default** on a column the server fills in, and date functions such as `NOW()` or `CURRENT_DATE` on date columns.
+Right-click an editable cell and open **Set Value** to set it without typing. Each item appears only where the column takes it:
+
+- **Empty** on text, `SET` and binary columns.
+- **NULL** on a nullable column.
+- **Default** on a column the server fills in. SQLite, libSQL, Turso, Cloudflare D1, ClickHouse, Databend, Snowflake, Trino, Cassandra and ScyllaDB take it on a new row only.
+- The database's own date and time functions on a date or time column, such as `NOW()` on MySQL or `CURRENT_TIMESTAMP` on SQLite.
+- **Generate UUID** (version 4) and **Generate UUIDv7** (ordered by creation time) on a `uuid` or `uniqueidentifier` column, and on a text or binary column whose display format is UUID. A foreign key column and a Cassandra `timeuuid` column get neither.
+
+Select several cells first to set all of them at once; Generate UUID gives each cell its own value. With whole rows selected, the clicked column changes on every selected row. **Edit > Set Value** holds the same items for the focused cell or the selection, and [Settings > Keyboard](/features/keyboard-shortcuts#customizing-shortcuts) assigns them shortcuts.
 
 On MongoDB, Firestore and the Firebase Realtime Database a document can lack a field altogether, and on Bigtable a row can lack a cell; the grid shows either as **No Field**. **Remove Field** on the same right-click menu deletes the field rather than storing NULL. Bigtable stores no NULL, so **NULL** and **Remove Field** both delete the cell. See [missing fields and null](/databases/mongodb#missing-fields-and-null).
 
 ## Adding and deleting rows
 
-- **Add Row** (`Cmd+Shift+N`), the **+** button, or **Edit > Add Row**. The row appears at the bottom with the cursor in its first writable cell. Later edits fold into the INSERT rather than queueing as updates.
-- **Duplicate Row** (`Cmd+Shift+D`) on the right-click menu copies a row and resets its primary key and its identity columns to `DEFAULT`, so the database assigns new ones.
+- **Add Row** (`Cmd+Shift+N`), the **+** button, or **Edit > Add Row**. The row appears at the bottom with the cursor in its first writable cell. A UUID primary key the server does not fill gets a new UUID, and the cursor skips it. Later edits fold into the INSERT rather than queueing as updates.
+- **Duplicate Row** (`Cmd+Shift+D`) on the right-click menu copies a row and resets its primary key and its identity columns to `DEFAULT`, so the database assigns new ones. A UUID primary key the server does not fill gets a new UUID instead.
 - **Delete**: select rows by their row numbers (`Shift`-click for a range, `Cmd`-click for separate rows) and press `Delete`. They stay visible with a strikethrough, and saving asks "Delete 5 rows?" before they go.
-- **Paste** on the right-click menu inserts copied rows as new rows.
-- **Fill Column** on the header right-click menu writes one value into every loaded row. It is absent on primary key columns and on columns the server owns.
+- **Paste** on the right-click menu inserts copied rows as new rows, with a new UUID in a UUID primary key the server does not fill.
+- **Fill Column** on the header right-click menu writes one value, NULL, or a new UUID or UUIDv7 per row into every loaded row. It is absent on primary key columns and on columns the server owns.
 
 A new row starts at `DEFAULT` in every column the server fills in. That covers a column with a default expression, and an identity or `AUTO_INCREMENT` column, which carries no default of its own. The INSERT leaves those columns out, so the server assigns them.
 
@@ -74,7 +82,7 @@ Individual columns stay read-only where the server owns them: generated, compute
 
 ## Saving
 
-Press `Cmd+S`, or click the toolbar checkmark. Values go out as bound parameters; `DEFAULT` and SQL functions such as `NOW()` are written into the statement as they stand.
+Press `Cmd+S`, or click the toolbar checkmark. Values go out as bound parameters; `DEFAULT` and the functions picked from **Set Value** or the inspector are written into the statement as they stand. Typing one of those functions into a date or time cell does the same. Text typed into any other column is saved as typed, even when it reads like `now()`, and a pending function cell is drawn like a pending `DEFAULT`.
 
 | Change | Generated SQL |
 |--------|--------------|

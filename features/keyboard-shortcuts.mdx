@@ -116,6 +116,8 @@ Every row except the five find rows is built into the editor and cannot be rebou
 | Add row | `Cmd+Shift+N` |
 | Duplicate row | `Cmd+Shift+D` |
 | Restore Previous Values | none by default, rebindable |
+| Set Value to Empty, NULL or Default | none by default, rebindable |
+| Generate UUID, Generate UUIDv7 | none by default, rebindable |
 | Delete selected rows | `Delete` or `Cmd+Delete` |
 | Truncate table (tables selected in the sidebar) | `Option+Delete` |
 | Preview FK reference | `Space` |
@@ -278,7 +280,7 @@ With the drawer open (`Cmd+Y`) and its entry list focused, `Return` loads the se
 | Set the focused field to NULL | `Ctrl+Option+N` |
 | Set the focused field to its DEFAULT | `Ctrl+Option+D` |
 
-`Ctrl+Option+N` and `Ctrl+Option+D` skip a field the server owns and a column definition on a Structure tab, neither of which takes either state.
+`Ctrl+Option+N` and `Ctrl+Option+D` work only where the field's menu offers **Set NULL** or **Set DEFAULT**, and no other command can be bound to them.
 
 ## Welcome window
 
