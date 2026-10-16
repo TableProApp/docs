@@ -1,62 +1,155 @@
 ---
 title: Appearance
-description: Themes, color customization, theme files, and connection colors
+description: Appearance mode, built-in themes, the Theme Editor, VS Code theme import, theme files, and connection colors
 ---
 
-**Appearance** picks Light, Dark, or **System** to follow macOS. **Light theme** and **Dark theme** each hold the theme used in that appearance, so setting your dark theme never means leaving Light mode.
+Three popups at the top of **Settings > Appearance** decide the colors. **Appearance** picks **System** to follow macOS, or **Light** or **Dark**, and applies to this Mac only. **Light theme** and **Dark theme** each hold the theme drawn in that appearance, so setting your dark theme never means leaving Light mode.
 
-<Frame caption="Appearance settings with the theme pickers and custom themes">
-  <img className="block dark:hidden" src="/images/settings-appearance.png" alt="Appearance settings" />
-  <img className="hidden dark:block" src="/images/settings-appearance-dark.png" alt="Appearance settings" />
+<Frame caption="Custom themes list first, above the built-in ones">
+  <img className="block dark:hidden" src="/images/settings-appearance.png" alt="Appearance pane with the Appearance popup, the Light theme and Dark theme popups, and the Themes list" />
+  <img className="hidden dark:block" src="/images/settings-appearance-dark.png" alt="Appearance pane with the Appearance popup, the Light theme and Dark theme popups, and the Themes list" />
 </Frame>
 
-## Themes
+Each theme popup lists only the themes made for its appearance: the built-in ones, then yours after a divider. The two theme choices and your custom themes sync between Macs under **Settings** in [iCloud Sync](/features/icloud-sync); **Appearance** does not. When the theme a popup holds cannot be used on this Mac, for example because its file did not load or has not synced yet, the popup shows the theme in use and says why.
 
-A theme colors what a window shows: the SQL editor and the other code views, the data grid, value viewers and inspector fields, JSON and PHP trees, diffs, ER diagrams, query plans and charts. Its window background fills the space behind them. On macOS 26 and later the sidebar, inspector and toolbar take on that background through the system glass, while controls and Settings keep the system look. The welcome window, the connection form and sheets keep it too, but a code field inside one, such as **Startup Commands**, **Pre-Connect Script** or a favorite's query, takes the editor colors.
+## What a theme colors
+
+A theme colors content: the SQL editor and every other code view, the data grid, value viewers and inspector fields, JSON and PHP trees, diffs, record lists such as Server Dashboard sessions, ER diagrams, query plans and charts, and the loading, empty and error states that take a grid's place.
+
+Its window background fills the area behind those panes on every macOS version. On macOS 26 and later it is also the window color of the main window, data file windows, Compare & Sync and value viewers, and the sidebar, inspector, toolbar and title bar take on its tone through the system glass. Before macOS 26 the sidebar and toolbar keep the system look. The bars along the top and bottom of a pane, such as the filter bar, drop their system material while the theme sets a window background, so the theme shows through them.
+
+Controls, Settings, the welcome window, the connection form, sheets and popovers keep the system look and your Accent color. A code field inside one of them, such as **Startup Commands**, **Pre-Connect Script**, a favorite's query or the **Startup SQL** of a connection link, takes the editor colors.
 
 With Increase Contrast on, the window background goes back to the macOS color and the rest of the theme stays.
 
-Default Light and Default Dark draw the editor and the grid in the macOS colors, so selection, the cursor, the current line and the focus ring follow your Accent and Highlight colors in System Settings > Appearance, and Increase Contrast. Their syntax colors are Xcode's defaults, and switch to Xcode's high-contrast palette when Increase Contrast is on. Dracula and Nord ship as dark themes.
-
-A theme only appears in the picker for its own appearance. If the theme a picker holds is missing on this Mac, for example one chosen on another Mac, the picker shows the theme in use and says why.
-
-## Custom themes
-
-Custom themes are listed under **Custom Themes**.
-
-| Control | What it does |
-|--------|--------|
-| **+** menu | **New Theme Based On** copies any theme, built-in ones included; **Import…** reads a theme JSON file |
-| **-** button | Deletes the selected theme after you confirm. A picker that held it goes back to Default Light or Default Dark |
-| **...** menu | **Edit…**, **Rename…**, **Duplicate**, **Export…** and **Show in Finder** for the selected theme |
-
-Double-click a theme or press Return to edit it, and press Delete to delete it. The same actions are in its right-click menu.
-
-**Edit…** opens a sheet with a live preview, the theme's name and a color well for each color. A color you have not set draws in the macOS color shown in its well; once you set one, the arrow beside it puts the default back. Changes save as you make them.
-
-| Group | Colors |
-|-------|----------|
-| Window | Background |
-| Editor | Background, text, cursor, selection, current line, current statement, line number, invisibles |
-| Syntax | Keyword, string, number, comment, NULL, operator, function, type |
-| Data Grid | Background, text, alternate row, header background, header text, grid line, selection, selected text, inactive selection, focus border, NULL value, bool true and false, row number, modified, inserted and deleted rows, deleted text |
-
-A theme file that cannot be read is listed under **Not Loaded** with the reason. Right-click it and choose **Show in Finder** to fix or remove the file.
-
 Fonts are not part of a theme. Editor Font lives in [Editor settings](/customization/editor-settings) and Data Grid Font in [Data settings](/customization/data-settings), and both stay on the Mac you set them on.
+
+## Built-in themes
+
+| Light theme | Dark theme |
+|-------------|------------|
+| Default Light | Default Dark |
+| Catppuccin Latte | Catppuccin Mocha |
+| GitHub Light | GitHub Dark |
+| Gruvbox Light | Gruvbox Dark |
+| One Light | One Dark |
+| Solarized Light | Solarized Dark |
+| Tokyo Night Light | Tokyo Night |
+
+Dracula and Nord are dark only.
+
+Default Light and Default Dark set no colors of their own. The editor and the grid draw in the macOS colors, so selection, the cursor, the current line and the focus ring follow your Accent and Highlight colors in System Settings > Appearance, and Increase Contrast. Their syntax colors are Xcode's defaults, and switch to Xcode's high-contrast palette when Increase Contrast is on. Keep them unless you want a palette. To use one, set both themes of a row as your **Light theme** and **Dark theme**, so the palette holds when the Mac switches between light and dark.
+
+The other themes keep their projects' own colors. Solarized Light's text sits at 4.1:1 on its background, under the 4.5:1 the Theme Editor asks for.
+
+## Managing themes
+
+**Themes** lists every theme on this Mac in up to three groups: **Custom**, then **Not Loaded** when a file in the themes folder could not be read, then **Built-in**. Each row names the theme and whether it is Light or Dark.
+
+| Task | How |
+|------|-----|
+| Start a theme | Click **+**, choose **New Theme Based On**, and pick any theme. The copy opens in the Theme Editor |
+| Copy a theme | Right-click it and choose **Duplicate**. The copy takes the name with "Copy" added |
+| Edit a theme | Double-click it, press Return, or choose **Edit…** from the **...** menu. A built-in theme opens read-only |
+| Rename a custom theme | Right-click it, choose **Rename**, type the new name and press Return. A name another theme already has is refused in the field |
+| Import | Click **+** and choose **Import…**, or drag one or more `.json` files onto the list. TablePro themes and [VS Code color themes](#importing-a-vs-code-theme) both work |
+| Export | Choose **Export…**, or drag the row to a Finder window for a `.json` copy. Built-in themes export too |
+| Use a theme | Right-click it and choose **Use for Light Appearance** or **Use for Dark Appearance** |
+| Remove a custom theme | Select it and click **-**, press Delete, or right-click it and choose **Move to Trash** |
+| Find the file | Choose **Show in Finder** |
+
+A right-click menu shows only what applies to that row. The **...** menu under the list acts on the selected row and dims what does not apply.
+
+**Move to Trash** moves the file to the macOS Trash. It asks first only when the theme is your **Light theme** or **Dark theme**, and that popup then goes back to Default Light or Default Dark. Press `Cmd+Z` with Settings in front to bring the theme back, popup choice included. New themes, duplicates, imports and renames undo the same way.
+
+An imported theme whose name is taken gets a number: a second Midnight imports as Midnight 2. When some files in an import fail, one alert lists each with its reason.
+
+A file under **Not Loaded** shows the reason it was refused. Right-click it to choose **Show in Finder**, **Try Again** or **Move to Trash**. The themes folder is read again each time you switch back to TablePro, so a file you fix in another editor loads when you return.
+
+## Editing a theme
+
+Each theme opens in a Theme Editor window of its own, titled with the theme's name. Opening a theme that already has a window brings that window forward.
+
+<Steps>
+  <Step title="Open the theme">
+    Double-click a custom theme in **Themes**. For a built-in theme, open it and click **Duplicate** in its window: the copy opens editable in its place.
+  </Step>
+  <Step title="Change colors">
+    Click a color well and pick a color. The preview at the top of the window repaints, and so does every window drawing with this theme.
+  </Step>
+  <Step title="Close the window">
+    Changes save 0.75 seconds after you stop and again when the window closes. There is no Save button.
+  </Step>
+</Steps>
+
+The preview is the real SQL editor and data grid over sample content, drawn in the theme's own appearance, so a dark theme previews dark on a light Mac. It shows the current line and statement, a selection, invisibles, alternate rows, NULL, booleans, and a modified, an inserted and a deleted row.
+
+Under it, **General** holds the theme's name, its appearance (Light or Dark) and its author. The colors follow in **Window**, **Editor**, **Syntax**, **Data Grid**, **Selection** and **Changes**.
+
+The line under each color's name says where the color comes from:
+
+| Line | Meaning |
+|------|---------|
+| A hex value, such as `#282A36` | The theme sets this color |
+| **System color** | Unset, so the macOS color draws |
+| **Default Light color** or **Default Dark color** | An unset syntax color, drawn in the default theme's value |
+| **Based on** and another color's name | Unset, and taken from that color. See [Colors a theme leaves out](#colors-a-theme-leaves-out) |
+
+The arrow beside a color the theme sets clears it, under the name **Use System Color** or **Use Default Color**. The same action is in the color's right-click menu. Opacity is offered only for washes drawn over content: the editor selection, current line, current statement and invisibles, the alternate row, both grid selections, and the four row change colors.
+
+`Cmd+Z` and `Cmd+Shift+Z` undo and redo, one step per color you drag through the picker. **Revert Changes** at the bottom puts the theme back the way it was when the window opened, and undoes like any other step.
+
+A note under **Editor** or **Data Grid** appears when text on its background falls below 4.5:1 contrast.
+
+If the file changes outside TablePro while its window is open, the window takes the newer file and says so. If the file is deleted, by hand or through sync from another Mac, choose **Keep Theme** to save your edits as a new theme, or **Close**.
+
+## Importing a VS Code theme
+
+A VS Code color theme imports like any other theme file, from **Import…** or by dropping its `.json` file on **Themes**. The import is saved as a TablePro theme; the VS Code file is not kept or read again. Themes installed in VS Code sit under `~/.vscode/extensions/`, one folder per extension, usually in its `themes` folder.
+
+### What carries over
+
+| TablePro colors | Read from |
+|-----------------|-----------|
+| Window background | `editorPane.background`, else `editor.background` |
+| Editor | `editor.background`, `editor.foreground`, `editorCursor.foreground`, `editor.selectionBackground`, `editor.lineHighlightBackground` (else `editor.lineHighlightBorder`), `editor.rangeHighlightBackground` for the current statement, `editorLineNumber.foreground`, `editorWhitespace.foreground` |
+| Syntax | `tokenColors` rules, matched the way VS Code matches them against the scopes of its SQL grammar. A token no rule colors takes `editor.foreground`, and NULL, when no rule colors it, takes the keyword color |
+| Data grid | The editor background and text; `foreground` for header text; `list.activeSelectionBackground`, `list.activeSelectionForeground` and `list.inactiveSelectionBackground`; `list.focusOutline` or `focusBorder`; `input.placeholderForeground` for NULL; `editorLineNumber.foreground` for row numbers; `tree.tableColumnsBorder` for grid lines; `tree.tableOddRowsBackground` for alternate rows and the header; booleans from the token rules for SQL `TRUE` and `FALSE` |
+| Row changes | `diffEditor.insertedLineBackground` and `diffEditor.removedLineBackground`, and the `gitDecoration` modified and deleted colors, made translucent, for modified rows and deleted text |
+
+A color the file does not set stays unset and draws as [Colors a theme leaves out](#colors-a-theme-leaves-out) describes. A translucent window, editor, grid or header background is flattened over the editor background.
+
+### What is left out
+
+- Colors for VS Code's own interface: the activity bar, status bar, tabs, side bar, panels, terminal and widgets. TablePro's sidebar, toolbar and bars keep the system look.
+- `fontStyle` in token rules. Italic comments import as plain text, and keywords are always bold.
+- `semanticTokenColors` and `semanticHighlighting`.
+- Rules scoped to other languages, such as `source.json`. Syntax colors are read from SQL scopes only.
+- Colors TablePro has no place for: the inactive editor selection, selected text in the editor, the active line number, find matches and word highlights.
+
+### How the file is read
+
+- Comments and trailing commas are fine.
+- `include`, and a `tokenColors` value that names a `.tmTheme` file, resolve inside the theme's own folder. Import a theme from the folder that holds the files it includes.
+- A path that starts with `/` or `~` or leads out of the folder is refused, as is an `include` chain more than 8 levels deep or one that includes itself.
+- Light or dark comes from the file's `type`, else from the brightness of `editor.background`, else dark. Change it under **General** in the Theme Editor. A high-contrast theme imports as a regular light or dark theme.
+- The name is the file's `name`, else its file name without `.json` and `-color-theme`.
+- A file over 2 MB, or one with more than 10,000 token rules, is refused. A color value that does not parse is skipped, and the slot takes its next source.
 
 ## Theme files
 
-A theme is one JSON file in `~/Library/Application Support/TablePro/Themes/`. **Export…** writes the colors the selected theme sets, which is the shortest way to start one.
+A custom theme is one JSON file in `~/Library/Application Support/TablePro/Themes/`. **Export…** writes the colors the selected theme sets, which is the shortest way to start one. A file copied into the folder by hand keeps its `id`; an imported one always gets a new `id`, so importing the same file twice makes two themes.
 
 | Key | Holds |
 |-----|-------|
-| `schema` | Format version. `3` is the version this release reads |
-| `id`, `name`, `author` | Identity. An `id` that collides with a built-in theme or one you already have is replaced on import |
-| `appearance` | `light` or `dark`. Decides which picker lists the theme |
+| `schema` | Format version. `3` is the only version this release reads |
+| `id` | ASCII letters, digits, `.`, `_` and `-`, at most 128 characters. It cannot start with `tablepro.` or contain `..` |
+| `name` | One line of at most 100 characters |
+| `author` | Optional. One line of at most 100 characters |
+| `appearance` | `light` or `dark`. Decides which popup lists the theme |
 | `window` | Window background, under `background` |
 | `editor` | Editor colors, with syntax colors nested under `syntax` |
-| `dataGrid` | Data grid colors |
+| `dataGrid` | Data grid colors, the Selection and Changes sections of the Theme Editor included |
 
 ```json
 {
@@ -75,9 +168,31 @@ A theme is one JSON file in `~/Library/Application Support/TablePro/Themes/`. **
 }
 ```
 
-A color is sRGB hex, `#RRGGBB`, or `#RRGGBBAA` for a translucent band such as a selection. Every color is optional. One you leave out draws in the macOS color for that spot, and a syntax color you leave out takes the Default Light or Default Dark value.
+A color is sRGB hex, `#RRGGBB`, or `#RRGGBBAA` for a translucent wash such as a selection. The window, editor, data grid and header backgrounds are always opaque: an alpha value there is dropped. Every color is optional.
 
-A file that names a color TablePro does not use, sets one twice, carries a color the app cannot parse, or declares a `schema` this release does not read is listed under **Not Loaded** with the reason. Themes written for earlier versions of TablePro need to be written again.
+### Colors a theme leaves out
+
+| Left out | Draws |
+|----------|-------|
+| Keyword, string, number, comment, NULL, function, type | The Default Light or Default Dark value |
+| Operator | The theme's editor text, else the macOS color |
+| Header text, bool true, bool false | The theme's data grid text, else the macOS color |
+| Alternate row | The theme's data grid background moved 4% toward its grid text, or toward black in a light theme and white in a dark one. Without a grid background, the macOS stripe |
+| Header background | The theme's data grid background, else the macOS color |
+| Selected text | The theme's data grid text, while the theme sets the grid selection |
+| Anything else | The macOS color for that spot |
+
+Without a grid selection color, the grid draws the macOS selection and its own text, even when the file sets selected text.
+
+### Files that do not load
+
+A file in the themes folder that breaks one of these is listed under **Not Loaded** with the reason, and a JSON error names the line and column:
+
+- It is not plain JSON. Comments are refused here; a VS Code theme goes through **Import…** instead.
+- It has no `schema`, or a `schema` other than `3`. A theme file from TablePro 0.80 or earlier needs to be made again.
+- It lacks `id`, `name` or `appearance`, or a field breaks the rules in the table.
+- It holds a key TablePro does not use, or a value that is not a `#RRGGBB` or `#RRGGBBAA` string.
+- Its `id` is one another file in the folder already uses. The first file by name loads.
 
 ## Connection colors
 
