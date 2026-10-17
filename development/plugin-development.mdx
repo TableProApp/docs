@@ -104,33 +104,3 @@ scripts/check-pluginkit-abi.sh [base-ref]
 ```
 
 Run it before merging any change under `Plugins/TableProPluginKit/`. It builds the framework at your tree and at the base ref with one toolchain and diffs the two public interfaces, so a Swift version difference between machines can never fake a diff. The base ref defaults to `origin/main`; pass the merge base when reviewing a branch. Commit or stash first, since it refuses a dirty working tree.
-
-## Building outside this repository
-
-A plugin needs TableProPluginKit, not this repository. Every driver happens to live under `Plugins/` here. A new one does not have to.
-
-```bash
-git checkout v<version>   # the oldest app release your plugin supports
-scripts/generate-project.sh
-scripts/build-pluginkit-xcframework.sh
-# build/pluginkit/TableProPluginKit.xcframework, plus a zip and its SHA-256
-```
-
-No prebuilt XCFramework is published, so build it this way and link the result from your own Xcode project. Build from a release tag, not `main`: the app rejects a plugin that declares a newer PluginKit than its own, and `main` moves ahead of the shipped app each time the PluginKit version is raised. Your plugin target then needs nothing else from this repository.
-
-Link it as **Do Not Embed**. The app supplies TableProPluginKit at runtime, so a copy inside your bundle is a second, conflicting one. The script refuses to emit a framework with no `.swiftinterface`, which is what a build without Library Evolution looks like: it links today and breaks every consumer on the next release.
-
-## Publishing
-
-Two steps put a plugin in TablePro's own registry, and both happen in this repository:
-
-<Steps>
-  <Step title="Add a manifest entry">
-    Add your plugin to `.github/plugin-registry.json`, keyed by the slug its tag will use. Without an entry the release workflow stops with `Unknown plugin`. `icon` and `databaseTypeIds` there have to match what your `DriverPlugin` class declares, and `scripts/ci/check-plugin-manifest.py` fails PR CI and the release workflow when they drift.
-  </Step>
-  <Step title="Push one tag">
-    `plugin-<slug>-v<version>`. CI builds both architectures, signs, notarizes, and updates `plugins.json`.
-  </Step>
-</Steps>
-
-CI signs with TablePro's certificate, so a plugin published there arrives through a pull request, not a tag of your own. The app loads only bundles TablePro signed. [Plugin Registry](/development/plugin-registry) has the manifest format, the `metadata` block that renders your connection form before the download finishes, and how to point the app at a private registry.
