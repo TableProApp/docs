@@ -194,10 +194,10 @@ def check_shortcuts(root: Path, docs: Path) -> list[str]:
 
 
 def check_pluginkit_version(root: Path, docs: Path) -> list[str]:
-    manager = (root / "TablePro" / "Core" / "Plugins" / "PluginManager.swift").read_text()
-    current = re.search(r"currentPluginKitVersion\s*=\s*(\d+)", manager)
+    config = (root / "Configs" / "PluginKit.xcconfig").read_text()
+    current = re.search(r"^TABLEPRO_PLUGINKIT_VERSION\s*=\s*(\d+)\s*$", config, re.M)
     if not current:
-        return ["PluginManager.swift no longer declares currentPluginKitVersion"]
+        return ["Configs/PluginKit.xcconfig no longer sets TABLEPRO_PLUGINKIT_VERSION"]
     expected = current.group(1)
 
     failures = []
