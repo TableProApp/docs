@@ -73,7 +73,7 @@ Registry plugins follow the app. After a TablePro update, each plugin installed 
 - A plugin that is not loaded, such as one rejected after the update, installs and loads at once.
 - A plugin that is loaded downloads in the background and replaces the old one the next time TablePro starts. Its row in **Settings > Plugins** reads "Updates when TablePro restarts" until then.
 
-If the registry has no newer build yet, the check tries again in the background, on the schedule in [A plugin will not install or load](/troubleshooting#a-plugin-will-not-install-or-load). Connecting to a database whose plugin is outdated checks again first.
+Offline, the check waits and runs once the Mac is back online. If the registry has no newer build yet, the check tries again in the background, on the schedule in [A plugin will not install or load](/troubleshooting#a-plugin-will-not-install-or-load). Connecting to a database whose plugin is outdated checks again first.
 
 Bundled plugins update with the app. A plugin installed from a file, including one installed over a registry plugin, updates from the registry only when an app update leaves it rejected and the registry has a compatible build of it.
 
