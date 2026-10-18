@@ -251,7 +251,7 @@ Verbs: **click** a button, **choose** a menu item, **select** a row or a checkbo
 **deselect** a checkbox. Never "click on", never "uncheck".
 
 **Menu paths** are one bold run with ` > `: `**File > Import from Other App…**`, never
-`**File** > **X**`. Verify the leaf against `TablePro/Core/Menu/*MenuBuilder.swift` every time. Eight
+`**File** > **X**`. Verify the leaf against `apple/TablePro/Core/Menu/*MenuBuilder.swift` every time. Eight
 paths were wrong at once because the Database menu shipped and nobody re-checked.
 
 **Shortcuts** in backticks, modifiers spelled out, joined with `+`: `` `Cmd+Option+F` ``. Never bold,

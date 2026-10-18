@@ -3,7 +3,7 @@ title: Plugin Development
 description: Write a database driver plugin, implement the PluginKit protocols, and package it as a .tableplugin bundle
 ---
 
-Start from a plugin that already works. `Plugins/SurrealDBDriverPlugin/` is the compact reference: no C bridge, an HTTP transport, the schema-aware query hooks filled in, and an editor language of its own.
+Start from a plugin that already works. `apple/Plugins/SurrealDBDriverPlugin/` is the compact reference: no C bridge, an HTTP transport, the schema-aware query hooks filled in, and an editor language of its own.
 
 Two protocols do the work. `DriverPlugin` describes the database (name, port, capabilities, SQL dialect) and creates driver instances; `PluginDatabaseDriver` is the connection itself. Implement both in a `.tableplugin` bundle linked against **TableProPluginKit**, and `PluginDriverAdapter` bridges your driver to the app's internal `DatabaseDriver`. A driver that connects and lists tables gets the whole UI without asking: connection form, sidebar, data grid, editor, import, export.
 
@@ -48,7 +48,7 @@ The host also injects three reserved `additionalFields` keys before it creates a
 
 A `.number` field takes a whole number of 0 or more. The form keeps ASCII digits only and will not save anything else. Use `.stepper(range:)` for a bounded or signed integer, and `.text` for a value with a decimal point.
 
-The remaining fifty-odd statics all have defaults: connection mode, URL schemes, brand color, editor language, `sqlDialect` (keywords, functions, completions), navigation model, system database names, and two dozen `supports*` capability flags. Override the ones that differ. `Plugins/TableProPluginKit/DriverPlugin.swift` is the full list.
+The remaining fifty-odd statics all have defaults: connection mode, URL schemes, brand color, editor language, `sqlDialect` (keywords, functions, completions), navigation model, system database names, and two dozen `supports*` capability flags. Override the ones that differ. `apple/Plugins/TableProPluginKit/DriverPlugin.swift` is the full list.
 
 ## Implementing PluginDatabaseDriver
 
@@ -100,7 +100,7 @@ Two changes look additive and are not. Both have shipped, and both surface the s
 [`.claude/rules/plugin-system.md`](https://github.com/TableProApp/TablePro/blob/main/.claude/rules/plugin-system.md) in the app repository carries the full additive-versus-breaking list and the checklist a breaking bump obliges you to run, including re-releasing every registry plugin before the app ships.
 
 ```bash
-scripts/check-pluginkit-abi.sh [base-ref]
+apple/scripts/check-pluginkit-abi.sh [base-ref]
 ```
 
-Run it before merging any change under `Plugins/TableProPluginKit/`. It builds the framework at your tree and at the base ref with one toolchain and diffs the two public interfaces, so a Swift version difference between machines can never fake a diff. The base ref defaults to `origin/main`; pass the merge base when reviewing a branch. Commit or stash first, since it refuses a dirty working tree.
+Run it before merging any change under `apple/Plugins/TableProPluginKit/`. It builds the framework at your tree and at the base ref with one toolchain and diffs the two public interfaces, so a Swift version difference between machines can never fake a diff. The base ref defaults to `origin/main`; pass the merge base when reviewing a branch. Commit or stash first, since it refuses a dirty working tree.

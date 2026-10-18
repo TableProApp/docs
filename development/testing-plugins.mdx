@@ -23,7 +23,7 @@ Do not reuse a built-in plugin's bundle ID. Installing over one fails outright, 
 ## Install with the dev script
 
 ```bash
-scripts/install-plugin-dev.sh MyDriverPlugin
+apple/scripts/install-plugin-dev.sh MyDriverPlugin
 ```
 
 It finds the newest `MyDriverPlugin.tableplugin` under DerivedData and copies it into the user plugins directory. Relaunch TablePro to load it. Build from Xcode first: the script reads DerivedData, and a command-line `xcodebuild` writes to `build/Debug` instead, where the script never looks.
@@ -34,7 +34,7 @@ Never edit the copied bundle, `Info.plist` included. Any change invalidates the 
 
 ## Bundle it into the app instead
 
-A plugin embedded in `PlugIns/` skips the signature check entirely, which is the shortest path when the team check is the thing in your way. Add the target to the app's dependency list in `project.yml`:
+A plugin embedded in `PlugIns/` skips the signature check entirely, which is the shortest path when the team check is the thing in your way. Add the target to the app's dependency list in `apple/project.yml`:
 
 ```yaml
 targets:
@@ -46,10 +46,10 @@ targets:
           destination: plugins
 ```
 
-Then run `scripts/generate-project.sh` and build. XcodeGen puts the bundle in an **Embed Dependencies** copy phase with `CodeSignOnCopy`, so it is re-signed with your debug identity on the way in.
+Then run `apple/scripts/generate-project.sh` and build. XcodeGen puts the bundle in an **Embed Dependencies** copy phase with `CodeSignOnCopy`, so it is re-signed with your debug identity on the way in.
 
 <Warning>
-`TablePro.xcodeproj` is generated and gitignored, so adding the plugin through the Xcode UI survives exactly until the next `scripts/generate-project.sh`. Edit `project.yml`. Take the entry back out before you open a pull request, or the plugin rides into a release build.
+`apple/TablePro.xcodeproj` is generated and gitignored, so adding the plugin through the Xcode UI survives exactly until the next `apple/scripts/generate-project.sh`. Edit `apple/project.yml`. Take the entry back out before you open a pull request, or the plugin rides into a release build.
 </Warning>
 
 ## Skip the signature check

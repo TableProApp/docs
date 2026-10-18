@@ -74,9 +74,10 @@ DOCS = Path(__file__).resolve().parent.parent
 
 
 def app_root(path: str) -> Path:
-    root = Path(path).resolve()
+    # Every claim checked here is about the macOS app, which lives in the checkout's apple/.
+    root = Path(path).resolve() / "apple"
     if not (root / "TablePro" / "Core" / "Menu").is_dir():
-        sys.exit(f"{path} is not a TablePro app checkout")
+        sys.exit(f"{path} is not a TablePro app checkout: it has no apple/TablePro/Core/Menu")
     return root
 
 
@@ -197,7 +198,7 @@ def check_pluginkit_version(root: Path, docs: Path) -> list[str]:
     config = (root / "Configs" / "PluginKit.xcconfig").read_text()
     current = re.search(r"^TABLEPRO_PLUGINKIT_VERSION\s*=\s*(\d+)\s*$", config, re.M)
     if not current:
-        return ["Configs/PluginKit.xcconfig no longer sets TABLEPRO_PLUGINKIT_VERSION"]
+        return ["apple/Configs/PluginKit.xcconfig no longer sets TABLEPRO_PLUGINKIT_VERSION"]
     expected = current.group(1)
 
     failures = []
@@ -220,7 +221,7 @@ def check_pluginkit_version(root: Path, docs: Path) -> list[str]:
 def check_changelog_parity(root: Path, docs: Path) -> list[str]:
     """Every release in CHANGELOG.md must appear on the changelog page.
 
-    The app's scripts/release/notes.py docs writes each stable's block from its CHANGELOG.md
+    The app's apple/scripts/release/notes.py docs writes each stable's block from its CHANGELOG.md
     section. The check stays one-way: the page may carry a version the file does not, which is
     how 0.39.0 is documented. It shipped, failed to launch with errno 163, and 0.39.1 replaced it
     the same day.

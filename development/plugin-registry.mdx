@@ -9,13 +9,13 @@ The app reads the manifest to install a driver when someone picks a database typ
 
 ## Getting a plugin into the registry
 
-Contribute it to TablePro's repository, as a target in the `RegistryPlugins` aggregate of `project.yml` and an entry in `.github/plugin-registry.json` that gives its display name. The next release publishes it: a beta tag publishes to the `beta` channel, a stable tag to `stable`. A fix to a plugin ships the same way, in the next beta or patch.
+Contribute it to TablePro's repository, as a target in the `RegistryPlugins` aggregate of `apple/project.yml` and an entry in `.github/plugin-registry.json` that gives its display name. The next release publishes it: a beta tag publishes to the `beta` channel, a stable tag to `stable`. A fix to a plugin ships the same way, in the next beta or patch.
 
 Bundled plugins ship inside the app and never appear in the manifest. The app never installs a registry copy over a bundled one.
 
 ## The manifest
 
-`https://updates.tablepro.app/plugins/v3.json`, served by GitHub Pages from the `feeds` branch that the release workflow writes through `scripts/release/registry.py`. The schema version is part of the path, so a later schema ships beside this one instead of replacing it. Within v3, changes only add fields.
+`https://updates.tablepro.app/plugins/v3.json`, served by GitHub Pages from the `feeds` branch that the release workflow writes through `apple/scripts/release/registry.py`. The schema version is part of the path, so a later schema ships beside this one instead of replacing it. Within v3, changes only add fields.
 
 ```json
 {
@@ -75,7 +75,7 @@ Plugins are sorted by `id`, and each plugin's releases by `build`, highest first
     Releases whose `minimumSystemVersion` is above the running macOS are skipped.
   </Step>
   <Step title="PluginKit">
-    `pluginKit` has to fall between `TABLEPRO_PLUGINKIT_MINIMUM_VERSION` and `TABLEPRO_PLUGINKIT_VERSION` in `Configs/PluginKit.xcconfig`.
+    `pluginKit` has to fall between `TABLEPRO_PLUGINKIT_MINIMUM_VERSION` and `TABLEPRO_PLUGINKIT_VERSION` in `apple/Configs/PluginKit.xcconfig`.
   </Step>
   <Step title="Build">
     The highest `build` left wins.
