@@ -199,6 +199,7 @@
             "pages": [
               "index",
               "installation",
+              "beta-updates",
               "quickstart",
               "switching",
               "faq",

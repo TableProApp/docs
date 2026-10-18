@@ -8,7 +8,7 @@ Three requests leave a stock install without you asking: one usage heartbeat a d
 | Channel | Goes to | On by default | Off switch |
 | --- | --- | --- | --- |
 | [Usage heartbeat](#usage-heartbeat) | `api.tablepro.app` | Yes | **Settings > General**, under Privacy |
-| [Update check](#update-checks) | `raw.githubusercontent.com` | Yes | **Settings > General**, under Software Update |
+| [Update check](#update-checks) | `updates.tablepro.app` | Yes | **Settings > General**, under Software Update |
 | [Plugin catalog](#the-plugin-catalog) | `raw.githubusercontent.com` | Yes | None |
 | [AI provider](#ai-providers) | whichever provider you add | No provider is configured on a fresh install | Delete the provider, or turn off **Enable AI Features** |
 | [iCloud sync](#icloud-sync) | your own iCloud account | No | **Settings > Sync** |
@@ -108,9 +108,9 @@ Every call is written to the local activity log with the token behind it, statem
 
 ## Update checks
 
-Sparkle fetches `https://raw.githubusercontent.com/TableProApp/TablePro/main/appcast.xml` once a day, and once for every **Check for Updates…** you press. It is a plain `GET` with no query parameters: system profiling is off, so nothing about your Mac rides along. The user agent names the app and its version, and GitHub sees your IP address as it would for any web request.
+Sparkle fetches `https://updates.tablepro.app/appcast.xml` once a day, and once for every **Check for Updates…** you press. It is a plain `GET` with no query parameters: system profiling is off, so nothing about your Mac rides along. The user agent names the app and its version, and GitHub Pages, which hosts the feed, sees your IP address as it would for any web request. **Get beta updates** sends nothing extra: the one feed lists stable releases and betas, and your Mac picks between them. Versions without **Get beta updates** fetch `https://raw.githubusercontent.com/TableProApp/TablePro/main/appcast.xml` instead.
 
-Updates download from the GitHub release named in the feed, and Sparkle checks each build's EdDSA signature against the public key inside the app before it installs anything.
+Updates download from the GitHub release named in the feed. Sparkle checks the feed's EdDSA signature, and each build's, against the public key inside the app, and refuses either one that does not match before it unpacks anything.
 
 **Automatically check for updates** in **Settings > General** is on by default. With it off, **Check for Updates…** in the same section is the only thing that reaches the feed.
 

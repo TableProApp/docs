@@ -1,0 +1,33 @@
+---
+title: Beta updates
+description: "Get each new version before it reaches everyone, and go back to stable releases"
+---
+
+Every new minor version ships as one or more betas before its stable release, such as `0.82.0-beta.1` ahead of `0.82.0`. Patch releases skip the beta and go straight to stable.
+
+## Getting betas
+
+<Steps>
+  <Step title="Turn on Get beta updates">
+    Open **Settings > General** and, under Software Update, select **Get beta updates**.
+  </Step>
+  <Step title="Check now">
+    Click **Check for Updates…**, or wait for the next daily check. The newest release wins, beta or stable.
+  </Step>
+</Steps>
+
+**TablePro > About TablePro** shows the version you run, with `-beta.N` in it while you are on a beta.
+
+## Going back to stable
+
+Deselect **Get beta updates**. The beta stays installed, because an update never moves to a lower version. The first stable release above it replaces it: on `0.82.0-beta.2`, that is `0.82.0`.
+
+To leave sooner, download the current stable from [Installation](/installation) and install it over the beta. A beta never writes connections or settings that the stable release before it cannot read.
+
+## Reporting a problem
+
+Open an issue on [GitHub](https://github.com/TableProApp/TablePro/issues) with the full version from **TablePro > About TablePro**. A beta with an open regression does not become the stable release.
+
+## For administrators
+
+The setting is the `com.TablePro.updates.receivesBetaUpdates` key, which a configuration profile can pin for a fleet. See [Managed updates](/security/managed-updates).
