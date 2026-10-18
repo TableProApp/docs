@@ -9,7 +9,7 @@ Three requests leave a stock install without you asking: one usage heartbeat a d
 | --- | --- | --- | --- |
 | [Usage heartbeat](#usage-heartbeat) | `api.tablepro.app` | Yes | **Settings > General**, under Privacy |
 | [Update check](#update-checks) | `updates.tablepro.app` | Yes | **Settings > General**, under Software Update |
-| [Plugin catalog](#the-plugin-catalog) | `raw.githubusercontent.com` | Yes | None |
+| [Plugin catalog](#the-plugin-catalog) | `updates.tablepro.app` | Yes | None |
 | [AI provider](#ai-providers) | whichever provider you add | No provider is configured on a fresh install | Delete the provider, or turn off **Enable AI Features** |
 | [iCloud sync](#icloud-sync) | your own iCloud account | No | **Settings > Sync** |
 | [MCP clients](#the-mcp-server) | nowhere: it listens on `127.0.0.1` | No | **Settings > MCP** |
@@ -118,7 +118,7 @@ Updates download from the GitHub release named in the feed. Sparkle checks the f
 
 ## The plugin catalog
 
-At launch the app fetches `https://raw.githubusercontent.com/TableProApp/plugins/main/plugins.json` when its cached copy is more than five minutes old, and again when it reconciles a plugin that a newer app version rejected. The request adds no header of its own; GitHub sees the IP address and the user agent URLSession sends. The response is cached on disk.
+At launch the app asks for `https://updates.tablepro.app/plugins/v3.json`, and its HTTP cache answers without a request while the last response is under ten minutes old. It asks the server again before it reports a plugin missing, and when it repairs a plugin that a newer app version rejected. The request adds no header of its own; GitHub Pages sees the IP address and the user agent URLSession sends. The response is cached on disk.
 
 Installing a plugin downloads its ZIP over HTTPS from the URL in that catalog and checks it against the SHA-256 the catalog declares.
 
@@ -175,7 +175,7 @@ Every path here is under `~/Library/Application Support/TablePro/` unless it say
 | `FilterState/`, `ColumnLayout/` | Per-table filters and column widths. |
 | `LastOpenConnections.json` | What to reopen for **Reopen Last Session**. |
 | `Plugins/` | Plugins you installed yourself. |
-| `Registry/registry-manifest.json`, `Registry/URLCache/` | The cached plugin catalog. |
+| `Registry/URLCache/` | The cached plugin catalog. |
 | `team_library.json` | The cached team library. |
 | `linked_sql_index.db` | File metadata for linked SQL folders. |
 | `~/Library/Preferences/com.TablePro.plist` | Settings, and the signed license blob, which carries the email on the license. |

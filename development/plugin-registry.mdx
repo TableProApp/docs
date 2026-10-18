@@ -1,157 +1,104 @@
 ---
 title: Plugin Registry
-description: Registry manifest format, binary selection, publishing, and PluginKit compatibility
+description: How registry plugins ship with each TablePro release, the v3 manifest, and how the app picks a release
 ---
 
-The official manifest is `plugins.json` in [TableProApp/plugins](https://github.com/TableProApp/plugins), and TablePro's release workflow writes it: a plugin gets there by being contributed to TablePro's own repository and tagged there. The app loads only bundles TablePro signed, so there is no other route. For what install and update look like to a user, see [Plugins](/features/plugins); to build the plugin in the first place, [Plugin Development](/development/plugin-development).
+Registry plugins ride the app's release train. One `v*` tag builds TablePro and every registry plugin, the plugin zips land on the app's GitHub release, and each plugin's version and build equal the app's. There are no plugin tags and no separate publish step. For what install and update look like to a user, see [Plugins](/features/plugins); to build the plugin in the first place, [Plugin Development](/development/plugin-development).
 
-The app fetches the manifest to install a driver when someone picks a database type with no plugin loaded, to install Parquet from the Export dialog, and to offer updates.
+The app reads the manifest to install a driver when someone picks a database type with no plugin loaded, to install an export format from the Export dialog, and to update installed registry plugins.
 
-## Manifest format
+## Getting a plugin into the registry
 
-```json
-{
-  "schemaVersion": 2,
-  "plugins": [ … ]
-}
-```
+Contribute it to TablePro's repository, as a target in the `RegistryPlugins` aggregate of `project.yml` and an entry in `.github/plugin-registry.json` that gives its display name and icon. The next release publishes it: a beta tag publishes to the `beta` channel, a stable tag to `stable`. A fix to a plugin ships the same way, in the next beta or patch.
 
-Schema version 2 is current. A manifest declaring a higher version is rejected and the app falls back to its cached copy.
+Bundled plugins ship inside the app and never appear in the manifest. The app never installs a registry copy over a bundled one.
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | string | Yes | Bundle identifier, such as `com.TablePro.OracleDriver` |
-| `name` | string | Yes | Display name |
-| `version` | string | Yes | Semantic version |
-| `summary` | string | Yes | One-line description |
-| `author` | object | Yes | `{ "name": "…", "url": "…" }`, `url` optional |
-| `homepage` | string | No | Project URL |
-| `category` | string | Yes | `database-driver`, `export-format`, `import-format`, `other`. An unknown value reads as `other` |
-| `databaseTypeIds` | [string] | No | `DatabaseType.pluginTypeId` values, which is what drives auto-install |
-| `binaries` | [object] | Yes | Per-architecture binaries |
-| `minAppVersion` | string | No | Below this the install fails before any download |
-| `iconName` | string | No | SF Symbol or bundled icon name |
-| `isVerified` | bool | No | Defaults to `false` |
-| `metadata` | object | No | Self-describing plugin metadata |
+## The manifest
 
-Each entry in `binaries`:
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `architecture` | string | Yes | `arm64` or `x86_64` |
-| `pluginKitVersion` | int | Yes for drivers | The PluginKit ABI the binary was built against |
-| `downloadURL` | string | Yes | Direct URL to the `.zip` |
-| `sha256` | string | Yes | SHA-256 hex of the ZIP |
-
-<Note>
-v1 manifests carried top-level `downloadURL`, `sha256`, and `minPluginKitVersion` in place of `binaries`. The app still decodes them, synthesizing one entry per architecture. Write new entries with `binaries`.
-</Note>
-
-## Binary selection
-
-The app filters `binaries` to the running architecture, keeps those whose `pluginKitVersion` falls inside `[minimumCompatiblePluginKitVersion, currentPluginKitVersion]`, and installs the highest. Both bounds are declared in `PluginManager.swift`. A driver binary with no `pluginKitVersion` never resolves, and the install fails with `noCompatibleBinary`.
-
-## Example entry
+`https://updates.tablepro.app/plugins/v3.json`, served by GitHub Pages from the `feeds` branch that the release workflow writes through `scripts/release/registry.py`. The schema version is part of the path, so a later schema ships beside this one instead of replacing it. Within v3, changes only add fields.
 
 ```json
 {
-  "id": "com.TablePro.OracleDriver",
-  "name": "Oracle Driver",
-  "version": "1.0.26",
-  "summary": "Oracle Database 12c+ driver via OracleNIO",
-  "author": { "name": "TablePro", "url": "https://tablepro.app" },
-  "homepage": "https://docs.tablepro.app/databases/oracle",
-  "category": "database-driver",
-  "databaseTypeIds": ["Oracle"],
-  "binaries": [
+  "schemaVersion": 3,
+  "retainFromPluginKit": 39,
+  "plugins": [
     {
-      "architecture": "arm64",
-      "pluginKitVersion": 39,
-      "downloadURL": "https://github.com/TableProApp/TablePro/releases/download/plugin-oracle-v1.0.26/OracleDriver-arm64.zip",
-      "sha256": "<sha256>"
-    },
-    {
-      "architecture": "x86_64",
-      "pluginKitVersion": 39,
-      "downloadURL": "https://github.com/TableProApp/TablePro/releases/download/plugin-oracle-v1.0.26/OracleDriver-x86_64.zip",
-      "sha256": "<sha256>"
+      "id": "com.TablePro.OracleDriver",
+      "name": "Oracle Driver",
+      "iconName": "oracle-icon",
+      "databaseTypeIds": ["Oracle"],
+      "releases": [
+        {
+          "version": "0.82.0",
+          "build": 820099,
+          "channel": "stable",
+          "pluginKit": 39,
+          "minimumSystemVersion": "13.0",
+          "url": "https://github.com/TableProApp/TablePro/releases/download/v0.82.0/OracleDriver-0.82.0.zip",
+          "sha256": "<sha256>"
+        }
+      ]
     }
-  ],
-  "minAppVersion": "0.57.0",
-  "iconName": "server.rack",
-  "isVerified": true
+  ]
 }
 ```
 
-## Plugin metadata
+Plugins are sorted by `id`, and each plugin's releases by `build`, highest first. The app refuses a document whose `schemaVersion` is not 3 and keeps the copy it already has.
 
-The optional `metadata` object makes an entry self-describing, so the app renders the connection form, sidebar, and editor for a database type before the plugin is installed. Carry it on every driver entry: without it, someone picking your database type stares at a bare form until the download finishes.
+| Plugin field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Bundle identifier |
+| `name` | string | Display name, from `.github/plugin-registry.json` |
+| `iconName` | string | SF Symbol or bundled icon name |
+| `databaseTypeIds` | [string] | The bundle's `TableProProvidesDatabaseTypeIds`. Picking one of these types installs the plugin |
+| `exportFormatIds` | [string] | Optional. The bundle's `TableProProvidesExportFormatIds`, which the Export dialog offers to install |
+| `releases` | [object] | Published builds |
 
-| Group | Fields |
-|-------|--------|
-| Identity and form | `displayName`, `iconName`, `defaultPort`, `brandColorHex`, `connectionMode`, `requiresAuthentication`, `additionalConnectionFields`, `postConnectActions`, `urlSchemes`, `fileExtensions` |
-| Capabilities | `supportsSSH`, `supportsSSL`, `supportsForeignKeys`, `supportsSchemaEditing`, `supportsDatabaseSwitching`, `supportsImport`, `supportsExport`, `supportsReadOnlyMode`, `supportsHealthMonitor`, and the rest of the flags |
-| Naming and navigation | `systemDatabaseNames`, `systemSchemaNames`, `defaultSchemaName`, `tableEntityName`, `containerEntityName`, `navigationModel`, `databaseGroupingStrategy` |
-| Editor | `editorLanguage`, `queryLanguageName`, `sqlDialect` (keywords, functions, data types, pagination style), `statementCompletions`, `explainVariants`, `columnTypesByCategory` |
+`name`, `iconName` and the ids come from the plugin's highest build, so an older release never rewrites them.
 
-`RegistryPluginMetadata` in `TablePro/Core/Plugins/Registry/RegistryModels.swift` is the full field list. `update-registry.py` copies an existing `metadata` block forward on every release, so it is edited by hand in the registry repository and never regenerated.
+| Release field | Type | Description |
+|-------|------|-------------|
+| `version` | string | The app version that built it, such as `0.82.0` or `0.83.0-beta.1` |
+| `build` | integer | The app's `CFBundleVersion` |
+| `channel` | string | `stable` or `beta` |
+| `pluginKit` | integer | The bundle's `TableProPluginKitVersion` |
+| `minimumSystemVersion` | string | The bundle's `LSMinimumSystemVersion` |
+| `url` | string | The zip on the app's GitHub release. Must be `https` |
+| `sha256` | string | SHA-256 hex of the zip, checked after the download |
 
-## Publishing a plugin
+## How the app picks a release
 
-Every plugin CI can publish has an entry in `.github/plugin-registry.json` in TablePro's repository, keyed by the slug that appears in its tag. That file maps the slug to a build target, so the mapping has no derivation rule: `mssql` builds `MSSQLDriver` and `cloudflare-d1` builds `CloudflareD1DriverPlugin`. Add the entry before the first tag, or the workflow exits with `Unknown plugin`.
+<Steps>
+  <Step title="Channel">
+    An app whose version carries `-beta.N`, and a local build, take `stable` and `beta` releases. A stable app takes `stable` only. A channel the app does not know is skipped, and the rest of the manifest still loads.
+  </Step>
+  <Step title="macOS">
+    Releases whose `minimumSystemVersion` is above the running macOS are skipped.
+  </Step>
+  <Step title="PluginKit">
+    `pluginKit` has to fall between `TABLEPRO_PLUGINKIT_MINIMUM_VERSION` and `TABLEPRO_PLUGINKIT_VERSION` in `Configs/PluginKit.xcconfig`.
+  </Step>
+  <Step title="Build">
+    The highest `build` left wins.
+  </Step>
+</Steps>
 
-```bash
-git tag -a plugin-oracle-v1.0.26 -m "plugin-oracle-v1.0.26"
-git push origin plugin-oracle-v1.0.26
-```
+When nothing is left, the install fails with **This plugin needs a newer version of TablePro. Update TablePro, then install it again.** if a release with a newer PluginKit exists, and with **No build of this plugin works with this version of TablePro.** otherwise.
 
-<Warning>
-Push plugin tags one at a time. A push carrying more than three tags creates no push events on GitHub, so no workflow fires and nothing is published.
-</Warning>
+The zip must match `sha256`, and the bundle inside must carry TablePro's Team ID in its code signature.
 
-Dispatching the workflow works too. Its `tags` input takes comma-separated `tag:pluginKitVersion` pairs, and dropping the `:` part makes the workflow read `currentPluginKitVersion` from `PluginManager.swift`:
+## Retention
 
-```bash
-gh workflow run build-plugin.yml --field "tags=plugin-oracle-v1.0.26"
-```
+`registry.py` keeps the two highest builds for each combination of channel, `pluginKit` and `minimumSystemVersion`. A beta goes once a stable with the same combination has a higher build, and a release whose `pluginKit` is below `retainFromPluginKit` goes too. A release that retention would drop on arrival is logged and not added.
 
-Either way CI builds both architectures, signs and notarizes the bundles, checks each bundle's declared PluginKit version against the release label, creates the GitHub release as a draft, checks the uploaded zips byte for byte, publishes it, re-verifies the published assets, and pushes the updated `plugins.json` to TableProApp/plugins through `.github/scripts/update-registry.py`, which writes atomically and rebases on a retry when the matrix jobs collide.
+`retainFromPluginKit` is the PluginKit version of the oldest app version that still runs on at least 1% of the Macs seen in the last 30 days. It rises through a normal pull request, and the manifest keeps the higher of its current value and the one in the tag, so a patch on an older line never lowers it.
 
-A published release is immutable, and a rebuild never matches its bytes. A run for a tag whose release is already published with other zips fails, so a new binary ships under the next patch version.
-
-Bundled plugins ride with the app release. Eight of them also have an entry in `.github/plugin-registry.json` (SQLite, ClickHouse, Redis, XLSX export, XLSX import, MQL export, SQL import, Markdown export), so a fix to one can be tagged and published to the registry. The app never installs or offers a registry update over a bundled plugin, so that build reaches only users who download its zip and install it from a file. Everyone else gets the fix with the next app release. A bulk ABI re-release skips them. The other seven have no entry and never reach `plugins.json`.
+Withdrawing a version removes its releases. The build retention kept before it comes back into selection.
 
 ## PluginKit compatibility
 
-A plugin built against any PluginKit version inside the app's `[minimum, current]` range loads, and the runtime fills newer requirements from their defaults. What that means for releases:
-
-- **Additive change** (a new requirement with a default, a new field on a non-frozen type): raise `currentPluginKitVersion` and the `TableProPluginKitVersion` of every plugin rebuilt against it, leave `minimumCompatiblePluginKitVersion` alone, and re-publish nothing. The binaries already out there keep serving, because the runtime fills a requirement they predate from its default. The bump is for the other direction: a plugin rebuilt against the new SDK references symbols an older app does not carry, and a manifest left at the old number passes that app's version check and then fails to load at all. Leaving the manifest behind is the one mistake this rule exists to stop.
-- **Breaking change** (a removed or changed requirement, a frozen-layout change, a requirement without a default): raise `currentPluginKitVersion` and `minimumCompatiblePluginKitVersion` together, then run `scripts/release-all-plugins.sh <newVersion>`. It reads the registry-only plugins out of `.github/plugin-registry.json`, bumps each one's patch version, and fires a single `workflow_dispatch` so they all build as one matrix.
-- **Retention**: `update-registry.py` keeps binaries for the three newest PluginKit versions per plugin. Older ones are pruned, and an app below every remaining binary resolves nothing at all, for every plugin.
-- **Bump the kit at most once per release cycle.** Retention counts kit versions, not days, so the window's length in wall-clock time is set by how often the number moves. Eleven bumps between 2026-09-02 and 2026-09-12 took it from 20 to 30 and left the oldest published binary at kit 21, while v0.65.0 to v0.70.0 ship kit 19 and v0.71.0 ships kit 20.
-
-To reach users who have not updated, build the plugin against the release they are on rather than against `main`:
-
-```bash
-scripts/release-plugin-for-shipped-app.sh plugin-mongodb-v1.0.45 v0.73.0
-```
-
-It reads that tag's `currentPluginKitVersion` and dispatches the workflow with `baseRef` set, so the binary links against that release's PluginKit and declares the matching `TableProPluginKitVersion`. Both have to come from the same tree. Stamping a binary built from `main` with an older number makes the older app accept it and then fail `Bundle.loadAndReturnError`.
-
-The app's own release workflow runs `scripts/check-registry-readiness.py --floor <min> --current <current>` and fails until every registry driver has a compatible binary, so the app cannot ship ahead of its plugins. When an installed driver predates a breaking bump, the app repairs it in the background on the next connect. See [After an app update](/features/plugins#after-an-app-update).
+A plugin loads when its `TableProPluginKitVersion` falls inside the app's range. An additive change raises `TABLEPRO_PLUGINKIT_VERSION`; a breaking change raises `TABLEPRO_PLUGINKIT_MINIMUM_VERSION` with it. Every release rebuilds every registry plugin against the PluginKit it ships, so neither needs a separate re-release. An installed driver that predates a breaking bump is repaired in the background. See [After an app update](/features/plugins#after-an-app-update).
 
 ## Caching
 
-The app fetches the manifest from `raw.githubusercontent.com/TableProApp/plugins/main/plugins.json`, which caches at the edge for about five minutes. Every fetch revalidates conditionally, the list refreshes at launch and when **Settings > Plugins** opens (throttled to one check per five minutes), and an install prompt forces a fresh fetch before it reports a plugin missing. CI also purges the jsDelivr cache after each registry push, for older app versions that still fetch from there. A newly published plugin shows up in the app within minutes.
-
-## Custom registry URL
-
-Point the app at a private or enterprise mirror of the manifest:
-
-```bash
-defaults write com.TablePro com.TablePro.customRegistryURL "https://your-registry.example.com/plugins.json"
-
-defaults delete com.TablePro com.TablePro.customRegistryURL
-```
-
-The custom manifest replaces the official one rather than adding to it. HTTP caching keys on the full URL, so a changed registry URL takes effect on the next fetch. A mirror can serve only bundles TablePro signed, since the app refuses every other signature. Both commands are also listed in [Settings](/customization/settings).
+GitHub Pages serves the manifest with `Cache-Control: max-age=600`. The app keeps the response in its HTTP cache on disk and decodes it at launch, so the catalog is there before any request. At launch and when **Settings > Plugins** opens, the cached response answers while it is fresh. Before an install reports a plugin missing, and when the app repairs an outdated plugin, it revalidates with the server. A new release reaches the app within about ten minutes.

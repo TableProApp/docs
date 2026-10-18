@@ -110,12 +110,3 @@ Three tabs are not in the table. Stock keyboard chords are on [Keyboard Shortcut
 ## Where settings live
 
 The file is `~/Library/Preferences/com.TablePro.plist`. **Reset All Settings to Defaults** on the General tab puts every tab back to its stock value after a confirmation, and that includes emptying the AI provider list. Saved connections, query history, and MCP tokens survive it.
-
-Two settings have no control in the window:
-
-| Setting | Command |
-|---------|---------|
-| Custom plugin registry | `defaults write com.TablePro com.TablePro.customRegistryURL <url>` |
-| Clear custom registry | `defaults delete com.TablePro com.TablePro.customRegistryURL` |
-
-See [Plugin Registry](/development/plugin-registry#custom-registry-url) for what a private registry has to serve.

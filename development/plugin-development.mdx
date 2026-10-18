@@ -15,8 +15,8 @@ A plugin is a macOS loadable bundle target with `WRAPPER_EXTENSION = tableplugin
 |-----|------|----------|---------|
 | `TableProPluginKitVersion` | integer | Yes | The PluginKit ABI the plugin was built against. Current value: 39 |
 | `TableProProvidesDatabaseTypeIds` | array of strings | Recommended | Database type IDs the plugin serves, which is what makes lazy loading possible |
-| `CFBundleShortVersionString` | string | Yes | Plugin version, read by registry update checks |
-| `TableProMinAppVersion` | string | No | The loader rejects the plugin on an older app |
+| `CFBundleShortVersionString` | string | Yes | Plugin version shown in **Settings > Plugins** |
+| `CFBundleVersion` | string | Yes | Build number. Of two copies of a plugin the higher build loads, and a registry update needs a higher build |
 
 Leave `TableProProvidesDatabaseTypeIds` out and the plugin loads eagerly at startup, blocking launch, and `PluginManager` logs a warning naming the key. With it, the app registers your metadata from `Info.plist` and loads the binary on first use.
 
