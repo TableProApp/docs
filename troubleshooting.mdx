@@ -20,7 +20,6 @@ A failure that happens on one engine only is on that engine's page, which ends w
 
 ## The app will not open
 
-- **Wrong architecture**: assets are per-architecture, `TablePro-<version>-arm64.dmg` and the `x86_64` one. Check yours under **Apple menu > About This Mac**.
 - **Too old a macOS**: 13.0 (Ventura) is the minimum.
 - **macOS refuses to open it**: the copy was damaged or stripped of its signature. Confirm with `spctl -a -vvv /Applications/TablePro.app`, then re-download or run `brew install --cask tablepro`.
 - **Opens then quits**: attach the crash report from Console.app to an issue.
