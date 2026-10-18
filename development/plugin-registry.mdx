@@ -9,7 +9,7 @@ The app reads the manifest to install a driver when someone picks a database typ
 
 ## Getting a plugin into the registry
 
-Contribute it to TablePro's repository, as a target in the `RegistryPlugins` aggregate of `project.yml` and an entry in `.github/plugin-registry.json` that gives its display name and icon. The next release publishes it: a beta tag publishes to the `beta` channel, a stable tag to `stable`. A fix to a plugin ships the same way, in the next beta or patch.
+Contribute it to TablePro's repository, as a target in the `RegistryPlugins` aggregate of `project.yml` and an entry in `.github/plugin-registry.json` that gives its display name. The next release publishes it: a beta tag publishes to the `beta` channel, a stable tag to `stable`. A fix to a plugin ships the same way, in the next beta or patch.
 
 Bundled plugins ship inside the app and never appear in the manifest. The app never installs a registry copy over a bundled one.
 
@@ -25,8 +25,8 @@ Bundled plugins ship inside the app and never appear in the manifest. The app ne
     {
       "id": "com.TablePro.OracleDriver",
       "name": "Oracle Driver",
-      "iconName": "oracle-icon",
       "databaseTypeIds": ["Oracle"],
+      "exportFormatIds": [],
       "releases": [
         {
           "version": "0.82.0",
@@ -49,11 +49,11 @@ Plugins are sorted by `id`, and each plugin's releases by `build`, highest first
 |-------|------|-------------|
 | `id` | string | Bundle identifier |
 | `name` | string | Display name, from `.github/plugin-registry.json` |
-| `iconName` | string | SF Symbol or bundled icon name |
 | `databaseTypeIds` | [string] | The bundle's `TableProProvidesDatabaseTypeIds`. Picking one of these types installs the plugin |
+| `exportFormatIds` | [string] | The bundle's `TableProProvidesExportFormatIds`. The Export dialog offers to install each of these formats |
 | `releases` | [object] | Published builds |
 
-`name`, `iconName` and `databaseTypeIds` come from the plugin's highest build, so an older release never rewrites them.
+`name`, `databaseTypeIds` and `exportFormatIds` come from the plugin's highest build, so an older release never rewrites them.
 
 | Release field | Type | Description |
 |-------|------|-------------|
