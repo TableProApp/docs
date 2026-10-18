@@ -40,7 +40,7 @@ Run the three scripts against an app checkout at the `main` the change describes
 
 - **A change that documents an app change** opens as a draft pull request whose description names the app pull request (`TableProApp/TablePro#1234`). CI checks against the app's `main`, so it goes green once the app pull request merges; mark it ready then.
 - **The daily run** catches an app change that broke a claim here. Fix the page, not the check.
-- **Releases.** The `release` skill in the app repository pushes the version's `<Update>` block in `changelog.mdx` straight to `main`. Every version in the app's `CHANGELOG.md` must be on that page.
+- **Releases.** For each stable release, the app's `release` skill opens a `docs(changelog): vX.Y.Z` pull request whose `<Update>` block in `changelog.mdx` is written by the app's `scripts/release/notes.py docs`, and merges it once the release is published. Every version in the app's `CHANGELOG.md` must be on that page.
 
 ## Writing style
 

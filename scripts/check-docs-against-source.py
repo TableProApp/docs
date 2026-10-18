@@ -220,14 +220,10 @@ def check_pluginkit_version(root: Path, docs: Path) -> list[str]:
 def check_changelog_parity(root: Path, docs: Path) -> list[str]:
     """Every release in CHANGELOG.md must appear on the changelog page.
 
-    The two are not copies of each other and must not be generated from one another:
-    0.67.0 is 201 terse entries in CHANGELOG.md and 113 merged, longer ones on the
-    page, because the page is edited for readers and the file is edited for the
-    release notes. What they must agree on is which versions exist.
-
-    The check is deliberately one-way. The page may carry a version the file does not,
-    which is how 0.39.0 is documented: it was tagged and shipped, failed to launch with
-    errno 163, and 0.39.1 replaced it the same day.
+    The app's scripts/release/notes.py docs writes each stable's block from its CHANGELOG.md
+    section. The check stays one-way: the page may carry a version the file does not, which is
+    how 0.39.0 is documented. It shipped, failed to launch with errno 163, and 0.39.1 replaced it
+    the same day.
     """
     shipped = set(
         re.findall(r"^## \[([0-9][^\]]*)\]", (root / "CHANGELOG.md").read_text(), re.M)
