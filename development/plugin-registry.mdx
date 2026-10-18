@@ -51,10 +51,9 @@ Plugins are sorted by `id`, and each plugin's releases by `build`, highest first
 | `name` | string | Display name, from `.github/plugin-registry.json` |
 | `iconName` | string | SF Symbol or bundled icon name |
 | `databaseTypeIds` | [string] | The bundle's `TableProProvidesDatabaseTypeIds`. Picking one of these types installs the plugin |
-| `exportFormatIds` | [string] | Optional. The bundle's `TableProProvidesExportFormatIds`, which the Export dialog offers to install |
 | `releases` | [object] | Published builds |
 
-`name`, `iconName` and the ids come from the plugin's highest build, so an older release never rewrites them.
+`name`, `iconName` and `databaseTypeIds` come from the plugin's highest build, so an older release never rewrites them.
 
 | Release field | Type | Description |
 |-------|------|-------------|
