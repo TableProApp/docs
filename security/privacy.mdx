@@ -36,6 +36,8 @@ The JSON body holds these fields and no others:
 | `update_install_mode` | how updates install: `automatic`, `notify`, or `off` |
 | `update_check_interval` | seconds between update checks, absent when checks are off |
 
+The **Get beta updates** switch is not in the body. A beta build shows only in `app_version`, which then reads like `0.82.0-beta.1`.
+
 No query text. No hostnames, ports, database names, or usernames. No email address, no file paths, no connection names.
 
 An `X-Signature` header carries an HMAC-SHA256 of the body. It proves the payload arrived unaltered; it is not encryption, and it carries nothing about you.
