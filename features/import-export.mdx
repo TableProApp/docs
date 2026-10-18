@@ -208,7 +208,7 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
     Column widths come from the header and the first 200 rows, so a wide value later in a long table is written whole rather than widening every row before it. A pipe or a line break inside a value is neutralised: both would end the cell early.
   </Tab>
   <Tab title="Parquet">
-    Choose **Install Parquet…** at the end of the format menu the first time. The plugin downloads, then Parquet is selected. It carries its own copy of DuckDB, which does the encoding, and is too large to ship in the app.
+    Choose **Install Parquet Export…** at the end of the format menu the first time. The item appears once the plugin registry has loaded, which needs a network connection on a fresh install. The plugin downloads, then Parquet is selected. It carries its own copy of DuckDB, which does the encoding, and is too large to ship in the app.
 
     | Option | Default |
     |--------|---------|
