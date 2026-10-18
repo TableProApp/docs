@@ -62,27 +62,26 @@ A registry plugin installs where you need it:
 - A `.duckdb` file opened from Finder, which asks for the DuckDB driver.
 - **Install Parquet…** at the end of the format menu in the Export dialog. Parquet is selected once the download finishes.
 
-On a Mac with no network, install from a file: drag a `.tableplugin` or `.zip` onto **Settings > Plugins**, or click the **+** button there. User-installed plugins live in `~/Library/Application Support/TablePro/Plugins`.
+On a Mac with no network, install from a file: drag a `.tableplugin` or `.zip` onto **Settings > Plugins**, or click the **+** button there. A file for a plugin that is already loaded replaces it the next time TablePro starts. User-installed plugins live in `~/Library/Application Support/TablePro/Plugins`.
 
 Every plugin is verified before it loads. A registry download must match the SHA-256 checksum in the registry manifest, and the bundle must be signed by TablePro. A bundle signed by anyone else, ad-hoc signed or unsigned is refused, with no override.
 
 ## Updates
 
-The Plugins settings tab carries a badge counting pending updates and plugins that failed to load. Select a plugin in **Settings > Plugins** to see its installed version, then click **Update**.
+Registry plugins follow the app. After a TablePro update, each plugin installed from the registry with an older build than the app is fetched again at launch:
 
-If a driver has open connections, the update is staged instead of applied. The staged version activates when the last connection using the driver closes, or click **Activate Now** after closing them. Quit before it activates and the update is offered again on next launch.
+- A plugin that is not loaded, such as one rejected after the update, installs and loads at once.
+- A plugin that is loaded downloads in the background and replaces the old one the next time TablePro starts. Its row in **Settings > Plugins** reads "Updates when TablePro restarts" until then.
 
-## After an app update
+If the registry has no newer build yet, the check runs again after 30 seconds, 5 minutes, then every 10 minutes, five tries in all. Connecting to a database whose plugin is outdated checks again first. Bundled plugins update with the app, and a plugin installed from a file never updates from the registry.
 
-An app update can raise the plugin interface version. Plugins built against the old version are rejected at load instead of crashing, and TablePro repairs them itself: at launch it reinstalls a compatible build of each outdated plugin, retrying in the background if the registry is unreachable. Connecting to a database whose plugin is outdated updates that plugin first.
-
-Until a plugin is repaired, it appears in a banner in **Settings > Plugins** with the reason and an action:
+An app update can raise the plugin interface version. A plugin built for an older one is rejected at load instead of crashing, and stays in a banner in **Settings > Plugins** with the reason and an action until it is repaired:
 
 | Action | Meaning |
 |--------|---------|
 | **Update Now** | A compatible build is in the registry. One click installs it. |
 | **Update TablePro** | The plugin requires a newer app version. |
-| No button | No compatible build is published yet. TablePro retries automatically. |
+| No button | No compatible build is published yet. The update check keeps trying. |
 | **Remove** | Deletes the rejected plugin from disk. |
 
 ## Managing plugins

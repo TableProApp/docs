@@ -97,7 +97,7 @@ Withdrawing a version removes its releases. The build retention kept before it c
 
 ## PluginKit compatibility
 
-A plugin loads when its `TableProPluginKitVersion` falls inside the app's range. An additive change raises `TABLEPRO_PLUGINKIT_VERSION`; a breaking change raises `TABLEPRO_PLUGINKIT_MINIMUM_VERSION` with it. Every release rebuilds every registry plugin against the PluginKit it ships, so neither needs a separate re-release. An installed driver that predates a breaking bump is repaired in the background. See [After an app update](/features/plugins#after-an-app-update).
+A plugin loads when its `TableProPluginKitVersion` falls inside the app's range. An additive change raises `TABLEPRO_PLUGINKIT_VERSION`; a breaking change raises `TABLEPRO_PLUGINKIT_MINIMUM_VERSION` with it. Every release rebuilds every registry plugin against the PluginKit it ships, so neither needs a separate re-release. An installed driver that predates a breaking bump is repaired in the background. See [Updates](/features/plugins#updates).
 
 ## Caching
 
