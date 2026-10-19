@@ -29,7 +29,7 @@ Expand a schema and **Procedures**, **Functions**, and **Triggers** sit beside *
 | Redshift, CockroachDB, PGlite, SAP HANA | No | No | No |
 | MongoDB, Redis, Elasticsearch, Typesense, DynamoDB, etcd, SurrealDB, Trino, Beancount, Spanner, Firestore, Firebase Realtime Database, Bigtable | No | No | No |
 
-A section appears only where the engine has that kind of object. An engine that has them and currently holds none keeps the section and shows **No items** inside it, so a database with no tables still lists its procedures and functions. A section whose list is still on its way shows **Loading…**, and one the server refused shows the error in place of its rows.
+A section appears only when the schema holds at least one object of that kind, so a database with no tables still lists its procedures and functions, and one with no triggers shows no Triggers section. A schema that holds nothing shows **No items**, or **Loading…** while its lists are on their way. A list the server refused keeps its section and shows the error in place of its rows.
 
 ## Finding a routine or trigger
 
