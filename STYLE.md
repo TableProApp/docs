@@ -162,10 +162,9 @@ normal reader should pick and who should pick differently. Exhaustiveness is not
 
 ### Headings
 
-Sentence case. Capitals only for acronyms, names with an interior capital (`MySQL`, `PGlite`), and
-headings that are literally a control or menu item in the app. `scripts/proper-nouns.txt` holds
-the product names whose second word is an ordinary English word: Google **Cloud** SQL, DynamoDB
-**Local**.
+Sentence case. Capitals only for acronyms, names with an interior capital (`MySQL`, `PGlite`),
+product names (Google Cloud SQL, DynamoDB Local), and headings that are literally a control or
+menu item in the app.
 
 Stop at H3; Mintlify's table of contents ignores H4. Never write an H1, the frontmatter `title` is
 the H1. Never `## Features`: it fitted 17 pages, so it is not a heading.
@@ -291,7 +290,7 @@ it.** If linking reads badly, the sentence is wrong, not the rule.
 Every count contradiction this corpus has shipped came from one fact typed on two pages: the driver
 count, the database count, the AI provider count, the Settings tab count, the PluginKit ABI version.
 
-Three claims rot faster than anything else and are checked in CI against the source that defines
+Three claims rot faster than anything else and are checked nightly against the source that defines
 them: menu paths, keyboard shortcuts, and the PluginKit ABI. All three were wrong at once in
 August 2026.
 
@@ -332,9 +331,9 @@ Every `<Frame>` holds either zero images or a light and dark pair at identical d
 ## 11. Before you open the pull request
 
 ```bash
-cd docs
-bash scripts/check-writing-style.sh
-python3 scripts/check-docs-against-source.py
+bash scripts/check-writing-style.sh ../TablePro
+python3 scripts/check-docs-against-source.py --app ../TablePro
+python3 scripts/check-links.py --app ../TablePro
 mint validate
 mint broken-links --check-anchors --check-redirects
 mint a11y

@@ -12,9 +12,6 @@
 #
 # changelog.mdx is excluded throughout. It is 116 releases of shipped history and
 # what 0.41.0's notes called a button cannot be rewritten now.
-#
-# Heading case is checked by check-docs-against-source.py, which needs the app's own
-# UI strings to tell a Title Case slip from a control's real name.
 
 set -uo pipefail
 

@@ -1,0 +1,81 @@
+name: Source check
+
+# Not on pull requests: it reads the app's main, so an app change turned unrelated docs pull requests red.
+on:
+  schedule:
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+# Queued, not canceled: two runs at once could each open an issue.
+concurrency:
+  group: source-check
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  source-check:
+    name: Check docs against the app source
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: docs
+          persist-credentials: false
+
+      - name: Check out the app
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: TableProApp/TablePro
+          ref: main
+          path: app
+          persist-credentials: false
+
+      - name: Check docs against the source
+        id: check
+        working-directory: docs
+        run: |
+          echo "app-sha=$(git -C ../app rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          set +e
+          python3 scripts/check-docs-against-source.py --app ../app > "$RUNNER_TEMP/output.txt" 2>&1
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          cat "$RUNNER_TEMP/output.txt"
+
+      - name: Open, update or close the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS: ${{ steps.check.outputs.status }}
+          APP_SHA: ${{ steps.check.outputs.app-sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TITLE: Docs contradict the app source
+        run: |
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --limit 100 \
+            --json number,title --jq 'map(select(.title == env.TITLE)) | first | .number // empty')
+
+          if [ "$STATUS" = 0 ]; then
+            if [ -n "$number" ]; then
+              gh issue close "$number" --repo "$GITHUB_REPOSITORY" \
+                --comment "Passes against TableProApp/TablePro@$APP_SHA: $RUN_URL"
+            fi
+            exit 0
+          fi
+
+          body="$RUNNER_TEMP/body.md"
+          {
+            echo "\`scripts/check-docs-against-source.py\` fails against TableProApp/TablePro@$APP_SHA: $RUN_URL"
+            echo
+            echo '```text'
+            head -n 300 "$RUNNER_TEMP/output.txt"
+            echo '```'
+            echo
+            echo 'Fix the page, or the check when the app moved a file it reads. The next passing run closes this issue.'
+          } > "$body"
+
+          if [ -n "$number" ]; then
+            gh issue edit "$number" --repo "$GITHUB_REPOSITORY" --body-file "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file "$body"
+          fi

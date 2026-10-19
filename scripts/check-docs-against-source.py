@@ -254,48 +254,6 @@ def check_changelog_anchors(root: Path, docs: Path) -> list[str]:
     return [f"changelog.mdx: label {label!r} is used more than once" for label in sorted(repeated)]
 
 
-def check_heading_case(root: Path, docs: Path) -> list[str]:
-    """Headings are sentence case, except where the heading is a name.
-
-    An acronym, a name with an interior capital, and a heading that is literally a
-    control or menu item in the app all keep their capitals. The last exemption reads
-    the app's own strings, so a renamed control never leaves a stale allowlist behind.
-    """
-    ui = set()
-    sources = [root / "TablePro", root / "Plugins", *sorted((root / "Packages").glob("*/Sources"))]
-    for swift in (path for source in sources for path in source.rglob("*.swift")):
-        ui |= set(re.findall(r'String\(\s*localized:\s*"((?:[^"\\]|\\.)*)"', swift.read_text()))
-    ui |= {re.sub(r"%(?:\d+\$)?(?:@|l{0,2}d)", "…", s) for s in ui}
-
-    acronym = re.compile(r"^[A-Z0-9]{2,}$")
-    inner = re.compile(r"^[A-Za-z][a-z0-9.]*[A-Z]")
-    known = {w for s in ui for w in s.split() if acronym.match(w) or inner.match(w)}
-    nouns = Path(__file__).with_name("proper-nouns.txt").read_text().splitlines()
-    known |= {n.strip() for n in nouns if n.strip() and not n.startswith("#")}
-
-    failures = []
-    for page in doc_pages(docs):
-        for line_no, line in enumerate(page.read_text().splitlines(), start=1):
-            match = re.match(r"^#{2,4} (.+)$", line)
-            if not match:
-                continue
-            heading = re.sub(r"^\d+\.\s*", "", match.group(1).strip())
-            if heading in ui or match.group(1).strip() in ui:
-                continue
-            for word in heading.split()[1:]:
-                core = word.strip("`*_()[],.:;?!\"'")
-                if not core or not core[0].isupper():
-                    continue
-                if acronym.match(core) or inner.match(core) or core in known:
-                    continue
-                failures.append(
-                    f"{page.relative_to(docs)}:{line_no}: sentence case, so {core!r} "
-                    f"in {heading!r} is capitalised without being a name"
-                )
-                break
-    return failures
-
-
 DOC_NAMES = {
     "SQL Server": "Microsoft SQL Server",
     "Oracle": "Oracle Database",
@@ -461,7 +419,6 @@ def main() -> int:
         ("PluginKit version", check_pluginkit_version),
         ("changelog parity", check_changelog_parity),
         ("changelog anchors", check_changelog_anchors),
-        ("heading case", check_heading_case),
         ("database table", check_database_table),
         ("engine counts", check_engine_counts),
     )

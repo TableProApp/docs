@@ -11,7 +11,7 @@ Claude Code loads this file through `CLAUDE.md`; Codex loads it directly.
 - `snippets/`: a fact two pages share lives here once. See `STYLE.md` 9.
 - `images/`: screenshots, each a light and dark pair.
 - `consent.js`: Mintlify loads every `.js` file in the repository on every page. Add no other.
-- `scripts/`: the three checks CI runs, `make-placeholder.py` for a shot not taken yet, `proper-nouns.txt` for the heading-case check.
+- `scripts/`: the three checks CI runs, `make-placeholder.py` for a shot not taken yet.
 - `STYLE.md`: the spec for every page.
 
 ## Commands
@@ -25,7 +25,7 @@ bash scripts/check-writing-style.sh ../TablePro                # house style; ba
 python3 scripts/check-links.py --app ../TablePro               # links, navigation, and the app's links into this site
 ```
 
-Run the three scripts against an app checkout at the `main` the change describes. CI checks out the app's `main`.
+Run the three scripts against an app checkout at the `main` the change describes. CI checks out the app's `main`: pull requests run all but `check-docs-against-source.py`, which runs nightly.
 
 ## Writing a page
 
@@ -38,8 +38,8 @@ Run the three scripts against an app checkout at the `main` the change describes
 
 ## Working with the app repository
 
-- **A change that documents an app change** opens as a draft pull request whose description names the app pull request (`TableProApp/TablePro#1234`). CI checks against the app's `main`, so it goes green once the app pull request merges; mark it ready then.
-- **The daily run** catches an app change that broke a claim here. Fix the page, not the check.
+- **A change that documents an app change** opens as a draft pull request whose description names the app pull request (`TableProApp/TablePro#1234`). Mark it ready once the app pull request merges.
+- **The nightly source check** runs `check-docs-against-source.py` against the app's `main` and opens or updates one issue, "Docs contradict the app source", while it fails. Fix the page, or the check when the app moved a file it reads. The next passing run closes the issue.
 - **Releases.** For each stable release, the app's `release` skill opens a `docs(changelog): vX.Y.Z` pull request whose `<Update>` block in `changelog.mdx` is written by the app's `apple/scripts/release/notes.py docs`, and merges it once the release is published. Every version in the app's `apple/CHANGELOG.md` must be on that page.
 
 ## Writing style

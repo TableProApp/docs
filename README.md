@@ -13,16 +13,17 @@ Preview at `http://localhost:3000`.
 
 ## Checks
 
-CI runs these on every pull request, on every push to `main`, and daily against the app's `main`. The scripts read the app source, so they take a checkout of it:
+CI runs these on every pull request and every push to `main`. The scripts read the app source, so they take a checkout of it:
 
 ```bash
 npm run validate
 npm run broken-links
 npm run a11y
-python3 scripts/check-docs-against-source.py --app ../TablePro
 bash scripts/check-writing-style.sh ../TablePro
 python3 scripts/check-links.py --app ../TablePro
 ```
+
+`python3 scripts/check-docs-against-source.py --app ../TablePro` runs nightly against the app's `main` instead, and reports a failure as an issue here.
 
 ## Contributing
 

@@ -6,10 +6,6 @@ on:
   pull_request:
   push:
     branches: [main]
-  # The app repository does not run these checks, so an app change that contradicts a page is
-  # caught here, against the app's main, within a day.
-  schedule:
-    - cron: '17 6 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -59,12 +55,6 @@ jobs:
       - name: Check accessibility
         working-directory: docs
         run: npm run a11y
-
-      # The three claims that rot fastest, each checked against the source that
-      # defines it. All three were wrong at once in August 2026.
-      - name: Check docs against the source
-        working-directory: docs
-        run: python3 scripts/check-docs-against-source.py --app ../app
 
       - name: Check writing style
         working-directory: docs
