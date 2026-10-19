@@ -189,7 +189,9 @@ Switch between **Data**, **Structure**, **JSON**, **Chart**, **Map**, and **Outp
 
 Pick a bar, line, area, or scatter chart, then a numeric Y column. X takes row numbers, another numeric column, a date or timestamp column, or a categorical column; an optional text, boolean, enum, or set column splits the result into series. Date and timestamp columns plot on a real time axis, whatever order the rows arrive in. Hover the plot for exact values.
 
-A chart draws the loaded rows, up to 2,000 points, 20 series, and 50,000 inspected rows, and the toolbar says when it hit one: "Showing the first 2,000 points of 8,431 loaded rows". Null, binary, and unrepresentable axis values are skipped and counted. Grid selection, Find, hidden columns, and value filters do not narrow a chart, and the page controls and **Fetch All** stay in the status bar. Chart type and axes belong to the tab and follow the column names, so they survive a page turn, a sort, and a re-run.
+**Facet** takes another text, boolean, enum, or set column and draws one chart per value, in a grid with one legend under it. The panels share their Y axis and their X axis, except for row numbers, which each panel counts on its own. Panels follow the order the rows name their values, so `ORDER BY` sets it, and NULL gets a panel titled "No value". A series keeps its color, symbol, and dash in every panel, and a re-sort or a page turn does not change them.
+
+A chart draws the loaded rows, up to 2,000 points, 20 series, 12 facets, and 50,000 inspected rows, and the toolbar says when it hit one: "Showing the first 2,000 points of 8,431 loaded rows". Null, binary, and unrepresentable axis values are skipped and counted. Grid selection, Find, hidden columns, and value filters do not narrow a chart, and the page controls and **Fetch All** stay in the status bar. Chart type and axes belong to the tab and follow the column names, so they survive a page turn, a sort, and a re-run.
 
 ### Map mode
 
