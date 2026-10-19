@@ -235,7 +235,7 @@ These read and drive the TablePro app itself, and none of them bypasses the conn
 | `open_table_tab` | `connection_id`, `table_name` (`database_name`, `schema_name`) | `status` (`opened`), `connection_id`, `table_name`, `tab_id`, `window_id` |
 | `search_query_history` | `query` (`connection_id`, `limit`, `since`, `until`) | `entries[]` carrying `id`, `query`, the connection and database it ran on, `source`, `statement_type`, `executed_at`, `execution_time_ms`, `row_count`, `was_successful` and `error_message`, newest first |
 
-Starred tables are a good hint at what matters in a database. `list_recent_tabs` covers every readable connection when `connection_id` is omitted, its `limit` runs 1 to 500, default 20, and `tab_type` is one of `query`, `table`, `createTable`, `erDiagram`, `serverDashboard`, `insights`, `usersRoles`.
+Starred tables are a good hint at what matters in a database. `list_recent_tabs` covers every readable connection when `connection_id` is omitted, its `limit` runs 1 to 500, default 20, and `tab_type` is one of `query`, `table`, `createTable`, `erDiagram`, `serverDashboard`, `insights`, `usersRoles`, `objectSource`, `versionHistory`, `tableListing`.
 
 `open_connection_window` and `open_table_tab` connect first if they have to, and return once the window has a tab or fail after 8 seconds. `open_table_tab` without `database_name` or `schema_name` means the ones the connection is on, and its `tab_id` is that table's tab, never a table of the same name elsewhere.
 
