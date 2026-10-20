@@ -81,9 +81,17 @@ SELECT u.| FROM users u  -- Columns from users via alias
 SELECT * FROM users WHERE |  -- Ctrl+Space for columns from users
 ```
 
+ORDER BY offers the SELECT list's aliases ahead of the table columns:
+
+```sql
+SELECT price * qty AS line_total FROM items ORDER BY li|  -- line_total
+```
+
+`SET` and an `INSERT` column list offer the columns of the table the statement writes, never those of a table its FROM or SELECT reads, also inside a `WITH` body.
+
 ## Aliases, subqueries and CTEs
 
-An alias followed by `.` gives that table's columns. A derived table or a `WITH` table gives the columns its own SELECT list produces:
+An alias followed by `.` gives that table's columns. A derived table or a `WITH` table gives the columns its own query produces:
 
 ```sql
 SELECT ahs.|  -- country, avg_score
@@ -100,7 +108,16 @@ WITH totals AS (
 SELECT t.| FROM totals t  -- region, total
 ```
 
-`AS name`, bare names and qualified `t.col` all resolve. A `SELECT *` subquery and an unaliased `AVG(score)` have no name to offer, so they are skipped.
+`AS name`, an alias without `AS` such as `COUNT(*) total`, bare names and qualified `t.col` all resolve. A column list, `WITH totals (region, amount) AS` or `AS t(id, name)`, renames the columns in order. `*` and `t.*` give the table's columns from the schema. An unaliased `AVG(score)` has no name to offer, so it is skipped.
+
+A `WITH` table may be `MATERIALIZED`, a `VALUES` list, or an `INSERT`, `UPDATE`, `DELETE` or `MERGE` that ends in `RETURNING`. It gives the columns it returns. `RETURNING *` gives the changed table's columns, plus those of a table joined through FROM or USING:
+
+```sql
+WITH moved AS (
+    DELETE FROM queue WHERE done RETURNING id, payload
+)
+SELECT m.| FROM moved m  -- id, payload
+```
 
 ## Functions and operators
 
