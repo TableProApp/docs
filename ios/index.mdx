@@ -119,7 +119,7 @@ Tap a row to open it full screen, page between rows, edit values, toggle one to 
 
 A new row starts with every column on **DEFAULT**, which leaves that column out of the `INSERT` so the database fills it in. The badge beside a field switches it between **DEFAULT**, **NULL** and a typed value, and **NULL** is offered on nullable columns only. Generated columns are never written, and an auto-increment key stays on **DEFAULT** until you type one.
 
-A save, insert, delete, truncate or drop runs inside a read-write transaction. MySQL, MariaDB, PostgreSQL, Redshift, Oracle and SQLite report what their session is already holding, and a write there runs inside that rather than under a transaction of its own, so the rows wait for whoever opened it. A server that starts its sessions read-only is a different problem: see [Server read-only is not Safe Mode](/features/safe-mode#server-read-only-is-not-safe-mode). SQL typed into the Query section is yours and goes out as written.
+A save, insert, delete, truncate or drop runs inside a read-write transaction. MySQL, MariaDB, TiDB, PostgreSQL, Redshift, Oracle and SQLite report what their session is already holding, and a write there runs inside that rather than under a transaction of its own, so the rows wait for whoever opened it. A server that starts its sessions read-only is a different problem: see [Server read-only is not Safe Mode](/features/safe-mode#server-read-only-is-not-safe-mode). SQL typed into the Query section is yours and goes out as written.
 
 ### Querying
 
@@ -128,6 +128,29 @@ A save, insert, delete, truncate or drop runs inside a read-write transaction. M
 **Stop** cancels the running statement and starts no other. On MySQL and Redis the statement keeps running on the server until it finishes. Results copy or export as JSON, CSV, or SQL `INSERT`.
 
 A running query appears in a Live Activity on the lock screen and Dynamic Island, with the elapsed time and the row count so far. **Settings > Live Activities > Hide Query** replaces the SQL text there with "Running query". The card clears when the query ends. Quitting the app mid-query leaves it behind, marked interrupted, until the next launch clears it.
+
+### Open transactions
+
+After `BEGIN` in **Query**, a bar sits at the bottom of every section until the transaction ends, by its buttons or by a typed `COMMIT` or `ROLLBACK`. On a MySQL or MariaDB server with autocommit off, opening a table is enough to start one. The bar names the database, or the connection on an engine with one database, and the connection list marks the row with an hourglass. Where their titles do not fit, **Roll Back** and **Commit** show as an arrow and a checkmark.
+
+<Frame caption="The mark stays on the list after you leave the connection">
+  <img className="block dark:hidden" src="/images/ios-transaction-bar.png" alt="Orders table with a Transaction Open bar above the tab bar, beside the connection list with an hourglass on the Shop connection" />
+  <img className="hidden dark:block" src="/images/ios-transaction-bar-dark.png" alt="Orders table with a Transaction Open bar above the tab bar, beside the connection list with an hourglass on the Shop connection" />
+</Frame>
+
+**Roll Back** asks first at every [safe mode](/features/safe-mode) level. **Commit** follows the level:
+
+| Safe Mode | Commit |
+| --- | --- |
+| **Off** | Commits at once |
+| **Confirm Writes** | Asks first |
+| **Read-Only** | Hidden |
+
+**Transaction Failed** means a PostgreSQL statement inside it failed, and the server keeps none of it. Only **Roll Back** is offered, and a typed `COMMIT` rolls it back as well.
+
+The bar shows on PostgreSQL, Redshift, MySQL, MariaDB, TiDB, SQLite and Oracle. DuckDB, SQL Server and OceanBase do not report their session state, so an open transaction there shows nothing.
+
+A connection that drops with a transaction open reconnects and says the server rolled the transaction back. One that drops during **Commit** never got the answer: check which changes were saved before running them again. Switching database on PostgreSQL or Redshift with a transaction open asks first, since the switch rolls it back.
 
 ## What is missing
 
