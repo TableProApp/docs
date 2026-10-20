@@ -25,10 +25,10 @@ The bar along the bottom carries **Test Connection**, **Cancel** and **Save**, p
 |-------|-------------|
 | **Name** | Display name in the connection list |
 | **Type** | The database type. **Change…** retypes the connection and resets the fields the old type owned |
-| **Connect Using** | MySQL and MariaDB. **Host and Port**, or **Socket** for a server on this Mac. See [Unix socket](/databases/mysql#unix-socket) |
+| **Connect Using** | MySQL, MariaDB, and PostgreSQL. **Host and Port**, or **Socket** for a server on this Mac. See Unix socket for [MySQL](/databases/mysql#unix-socket) and [PostgreSQL](/databases/postgresql#unix-socket) |
 | **Host** | Empty falls back to the driver's own default, usually `localhost` |
 | **Port** | Pre-filled from the database type |
-| **Socket** | Replaces Host and Port when **Connect Using** is **Socket**. The full path of the server's socket file, such as `/tmp/mysql.sock` |
+| **Socket** | Replaces Host when **Connect Using** is **Socket**. MySQL and MariaDB take the socket file, such as `/tmp/mysql.sock`, and drop Port. PostgreSQL takes the folder, such as `/tmp`, and keeps Port, which names the file |
 | **Database** | Optional on drivers that browse every database from one session. PostgreSQL and Redshift do not connect without one |
 | **Username** | Not pre-filled. Empty means the driver's own default |
 | **Password** | Stored in the macOS Keychain |
@@ -53,7 +53,7 @@ SQLite, DuckDB, libSQL, and Beancount replace the host fields with a file path. 
 
 Leave it on **Direct** unless the database is unreachable from this Mac. Switching to another transport keeps what you typed into the previous one, so switching back costs nothing.
 
-A connection set to **Socket** on General offers only **Direct**, since a tunnel cannot reach a socket file on this Mac.
+A connection set to **Socket** on General offers only **Direct**, since a tunnel cannot reach a socket file on this Mac. A PostgreSQL socket also has no SSL settings.
 
 **Socket Path**, under **SSH Tunnel**, forwards to a unix socket instead of Host and Port, which are then unused. See [Forwarding to a unix socket](/connections/ssh-tunneling#forwarding-to-a-unix-socket).
 

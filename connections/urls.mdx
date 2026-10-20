@@ -116,6 +116,7 @@ Names are matched case-insensitively. Anything unrecognized is ignored, except o
 | `statusColor` | Connection color as hex, matched to the nearest palette color | `?statusColor=FF3B30` |
 | `env` | Assign an existing tag by name. `environment` is accepted too | `?env=production` |
 | `socket` | MySQL and MariaDB. Socket file path, in place of host and port. Alias `unix_socket`. See [Unix socket](#unix-socket) | `?socket=%2Ftmp%2Fmysql.sock` |
+| `host`, `port` | PostgreSQL. Override the URL's own host and port. A host starting with `/` is the socket folder. See [PostgreSQL socket](#postgresql-socket) | `?host=/var/run/postgresql` |
 
 ### Unix socket
 
@@ -132,6 +133,22 @@ mariadb://root@/shop?socket=(/tmp/mysql.sock)
 - A path with a control or invisible character refuses the URL.
 - Other engines and `+ssh` URLs ignore `socket`.
 - **Copy Connection String** writes this form, with no port.
+
+### PostgreSQL socket
+
+```text
+postgresql://user@localhost:5433/shop?host=/var/run/postgresql
+postgresql:///shop?host=%2Ftmp&port=5433
+postgresql://%2Ftmp:5433/shop
+```
+
+- A host starting with `/` is the folder holding the socket, as in `psql`. Write it in `host=`, or percent-encoded in place of the host.
+- `host=` and `port=` win over the host and port before the path.
+- The port picks the socket file, `.s.PGSQL.5433` for `5433`. A host naming that file sets the port from its name.
+- Only `%` escapes decode: `+` stays a `+`.
+- A folder with a comma, a control or invisible character, or a socket file path over 103 bytes refuses the URL.
+- `socket` is not read: it is MySQL's name.
+- **Copy Connection String** writes the first form, with the port when it is not `5432`.
 
 ### SSL/TLS
 
@@ -237,7 +254,7 @@ When another client also handles the scheme, `open -b com.TablePro "mysql://…"
 
 Every URL opened from outside the app raises an **Open External Database Connection?** alert naming the database type, host and port or socket, user, and database. **Connect** does not answer the Return key. Escape is the only keyboard answer, and it cancels.
 
-**Always Allow** appears only for a database on this machine (`localhost`, `127.x.x.x`, `::1`, or a socket). A trusted link is matched on database type, host, socket, database, username, and the URL's `name` parameter, never the port, so the same link on a different port still connects without asking again. Trusting `localhost` does not cover a socket link. Trusting one socket does not cover another. Remote hosts always prompt, and so does a link through an SSH tunnel, whose database is on the SSH server.
+**Always Allow** appears only for a database on this machine (`localhost`, `127.x.x.x`, `::1`, or a socket). A trusted link is matched on database type, host, socket, database, username, and the URL's `name` parameter, never the port, so the same link on a different port still connects without asking again. Trusting `localhost` does not cover a socket link. Trusting one socket does not cover another, and a PostgreSQL socket on another port is another socket. Remote hosts always prompt, and so does a link through an SSH tunnel, whose database is on the SSH server.
 
 A link with a [filter](#filtering) asks every time and offers no **Always Allow**. Read the filter in the box under the target before choosing **Connect**: it runs on the table as soon as the connection opens.
 

@@ -11,9 +11,11 @@ Unlike MySQL, PostgreSQL will not connect without a **Database**, and a connecti
 
 | Field | Default | Notes |
 |-------|---------|-------|
+| **Connect Using** | **Host and Port** | **Socket** connects through the server's socket on this Mac. See [Unix socket](#unix-socket) |
 | **Host** | `localhost` | |
-| **Port** | `5432` | |
-| **Username** | - | Not pre-filled; most servers use `postgres` |
+| **Port** | `5432` | With **Socket**, picks the socket file |
+| **Socket** | empty | With **Connect Using** set to **Socket**: the folder holding the socket, or the socket file |
+| **Username** | - | Not pre-filled; most servers use `postgres`. Empty signs in as your macOS login name |
 | **Database** | - | **Required** |
 
 Fill in the form and click **Save & Connect**. For remote servers use [SSH tunneling](/connections/ssh-tunneling); Google Cloud SQL instances can connect through the [Cloud SQL Auth Proxy](/connections/cloud-sql-proxy).
@@ -32,13 +34,36 @@ Any server from 9.1 on works. A feature the server predates stays out of the sid
   <img className="hidden dark:block" src="/images/postgresql-connection-form-dark.png" alt="PostgreSQL connection form" />
 </Frame>
 
+## Unix socket
+
+A server on this Mac listens on a socket as well as a port, and a server with `listen_addresses = ''` listens only there. Set **Connect Using** to **Socket** and enter the folder that holds the socket. Host leaves the form, and **Network** offers only **Direct**.
+
+The socket file is named after the port, `.s.PGSQL.5432` for port `5432`, so **Port** stays and picks the server. Entering the file itself, such as `/tmp/.s.PGSQL.5433`, saves its folder and sets **Port** from the name. The server lists its folders:
+
+```sql
+SHOW unix_socket_directories;
+```
+
+| Where | Folder |
+|-------|--------|
+| Homebrew, Postgres.app | `/tmp` |
+| Debian and Ubuntu packages | `/var/run/postgresql` |
+
+The **Socket** field suggests both. The note under it names the socket file and says when nothing is there. Save still works, so a connection can be set up before its server starts. A path starting with `~` is expanded, and macOS caps the socket file's path at 103 bytes.
+
+A `local` line in `pg_hba.conf` decides who signs in. With `peer`, leave **Username** empty to sign in as your macOS login name.
+
+No SSL Mode applies: a socket connection never leaves this Mac, so the SSL settings leave the Network tab. Backup and restore reach the server through the same socket, and `~/.pgpass` matches it the way `psql` does: the `/tmp` folder as `localhost`, any other folder by its path.
+
 ## Connection URL
 
 ```text
 postgresql://user:password@host:5432/database
+postgresql://user@localhost:5433/database?host=/var/run/postgresql
+postgresql://user@%2Ftmp/database
 ```
 
-`postgres://` also works. Opening a URL connects directly. See [Connection URL Reference](/connections/urls).
+`postgres://` also works. A host starting with `/`, in `host=` or percent-encoded in place of the host, is the socket folder. Opening a URL connects directly. See [Connection URL Reference](/connections/urls#postgresql-socket).
 
 ## Authentication
 
@@ -52,7 +77,7 @@ For a Cloud SQL instance you reach directly, set **Authentication** to a Google 
 
 ### Password file
 
-Turn on **Use Password File** to read the password from `~/.pgpass` instead of typing one. Entries are `hostname:port:database:username:password`, `*` matches any field, first match wins. The form reports what it found, including `~/.pgpass has incorrect permissions (needs chmod 0600)`, the one that silently blocks a connect.
+Turn on **Use Password File** to read the password from `~/.pgpass` instead of typing one. Entries are `hostname:port:database:username:password`, `*` matches any field, first match wins. An empty **Username** matches your macOS login name, and a socket connection matches as described in [Unix socket](#unix-socket). The form reports what it found, including `~/.pgpass has incorrect permissions (needs chmod 0600)`, the one that silently blocks a connect.
 
 ## Databases and schemas
 
