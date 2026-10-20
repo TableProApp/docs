@@ -96,6 +96,8 @@ On an engine with transactions, the statements run inside one, so a failure roll
 
 Every queued change has to become a statement before anything is sent. When a change cannot, such as a new Redis row with no key, or it holds a value the driver cannot write, such as an edit to one leaf of an Elasticsearch nested array or to a column the server owns made before the table's structure finished loading, the save stops, names what it could not write, and keeps the whole queue. Undo that change, or make it with a query, then save again.
 
+The statements a driver writes for itself, as SQL Server, Oracle and ClickHouse do, are read before anything is sent. An `UPDATE` or `DELETE` with no `WHERE` of its own would reach every row of the table, so the save stops, names the table, and keeps the whole queue. A `WHERE` inside a comment, a string or a subquery does not count.
+
 Each generated SQL statement is held to the number of rows it was written for. On a table with no primary key, two identical rows cannot be told apart, so a statement meant for one of them matches both; the save stops there and reports what happened instead of rewriting the other row.
 
 Such a statement is held to the other end too. Finding fewer rows than it was written for means the row it meant to write is no longer there, so the save rolls back and keeps the edits rather than reporting a success that wrote nothing. Engines whose drivers report no real count, ClickHouse among them, are not held to it. Of the drivers that write their own statements, SQL Server and Oracle are held to it on a table without a primary key, and MongoDB and Redis are not. SQL Server bounds that match with `TOP (1)` and Oracle with `ROWNUM = 1`, so of two identical rows they write one.
