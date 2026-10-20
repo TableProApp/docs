@@ -24,7 +24,26 @@ Click **New Connection…**, select **Cassandra** or **ScyllaDB**, enter host, p
 
 There is no Keyspace field. Pick one in the sidebar after connecting, or put it in the URL path and import that URL. Later switches happen in place, with no reconnect, and the system keyspaces are filtered out of the list. Tabs already open are bound to their own keyspace and do not follow. See [Tabs](/features/tabs#where-a-tab-points).
 
-There is no consistency level field either. The driver never sets one, so every statement runs at the DataStax C driver's default of `LOCAL_ONE`.
+## Consistency
+
+Statements in the CQL editor, table browsing and grid saves run at the **Consistency** level on the connection's **Options** tab. **Default** is `LOCAL_ONE`, or `LOCAL_QUORUM` on Amazon Keyspaces. **Serial Consistency** is the level a lightweight transaction (`IF NOT EXISTS`, `IF EXISTS`, `IF` a condition) checks its condition at: `SERIAL` or `LOCAL_SERIAL`. Its **Default** leaves the choice to the server, which uses `SERIAL`.
+
+The result footer names the level each statement ran at, and both levels after a lightweight transaction:
+
+```text
+Consistency: QUORUM, serial: LOCAL_SERIAL
+```
+
+To change the level for the statements that follow, run the cqlsh command in the CQL editor:
+
+```sql
+CONSISTENCY QUORUM;
+SERIAL CONSISTENCY LOCAL_SERIAL;
+```
+
+`CONSISTENCY` or `SERIAL CONSISTENCY` alone names the level in use. The server never sees these lines. The new level holds for every tab on the connection until it disconnects, and a reconnect goes back to the **Options** setting. **Count Exactly**, export and import run on a connection of their own, at the **Options** setting. End the command with a semicolon when a statement follows it on the next line.
+
+The schema in the sidebar is read at `LOCAL_ONE` whatever the level, so a level the cluster cannot meet, or `ANY`, which the server refuses for reads, leaves the sidebar working.
 
 ## Connection URLs
 
@@ -50,6 +69,8 @@ Keyspaces authenticates with SigV4, not a password, so set **Authentication** to
     Keyspaces refuses a plaintext connection. See [AWS IAM Authentication](/connections/aws-iam).
   </Step>
 </Steps>
+
+Keyspaces reads at `ONE`, `LOCAL_ONE` and `LOCAL_QUORUM`, and writes only at `LOCAL_QUORUM`. **Default** consistency is `LOCAL_QUORUM` when Authentication is an AWS IAM mode or the host is a Keyspaces endpoint, so writes work without a setting. Pick `LOCAL_ONE` to read cheaper, and every write then fails.
 
 ## Browsing and editing
 
