@@ -36,7 +36,7 @@ Both stage cell edits as pending changes. A query tab does it only when its quer
 | Tab used before this one | `Ctrl+Tab` |
 | Tab used longest ago | `Ctrl+Shift+Tab` |
 
-**Close Other Tabs**, **Close All Tabs**, and **Close Tabs for Other Databases** ship unbound. Bind them in **Settings > Keyboard** under Navigation.
+**Close Other Tabs**, **Close All Tabs**, **Close Tabs for Other Databases**, and **Pin Tab** ship unbound. Bind them in **Settings > Keyboard** under Navigation.
 
 ## Preview tabs
 
@@ -59,7 +59,7 @@ A preview tab turns permanent as soon as you sort it, filter it, or edit data, a
 | Close every tab for this database | **File > Close All Tabs**, also on the tab's contextual menu |
 | Close tabs bound to another database | **File > Close Tabs for Other Databases** |
 
-Close Other Tabs and Close All Tabs act on the tabs in the strip, never on another database's. Closing the last tab leaves the database open on its empty state. `Cmd+W` again closes that database's entry in the connections strip, and the connection once it was its only one; [Keyboard Shortcuts](/features/keyboard-shortcuts#tabs-and-windows) has the rest of that cascade.
+Close Other Tabs and Close All Tabs act on the tabs in the strip, never on another database's. None of the three closes a [pinned tab](#pinning-tabs). Closing the last tab leaves the database open on its empty state. `Cmd+W` again closes that database's entry in the connections strip, and the connection once it was its only one; [Keyboard Shortcuts](/features/keyboard-shortcuts#tabs-and-windows) has the rest of that cascade.
 
 **Close Tabs for Other Databases** takes every tab of the connection's other databases, never the tab in front of you, and never another connection's tabs. On engines that switch schemas instead, such as BigQuery, Spanner and Oracle, it reads **Close Tabs for Other Schemas**.
 
@@ -83,9 +83,13 @@ Hold the drag near either end of the strip and the track scrolls under it, so a 
 
 Right-click a tab for **Move Tab Left** and **Move Tab Right**, which move it one place at a time, dim at the ends of the strip, and are offered to VoiceOver as actions on the tab.
 
-<Note>
-Tabs cannot be pinned. Pinning exists for results inside a query tab (`Cmd+Option+P`).
-</Note>
+## Pinning tabs
+
+Right-click a tab and choose **Pin Tab**, or choose **Window > Pin Tab**, to keep a tab open all day. A pinned tab moves to the front of the strip with a pin beside its title, and **Close Other Tabs**, **Close All Tabs**, and **Close Tabs for Other Databases** leave it open. `Cmd+W`, its close button, and a middle-click still close it.
+
+Pinning a preview tab keeps it, and a sidebar click never takes over a pinned tab: the table opens in a tab of its own. Drag a pinned tab to reorder it among the other pinned tabs; it never moves past them. Choose **Unpin Tab** to put it back at the start of the unpinned tabs.
+
+The pin is saved with the tab, comes back after a restart, and moves with the tab to a new window or another connection. Pinning results inside a query tab is a separate command, **View > Pin Result** (`Cmd+Option+P`).
 
 ## Moving a tab to its own window
 
@@ -144,7 +148,7 @@ PostgreSQL, Redshift, and CockroachDB keep one connection per database in the co
 | Tab type, table name, database, and schema | Pending data changes |
 | Applied sort and current page | Selected rows |
 | Per-table filters, column widths | |
-| Tab order and which tab was frontmost | |
+| Tab order, pinned tabs, and which tab was frontmost | |
 
 The tab set is written when you switch tabs, a second after you stop typing, and every 30 seconds otherwise, so a crash costs at most the last half minute. On relaunch only the frontmost tab runs its query; the others load the first time you switch to them, and one that fails shows the error inline. A connection that cannot be reached shows the driver's error with **Try Again**, **Manage Connections…**, and **Copy Details**, and stays in the next session's list. Whether the last session reopens at all is [Startup Behavior](/customization/general-settings#startup).
 
