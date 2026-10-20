@@ -1,6 +1,6 @@
 ---
 title: Data Settings
-description: Data grid font, pagination, query result cap, JSON viewer, and query history
+description: Data grid font, copy format, pagination, query result cap, JSON viewer, and query history
 ---
 
 Browsing a table pages 1,000 rows at a time, and a query that returns more than 10,000 rows stops there. Both numbers, and the rest of what the grid does before you touch anything, are on **Settings > Data**.
@@ -33,6 +33,14 @@ The picker lists the monospaced families installed on your Mac, at 10 to 24 pt.
 | Smart value detection | On | Reads id-like binary columns as UUIDs, timestamp-named integer columns as dates, and binary columns holding UTF-8 as text. Override per column with Display As, see [Cell and Row Viewers](/features/json-viewer) |
 | Default row sort | No sorting (engine order) | Or Primary key, First column. Applied when a table first opens; clicking a column header overrides it |
 | Sort direction | Ascending | Or Descending. Sets the default row sort's direction and which way the first click on a column header sorts |
+
+## Copying
+
+| Setting | Default | Options |
+|---------|---------|---------|
+| Copy rows as | TSV | TSV, TSV with Headers, JSON, CSV, CSV with Headers, Markdown |
+
+`Cmd+C` writes this format for whole rows, picked by their row numbers or with `Cmd+A`, in any grid that shows rows of data; the Structure tab keeps copying its columns and indexes. A cell range copies as tab-separated cells, and a clicked cell as its value. Every format, IN Clause and the statements included, is also under **Edit > Copy Special** and the grid's **Copy as** menu; see [Copying](/features/data-grid#copying).
 
 ## Pagination
 
