@@ -183,7 +183,7 @@ The local end of the tunnel listens on a port between 60000 and 65000. Allow it.
 
 ### SSH fails instantly against a server on your own network
 
-macOS 15 and later put outbound connections to local network addresses behind a Local Network permission, and a denied app fails fast with "no route to host". Check TablePro under **System Settings > Privacy & Security > Local Network**. Servers over the internet, and anything on `127.0.0.1`, are unaffected.
+macOS 15 and later put outbound connections to local network addresses behind a Local Network permission. With it off, the window reads **Local Network Access Required** and names the SSH server, or the first jump host, it could not reach. **Open System Settings** takes you to **Privacy & Security**, where **Local Network** lists TablePro. Servers over the internet, and anything on `127.0.0.1`, are unaffected.
 
 ### SSH itself fails
 

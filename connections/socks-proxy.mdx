@@ -73,7 +73,7 @@ Fifteen seconds passed with no path to the database. The proxy did not answer, r
 
 ### Local network permission prompt
 
-On macOS 15 and later, a proxy on your local network (a `192.168.x.x` address) raises the one-time Local Network alert. Allow it, or the proxy stays unreachable. A loopback proxy such as `ssh -D` on `127.0.0.1` never triggers it.
+On macOS 15 and later, a proxy on your local network (a `192.168.x.x` address) raises the one-time Local Network alert. Allow it, or the proxy stays unreachable: the window then reads **Local Network Access Required** and names the proxy, and **Open System Settings** takes you to **Privacy & Security**, where **Local Network** lists TablePro. A loopback proxy such as `ssh -D` on `127.0.0.1` never triggers it.
 
 ### The database rejects the connection
 
