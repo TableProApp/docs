@@ -15,9 +15,21 @@ Redshift speaks the PostgreSQL wire protocol and uses the same bundled libpq dri
 
 Fill in the form and click **Save & Connect**. New connections default to SSL mode **Preferred**, and there is no version gate: any cluster AWS still runs will connect.
 
-<Info>
-AWS IAM authentication is not available for Redshift connections, unlike MySQL and PostgreSQL. Use a database username and password. For a cluster that is not publicly reachable, put it behind an [SSH tunnel](/connections/ssh-tunneling) on a bastion in the VPC.
-</Info>
+For a cluster that is not publicly reachable, put it behind an [SSH tunnel](/connections/ssh-tunneling) on a bastion in the VPC.
+
+## AWS IAM sign-in
+
+Set **Authentication** to **AWS IAM (Profile)**, **AWS IAM (SSO)** or **AWS IAM (Access Key)**, and every connect asks AWS for a user and a temporary password instead of reading a saved one. Profiles resolve as described in [AWS IAM Authentication](/connections/aws-iam#profiles), IAM Identity Center sign-in included.
+
+| Endpoint | AWS call | Signs in as |
+|---|---|---|
+| Provisioned cluster, **Username** empty | `redshift:GetClusterCredentialsWithIAM` | The user mapped to your IAM identity, such as `IAMR:analyst` |
+| Provisioned cluster, **Username** set | `redshift:GetClusterCredentials` for that user | `IAM:` and the user name |
+| Serverless workgroup | `redshift-serverless:GetCredentials` | The user mapped to your IAM identity |
+
+The cluster or workgroup and its region come from **Host**, so keep it the endpoint AWS issued. A tunnel TablePro opens needs nothing more. A port forward you run yourself leaves `127.0.0.1` in **Host**: set **Redshift Endpoint** to the real one, such as `my-cluster.abc123xyz.us-east-1.redshift.amazonaws.com`. It is honored only when **Host** is a loopback address or that same endpoint. **AWS Region** overrides the region.
+
+The policy needs the call above on the cluster or workgroup, and access to the `dbname` when it limits databases. The password lasts 15 minutes and is fetched again for each connect, and SSL mode **Disabled** or **Preferred** is raised to **Required**. IAM sign-in to Redshift works on the Mac only.
 
 ## Connection URL
 

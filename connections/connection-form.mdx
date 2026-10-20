@@ -70,7 +70,9 @@ Encryption sits below the transport. [SSL/TLS](/connections/ssl) covers the mode
 | **Connect timeout** | Maximum seconds for the network transport and remote database to finish connecting. Empty uses 30 seconds; valid values are 1 to 600 |
 | **Query timeout** | Override of **Settings > General** for this connection. Empty inherits the global value; `0` means no limit. Only drivers that support query timeouts enforce it |
 | **Startup Commands** | SQL to run after every connect. See [Startup commands](#startup-commands) |
-| **Pre-Connect Script** | Shell script run before connecting. A non-zero exit aborts the connect |
+| **Pre-Connect Script** | Shell script run before connecting. A non-zero exit aborts the connect. See [Connection scripts](#connection-scripts) |
+| **Timeout** | Seconds each connection script may run. Empty uses 10; valid values are 1 to 300 |
+| **Post-Disconnect Script** | Shell script run once the session ends, after a pre-connect script ran. See [Connection scripts](#connection-scripts) |
 | **Safe Mode** | Confirms, authenticates or refuses queries before they run. See [Safe Mode](/features/safe-mode) |
 | **AI Policy** | Per-connection override for the in-app AI agents. **Never** also refuses external clients. Shown while **Enable AI Features** is on |
 | **External Clients** | **Blocked**, **Read Only** (the default), or **Read & Write** for MCP clients such as Raycast, Cursor, and Claude Desktop, and for [AppleScript](/developers/applescript). A token's own scope cannot raise it. See the [integration security model](/developers#security-model) |
@@ -87,10 +89,6 @@ session picks it up.
   <img className="block dark:hidden" src="/images/connection-timeouts.png" alt="PostgreSQL connection Options pane with Connect timeout and Query timeout fields using their inherited defaults" />
   <img className="hidden dark:block" src="/images/connection-timeouts-dark.png" alt="PostgreSQL connection Options pane in dark appearance with Connect timeout and Query timeout fields using their inherited defaults" />
 </Frame>
-
-A pre-connect script never runs unprompted. A **Pre-Connect Script** alert shows the script itself and waits for **Run Script**, every time, whatever opens the connection: its window, a link, Compare, **Copy To**, the AI assistant, an MCP client or a script. With no answer in 60 seconds the alert closes as **Cancel**.
-
-A connect you did not start never runs the script. A restored window at launch, a table loading on its own and a reconnect after a tunnel drops all stop at a **Connect** button instead.
 
 ## Appearance
 
@@ -114,6 +112,39 @@ SET search_path TO myschema, public;
 </CodeGroup>
 
 A statement that fails is logged and skipped, and the connection still opens.
+
+## Connection scripts
+
+Put whatever has to happen before the database answers in **Pre-Connect Script**: a VPN profile coming up, `aws sso login`, a credential refresh. The script runs in `bash`, and a non-zero exit stops the connect with the script's standard error in the message. Homebrew's `/opt/homebrew/bin` and `/usr/local/bin` are on `PATH` even when TablePro was opened from the Dock.
+
+Both scripts get the connection in their environment, so one script can serve every connection that needs it:
+
+| Variable | Value |
+|---|---|
+| `TABLEPRO_CONNECTION_NAME` | The connection's name |
+| `TABLEPRO_HOST` | **Host**, as typed, even when an SSH tunnel or proxy carries the connection |
+| `TABLEPRO_PORT` | **Port**, as typed |
+| `TABLEPRO_USER` | **Username**, or the linked credential profile's |
+| `TABLEPRO_DATABASE` | **Database** |
+
+The password is never passed.
+
+```bash
+scutil --nc start "Office VPN"
+until nc -z "$TABLEPRO_HOST" "$TABLEPRO_PORT"; do sleep 1; done
+```
+
+A script still running at **Timeout** is stopped and the connect fails. Raise it for a VPN that takes 15 seconds to come up or a sign-in that waits on the browser. Canceling the connect stops the script too.
+
+**Post-Disconnect Script** undoes what the pre-connect script started. It runs once per session, after the session ends by **Disconnect**, by closing its last window, by quitting TablePro, or by a connect that fails after the pre-connect script succeeded. A connection with no pre-connect script never runs it. It gets the same variables and the same timeout, and a failure goes to the log rather than an alert.
+
+```bash
+scutil --nc stop "Office VPN"
+```
+
+Neither script runs unprompted. A **Pre-Connect Script** alert shows both scripts and waits for **Run Script**, every time, whatever opens the connection: its window, a link, Compare, **Copy To**, the AI assistant, an MCP client or a script. With no answer in 60 seconds the alert closes as **Cancel**.
+
+A connect you did not start never runs the script. A restored window at launch, a table loading on its own and a reconnect after a tunnel drops all stop at a **Connect** button instead. Links, exports and the Team Library carry neither script.
 
 ## Connection health
 

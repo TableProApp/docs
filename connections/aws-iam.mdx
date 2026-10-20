@@ -105,6 +105,10 @@ mydb.abc123.us-east-1.rds.amazonaws.com:5432
 
 The port is optional, falling back to 5432 for PostgreSQL and 3306 for MySQL and MariaDB. The field also covers a CNAME or any alias AWS did not issue, and is honored only when **Host** is loopback or already the same hostname.
 
+## Redshift
+
+Redshift hands out its own user and temporary password rather than a signed token. The same three options appear on a Redshift connection, and [Redshift](/databases/redshift#aws-iam-sign-in) covers what each endpoint calls.
+
 ## On iPhone and iPad
 
 Synced connections keep their AWS IAM option. **AWS IAM (Profile)** needs an access key saved on the device, and **AWS IAM (SSO)** signs in to IAM Identity Center from the device itself. [IAM sign-in](/ios#iam-sign-in) covers the setup.

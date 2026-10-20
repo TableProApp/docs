@@ -83,7 +83,7 @@ Group and folder paths match by name from the top down: an existing group or fol
   <img className="hidden dark:block" src="/images/connection-import-preview-dark.png" alt="Import preview" />
 </Frame>
 
-Anything that decides where a credential comes from is stripped on the way in, from a file and from a link alike: AWS options including IAM authentication, the region, the profile and the RDS endpoint; **Use Password File**; **Prompt for password**; the SSL client key passphrase; the pre-tunnel host and port; and the **Pre-Connect Script**. Startup SQL and tunnel commands run on every connect, so a file brings them only if you agree: importing lists each one and asks, and **Import Without Commands** is the default. A link's sheet shows its startup SQL in full before you add it.
+Anything that decides where a credential comes from is stripped on the way in, from a file and from a link alike: AWS options including IAM authentication, the region, the profile and the RDS endpoint; **Use Password File**; **Prompt for password**; the SSL client key passphrase; the pre-tunnel host and port; and the **Pre-Connect Script** and **Post-Disconnect Script**. Startup SQL and tunnel commands run on every connect, so a file brings them only if you agree: importing lists each one and asks, and **Import Without Commands** is the default. A link's sheet shows its startup SQL in full before you add it.
 
 ## Share via link
 
@@ -160,6 +160,7 @@ A connection in `~/Library/Application Support/TablePro/connections.json` can sa
 { "passwordSource": { "kind": "file", "path": "~/.config/tablepro/secrets/feature-x.pw" } }
 { "passwordSource": { "kind": "env", "variable": "STAGING_DB_PASSWORD" } }
 { "passwordSource": { "kind": "command", "shell": "op read op://vault/feature-x/password" } }
+{ "passwordSource": { "kind": "command", "shell": "aws rds generate-db-auth-token --hostname {host} --port {port} --username {user}", "reuseSeconds": 600 } }
 { "passwordSource": { "kind": "onePassword", "reference": "op://vault/feature-x/password" } }
 { "passwordSource": { "kind": "vault", "path": "secret/data/staging/db", "field": "password" } }
 { "passwordSource": { "kind": "awsSecretsManager", "secretId": "prod/db", "jsonKey": "password" } }
@@ -169,7 +170,7 @@ A connection in `~/Library/Application Support/TablePro/connections.json` can sa
 |---|---|---|
 | `file` | The file at `path`, minus a trailing newline | `chmod 600` the file |
 | `env` | The named environment variable | Same Dock caveat as environment variables |
-| `command` | stdout of the command, run through `/bin/bash`. A non-zero exit fails the connect | |
+| `command` | stdout of the command, run through `/bin/bash`, with `{host}`, `{port}`, `{user}` and `{database}` filled in and quoted. A non-zero exit fails the connect. `reuseSeconds`, 1 to 86400, keeps the output that long | |
 | `onePassword` | `op read` on the reference | `op signin` |
 | `vault` | `vault kv get` for one field at a path | `VAULT_ADDR` and `VAULT_TOKEN` in TablePro's environment |
 | `awsSecretsManager` | `aws secretsmanager get-secret-value`. `jsonKey` pulls one field out of a JSON secret; omit it for the whole value | |
