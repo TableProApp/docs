@@ -111,9 +111,24 @@ Comments are edited per object. Right-click a table or view and choose **Edit Co
 
 Engines installed as plugins need their latest plugin version.
 
-## Sequences and system-versioned tables
+## Sequences
 
-A MariaDB sequence carries a number icon in the sidebar and reads as **Sequence**. It is a read-only kind, so its menu drops **Truncate** and **Import**, the drop item reads **Drop Sequence**, and the Structure tab offers no edit. MariaDB refuses `UPDATE`, `DELETE` and `TRUNCATE` on one with error 1031, and `ALTER TABLE … ADD COLUMN` with error 4086. Rename still works, through `RENAME TABLE`. Read the current value with `SELECT * FROM seq_name`, and change it with `SETVAL` in the query editor.
+PostgreSQL and MariaDB sequences are listed under **Sequences** in each schema, with a number icon. Hover one to see the column that owns it, such as `orders.id` for a `serial` or identity column. The sidebar filter and Open Quickly find sequences by name.
+
+Double-click a sequence to open it. On PostgreSQL the grid shows `last_value`, `log_cnt` and `is_called`, and the DDL tab of **Show Structure** holds the `CREATE SEQUENCE` statement with the data type, start, increment, minimum, maximum and cache, followed by `OWNED BY` and the `setval` that restores its position. On MariaDB the grid shows every setting.
+
+A sequence is a read-only kind: its menu drops **Truncate** and **Import**, the Structure tab offers no edit, and the drop item reads **Drop Sequence**. **Rename** works on both engines.
+
+On PostgreSQL, right-click a sequence for two more commands, also under **Database > Set Next Value…** and **Database > Edit Sequence…**:
+
+- **Set Next Value…** sets what the next `nextval` returns. For a sequence a column owns, **After the values already in** moves it one step past that column's highest value, or its lowest for a descending sequence, which repairs a sequence that fell behind its table after a bulk load or a restore. It never moves a sequence back, and it holds inserts into the table until it is done. To move a sequence back, type the value.
+- **Edit Sequence…** shows the data type, start, last value and owner, and changes the increment, minimum, maximum, cache and cycling through `ALTER SEQUENCE`.
+
+Both sheets show the SQL before it runs and go through [Safe Mode](/features/safe-mode). **New Sequence…** under the **+** button at the foot of the sidebar, or **Database > New Sequence…**, opens a `CREATE SEQUENCE` template in a query tab.
+
+MariaDB refuses `UPDATE`, `DELETE` and `TRUNCATE` on a sequence with error 1031, and `ALTER TABLE … ADD COLUMN` with error 4086. Rename goes through `RENAME TABLE`. Change a MariaDB sequence's value with `SETVAL` in the query editor.
+
+## System-versioned tables
 
 A MariaDB table declared `WITH SYSTEM VERSIONING` stays an ordinary table: row editing, **Import**, index edits, comments, rename and drop all work. **Truncate** alone is withheld, because the server refuses it with error 4137. Delete the history with `DELETE HISTORY FROM table_name` instead. On iPhone and iPad the listing reports such a table as a plain one, so **Truncate** is offered there and the server's refusal comes back as an alert.
 

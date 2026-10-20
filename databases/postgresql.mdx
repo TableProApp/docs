@@ -102,6 +102,10 @@ A value the list cannot represent opens the text editor instead: a multi-dimensi
 
 `box[]` is the one column whose elements are not separated by a comma. PostgreSQL uses a semicolon there, because a box's own text contains commas, and the list reads it that way.
 
+## Sequences
+
+Each schema lists its sequences under **Sequences**, with the owning column on hover. **Set Next Value…** realigns a sequence with the highest value in its column, and **Edit Sequence…** changes its increment, bounds, cache and cycling. See [Sequences](/features/table-operations#sequences).
+
 ## User-defined types
 
 Enums, composites, domains and ranges are listed under **Types** in each schema, the `CREATE` statement rebuilt from `pg_type`. The structure editor's type picker offers the schema's types under **User-Defined**. See [User-Defined Types](/features/user-defined-types).
