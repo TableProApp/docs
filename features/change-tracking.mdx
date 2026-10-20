@@ -36,15 +36,18 @@ Double-click a cell, or press `Enter` on it. `Enter` commits the edit to the que
   <img className="hidden dark:block" src="/images/date-picker-editor-dark.png" alt="Cell editor" />
 </Frame>
 
-Right-click an editable cell and open **Set Value** to set it without typing. Each item appears only where the column takes it:
+Right-click an editable cell and open **Set Value**. Each item appears only where the column takes it:
 
 - **Empty** on text, `SET` and binary columns.
 - **NULL** on a nullable column.
 - **Default** on a column the server fills in. SQLite, libSQL, Turso, Cloudflare D1, ClickHouse, Databend, Snowflake, Trino, Cassandra and ScyllaDB take it on a new row only.
 - The database's own date and time functions on a date or time column, such as `NOW()` on MySQL or `CURRENT_TIMESTAMP` on SQLite.
 - **Generate UUID** (version 4) and **Generate UUIDv7** (ordered by creation time) on a `uuid` or `uniqueidentifier` column, and on a text or binary column whose display format is UUID. A foreign key column and a Cassandra `timeuuid` column get neither.
+- **Set Cells to Value…** on any cell you could type into. Type the value once and click **Set**. It is read the way a typed value is, so an empty value stores NULL in a date or number column, and a function such as `NOW()` in a date or time column runs on the server.
 
-Select several cells first to set all of them at once; Generate UUID gives each cell its own value. With whole rows selected, the clicked column changes on every selected row. **Edit > Set Value** holds the same items for the focused cell or the selection, and [Settings > Keyboard](/features/keyboard-shortcuts#customizing-shortcuts) assigns them shortcuts.
+Select several cells first to set all of them at once; Generate UUID gives each cell its own value. With whole rows selected, the clicked column changes on every selected row. Cells that cannot take the value keep what they hold: **Set Cells to Value…** skips a column the server owns, a binary column and a deleted row, and says how many cells it sets before you confirm. **Edit > Set Value** holds the same items for the focused cell or the selection, and [Settings > Keyboard](/features/keyboard-shortcuts#customizing-shortcuts) assigns them shortcuts.
+
+To copy one value into many cells, copy it, select the cells and press `Cmd+V`. A copied block of several cells pastes from the focused cell rightward and down instead.
 
 On MongoDB, Firestore and the Firebase Realtime Database a document can lack a field altogether, and on Bigtable a row can lack a cell; the grid shows either as **No Field**. **Remove Field** on the same right-click menu deletes the field rather than storing NULL. Bigtable stores no NULL, so **NULL** and **Remove Field** both delete the cell. See [missing fields and null](/databases/mongodb#missing-fields-and-null).
 
