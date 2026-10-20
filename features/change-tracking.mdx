@@ -52,13 +52,25 @@ On MongoDB, Firestore and the Firebase Realtime Database a document can lack a f
 
 - **Add Row** (`Cmd+Shift+N`), the **+** button, or **Edit > Add Row**. The row appears at the bottom with the cursor in its first writable cell. A UUID primary key the server does not fill gets a new UUID, and the cursor skips it. Later edits fold into the INSERT rather than queueing as updates.
 - **Duplicate Row** (`Cmd+Shift+D`) on the right-click menu copies a row and resets its primary key and its identity columns to `DEFAULT`, so the database assigns new ones. A UUID primary key the server does not fill gets a new UUID instead.
-- **Delete**: select rows by their row numbers (`Shift`-click for a range, `Cmd`-click for separate rows) and press `Delete`. They stay visible with a strikethrough, and saving asks "Delete 5 rows?" before they go.
+- **Delete**: select rows by their row numbers (`Shift`-click for a range, `Cmd`-click for separate rows) and press `Delete`. They stay visible with a strikethrough, and saving asks "Delete 5 rows from customers?" before they go.
 - **Paste** on the right-click menu inserts copied rows as new rows, with a new UUID in a UUID primary key the server does not fill.
 - **Fill Column** on the header right-click menu writes one value, NULL, or a new UUID or UUIDv7 per row into every loaded row. It is absent on primary key columns and on columns the server owns.
 
 A new row starts at `DEFAULT` in every column the server fills in. That covers a column with a default expression, and an identity or `AUTO_INCREMENT` column, which carries no default of its own. The INSERT leaves those columns out, so the server assigns them.
 
 Add Row and Duplicate Row stay dimmed until the table's schema has loaded, which is what says which columns the server fills in. On a table opened for the first time that is a fraction of a second.
+
+### Rows other tables hold
+
+When foreign keys point at the table, the delete prompt lists what the delete does to other tables before anything is sent:
+
+- Rows an `ON DELETE CASCADE` key deletes, followed up to 5 keys deep.
+- Rows an `ON DELETE SET NULL` or `SET DEFAULT` key rewrites, with the column it sets.
+- Rows a `RESTRICT` or `NO ACTION` key protects. These make the save fail, and the prompt says so.
+
+Click **Show** beside a line to open those rows in a new tab, filtered. The save is cancelled and the deleted rows stay queued, so press `Cmd+S` again when you are done looking.
+
+The counts come from `SELECT COUNT(*)` queries under the connection's query timeout. Counting stops after 5 seconds, and a table not counted by then, or whose count failed, shows as not counted rather than as a number. Only foreign keys declared in the table's own schema are checked, and the prompt says so when the database has other schemas. When a transaction is open on the connection and the counts cannot see its uncommitted rows, the prompt says that too. SQLite and libSQL enforce foreign keys only on a connection that ran `PRAGMA foreign_keys = ON`, and MySQL and MariaDB skip them while `foreign_key_checks` is 0. With the keys off nothing cascades, and the prompt says the referencing rows stay as they are.
 
 ## When the grid will not edit
 
