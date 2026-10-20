@@ -86,6 +86,8 @@ That is what the [Structure tab](/features/table-structure) shows, what the [MCP
 
 `jsonb` renders as formatted JSON, and `uuid`, `inet`, `timestamp with time zone`, `interval` and `bytea` display natively. PostGIS `geometry` and `geography` render as EWKT with the SRID kept, `SRID=4326;POINT(-73 40.7237)`, rather than raw EWKB hex; a value that fails to convert stays hex.
 
+pgvector `vector`, `halfvec` and `sparsevec` cells show their first three elements and the dimension count, `[0.0123, -0.0456, 0.0789, …] 1536 dims`. Double-click one for every element beside its index, **Copy as JSON**, and **Edit as Text** for the literal. A value of the wrong length for its `vector(1536)` column stops the save and names the column.
+
 An array column opens one of three editors, decided by its element type:
 
 | Element type | Editor |

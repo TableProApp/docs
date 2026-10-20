@@ -18,7 +18,7 @@ A queued change also marks the value itself, so it stays legible once the row is
 
 ## Editing a cell
 
-Double-click a cell, or press `Enter` on it. `Enter` commits the edit to the queue, `Escape` cancels. Setting a value back to what it was drops it from the queue again. Delete the text of a date, number, boolean, JSON or array cell to store NULL. In a NOT NULL column of those types the cell keeps its value, and an emptied text cell stores an empty string. Some types open an editor of their own:
+Double-click a cell, or press `Enter` on it. `Enter` commits the edit to the queue, `Escape` cancels. Setting a value back to what it was drops it from the queue again. Delete the text of a date, number, boolean, JSON, array or vector cell to store NULL. In a NOT NULL column of those types the cell keeps its value, and an emptied text cell stores an empty string. Some types open an editor of their own:
 
 | Column type | Editor |
 |---|---|
@@ -29,6 +29,7 @@ Double-click a cell, or press `Enter` on it. `Enter` commits the edit to the que
 | `SET` (MySQL/MariaDB) | Multi-select checkboxes |
 | Array of a simple type (PostgreSQL) | Ordered list, one row per element |
 | `jsonb[]`, `json[]` (PostgreSQL) | Ordered list, the selected element in the [JSON viewer](/features/json-viewer) |
+| `vector`, `halfvec`, `sparsevec` (pgvector) | Element list with **Copy as JSON**, and **Edit as Text** for the literal |
 | `JSON`, `JSONB`, `BLOB`, binary | [Cell viewers](/features/json-viewer) |
 
 <Frame caption="Type-specific cell editor">
@@ -94,7 +95,7 @@ A table without a primary key is matched on every original column value instead,
 
 On an engine with transactions, the statements run inside one, so a failure rolls the whole save back and the table is left as it was. Without them, the statements that ran before the failure stand. Either way a failed save reports **Save Failed** with the server's message and keeps the queue intact, so correct the value and save again. A save that succeeds clears the queue, clears undo, and reloads the grid at the same place, with its sort, value filter and selection. In a query tab the reload runs the statement behind the result again, not the one at the caret.
 
-Every queued change has to become a statement before anything is sent. When a change cannot, such as a new Redis row with no key, or it holds a value the driver cannot write, such as an edit to one leaf of an Elasticsearch nested array or to a column the server owns made before the table's structure finished loading, the save stops, names what it could not write, and keeps the whole queue. Undo that change, or make it with a query, then save again.
+Every queued change has to become a statement before anything is sent. When a change cannot, such as a new Redis row with no key, or it holds a value the driver cannot write, such as an edit to one leaf of an Elasticsearch nested array or to a column the server owns made before the table's structure finished loading, or a pgvector value whose length differs from its `vector(n)` column, the save stops, names what it could not write, and keeps the whole queue. Undo that change, or make it with a query, then save again.
 
 Each generated SQL statement is held to the number of rows it was written for. On a table with no primary key, two identical rows cannot be told apart, so a statement meant for one of them matches both; the save stops there and reports what happened instead of rewriting the other row.
 
