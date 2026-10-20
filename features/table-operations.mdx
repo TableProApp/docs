@@ -122,7 +122,7 @@ A sequence is a read-only kind: its menu drops **Truncate** and **Import**, the 
 On PostgreSQL, right-click a sequence for two more commands, also under **Database > Set Next Value…** and **Database > Edit Sequence…**:
 
 - **Set Next Value…** sets what the next `nextval` returns. For a sequence a column owns, **After the values already in** moves it one step past that column's highest value, or its lowest for a descending sequence, which repairs a sequence that fell behind its table after a bulk load or a restore. It never moves a sequence back, and it holds inserts into the table until it is done. To move a sequence back, type the value.
-- **Edit Sequence…** shows the data type, start, last value and owner, and changes the increment, minimum, maximum, cache and cycling through `ALTER SEQUENCE`.
+- **Edit Sequence…** shows the data type, start, next value and owner, and changes the increment, minimum, maximum, cache and cycling through `ALTER SEQUENCE`.
 
 Both sheets show the SQL before it runs and go through [Safe Mode](/features/safe-mode). **New Sequence…** under the **+** button at the foot of the sidebar, or **Database > New Sequence…**, opens a `CREATE SEQUENCE` template in a query tab.
 
