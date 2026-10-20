@@ -218,3 +218,11 @@ SQL Server, Oracle, SpatiaLite, Teradata, Trino, Spanner, Cassandra and BigQuery
 Double-click a cell to edit it. A long value stays on one line and scrolls sideways rather than wrapping into the column's width. Nothing reaches the database until you save, and [Change Tracking](/features/change-tracking) covers the type-specific editors, the row operations, and what a Save runs.
 
 NULL renders as styled `NULL` text. That text, the date format, row height, row numbers, and alternate row backgrounds are [data settings](/customization/data-settings). Every shortcut the grid answers to, and how to rebind it, is in [Keyboard Shortcuts](/features/keyboard-shortcuts).
+
+### Invisible characters
+
+A value that will not match a `WHERE` clause it looks right for often holds a character that draws as nothing. Cells mark those characters the way the [SQL editor](/features/sql-editor#invisible-characters) does: a zero-width space, a byte order mark, a soft hyphen or a bidirectional control shows as a box with its short name, such as `ZWSP`, `BOM`, `SHY` or `RLO`, and a non-breaking or other special space is outlined. A carriage return with no line feed after it shows as `CR`. Other line breaks still read as a space.
+
+The inspector's text fields, the viewer and editor that open on a cell, and the [text window](/features/json-viewer#row-details-inspector) mark the same characters. The text window's status bar also counts the value's characters and bytes.
+
+To hide the marks, turn off **Show invisible characters** in [Settings > Data](/customization/data-settings).

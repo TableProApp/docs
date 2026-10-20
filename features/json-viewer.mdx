@@ -144,7 +144,7 @@ A value that refuses to open in one mode still opens in another.
 | An image, in any column | [Image viewer](#image-viewer), source behind the second segment |
 | An enum, set, or boolean column | Picker |
 | A blob column, or other bytes in a spatial column | Hex editor |
-| A `TEXT` variant, `CLOB` or `NTEXT` column, or any value with a line break or over 80 characters | Scrolling text box |
+| A `TEXT` variant, `CLOB` or `NTEXT` column, or any value with a line break, over 80 characters, or holding a [marked invisible character](/features/data-grid#invisible-characters) | Scrolling text box |
 | Anything else | Single-line field |
 
 <Frame caption="Row details inspector with per-field editors">
@@ -158,7 +158,7 @@ The hex editor shows the first 10 KB of a blob. Past that it reads **Truncated, 
 
 The text box, the JSON editor and the map each carry a drag handle under them, with separate remembered heights that survive a relaunch.
 
-**Open in Window** detaches a JSON, PHP or text value into its own resizable window; on an editable row, edits there join the same pending changes as the field. An image and a map detach read-only. The expand button on a JSON, PHP, long text or geometry field grows it to fill the inspector's height with the other fields still listed around it; click it again to shrink it back. Binary and image fields draw at a fixed height and carry no expand button, and neither does a geometry field stored as bytes, whose map still takes the drag handle.
+**Open in Window** detaches a JSON, PHP or text value into its own resizable window; on an editable row, edits there join the same pending changes as the field. An image and a map detach read-only. The text window's status bar counts the value's characters, as the Unicode code points `CHAR_LENGTH` counts, and its bytes in UTF-8, and warns when the value holds a bidirectional control that can reorder how the text reads. The expand button on a JSON, PHP, long text or geometry field grows it to fill the inspector's height with the other fields still listed around it; click it again to shrink it back. Binary and image fields draw at a fixed height and carry no expand button, and neither does a geometry field stored as bytes, whose map still takes the drag handle.
 
 Every field carries a menu at its trailing edge, and right-clicking the field opens the same one. **Set NULL**, **Set DEFAULT**, **Set EMPTY**, **Generate UUID**, **Generate UUIDv7** and **SQL Functions** need an editable field and appear only where the column takes them, as in [Set Value](/features/change-tracking#editing-a-cell); `Ctrl+Option+N` and `Ctrl+Option+D` set NULL and DEFAULT from the keyboard. **Copy Value** is always there, and a read-only field keeps its text selectable.
 
