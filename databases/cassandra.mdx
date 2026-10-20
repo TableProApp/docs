@@ -100,7 +100,7 @@ Both verifying modes need a **CA Certificate** path, and refuse to connect witho
 
 - A page far into a large table is slow, because every row before it is read first. Filter the table down, or query it in the CQL editor with a `WHERE` on the partition key.
 - Counter columns cannot be set with a plain `UPDATE`. The grid will edit one and the server rejects the statement it generates. Use `UPDATE … SET c = c + 1` in the CQL editor.
-- Materialized views and UDTs do not appear in the sidebar. Query `system_schema` in the CQL editor to see them. UDFs and UDAs are listed under Functions; see [Procedures, functions, and triggers](/features/routines-triggers).
+- Materialized views do not appear in the sidebar. Query `system_schema.views` in the CQL editor to see them. UDFs and UDAs are listed under Functions; see [Procedures, functions, and triggers](/features/routines-triggers). User-defined types are listed under Types; see [User-Defined Types](/features/user-defined-types).
 - The DDL tab reconstructs `CREATE TABLE` from the column list, so table options (compaction, compression, `gc_grace_seconds`), clustering order, and the split between partition and clustering key are all missing from it. Read the real definition with `DESCRIBE TABLE` in `cqlsh`.
 - DataStax Astra DB does not connect. The Secure Connect Bundle it requires cannot be loaded, and there is no way around it.
 - The connect timeout comes from the connection's **Options** section. The CQL request timeout

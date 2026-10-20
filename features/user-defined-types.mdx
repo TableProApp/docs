@@ -1,9 +1,9 @@
 ---
 title: User-Defined Types
-description: Browse a schema's enums, composites, domains and ranges and read each definition
+description: Browse the types a schema or keyspace declares, read each definition, and drop one
 ---
 
-Expand a schema and **Types** sits beside **Functions** and **Triggers**, one row per enum, composite, domain and range the schema declares. Select a row and press Return, or double-click it, and the type's `CREATE` statement opens in a tab.
+Expand a schema, or a keyspace on Cassandra and ScyllaDB, and **Types** sits beside **Functions** and **Triggers**, one row per type it declares. Select a row and press Return, or double-click it, and the type's `CREATE` statement opens in a tab.
 
 <Frame caption="An enum open from the Types section">
   <img className="block dark:hidden" src="/images/user-defined-types-sidebar.png" alt="Sidebar tree with the Types section expanded under a PostgreSQL schema, and a tab showing the rebuilt CREATE TYPE statement" />
@@ -16,6 +16,7 @@ Expand a schema and **Types** sits beside **Functions** and **Triggers**, one ro
 |---|---|
 | PostgreSQL, PGlite | Enums, composites, domains, ranges |
 | SQL Server | Alias types, table types, CLR types |
+| Cassandra, ScyllaDB | User-defined types |
 | Every other engine | None |
 
 A table's own row type, the array type created beside every type, the multirange created beside every range, and any type an extension installed are left out. A type in another schema is listed under that schema. On SQL Server the built-in types are left out too, so the section holds only what the database declares.
@@ -30,13 +31,21 @@ On SQL Server nothing is stored to read back at all, because a type has no `sys.
 
 A SQL Server table type is a table-valued parameter and cannot declare a column, so it is left out of the column type picker. Alias types appear there.
 
+On Cassandra the statement is rebuilt from `system_schema.types`: the fields in declaration order, each with the type the server reports.
+
 ## Changing or creating a type
 
 The tab is read-only. **Open in Editor** puts the definition in a query tab; write the `ALTER TYPE` or `CREATE TYPE` there and run it, then choose **Refresh** on the **Types** section. On PostgreSQL, `ALTER TYPE … ADD VALUE` adds an enum label and, from PostgreSQL 10, `RENAME VALUE` renames one. No statement removes a label or moves an existing one.
 
+## Dropping a type
+
+Right-click a type and choose **Drop Type…**. The `DROP TYPE` statement (`DROP DOMAIN` for a PostgreSQL domain) is shown for confirmation before it runs, and the **Types** section refreshes once it has. The server refuses while a table, or another type, still uses the type, and its reason is shown. A read-only connection has no **Drop Type…**.
+
 ## Using a type in a column
 
 In a table's **Structure** tab, the column type picker opens with a **User-Defined** group listing the types of every schema the sidebar's [schema filter](/features/connection-window#filtering-schemas) keeps, and of the table's own schema, ahead of the engine's. Every entry is schema-qualified and quoted where the name needs it, `sales.status` or `app."Order Status"`, so the column definition names the type and never a built-in of the same name. See [Table Structure](/features/table-structure#columns-tab).
+
+On Cassandra and ScyllaDB the group lists the types of the table's own keyspace, the only one a column can use, by name, quoted where the name needs it. An entry comes wrapped as `frozen<address>` where a plain column cannot hold the type: when a field is a collection that is not frozen, on Cassandra before 3.6, and on ScyllaDB.
 
 ## Finding a type
 
