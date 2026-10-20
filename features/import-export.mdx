@@ -96,7 +96,7 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
     | Encoding (UTF-8, ISO Latin 1, Windows-1252) | UTF-8 |
     | Include byte order mark | No |
 
-    Sanitizing prefixes a value starting with `=`, `+`, `-`, or `@` with a single quote, so a spreadsheet treats it as text.
+    Sanitizing prefixes a value starting with `=`, `+`, `-`, or `@` with a single quote, so a spreadsheet treats it as text. A plain number such as `-5` or `+1.5e3` is written as it is.
 
     Excel on Windows needs the byte order mark to read a UTF-8 file. Readers that do not expect one read it as part of the first column name. Only UTF-8 carries a mark, so the checkbox dims for the other two encodings.
 
