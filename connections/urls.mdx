@@ -44,6 +44,7 @@ Two readers take these URLs, and not the same set. The **Import from URL…** sh
 | `ch://` | ClickHouse (alias) | Yes |
 | `teradata://` | Teradata | No |
 | `trino://` | Trino | No |
+| `presto://` | Presto | No |
 | `duckdb://` | DuckDB file | Yes |
 | `quack://` | DuckDB remote (Quack protocol) | No |
 | `beancount://` | Beancount ledger file | No |
@@ -139,10 +140,10 @@ mariadb://root@/shop?socket=(/tmp/mysql.sock)
 |-----------|--------|-------------|
 | `sslmode` | `disable`, `prefer`, `require`, `verify-ca`, `verify-full` | SSL mode under libpq's names, in any case and with `_` for `-`, so `VERIFY_FULL` works too. ClickHouse JDBC's `strict` and `none` read as Verify Identity and Required |
 | `tlsmode` | `0`-`4` | The same modes as integers: 0=disable, 1=prefer, 2=require, 3=verify-ca, 4=verify-full |
-| `tls` / `ssl` | `true`, `false` | `true` turns TLS on: Verify Identity for Trino and ClickHouse, Required for every other database. `false` sets Disabled, even on a port that means TLS |
+| `tls` / `ssl` | `true`, `false` | `true` turns TLS on: Verify Identity for Trino, Presto and ClickHouse, Required for every other database. `false` sets Disabled, even on a port that means TLS |
 | `SSLVerification` | `FULL`, `CA`, `NONE` | Trino's certificate check once TLS is on: Verify Identity, Verify CA, Required. Ignored while TLS is off. Verify CA also needs a CA certificate file |
 
-`sslmode` or `tlsmode` wins over `ssl`, `tls` and `SSLVerification`. With none of them, a Trino URL on port `443` and a ClickHouse URL on `443` or `8443` import as Verify Identity, as in [Ports that mean TLS](/connections/ssl#ports-that-mean-tls), and every other URL takes the driver's default from [Per-driver defaults](/connections/ssl#per-driver-defaults). **Import from URL…** and a link opened from a browser or `open` resolve the mode the same way, so `ssl=false` or `sslmode=disable` is how a link asks for plain TCP. A URL that turns TLS on and names no port opens on the driver's TLS port, `443` for Trino and `8443` for ClickHouse, and a port written in the URL is kept.
+`sslmode` or `tlsmode` wins over `ssl`, `tls` and `SSLVerification`. With none of them, a Trino or Presto URL on port `443` and a ClickHouse URL on `443` or `8443` import as Verify Identity, as in [Ports that mean TLS](/connections/ssl#ports-that-mean-tls), and every other URL takes the driver's default from [Per-driver defaults](/connections/ssl#per-driver-defaults). **Import from URL…** and a link opened from a browser or `open` resolve the mode the same way, so `ssl=false` or `sslmode=disable` is how a link asks for plain TCP. A URL that turns TLS on and names no port opens on the driver's TLS port, `443` for Trino and Presto and `8443` for ClickHouse, and a port written in the URL is kept.
 
 ```text
 postgresql://user:pass@host/db?sslmode=require

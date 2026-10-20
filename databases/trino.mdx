@@ -1,6 +1,6 @@
 ---
-title: Trino
-description: Catalogs and schemas, type mapping, EXPLAIN variants, and the auth a Trino cluster accepts
+title: Trino / Presto
+description: Catalogs and schemas, type mapping, EXPLAIN variants, and the auth a Trino or Presto cluster accepts
 ---
 
 import RegistryPlugin from "/snippets/registry-plugin.mdx";
@@ -14,7 +14,7 @@ What a write does depends on the catalog's connector, not on TablePro. A stateme
 
 ## Quick setup
 
-Click **New Connection…**, select **Trino**, enter the coordinator host and port, set **Username**, and click **Save & Connect**. A cluster with no authentication needs nothing else, and **Catalog** and **Schema** are optional starting points.
+Click **New Connection…**, select **Trino** or **Presto**, enter the coordinator host and port, set **Username**, and click **Save & Connect**. A cluster with no authentication needs nothing else, and **Catalog** and **Schema** are optional starting points.
 
 <RegistryPlugin name="Trino" plugin="Trino Driver" />
 
@@ -34,10 +34,11 @@ Click **New Connection…**, select **Trino**, enter the coordinator host and po
 ## Connection URL
 
 ```text
-trino://user@host:8080/catalog
+trino://user@host:8080/catalog/schema
+presto://user@host:8080/catalog/schema
 ```
 
-**Import from URL…** accepts the scheme; macOS does not route `trino://` links. See [Connection URL Reference](/connections/urls).
+The path names the catalog and then the schema, and the schema is optional. **Import from URL…** accepts both schemes and their `jdbc:` forms; macOS does not route `trino://` or `presto://` links. See [Connection URL Reference](/connections/urls).
 
 ## Authentication
 
@@ -94,6 +95,16 @@ Click the Explain dropdown in the query editor to choose:
 | **Explain (Validate)** | `EXPLAIN (TYPE VALIDATE)`, parses and validates without running the query |
 | **Explain Analyze** | `EXPLAIN ANALYZE`, runs the query and reports actual timings |
 
+## Presto
+
+**Presto** is its own entry in the database type list and uses the same driver. Measured against Presto 0.299, it differs from Trino in five places:
+
+- A table shows its first page of rows and no page navigation. Presto turns `OFFSET` off by default, so filter, sort, or query with `LIMIT` in the editor to reach other rows.
+- Column comments show and cannot be changed, and table comments do not show. Presto has no `COMMENT ON` statement and no metadata table for table comments.
+- Materialized views are listed from `information_schema.materialized_views`.
+- `timestamp` values arrive at millisecond precision.
+- An `array` inside an `array`, `map` or `row` shows as JSON text inside the outer value.
+
 ## SSL/TLS
 
 **Disabled** is the default and speaks plain HTTP. There is no plaintext fallback, so every other mode forces TLS. Port `443` turns on **Verify Identity**. See [Ports that mean TLS](/connections/ssl#ports-that-mean-tls).
@@ -113,7 +124,6 @@ Click the Explain dropdown in the query editor to choose:
 - Neither a connection's **Query timeout** override nor the inherited [global
   setting](/customization/general-settings#query-timeout) reaches Trino. A long query runs until you
   cancel it or the cluster ends it.
-- Presto is not supported. It speaks the same protocol under an `X-Presto-` header prefix, and this driver always sends `X-Trino-`.
 
 ## Troubleshooting
 
@@ -147,7 +157,7 @@ The coordinator rejected the user, password or access token it was sent, and its
 
 ### "The server redirected the request to …"
 
-Trino never redirects, so a proxy or load balancer in front of it sent this, and the redirect is not followed. A redirect to `https://` on the same host means the proxy serves HTTPS: set **Port** to the one named, usually `443`, and **SSL Mode** to **Verify Identity**. Any other address, often a sign-in page, means the host and port reach the proxy instead of Trino.
+The coordinator never redirects, so a proxy or load balancer in front of it sent this, and the redirect is not followed. A redirect to `https://` on the same host means the proxy serves HTTPS: set **Port** to the one named, usually `443`, and **SSL Mode** to **Verify Identity**. Any other address, often a sign-in page, means the host and port reach the proxy instead of the coordinator.
 
 ### "The server requires a client certificate for TLS mutual authentication"
 

@@ -3,7 +3,7 @@ title: SSL/TLS
 description: Configure encrypted database connections, per-driver defaults, and certificate verification
 ---
 
-Managed databases require TLS, every one of them, from RDS and Cloud SQL to Supabase, Neon, Atlas, and ClickHouse Cloud. Use **Verify Identity** when your provider hands you a CA certificate, or when the driver checks the system trust store on its own: ClickHouse, Trino, and SQL Server. Otherwise set **Required (skip verify)**.
+Managed databases require TLS, every one of them, from RDS and Cloud SQL to Supabase, Neon, Atlas, and ClickHouse Cloud. Use **Verify Identity** when your provider hands you a CA certificate, or when the driver checks the system trust store on its own: ClickHouse, Trino, Presto, and SQL Server. Otherwise set **Required (skip verify)**.
 
 ## Modes
 
@@ -26,7 +26,7 @@ The certificate rows appear only once **SSL Mode** is anything but Disabled. Eac
 
 | Field | When it appears | What it takes |
 |---|---|---|
-| **Certificate**, under **CA Certificate** | Verify CA and Verify Identity only | The PEM or DER certificate the server's certificate chains to, for example `/path/to/ca-cert.pem`. Saving without it is blocked, except under Verify Identity on ClickHouse, Kafka, SAP HANA and Trino, which check the system trust store when it is empty |
+| **Certificate**, under **CA Certificate** | Verify CA and Verify Identity only | The PEM or DER certificate the server's certificate chains to, for example `/path/to/ca-cert.pem`. Saving without it is blocked, except under Verify Identity on ClickHouse, Kafka, Presto, SAP HANA and Trino, which check the system trust store when it is empty |
 | **Client Certificate** | Any mode but Disabled | Your certificate, for a server that enforces mutual TLS. Optional otherwise |
 | **Client Key** | Any mode but Disabled | The matching private key. Required once a client certificate is set |
 | **Key Passphrase** | Once **Client Key** has a path, on drivers that support it (Cassandra and ScyllaDB) | The passphrase of an encrypted key. Stored in the Keychain |
@@ -45,7 +45,7 @@ A new connection starts on the mode that matches the driver's own default, and s
 | Teradata | Disabled | Opens a TLS transport, retries on a plain socket if it fails to come up |
 | MongoDB, Redis, Cassandra, ClickHouse, Elasticsearch, Typesense, SurrealDB, Weaviate | Disabled | Nothing. No fallback exists, so Preferred forces TLS exactly like Required |
 | etcd | Disabled | Nothing. The driver never reads these fields. Set **TLS Mode** on the Options section instead, and see [etcd](/databases/etcd) |
-| Trino | Disabled | Sends every request over HTTPS with no fallback, again like Required |
+| Trino, Presto | Disabled | Sends every request over HTTPS with no fallback, again like Required |
 | SAP HANA | Verify Identity | Nothing. No fallback exists, so Preferred forces TLS exactly like Required |
 | Oracle | Disabled | Connects in plain TCP, so it behaves like Disabled. A red warning appears under the picker; use Required to enforce TCPS |
 | Snowflake, BigQuery, Bigtable, Spanner, Firestore, Firebase Realtime Database, DynamoDB, Cloudflare D1, Cloudflare R2 SQL, libSQL / Turso | Always encrypted | These drivers are HTTPS and manage TLS themselves. No **SSL Mode** |
@@ -55,7 +55,7 @@ A new connection starts on the mode that matches the driver's own default, and s
 
 | Driver | Ports |
 |---|---|
-| Trino | 443 |
+| Trino, Presto | 443 |
 | ClickHouse | 443, 8443 |
 
 Type one of these ports while **SSL Mode** is still at the driver's default and the mode becomes **Verify Identity**, with a note under **Port**. Type a different port and the default comes back. A mode you picked yourself never changes.
@@ -106,7 +106,7 @@ The server enforces mutual TLS. Fill in **Client Certificate** and **Client Key*
 
 ### "client private key is encrypted" / "passphrase is incorrect"
 
-Enter the key's passphrase in **Key Passphrase**, which appears once **Client Key** has a path. Trino and etcd have no **Key Passphrase**: decrypt the key first with `openssl pkey -in encrypted.key -out client.key` and choose the decrypted file.
+Enter the key's passphrase in **Key Passphrase**, which appears once **Client Key** has a path. Trino, Presto and etcd have no **Key Passphrase**: decrypt the key first with `openssl pkey -in encrypted.key -out client.key` and choose the decrypted file.
 
 ## On iPhone and iPad
 
