@@ -1,0 +1,50 @@
+---
+title: Emacs Mode
+description: Emacs movement, kill and yank, and the mark inside the SQL editor
+---
+
+Choose **Emacs** under **Settings > Editor > Key bindings**. Emacs keys apply only in the SQL editor, and a `Cmd` chord passes through, so `Cmd+Enter` still runs the query. Vim and Emacs exclude each other: choosing one turns the other off.
+
+## Move the cursor
+
+| Key | Goes to |
+|-----|---------|
+| `Ctrl+F` `Ctrl+B` | Next, previous character |
+| `Ctrl+N` `Ctrl+P` | Next, previous line |
+| `Ctrl+A` `Ctrl+E` | Start, end of the line |
+| `Option+F` `Option+B` | Next, previous word |
+
+## Kill and yank
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+K` | Kill to the end of the line. At the end of a line, kill the line break |
+| `Option+D` | Kill the next word |
+| `Option+Delete` | Kill the previous word |
+| `Ctrl+W` | Kill the region |
+| `Option+W` | Copy the region to the kill ring |
+| `Ctrl+Y` | Yank the last kill |
+| `Option+Y` | Right after a yank, swap it for the kill before it. Press again to go further back |
+
+Kills in a row join into one entry: three `Ctrl+K` presses yank back as three lines. A move or an edit in between starts a new entry. `Delete` and `Forward Delete` never touch the kill ring.
+
+The kill ring holds 120 entries and is separate from the clipboard, so `Cmd+C`, `Cmd+X` and `Cmd+V` keep working as usual.
+
+## Mark and region
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+Space` `Ctrl+@` | Set the mark. Every motion then grows the region from it, the arrow keys too |
+| `Ctrl+G` | Drop the region and close completions |
+
+The region shows as the selection. A click, `Shift` with an arrow key, or typing drops it, and typing over it replaces it. `Ctrl+K`, `Option+D` and `Ctrl+Y` drop it and act at the cursor.
+
+When more than one input source is enabled, macOS takes `Ctrl+Space` to switch between them. Use `Ctrl+@`, or turn that shortcut off in **System Settings > Keyboard > Keyboard Shortcuts > Input Sources**.
+
+## Completions
+
+`Ctrl+Space` sets the mark in Emacs mode, so open completions with `Escape` or `Option+Escape`.
+
+## Other keys
+
+`Option` types its usual character on every key the tables leave out. `Ctrl+D`, `Ctrl+T`, `Ctrl+O`, `Ctrl+V` and the other text keys every Mac text field answers keep their macOS meaning.

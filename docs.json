@@ -283,6 +283,7 @@
               "features/autocomplete",
               "features/query-parameters",
               "features/vim-mode",
+              "features/emacs-mode",
               "features/query-history",
               "features/query-insights"
             ]
