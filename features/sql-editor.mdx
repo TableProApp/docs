@@ -190,19 +190,30 @@ The editor also carries multiple cursors, for editing several places at once.
 
 Press `Cmd+Shift+L` to format the statement at the cursor. The toolbar's format button and **Query > Format Query** do the same, and the shortcut is rebindable in **Settings > Keyboard**.
 
-The token-based formatter breaks a line per clause, indents two spaces, cases keywords per **Settings > Editor > Keyword case**, and keeps your comments, string literals, cursor position and dialect identifier quoting (MySQL backticks, PostgreSQL double quotes). JOINs, subqueries, CASE expressions, recursive CTEs, window functions and set operations are all handled. Procedural blocks pass through with minimal changes: PL/pgSQL `DO`, stored procedures, T-SQL `BEGIN`/`END`.
+The formatter breaks a line per clause and keeps your comments, string literals, cursor position and dialect identifier quoting (MySQL backticks, PostgreSQL double quotes). Indentation, keyword and function case, comma position, line width, the join condition and alias alignment are set in **Settings > Editor > Formatter**; see [Formatter](/customization/editor-settings#formatter). A `.sql-formatter.json` in a [linked SQL folder](/features/favorites#linked-sql-folders) sets them for the files in that folder. JOINs, subqueries, CASE expressions, recursive CTEs, window functions and set operations are all handled. Procedural blocks pass through with minimal changes: PL/pgSQL `DO`, stored procedures, T-SQL `BEGIN`/`END`.
 
 **Before**:
 ```sql
 select u.id,u.name,count(o.id) as order_count from users u left join orders o on u.id=o.user_id where u.status='active' group by u.id,u.name having count(o.id)>5 order by order_count desc;
 ```
 
-**After**:
+**After**, with the default rules:
 ```sql
-SELECT
-  u.id,
-  u.name,
-  COUNT(o.id) AS order_count
+SELECT u.id,
+       u.name,
+       count(o.id) AS order_count
+FROM users u
+LEFT JOIN orders o
+  ON u.id = o.user_id
+WHERE u.status = 'active'
+GROUP BY u.id, u.name
+HAVING count(o.id) > 5
+ORDER BY order_count DESC;
+```
+
+**After**, with a line width of 80, the join condition on the JOIN line and function case `UPPERCASE`:
+```sql
+SELECT u.id, u.name, COUNT(o.id) AS order_count
 FROM users u
 LEFT JOIN orders o ON u.id = o.user_id
 WHERE u.status = 'active'

@@ -129,6 +129,8 @@ Click **+** at the foot of the sidebar, choose **Add Linked SQL Folder…**, and
 
 Linked folders are global, so every connection shows them. Only the first 4 KB of each file is read to build the sidebar, so a large repo stays cheap.
 
+Commit a `.sql-formatter.json` to the folder and **Format Query** uses it for every file opened from there, so the whole team formats alike. See [Share the rules](/customization/editor-settings#share-the-rules).
+
 ### Editing files
 
 Click a linked file to open it as an ordinary editor tab. `Cmd+S` writes back in the encoding the file was read with, detected from the file itself and falling back to UTF-8, then ISO Latin-1.

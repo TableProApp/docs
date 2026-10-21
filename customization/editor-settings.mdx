@@ -1,6 +1,6 @@
 ---
 title: Editor Settings
-description: SQL editor font, Vim mode, line numbers, indentation, and query parameter settings
+description: SQL editor font, Vim mode, line numbers, indentation, formatter rules, and query parameter settings
 ---
 
 **Settings > Editor** covers typing and how SQL is displayed. Grid, pagination, result cap and JSON viewer settings are on the [Data](/customization/data-settings) tab instead.
@@ -42,8 +42,56 @@ The picker lists the monospaced families installed on your Mac, at 10 to 24 pt. 
 | Setting | Default | Notes |
 |---------|---------|-------|
 | Tab width | 4 spaces | 2, 4, or 8 |
-| Keyword case | Match what I type, otherwise UPPERCASE | The case completed keywords and functions take, and the case **Format SQL** produces. `UPPERCASE` and `lowercase` also rewrite keywords as you type them, leaving strings, comments and quoted identifiers untouched. See [Keyword case](/features/autocomplete#keyword-case) |
+| Keyword case | Match what I type, otherwise UPPERCASE | The case completed keywords and functions take. `UPPERCASE` and `lowercase` also rewrite keywords as you type them, leaving strings, comments and quoted identifiers untouched. **Format Query** follows it while the formatter's own keyword case is **Same as editor**. See [Keyword case](/features/autocomplete#keyword-case) |
 | Query parameters (`:name` syntax) | On | Detects `:name` placeholders and shows the parameter panel. See [Query Parameters](/features/query-parameters) |
 | Vim mode | Off | Modal editing in the SQL editor. See [Vim Mode](/features/vim-mode) |
 
 Autocomplete is always on; see [Autocomplete](/features/autocomplete). Editor shortcuts are listed and customized on [Keyboard Shortcuts](/features/keyboard-shortcuts).
+
+## Formatter
+
+**Query > Format Query** (`Cmd+Shift+L`) follows these rules. The preview at the end of the section formats a sample statement with them, in the editor theme. The defaults produce the layout shown under [Formatting](/features/sql-editor#formatting).
+
+| Setting | Default | Notes |
+|---------|---------|-------|
+| Indent with | Spaces | Tabs indent each level with one tab, then line items up with spaces |
+| Indent width | 2 spaces | 2, 4, 8, or the editor's **Tab width** |
+| Keyword case | Same as editor | `UPPERCASE`, `lowercase`, or **As written**. **Same as editor** writes `lowercase` when **Keyword case** under Editing prefers lowercase, otherwise `UPPERCASE` |
+| Function case | As written | Applies to a call, `count(*)`, never to a column that shares a function's name. ClickHouse keeps the case you typed, since it matches function names by exact case |
+| Commas | At the end of the line | **At the start of the line** puts `, ` before each item of a SELECT list, SET list and CREATE TABLE column list |
+| Line width | One item per line | At 80, 100 or 120 characters, a SELECT list, SET list or WHERE condition that fits stays on one line |
+| Join condition | On its own line | **On the JOIN line** writes `LEFT JOIN orders o ON u.id = o.user_id` |
+| Align column aliases | Off | Lines up the `AS` of each SELECT item that sits on one line |
+
+**Restore Defaults** puts every formatter setting back.
+
+### Share the rules
+
+Click **Export…** to save the rules as `sql-formatter.json`. The file holds the resolved values: a width that follows **Tab width** is written as the number, and **Same as editor** as the case it means, so the file formats the same on every Mac. Click **Import…** on another Mac to load it into Settings.
+
+To apply the rules to a [linked SQL folder](/features/favorites#linked-sql-folders) instead, save the file in that folder as `.sql-formatter.json`. A file opened from the folder then formats with it rather than with Settings. The nearest `.sql-formatter.json` wins, from the file's own folder up to the linked folder; nothing above the linked folder is read. A rules file that cannot be read stops Format Query with an error naming it.
+
+```json
+{
+  "alignAliases" : false,
+  "commaPosition" : "trailing",
+  "functionCase" : "preserve",
+  "indentStyle" : "spaces",
+  "indentWidth" : 2,
+  "joinCondition" : "newLine",
+  "keywordCase" : "upper",
+  "lineWidth" : 0
+}
+```
+
+| Key | Values |
+|-----|--------|
+| `indentStyle` | `spaces`, `tabs` |
+| `indentWidth` | 1 to 16 |
+| `keywordCase`, `functionCase` | `upper`, `lower`, `preserve` |
+| `commaPosition` | `trailing`, `leading` |
+| `lineWidth` | 0 to 1000. 0 puts each item on its own line |
+| `joinCondition` | `newLine`, `sameLine` |
+| `alignAliases` | `true`, `false` |
+
+A key the file leaves out takes the default shown in the example, not your Settings value. A key TablePro does not know is ignored, and a value it cannot read is an error.
