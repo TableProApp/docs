@@ -46,7 +46,7 @@ On PostgreSQL 9.1 an idle session shows an empty Query: that server keeps only t
 
 Two buttons sit on each row. **Cancel Query** stops the running statement and leaves the connection up: `pg_cancel_backend` on PostgreSQL, `KILL QUERY` on MySQL, `ALTER SYSTEM CANCEL SQL` on Oracle, `killOp` on MongoDB, `CLIENT UNBLOCK … ERROR` on Redis. **Terminate Session** ends the connection itself with `pg_terminate_backend`, `KILL`, `ALTER SYSTEM KILL SESSION … IMMEDIATE` or `CLIENT KILL ID`, and the server rolls back any transaction that session had open. Both confirm first, and a refusal from the server comes back as an **Action Failed** alert.
 
-MySQL before 5.0 and Oracle before 18c have no way to cancel a statement, so their rows offer only **Terminate Session**. MongoDB has no command that closes another client's connection, and an idle MongoDB connection has no operation to cancel. On Redis only a blocked client, one waiting in `BLPOP`, `XREAD` or the like, has a command to cancel: its wait ends with an error.
+MySQL before 5.0 and Oracle before 18c have no way to cancel a statement, so their rows offer only **Terminate Session**. MongoDB has no command that closes another client's connection, and an idle MongoDB connection has no operation to cancel. On Redis only a blocked client, one waiting in `BLPOP`, `XREAD` or the like, has a command to cancel, from Redis 5.0: its wait ends with an error.
 
 On MongoDB, State is `active` or `idle`. On Redis, Duration is how long the client has been idle, Query is its last command, and State names a blocked, `MULTI`, Pub/Sub, replica or master client.
 
@@ -75,7 +75,7 @@ The interval menu offers 1s, 2s, 5s (the default), 10s, 30s, and Off. **Pause** 
 | ClickHouse | Yes | Active queries, active merges, part mutations, disk usage | Yes | - | Yes |
 | Oracle | Yes | User sessions, database CPU, logical reads per second, uptime | Yes | 18c and later | Yes |
 | MongoDB | Yes | Connections, uptime, resident memory, query, insert, update, delete and command counters | Profiler | Yes | - |
-| Redis | Yes | Connected clients, used memory, operations per second, keyspace hit ratio, uptime | Slow log | Blocked clients | Yes |
+| Redis | Yes | Connected clients, used memory, operations per second, keyspace hit ratio, uptime | Slow log | Blocked clients, 5.0 and later | Yes |
 | Typesense | - | System and process memory, memory fragmentation, disk, requests per second, search and write latency, pending write batches, cache hit ratio | - | - | - |
 
 On Oracle, a pluggable database shows its own sessions and metrics, and the root container shows every container's. On a Redis Cluster, the sessions and metrics come from one primary, the node TablePro sends commands without a key to, and the slow log comes from every node. While a `MULTI` block is open on a Redis connection, the panels say so and send nothing into it until it ends.
