@@ -69,7 +69,13 @@ Drag a border to resize a column, or double-click it to fit the content; **Size 
 
 Hide columns from the columns button in the status bar or from the header menu. A hidden column is not fetched, so hiding a large one makes the table load faster; the primary key and the sorted column are fetched either way. On a schemaless store the popover lists every field the grid can draw, including ones that turn up only in later documents.
 
-Widths, order, and hidden columns are remembered per table, scoped to the connection, database, and schema; **Reset Columns** in the popover puts them back. Right-click a header and choose **Display As** to read a column's stored values in a different form; [Cell and Row Viewers](/features/json-viewer) lists the formats.
+Widths, order, hidden and frozen columns are remembered per table, scoped to the connection, database, and schema; **Reset Columns** in the popover puts them back. Right-click a header and choose **Display As** to read a column's stored values in a different form; [Cell and Row Viewers](/features/json-viewer) lists the formats.
+
+### Freeze columns
+
+Right-click a column's header and choose **Freeze Up to This Column** to hold it and every column before it beside the row numbers. The rest scroll under them, and a line marks where the frozen columns end. Select, copy, edit, and jump to a frozen column as to any other. **Unfreeze Columns** on the header menu lets them scroll again.
+
+Frozen columns cover at most two thirds of the grid's width. The menu item is dimmed for a column that would freeze more, and frozen columns that no longer fit after the window narrows scroll until it widens again. Click a frozen header to sort it, or drag its edge to resize it, at any scroll position. To move a frozen column, scroll back to the first column and drag its header. On a query result they stay frozen until the tab closes or the app quits.
 
 ### Jump to a column
 
