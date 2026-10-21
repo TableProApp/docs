@@ -127,6 +127,8 @@ Selecting a node in either view fills the detail panel:
 | **Cost** | `startup..total`, or the total alone when that is all the plan carries |
 | **Rows**, **Width** | Estimated row count and row width |
 | **Actual Time**, **Actual Rows**, **Loops** | Present only on a measured plan |
+| **Warnings** | What the server flagged on the step, such as a spill to tempdb or an implicit conversion. The step carries a warning badge in both views |
+| **Missing Indexes** | An index the server says would have helped, as a `CREATE INDEX` statement with a copy button |
 | **Details** | Everything else the driver reported: join type, index name, filter conditions, sort keys |
 
 Properties the driver reported as false or zero are left out of **Details**.
@@ -151,9 +153,13 @@ Properties the driver reported as false or zero are left out of **Details**.
 | Spanner | Plan | From the indented text |
 | SAP HANA | Plan | From the indented text |
 | Teradata | EXPLAIN | Raw text only |
+| Oracle | Estimated Plan, Actual Plan | From `PLAN_TABLE`, and from `V$SQL_PLAN_STATISTICS_ALL` for the actual plan |
+| SQL Server, Azure SQL | Estimated Plan, Actual Plan | From the showplan XML |
+
+On Oracle the estimated plan needs no grant. The actual plan reads `V$SESSION`, `V$PARAMETER` and `V$SQL_PLAN_STATISTICS_ALL`, so the account needs `SELECT` on `V_$SESSION`, `V_$PARAMETER` and `V_$SQL_PLAN_STATISTICS_ALL`, or `SELECT_CATALOG_ROLE`. On SQL Server both variants need the `SHOWPLAN` permission in the database.
 
 An engine missing from the table has no plan to show, and **Query > Explain Query** is dimmed for it. On MongoDB, call `.explain()` on the query in the editor instead.
 
 <Warning>
-`EXPLAIN` does not run the query. `EXPLAIN ANALYZE` does, so on a production server it costs whatever the query costs. Safe Mode asks before an EXPLAIN too, whichever way you started it, and the Stop button cancels one that is taking too long.
+`EXPLAIN` and **Estimated Plan** do not run the query. `EXPLAIN ANALYZE` and **Actual Plan** do, so on a production server they cost whatever the query costs. Safe Mode asks before an EXPLAIN too, whichever way you started it, and the Stop button cancels one that is taking too long.
 </Warning>
