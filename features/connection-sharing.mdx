@@ -164,6 +164,9 @@ A connection in `~/Library/Application Support/TablePro/connections.json` can sa
 { "passwordSource": { "kind": "onePassword", "reference": "op://vault/feature-x/password" } }
 { "passwordSource": { "kind": "vault", "path": "secret/data/staging/db", "field": "password" } }
 { "passwordSource": { "kind": "awsSecretsManager", "secretId": "prod/db", "jsonKey": "password" } }
+{ "passwordSource": { "kind": "vaultDatabaseRole", "mount": "database", "role": "readonly" } }
+{ "passwordSource": { "kind": "vaultDatabaseRole", "address": "https://vault.example.com:8200", "mount": "database", "role": "readonly",
+                      "auth": { "method": "approle", "roleId": "8f1c…", "secretIdPath": "~/.vault/secret-id" } } }
 ```
 
 | `kind` | Reads from | Set up first |
@@ -174,6 +177,7 @@ A connection in `~/Library/Application Support/TablePro/connections.json` can sa
 | `onePassword` | `op read` on the reference | `op signin` |
 | `vault` | `vault kv get` for one field at a path | `VAULT_ADDR` and `VAULT_TOKEN` in TablePro's environment |
 | `awsSecretsManager` | `aws secretsmanager get-secret-value`. `jsonKey` pulls one field out of a JSON secret; omit it for the whole value | |
+| `vaultDatabaseRole` | A new lease from `<mount>/creds/<role>`, which supplies the username as well. `auth.method` is `token` (the default), `approle` with `roleId` and `secretIdPath`, or `oidc` with an optional `role`; each takes an optional `mount` | `address`, or `VAULT_ADDR` in TablePro's environment. See [Vault database roles](/connections/credential-profiles#vault-database-roles) |
 
 Every command gets 30 seconds. The three CLI kinds quote each argument, so a reference cannot break out into the shell, and they need the tool on `PATH`, in `/usr/local/bin`, or in `/opt/homebrew/bin`.
 
