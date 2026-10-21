@@ -27,7 +27,7 @@ It opens itself with nothing typed after FROM, JOIN, INTO, ON, SET, USING, RETUR
 | `Return` / `Tab` | Accept the selected suggestion |
 | `Escape` | Dismiss and keep typing |
 
-Autocomplete is always on and there is nothing to turn off. What the popup offers depends entirely on where the cursor sits; the one setting is the case keywords come back in.
+Autocomplete is always on and there is nothing to turn off. What the popup offers depends entirely on where the cursor sits. Two settings decide spelling: the case keywords come back in, and on some engines the case of table and column names.
 
 ## SQL keywords
 
@@ -47,7 +47,7 @@ cou|  -- count()
 COU|  -- COUNT()
 ```
 
-The first letter decides, so `Sel` completes to `SELECT` and `sElE` to `select`. A phrase moves as one: `group b` completes to `group by`. Table, column, schema and alias names are never re-cased, and neither are saved [favorite keywords](#favorite-keywords) or the values of an enum column.
+The first letter decides, so `Sel` completes to `SELECT` and `sElE` to `select`. A phrase moves as one: `group b` completes to `group by`. Table, column and schema names follow [Identifier case](#identifier-case) instead. Aliases, saved [favorite keywords](#favorite-keywords) and the values of an enum column are never re-cased.
 
 **Settings > Editor > Keyword case** holds four values:
 
@@ -59,6 +59,27 @@ The first letter decides, so `Sel` completes to `SELECT` and `sElE` to `select`.
 | lowercase | `select` | `select` |
 
 The two absolute values also rewrite keywords as you type them and set the case [Format SQL](/features/sql-editor#formatting) produces.
+
+## Identifier case
+
+PostgreSQL and PGlite read an unquoted name as lowercase, Oracle and Snowflake as uppercase. On those engines a table or column stored in any other case, or named after a reserved word, completes quoted and exactly as stored, so the query finds it:
+
+```sql
+SELECT * FROM mix|  -- "MixedCase"
+```
+
+Set how the other names are spelled under **Autocomplete > Identifier case** in the connection's [Options](/connections/connection-form#options) tab:
+
+| Value | Snowflake table `MY_TABLE`, typing `my_t` |
+|-------|-------------------------------------------|
+| As stored (the default) | `MY_TABLE` |
+| lowercase | `my_table` |
+| UPPERCASE | `MY_TABLE` |
+| Match what I type | `my_table` |
+
+A name changes case only when the engine reads the new spelling as the same name. **Match what I type** follows the first letter you type, and keeps the stored spelling when you have typed none. Inside quotes you typed yourself, the name goes in as stored.
+
+**lowercase** and **UPPERCASE** also spell the names **Copy as INSERT Statements** and **Copy as UPDATE Statements** write, which otherwise quote every name.
 
 ## Table names
 
