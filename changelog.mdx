@@ -4,6 +4,20 @@ description: "Product updates and announcements for TablePro"
 rss: true
 ---
 
+<Update label="v0.82.2" description="October 23, 2026">
+  ### Improvements
+
+  - The grid no longer edits or deletes ClickHouse, Snowflake, Trino or keyless Dameng rows; use a SQL statement instead. ([#3794](https://github.com/TableProApp/TablePro/pull/3794))
+
+  ### Bug Fixes
+
+  - A grid edit or delete on ClickHouse, Snowflake, Trino or a keyless Dameng table could change other rows too. ([#3794](https://github.com/TableProApp/TablePro/pull/3794))
+
+  ### Security
+
+  - SAP HANA connections accepting a server certificate issued through a compromised intermediate CA (GO-2026-6809). ([#3796](https://github.com/TableProApp/TablePro/pull/3796))
+</Update>
+
 <Update label="v0.82.0" description="October 19, 2026">
   Solarized, GitHub, Catppuccin, Gruvbox, Tokyo Night and One Dark themes, VS Code theme import, and a Theme Editor with live preview.
 
