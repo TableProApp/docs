@@ -115,7 +115,7 @@ The strip keeps one row and scrolls it, the way every macOS tab bar does. Scroll
 
 ## Switching tabs
 
-`Cmd+1` through `Cmd+9` jump by position, `Cmd+Shift+[` and `Cmd+Shift+]` step along the strip, and **Window > Show Previous Tab** and **Window > Show Next Tab** do the same from the menu bar. A tab scrolled out of sight is pulled back into view. Switching keeps SQL, cursor, results, scroll position, sort, filters, and pending changes.
+`Cmd+1` through `Cmd+9` jump by position, `Cmd+Shift+[` and `Cmd+Shift+]` step along the strip, and **Window > Show Previous Tab** and **Window > Show Next Tab** do the same from the menu bar. A tab scrolled out of sight is pulled back into view. Switching keeps SQL, cursor, results, scroll position, sort, filters, and pending changes. A table tab shows the rows it last read until you reload it, as [Reloading](/features/data-grid#reloading) describes.
 
 `Ctrl+Tab` goes back to the tab you used before this one, wherever it sits in the strip. Press it again to return. The order covers every connection in the window, so it also bounces between a tab on one connection and a tab on another.
 
@@ -127,8 +127,6 @@ To reach further back, keep `Control` held and press `Tab` again. After a moment
 </Frame>
 
 Both commands are in the **Window** menu as **Switch to Recent Tab** and **Switch to Least Recent Tab**. Chosen there with the pointer, or bound in **Settings > Keyboard** to a function key with no modifier, each one switches straight to its tab without showing the list. Tabs behind Agent mode or a connection that is not connected are left out. In a window with no other editor tab to go to, `Ctrl+Tab` and `Ctrl+Shift+Tab` switch the window's own tabs instead, when it is part of a macOS window tab group.
-
-Loaded rows are the exception, and only in bulk. Background table tabs keep their rows up to a budget read from the Mac's memory: two under 8 GB, three at 8 GB, five at 16 GB, eight at 32 GB or more, halved under memory pressure. Past that, the tabs you touched longest ago drop their rows and re-query when you return. Thirty table tabs cost one query on return, not thirty resident result sets.
 
 ## Where a tab points
 
