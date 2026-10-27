@@ -100,9 +100,11 @@ Finishing commits what the routine changed. A PostgreSQL procedure's own `COMMIT
 **Stop** waits at most 3 seconds for the server to end the routine. When it cannot confirm the end, the status says so in place of **Stopped**:
 
 - On PostgreSQL it reads "The routine couldn't be stopped on the server." and names the server process, with the SQL that ends it. See [Troubleshooting](#troubleshooting).
-- On Oracle, a routine that Stop cannot reach, such as one running between breakpoints under DBMS_DEBUG, is ended with `ALTER SYSTEM KILL SESSION` when your account has `ALTER SYSTEM`. Without it, the status and Output say the routine is still running and give its SID and SERIAL#. Its uncommitted work rolls back when it ends, and a user with `ALTER SYSTEM` can kill it sooner.
+- On Oracle, a routine that Stop cannot reach, such as one running between breakpoints under DBMS_DEBUG, is ended with `ALTER SYSTEM KILL SESSION` when your account has `ALTER SYSTEM`. Without it, the status and Output say the routine is still running and give its SID, SERIAL# and the `ALTER SYSTEM KILL SESSION` statement that ends it, naming the instance on RAC. Its uncommitted work rolls back when it ends, and a user with `ALTER SYSTEM` can kill it sooner.
 
-Closing the debug tab, closing its window, disconnecting, deselecting the module and quitting TablePro each stop the run first. Quitting waits up to 5 seconds for that.
+Closing the debug tab, closing its window, disconnecting, deselecting the module and quitting TablePro each stop the run first. Quitting waits up to 5 seconds for that. When the tab is gone and the stop could not be confirmed, an alert says so instead of the status.
+
+A debug tab stays in the window that started it: it cannot be dragged into a window of its own.
 
 A crash or a force quit cannot stop the run. A PostgreSQL run then holds its server session and its locks until the server restarts. Oracle ends the run and rolls it back on its own, within 30 seconds under DBMS_DEBUG.
 
