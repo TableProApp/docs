@@ -236,35 +236,42 @@ references the target's afterwards, so the duplicate stands on its own; one that
 schema is left as it was.
 
 Order alone cannot place two tables that reference each other, a table that references itself
-with a child row ahead of its parent, or a source row whose parent is already gone. Rows are
-therefore written with the target's foreign key checks off where the engine can turn them off for
-one session, as MySQL and MariaDB can, and the session gets back the setting it had. PostgreSQL keeps
-its checks on, because its switch also stops the target's own triggers and needs a superuser, so
-there such a row fails and the result names its table. **Skip and continue** keeps them on too: a
-table that failed can leave its children's parents missing, and only the checks say so.
+with a child row ahead of its parent, or a source row whose parent is already gone. Under **Stop and
+roll back**, when every key the copied tables hold points at a table the copy fills with all of its
+rows, those rows are written with the target's foreign key checks off where the engine can turn them
+off for one session, as MySQL and MariaDB can, and the session gets back the setting it had.
+
+The checks stay on otherwise, and such a row fails with the result naming its table:
+
+- A key to a table outside the copy, or to one narrowed by a filter or a row limit. Turning the
+  checks back on checks nothing already written, so the row would point at nothing.
+- PostgreSQL, because its switch also stops the target's own triggers and needs a superuser.
+- **Stop and keep what ran** and **Skip and continue**, since what they keep after a failure can
+  leave a child's parent missing.
 
 Emptying a table for a Replace keeps the checks on, so a table that references it, selected or not,
 applies its own `ON DELETE` rule.
 
-Two tables that reference each other are created with checks off on MySQL and MariaDB. On
-PostgreSQL the second `CREATE TABLE` fails, its error appears in the result, and the rest of the
-copy is unaffected.
+Two tables that reference each other are created with checks off on MySQL and MariaDB when the copy
+holds both. On PostgreSQL the second `CREATE TABLE` fails, its error appears in the result, and the
+rest of the copy is unaffected.
 
 ## Stopping a copy
 
-**Stop** takes effect at the next batch boundary. Each table is its own transaction where the engine
-supports one, so the table being copied rolls back and the tables already finished stay. A driver
-blocked inside a network call finishes that batch first.
+**Stop** takes effect at the next batch boundary. A driver blocked inside a network call finishes that
+batch first.
 
-A Replace that removes the target's rows is the exception: every table is emptied before any of them
-is filled, so that a cascading foreign key cannot reach a table you did not select. Under **Stop and
-roll back** the whole data phase is then one transaction, and stopping it or a failure puts every row
-back. The other two settings promise no rollback, so there the clearing stands, and a table whose
-emptying failed gets no rows. The structure is not one transaction under them either, so what was
-created before a failure stays.
+Under **Stop and roll back** the whole data phase is one transaction where the engine supports one,
+so stopping it or a failure puts every row back. A Replace that removes the target's rows empties
+every table inside it before any of them is filled, so that a cascading foreign key cannot reach a
+table you did not select.
 
-A stopped copy reports only what was committed. The table it was in the middle of counts as neither
-copied nor failed.
+The other two settings commit each batch as it is written, so stopping or a failure keeps what was
+written. There the clearing stands, a table whose emptying failed gets no rows, and the structure is
+not one transaction either, so what was created before a failure stays.
+
+The result counts only the rows the target kept, including the batches a failed table wrote before
+its error.
 
 When the target connection already holds a transaction, the copy runs inside it and opens none of its own. Nothing it wrote is committed until you commit that transaction, and the result says so.
 
