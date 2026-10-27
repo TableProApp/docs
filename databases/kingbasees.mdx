@@ -1,0 +1,86 @@
+---
+title: KingbaseES
+description: Connect to a KingbaseES server with the downloadable libpq driver
+---
+
+import RegistryPlugin from "/snippets/registry-plugin.mdx";
+
+Choose **KingbaseES** when creating the connection. Enter the database and role supplied by your administrator; neither field is pre-filled.
+
+<RegistryPlugin name="KingbaseES" />
+
+The plugin is named **KingbaseES Driver**. It supports KingbaseES V9 and was tested against V9R1C10 in PostgreSQL and Oracle compatibility modes.
+
+## Quick setup
+
+<Steps>
+  <Step title="Choose the engine">
+    Create a connection, choose **KingbaseES**, and install its driver when offered.
+  </Step>
+  <Step title="Enter the server details">
+    Set **Host**, **Port**, **Username**, **Password**, and **Database** to the values for your server. The default port is `54321`.
+  </Step>
+  <Step title="Connect">
+    Click **Save & Connect**.
+  </Step>
+</Steps>
+
+## Connection settings
+
+| Field | Default | Notes |
+|---|---|---|
+| **Host** | `localhost` | Enter the server hostname or IP address |
+| **Port** | `54321` | Use the port configured on your server |
+| **Username** | Empty | Enter your database role |
+| **Database** | Empty | Required; enter the database to open |
+| **SSL Mode** | **Preferred** | Tries TLS first, then plain text if the server refuses TLS |
+| **Connection Options** | Empty | Additional libpq connection options |
+
+## Connection URL
+
+```text
+kingbase://user:password@host:54321/database
+kingbase8://user:password@host:54321/database
+```
+
+See [Connection URL Reference](/connections/urls) for opening a connection URL.
+
+## Authentication
+
+Enter the password for your database role, or select **Use ~/.pgpass** to read it from a password file. A matching entry uses the server's port:
+
+```text
+host:54321:database:user:password
+```
+
+Set the file permissions with `chmod 0600 ~/.pgpass`. See [Password file](/databases/postgresql#password-file).
+
+## Cross-database tabs
+
+Each database opened from the connections strip keeps a separate connection. A tab runs on the connection for its bound database; transactions and temporary tables belong to that connection. See [Cross-database tabs](/databases/postgresql#cross-database-tabs).
+
+## Compatibility modes
+
+The driver reads the server's `database_mode` setting when it connects. PostgreSQL (`pg`) and Oracle (`oracle`) modes are supported. A server in MySQL or SQL Server mode is refused with an error, and a server without the setting connects in PostgreSQL mode.
+
+In Oracle mode, anonymous blocks, procedure bodies, `q'[...]'` strings and `/` lines stay whole when you run a statement or a script, import a `.sql` file, or run startup commands. Dollar-quoted strings work in both modes.
+
+## Copying and comparing
+
+Copy tables between KingbaseES in PostgreSQL mode and PostgreSQL, or generate a Compare & Sync structure script between them. A server in Oracle mode spells its column types its own way, so it copies and syncs structure only with another Oracle-mode server. See [Copy objects](/features/copy-objects) and [Compare & Sync](/features/compare-sync).
+
+## SSL/TLS
+
+The default **Preferred** mode falls back to plain text when the server refuses TLS. Select **Verify CA** to validate the server certificate. See [SSL/TLS](/connections/ssl) for the certificate settings.
+
+## Limitations
+
+- In the tested Oracle configuration, empty strings and empty `bytea` values become SQL NULL. They do not remain distinct values; use a separate flag column if that distinction matters.
+- Oracle-mode `DATE` values include a time component. Read and write the time as part of the value.
+- The tested V9R1C10 server rejects `NUMERIC 'Infinity'`. Use a finite numeric value or a separate status column.
+- A transaction or temporary table in one database is not shared with another database's tab. Keep related statements on the same database connection.
+
+## Related
+
+- [Connections](/connections)
+- [Plugins](/features/plugins)

@@ -98,6 +98,8 @@ A `CREATE` whose unit does not compile fails with Oracle's own errors, one per l
 
 `DBMS_OUTPUT.PUT_LINE` lines show with the result of the statement that printed them. See [Server output](/features/query-results#server-output).
 
+The [Routine Debugger](/features/routine-debugger) steps through a procedure, a function or a package with breakpoints. It needs `DEBUG CONNECT SESSION`.
+
 In a trigger body, `:NEW` and `:OLD` are left as written. In an anonymous block, `:name` is a [query parameter](/features/query-parameters) filled from the panel.
 
 An anonymous block, or a query whose `WITH` clause declares a function, runs code on the server. One that drops or truncates, including through `EXECUTE IMMEDIATE '…'`, raises the [dangerous query warning](/features/safe-mode) before it runs, and a Read-Only connection refuses it like any write. [MCP clients](/developers/mcp-tools) and the AI assistant cannot send either.

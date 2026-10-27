@@ -255,6 +255,7 @@
               "databases/bigquery",
               "databases/bigtable",
               "databases/kafka",
+              "databases/kingbasees",
               "databases/libsql",
               "databases/mariadb",
               "databases/mssql",
@@ -311,6 +312,7 @@
             "pages": [
               "features/table-structure",
               "features/routines-triggers",
+              "features/routine-debugger",
               "features/user-defined-types",
               "features/table-operations",
               "features/er-diagram",

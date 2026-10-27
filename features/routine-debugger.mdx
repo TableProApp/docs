@@ -1,0 +1,256 @@
+---
+title: Routine Debugger
+description: Step through PostgreSQL PL/pgSQL and Oracle PL/SQL routines with breakpoints, the call stack and variable values
+---
+
+A debug run executes the routine on the server, with the arguments you type, in two sessions of its own. It does not see uncommitted work from your query tabs, and what it changes is committed when it finishes.
+
+## Turn it on
+
+The debugger is a module, off by default. Select **Routine Debugger** under **Modules** in **Settings > Extensions**. That adds:
+
+- the **Debug** menu, between Query and Window
+- **Debug…** on the right-click menu of a function or procedure in the sidebar
+- a **Debug** section in **Settings > Keyboard**
+- **Continue** and **Stop** in the toolbar while a debug tab is in front. Step Over, Step Into and Step Out are in **View > Customize Toolbar…**
+
+Deselecting the checkbox removes all of them, closes every debug tab and stops its run.
+
+<Frame caption="Modules sit above the plugin list">
+  <img className="block dark:hidden" src="/images/settings-extensions.png" alt="Settings Extensions pane with the Routine Debugger checkbox under Modules and the installed plugins under it" />
+  <img className="hidden dark:block" src="/images/settings-extensions-dark.png" alt="Settings Extensions pane with the Routine Debugger checkbox under Modules and the installed plugins under it" />
+</Frame>
+
+## Engine support
+
+| Engine | What runs under the debugger | Step Out | Server side |
+|---|---|---|---|
+| PostgreSQL | PL/pgSQL functions and procedures. Not trigger functions | No | The pldebugger package and the `pldbgapi` extension. See [PostgreSQL setup](#postgresql-setup) |
+| Oracle | PL/SQL procedures, functions and packages | Yes | Built in. See [Oracle setup](#oracle-setup) |
+
+Other engines have no debugger, Redshift, CockroachDB and PGlite included.
+
+## Start a run
+
+<Steps>
+  <Step title="Choose the routine">
+    Right-click a function or procedure in the sidebar and choose **Debug…**. To debug an Oracle package, or to pick from a list, choose **Debug > Debug Routine…**: it lists what can be debugged in the current schema, with a search field.
+  </Step>
+  <Step title="Fill in the arguments">
+    Each parameter has a row with its name and type. Type a value, or select **NULL**. **Default** is selected for every parameter that has a default; deselect it to pass a value instead. An output parameter takes no value. For a package, pick the procedure or function to start from in **Entry Point**.
+  </Step>
+  <Step title="Click Debug">
+    A debug tab opens, and the routine pauses where it starts: on its first statement on PostgreSQL, on the entry point's header line on Oracle.
+  </Step>
+</Steps>
+
+<Frame caption="An Oracle package asks for the entry point and the protocol">
+  <img className="block dark:hidden" src="/images/routine-debugger-start.png" alt="Debug start sheet with an Entry Point menu, a parameter table with Name, Type, Value, NULL and Default columns, and Protocol, Debugger Host and Debugger Ports fields" />
+  <img className="hidden dark:block" src="/images/routine-debugger-start-dark.png" alt="Debug start sheet with an Entry Point menu, a parameter table with Name, Type, Value, NULL and Default columns, and Protocol, Debugger Host and Debugger Ports fields" />
+</Frame>
+
+On Oracle the start sheet also carries **Protocol**, **Debugger Host** and **Debugger Ports**; see [Protocol](#protocol). Their values are remembered per connection on this Mac.
+
+The run goes through [Safe Mode](/features/safe-mode) as a write: **Read-Only** refuses it, and the Alert and Safe Mode levels ask first.
+
+## The debug tab
+
+<Frame caption="Paused inside a called function, with the caller one row down the stack">
+  <img className="block dark:hidden" src="/images/routine-debugger-tab.png" alt="Debug tab with the call stack on the left, read-only source with a red breakpoint and a green current line, and Variables and Output panes under a bar of debug buttons" />
+  <img className="hidden dark:block" src="/images/routine-debugger-tab-dark.png" alt="Debug tab with the call stack on the left, read-only source with a red breakpoint and a green current line, and Variables and Output panes under a bar of debug buttons" />
+</Frame>
+
+| Pane | Shows |
+|---|---|
+| Source | The routine's source, read-only. A green arrow and band mark the line about to run |
+| Call Stack | One row per active call, innermost first. Select a row to show that call's source and variables |
+| Variables | Name, value and type of each parameter and local variable of the selected call. NULL reads the way the data grid shows it |
+| Output | `RAISE NOTICE` lines on PostgreSQL, `DBMS_OUTPUT` lines on Oracle. When the routine finishes, its result follows as a grid: the rows a PostgreSQL function returns, or an Oracle function's return value and OUT parameters |
+
+On PostgreSQL the source is the routine's body without its `CREATE FUNCTION` header, so its line numbers are the ones the server's error messages use. On Oracle, package variables are listed with the rest, a record shows as `(A => 21, B => x)`, a collection as **Collection** or, under DBMS_DEBUG_JDWP, **Collection of 3 elements**, and a value the debugger cannot read as **Not readable**.
+
+The bar between the panes holds the run's buttons and its status: **Paused at line 12 in …**, **Running…**, **Finished**, **Stopped**, or the error that ended it. A long status is cut to one line; hold the pointer over it to read all of it.
+
+A debug tab stays in the tab strip whichever database or schema the sidebar shows. It is not restored when TablePro relaunches, and **Reopen Closed Tab** skips it.
+
+### Breakpoints
+
+Click the narrow column left of the line numbers to set a breakpoint, a red circle, and click it again to remove it. **Debug > Toggle Breakpoint** does the same on the line holding the cursor, and **Debug > Remove All Breakpoints** clears them.
+
+- A breakpoint set while the routine runs takes effect at the next pause.
+- PostgreSQL accepts a breakpoint on any line. One on a line with no statement never stops.
+- Oracle moves a breakpoint to the next line with code and says so in Output. With no code after it, the breakpoint is removed.
+
+### Step through
+
+| Command | What it does |
+|---|---|
+| **Continue** | Runs to the next breakpoint, or to the end |
+| **Step Over** | Runs the current line without stopping inside the routines it calls |
+| **Step Into** | Runs the current line and stops inside a PL/pgSQL or PL/SQL routine it calls |
+| **Step Out** | Runs until the current routine returns to its caller. Oracle only; it stays dimmed on PostgreSQL |
+| **Stop** | Ends the run and rolls it back. See [How a run ends](#how-a-run-ends) |
+
+Each is in the **Debug** menu and on the bar. Their default keys are under [Debug](/features/keyboard-shortcuts#debug).
+
+## How a run ends
+
+Finishing commits what the routine changed. A PostgreSQL procedure's own `COMMIT` statements commit as they run, and **Stop** rolls back only what came after the last one. An error in the routine rolls the run back and shows on the bar. **Stop** rolls it back.
+
+**Stop** waits at most 3 seconds for the server to end the routine. When it cannot confirm the end, the status says so in place of **Stopped**:
+
+- On PostgreSQL it reads "The routine couldn't be stopped on the server." and names the server process, with the SQL that ends it. See [Troubleshooting](#troubleshooting).
+- On Oracle, a routine that Stop cannot reach, such as one running between breakpoints under DBMS_DEBUG, is ended with `ALTER SYSTEM KILL SESSION` when your account has `ALTER SYSTEM`. Without it, the status and Output say the routine is still running and give its SID, SERIAL# and the `ALTER SYSTEM KILL SESSION` statement that ends it, naming the instance on RAC. Its uncommitted work rolls back when it ends, and a user with `ALTER SYSTEM` can kill it sooner.
+
+Closing the debug tab, closing its window, disconnecting, deselecting the module and quitting TablePro each stop the run first. Quitting waits up to 5 seconds for that. When the tab is gone and the stop could not be confirmed, an alert says so instead of the status.
+
+A debug tab stays in the window that started it: it cannot be dragged into a window of its own.
+
+A crash or a force quit cannot stop the run. A PostgreSQL run then holds its server session and its locks until the server restarts. Oracle ends the run and rolls it back on its own, within 30 seconds under DBMS_DEBUG.
+
+## PostgreSQL setup
+
+<Steps>
+  <Step title="Install the package on the server">
+    Install pldebugger for the server's PostgreSQL major version. With the PGDG packages on Debian or Ubuntu, that is `postgresql-17-pldebugger` for PostgreSQL 17.
+  </Step>
+  <Step title="Create the extension in each database">
+    As a superuser, in every database whose routines you debug:
+
+    ```sql
+    CREATE EXTENSION pldbgapi;
+    ```
+  </Step>
+</Steps>
+
+To debug a routine, connect as its owner or as a superuser. `shared_preload_libraries` needs no change. Add `plugin_debugger` to it and restart the server only if a run fails with "The server couldn't start the debugger."
+
+Amazon RDS for PostgreSQL 16 to 19 does not list `pldbgapi` among its extensions, so routines there cannot be debugged.
+
+## Oracle setup
+
+### Privileges
+
+The account you connect with needs `DEBUG CONNECT SESSION`. To debug a routine another schema owns, it also needs `DEBUG` on that routine, or `DEBUG ANY PROCEDURE`. A DBA grants them:
+
+```sql
+GRANT DEBUG CONNECT SESSION TO app_user;
+GRANT DEBUG ON hr.payroll_pkg TO app_user;
+```
+
+### Compile for debug
+
+A unit compiled without debug information cannot stop on a breakpoint. Starting a run on one asks to compile it first: **Compile for Debug** recompiles it with `PLSQL_OPTIMIZE_LEVEL=1` and keeps its other settings. Compiling commits. For a package, other sessions using it lose its state, and their next call to it fails once with ORA-04068. Safe Mode treats the compile as a schema change.
+
+### Protocol
+
+| Protocol | Who connects to whom | Needs |
+|---|---|---|
+| DBMS_DEBUG_JDWP | The database server connects to this Mac | A `jdwp` access control entry a DBA grants, and a route from the server to the Mac |
+| DBMS_DEBUG | TablePro connects to the database | Nothing more. Works through SSH tunnels and proxies |
+
+Leave **Protocol** on **Automatic**, the default. It tries DBMS_DEBUG_JDWP and falls back to DBMS_DEBUG when the server cannot reach the Mac: the access control list refuses it, the connection fails or takes more than 15 seconds, no port in the range is free, or the database has no DBMS_DEBUG_JDWP. Output names the protocol in use and the reason for a fallback. Choose **DBMS_DEBUG** when you know the server cannot reach this Mac, which skips that attempt. **DBMS_DEBUG_JDWP** never falls back, so a failure stops the run with its reason.
+
+**Debugger Host** is the address the server uses to reach this Mac. On a direct connection it starts as the address this Mac uses to reach the database, which is `127.0.0.1` when the database runs on this Mac or in a local container. Through an SSH tunnel or a proxy it starts empty. With no host, **Automatic** uses DBMS_DEBUG and **DBMS_DEBUG_JDWP** refuses to start.
+
+**Debugger Ports** takes one port or a range, `4000-4999` by default. A list of ports is refused. TablePro listens on a free port in it and accepts the connection only from the database server's address. If the macOS firewall is on, allow TablePro to accept incoming connections.
+
+For DBMS_DEBUG_JDWP, a DBA allows the database user to connect to the Mac's address and port range:
+
+```sql
+BEGIN
+  DBMS_NETWORK_ACL_ADMIN.APPEND_HOST_ACE(
+    host       => '192.168.1.20',
+    lower_port => 4000,
+    upper_port => 4999,
+    ace        => xs$ace_type(
+                    privilege_list => xs$name_list('jdwp'),
+                    principal_name => 'APP_USER',
+                    principal_type => xs_acl.ptype_db));
+END;
+/
+```
+
+## Limitations
+
+- PostgreSQL does not offer routines with polymorphic parameters, such as `anyelement`, or `record` parameters: they have no **Debug…** item and are left out of **Debug Routine…**. Debug a routine that calls one with concrete types, and step into it.
+- On PostgreSQL 17 and later, a server-wide `transaction_timeout` ends the run when one step or Continue takes longer than the timeout. The run rolls back with "The debugger's session was interrupted while it waited…", and the debug sessions' own setting cannot lift it. A long pause does not count. Turn the server's `transaction_timeout` off, or raise it above the slowest statement you step across.
+- PostgreSQL does not list record and row variables. `RAISE NOTICE` a field to read it in Output.
+- Under DBMS_DEBUG, a whole record variable is not listed. DBMS_DEBUG_JDWP lists it with its fields.
+
+## Troubleshooting
+
+### The PL/pgSQL debugger isn't installed in “…”.
+
+The server has the pldebugger package, but this database has no `pldbgapi` extension. Ask a superuser to run `CREATE EXTENSION pldbgapi` in it.
+
+### This server has no PL/pgSQL debugger.
+
+The pldebugger package is not installed on the server. Install it, then create the extension. See [PostgreSQL setup](#postgresql-setup).
+
+### Only the owner of … or a superuser can debug it.
+
+pldebugger debugs a routine only for its owner or a superuser. Connect as one of them.
+
+### The server couldn't start the debugger.
+
+The server ran out of the shared memory pldebugger uses. Add `plugin_debugger` to `shared_preload_libraries` in `postgresql.conf` and restart the server.
+
+### This routine sets client_min_messages to …, which hides the notice the debugger starts with.
+
+The routine's own `SET client_min_messages` is `warning` or stricter, so the debugger never hears it start. Remove that `SET` from the routine to debug it.
+
+### This routine sets transaction_timeout to …, which would end it while it waits at a breakpoint.
+
+The routine's own `SET transaction_timeout` would end it during a pause. Remove that `SET` from the routine to debug it.
+
+### The debugger's session was interrupted while it waited, so the routine was stopped and its uncommitted changes were rolled back.
+
+A cancel reached the debugger's session, or a step outlasted the server's `transaction_timeout`. See [Limitations](#limitations).
+
+### The routine couldn't be stopped on the server.
+
+Stop could not confirm within its time limit that the routine ended, and the server process may still hold its locks. Hold the pointer over the status for the details. When they give a port, run the two statements they name in the same database, passing the number the first one returns to the second:
+
+```sql
+SELECT pldbg_attach_to_port(12);
+SELECT pldbg_abort_target(1);
+```
+
+When they name only the server process, find it in `pg_stat_activity`.
+
+### Debugging needs the DEBUG CONNECT SESSION privilege.
+
+The Oracle account lacks the privilege. A DBA grants it with `GRANT DEBUG CONNECT SESSION TO …`.
+
+### Debugging … needs the DEBUG privilege on it.
+
+The routine belongs to another schema. A DBA grants `DEBUG` on it, or `DEBUG ANY PROCEDURE`.
+
+### The database isn't allowed to connect to TablePro at … (ORA-24247).
+
+The access control list has no `jdwp` entry for this Mac's address and port. Under **Automatic** the line appears in Output and the run continues through DBMS_DEBUG. To use DBMS_DEBUG_JDWP, a DBA adds the entry shown under [Protocol](#protocol).
+
+### The database couldn't reach TablePro at ….
+
+The server has no route to **Debugger Host**, or a firewall blocks the port. Under **Automatic** the run continues through DBMS_DEBUG. Set **Debugger Host** to an address the server can reach, or choose **DBMS_DEBUG**.
+
+### A connection came from …, which isn't the database server's address, so TablePro closed it.
+
+The server reached this Mac from another address than the one TablePro connects to, as through NAT or a load balancer. Under **Automatic** the run continues through DBMS_DEBUG. Otherwise choose **DBMS_DEBUG**.
+
+### DBMS_DEBUG_JDWP needs a Debugger Host for the database to connect back to.
+
+**Debugger Host** is empty, which it is by default through an SSH tunnel or a proxy. Set it to an address the server can reach this Mac at, or choose **DBMS_DEBUG**.
+
+### “…” isn't a port or a range of ports, such as 4000-4999.
+
+**Debugger Ports** holds something other than one port or one range, such as a list. Enter a single range.
+
+### TablePro can't turn text into a … value for ….
+
+The parameter's type has no text form TablePro can convert. Pass **NULL** or leave it at **Default**.
+
+### TablePro can't pass any value of type … to ….
+
+The parameter's type cannot be declared in the block that starts the run. Debug a routine that calls this one with that value, and step into it.

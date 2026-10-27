@@ -62,7 +62,7 @@ A registry plugin installs where you need it:
 - A `.duckdb` file opened from Finder, which asks for the DuckDB driver.
 - **Install Parquet Export…** at the end of the format menu in the Export dialog. Parquet is selected once the download finishes.
 
-On a Mac with no network, install from a file: drag a `.tableplugin` or `.zip` onto **Settings > Plugins**, or click the **+** button there. A file for a plugin that is already loaded replaces it the next time TablePro starts. User-installed plugins live in `~/Library/Application Support/TablePro/Plugins`.
+On a Mac with no network, install from a file: drag a `.tableplugin` or `.zip` onto **Settings > Extensions**, or click the **+** button there. A file for a plugin that is already loaded replaces it the next time TablePro starts. User-installed plugins live in `~/Library/Application Support/TablePro/Plugins`.
 
 Every plugin is verified before it loads. A registry download must match the SHA-256 checksum in the registry manifest, and the bundle must be signed by TablePro. A bundle signed by anyone else, ad-hoc signed or unsigned is refused, with no override.
 
@@ -71,13 +71,13 @@ Every plugin is verified before it loads. A registry download must match the SHA
 Registry plugins follow the app. After a TablePro update, each plugin installed from the registry with an older build than the app is fetched again at launch:
 
 - A plugin that is not loaded, such as one rejected after the update, installs and loads at once.
-- A plugin that is loaded downloads in the background and replaces the old one the next time TablePro starts. Its row in **Settings > Plugins** reads "Updates when TablePro restarts" until then.
+- A plugin that is loaded downloads in the background and replaces the old one the next time TablePro starts. Its row in **Settings > Extensions** reads "Updates when TablePro restarts" until then.
 
 Offline, the check waits and runs once the Mac is back online. If the registry has no newer build yet, the check tries again in the background, on the schedule in [A plugin will not install or load](/troubleshooting#a-plugin-will-not-install-or-load). Connecting to a database whose plugin is outdated checks again first.
 
 Bundled plugins update with the app. A plugin installed from a file, including one installed over a registry plugin, updates from the registry only when an app update leaves it rejected and the registry has a compatible build of it.
 
-An app update can raise the plugin interface version. A plugin built for an older one is rejected at load instead of crashing, and stays in a banner in **Settings > Plugins** with the reason and an action until it is repaired:
+An app update can raise the plugin interface version. A plugin built for an older one is rejected at load instead of crashing, and stays in a banner in **Settings > Extensions** with the reason and an action until it is repaired:
 
 | Action | Meaning |
 |--------|---------|
@@ -88,7 +88,7 @@ An app update can raise the plugin interface version. A plugin built for an olde
 
 ## Managing plugins
 
-In **Settings > Plugins**:
+In **Settings > Extensions**:
 
 - **Uninstall** removes a user-installed plugin from disk. Bundled plugins cannot be uninstalled.
 - The detail pane shows version, bundle ID, capabilities, database type, and default port. Plugins with their own settings show them here.
@@ -100,8 +100,12 @@ Saved connections survive a removal. A connection whose driver cannot load stays
 | Cause | Button |
 |-------|--------|
 | The driver is not installed | **Install Plugin…** downloads it and connects |
-| The plugin failed to load or needs an update | **Open Plugin Settings** selects it in **Settings > Plugins**. Click **Try Again** once it is fixed |
+| The plugin failed to load or needs an update | **Open Plugin Settings** selects it in **Settings > Extensions**. Click **Try Again** once it is fixed |
 | The connection names a database type no plugin provides, which a connection imported from another app can | **Edit Connection…** opens the form to choose the type |
+
+## Modules
+
+**Settings > Extensions** lists **Modules** above the plugins. A module comes with the app and stays out of the menus until you select its checkbox. The checkbox is per Mac and does not sync. **Routine Debugger** is the one module; see [Routine Debugger](/features/routine-debugger#turn-it-on).
 
 ## Themes
 

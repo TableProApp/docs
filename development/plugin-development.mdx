@@ -15,7 +15,7 @@ A plugin is a macOS loadable bundle target with `WRAPPER_EXTENSION = tableplugin
 |-----|------|----------|---------|
 | `TableProPluginKitVersion` | integer | Yes | The PluginKit ABI the plugin was built against. Current value: 41 |
 | `TableProProvidesDatabaseTypeIds` | array of strings | Recommended | Database type IDs the plugin serves, which is what makes lazy loading possible |
-| `CFBundleShortVersionString` | string | Yes | Plugin version shown in **Settings > Plugins** |
+| `CFBundleShortVersionString` | string | Yes | Plugin version shown in **Settings > Extensions** |
 | `CFBundleVersion` | string | Yes | Build number. Of two copies of a plugin the higher build loads, and a registry update needs a higher build |
 
 Leave `TableProProvidesDatabaseTypeIds` out and the plugin loads eagerly at startup, blocking launch, and `PluginManager` logs a warning naming the key. With it, the app registers your metadata from `Info.plist` and loads the binary on first use.
@@ -86,7 +86,7 @@ Adopt these on top of `PluginDatabaseDriver` to reach more of the UI. The app fi
 | `PluginDefaultSortProvider` | Per-table control of default sorting: `.useAppDefault`, `.suppress`, or `.forceColumns([String])` |
 | `PluginPrincipalManagement` | Users, roles, and grants in the Users & Roles tab |
 | `PluginBrowseFilterProvider` | Control of the sidebar object filter: glob syntax, case sensitivity, type scopes |
-| `SettablePlugin` | A settings pane of your own under **Settings > Plugins** |
+| `SettablePlugin` | A settings pane of your own under **Settings > Extensions** |
 
 ## ABI compatibility
 

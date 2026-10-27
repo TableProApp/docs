@@ -100,4 +100,4 @@ A plugin loads when its `TableProPluginKitVersion` falls inside the app's range.
 
 ## Caching
 
-GitHub Pages serves the manifest with `Cache-Control: max-age=600`. The app keeps the response in its HTTP cache on disk and decodes it at launch, so the catalog is there before any request. At launch and when **Settings > Plugins** opens, the cached response answers while it is fresh. Before an install reports a plugin missing, and when the app repairs an outdated plugin, it revalidates with the server. A new release reaches the app within about ten minutes.
+GitHub Pages serves the manifest with `Cache-Control: max-age=600`. The app keeps the response in its HTTP cache on disk and decodes it at launch, so the catalog is there before any request. At launch and when **Settings > Extensions** opens, the cached response answers while it is fresh. Before an install reports a plugin missing, and when the app repairs an outdated plugin, it revalidates with the server. A new release reaches the app within about ten minutes.
