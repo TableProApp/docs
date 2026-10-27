@@ -252,6 +252,8 @@ The checks stay on otherwise, and such a row fails with the result naming its ta
 - **Data only**, or **Add rows to it** on a table the target already has. The target keeps its own
   keys there, and the source cannot say where they point.
 - A target with no transactions, where a failure could not take the rows back.
+- A target account that cannot read the tables it writes, so the copy could not count what each key
+  refuses.
 - PostgreSQL, because its switch also stops the target's own triggers and needs a superuser.
 - **Stop and keep what ran** and **Skip and continue**, since what they keep after a failure can
   leave a child's parent missing.
