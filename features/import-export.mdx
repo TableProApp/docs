@@ -55,7 +55,7 @@ On an engine that groups by schema, the tree lists the schemas the sidebar's [sc
 
 The default schema and the schemas of the tables you opened the dialog on open expanded, and the rest collapsed. A collapsed schema lists its tables and views only: expand it, or select its checkbox, to read its routines, triggers, sequences and types. **Export** is dimmed until they arrive. A database or schema exported with **Export…** is read in full from the start.
 
-Arrow keys move through the tree, Left and Right close and open a group, and Space ticks every selected row. Ticking a group ticks everything under it.
+Arrow keys move through the tree, Left and Right close and open a group, and Space ticks every selected row, or unticks them when all are ticked. Ticking a group ticks everything under it except an object whose option columns are all off.
 
 Only SQL writes every group. CSV, JSON and XLSX take tables and views, and switching to one of them drops the rest from the tree. Per-object checkboxes follow the kind: **Data** is off the row for anything without rows, and a privilege row carries neither **Drop** nor **Data**.
 
@@ -126,7 +126,7 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
     | Exclude the AUTO_INCREMENT counter | Yes |
     | Exclude DEFINER clauses | Yes |
 
-    Structure (CREATE TABLE), Drop (DROP TABLE IF EXISTS), and Data (INSERT statements) are per-table checkboxes, and a multi-table export can mix them.
+    Structure (CREATE TABLE), Drop (DROP TABLE IF EXISTS), and Data (INSERT statements) are per-table checkboxes, and a multi-table export can mix them. The same columns on a database, schema or group row set that option for everything beneath it, and show a dash when the objects differ. For a schema-only export, tick the database, then untick **Drop** and **Data** on its row.
 
     Structure carries the table's indexes. They are written after the rows and before the deferred foreign keys, the order `pg_dump` uses, so the rows load without index upkeep and a foreign key that references a unique index finds it in place. On MySQL, MariaDB, ClickHouse, Trino and CockroachDB the server writes them inside `CREATE TABLE`, so they arrive with the table instead. A materialized view's indexes follow the view. An invalid PostgreSQL index, which a failed `CREATE INDEX CONCURRENTLY` leaves behind, is left out, as `pg_dump` leaves it out.
 
@@ -175,7 +175,7 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
     Not available on MongoDB or Redis.
   </Tab>
   <Tab title="MQL">
-    MongoDB only. Writes a `.js` file of `insertMany()` calls that runs in `mongosh`, 500 documents per call by default, with per-collection checkboxes for drop, indexes, and data.
+    MongoDB only. Writes a `.js` file of `insertMany()` calls that runs in `mongosh`, 500 documents per call by default, with per-collection checkboxes for drop, indexes, and data. The database row's checkbox in each column sets it for every collection.
 
     ```javascript
     db.users.insertMany([
