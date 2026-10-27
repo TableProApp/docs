@@ -269,7 +269,8 @@ rest of the copy is unaffected.
 batch first.
 
 Under **Stop and roll back** the whole data phase is one transaction where the engine supports one,
-so stopping it or a failure puts every row back. A Replace that removes the target's rows empties
+so stopping it or a failure puts every row back. A MySQL table on a storage engine without
+transactions, such as MyISAM, keeps its rows through that, and the result counts them. A Replace that removes the target's rows empties
 every table inside it before any of them is filled, so that a cascading foreign key cannot reach a
 table you did not select.
 
