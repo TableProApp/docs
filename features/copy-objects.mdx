@@ -237,14 +237,18 @@ schema is left as it was.
 
 Order alone cannot place two tables that reference each other, a table that references itself
 with a child row ahead of its parent, or a source row whose parent is already gone. Under **Stop and
-roll back**, when every key the copied tables hold points at a table the copy fills with all of its
-rows, those rows are written with the target's foreign key checks off where the engine can turn them
-off for one session, as MySQL and MariaDB can, and the session gets back the setting it had.
+roll back**, when the copy creates every table it fills and every key those tables hold points at a
+table the copy fills with all of its rows, the rows are written with the target's foreign key checks
+off where the engine can turn them off for one session, as MySQL and MariaDB can, and the session
+gets back the setting it had.
 
 The checks stay on otherwise, and such a row fails with the result naming its table:
 
 - A key to a table outside the copy, or to one narrowed by a filter or a row limit. Turning the
   checks back on checks nothing already written, so the row would point at nothing.
+- **Data only**, or **Add rows to it** on a table the target already has. The target keeps its own
+  keys there, and the source cannot say where they point.
+- A target with no transactions, where a failure could not take the rows back.
 - PostgreSQL, because its switch also stops the target's own triggers and needs a superuser.
 - **Stop and keep what ran** and **Skip and continue**, since what they keep after a failure can
   leave a child's parent missing.
