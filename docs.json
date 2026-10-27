@@ -311,7 +311,6 @@
             "pages": [
               "features/table-structure",
               "features/routines-triggers",
-              "features/routine-debugger",
               "features/user-defined-types",
               "features/table-operations",
               "features/er-diagram",
