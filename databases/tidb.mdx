@@ -40,7 +40,6 @@ A connection saved as **MySQL** that reaches a TiDB server still gets TiDB's **S
 
 - No triggers, stored routines or events.
 - No Server Dashboard, and **File > Backup Dump…** stays dimmed. Export with [Dumpling](https://docs.pingcap.com/tidb/stable/dumpling-overview) instead.
-- Create Table has no engine, charset or collation pickers.
 - [Compare & Sync](/features/compare-sync) writes no structure script between TiDB and MySQL or MariaDB. TiDB against TiDB works.
 - Pages of an unsorted table can repeat or skip rows on a table spread over several regions. Sort by a column to get stable pages.
 - Behind TiProxy or a load balancer, **Stop** needs Global Kill, on by default since TiDB 6.1. Without it, connect straight to one TiDB node.

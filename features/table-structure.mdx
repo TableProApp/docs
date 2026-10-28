@@ -14,7 +14,7 @@ This is a DDL editor with a grid in front of it. Rename a column, add an index, 
 
 Open a table and switch the result view to **Structure**, or right-click it in the sidebar and choose **Show Structure**.
 
-The tabs are **Columns**, **Indexes**, **Foreign Keys**, **Constraints**, **Triggers**, **DDL**, and **Parts** (ClickHouse only); the first five carry item counts. A tab the engine has no concept of is hidden: ClickHouse has no Foreign Keys, Redshift no Triggers, Redis no Constraints. Every grid has a filter field, and clicking a header sorts by that one column.
+The tabs are **Columns**, **Indexes**, **Foreign Keys**, **Constraints**, **Triggers**, **Options** (MySQL and MariaDB only), **DDL**, and **Parts** (ClickHouse only); the first five carry item counts. A tab the engine has no concept of is hidden: ClickHouse has no Foreign Keys, Redshift no Triggers, Redis no Constraints. Every grid has a filter field, and clicking a header sorts by that one column.
 
 ## Table comment
 
@@ -43,6 +43,12 @@ Every other engine edits a table and a partitioned table only. A view, a materia
 Columns are edited in place. **Nullable**, **Primary Key**, and **Auto Inc** are YES/NO dropdowns; **Primary Key** set to YES forces **Nullable** to NO and holds it there until the key comes back off. **Type** opens a picker of the engine's types by category: search to filter, or type a parametric value such as `VARCHAR(255)` and press Return to use it as written. The cell reads the declared type and writes back what was typed. On PostgreSQL and PGlite the picker opens with a **User-Defined** group of enums, composites, domains and ranges from the schemas the sidebar's schema filter keeps and the table's own schema, each listed schema-qualified as `sales.status`. See [User-Defined Types](/features/user-defined-types).
 
 Which remaining columns appear is the driver's choice. **Comment** is there on most engines and writes the column comment. MySQL and MariaDB add **Charset**, **Collation**, and **On Update**; **On Update** set to YES on a `TIMESTAMP` or `DATETIME` column adds `ON UPDATE CURRENT_TIMESTAMP` at that column's own precision, so `TIMESTAMP(6)` gets `ON UPDATE CURRENT_TIMESTAMP(6)`.
+
+### Charset and collation
+
+Both cells are menus of what the server lists. **Charset** starts with **Table Default**, which drops the column's own character set so it takes the table's, followed by the server's character sets. Picking one sets **Collation** to that set's default. **Collation** lists the collations of the row's character set, or of the table's when the row has none, with the default marked **(default)**.
+
+A name typed into either cell has to be one the server lists, and a collation that belongs to another character set moves the column to that set. Both cells are read-only on a type that takes no character set, which is anything but `CHAR`, `VARCHAR`, the `TEXT` types, `ENUM` and `SET`. Changing **Type** to such a type empties both. If the server's list cannot be read, the menu says **Couldn't read the character sets** and the cells stay read-only; open the menu again to retry.
 
 ### Default
 
@@ -215,7 +221,7 @@ SQLite also accepts two constraints under one name, treats `c` and `C` as the sa
 - **Save Changes** (`Cmd+S` or the toolbar checkmark) applies the queue.
 - **Preview SQL** (`Cmd+Shift+P`) shows the statements **Save Changes** would run, on the tab's own schema, and runs none of them. A save that recreates the table previews as its rebuild script, with what the rebuild cannot carry over.
 
-A save asks at most once, on a sheet showing the statements it will run. One that removes a column, an index, a key or a check constraint, changes a column's type, adds NOT NULL, changes the primary key, or adds or rewrites a check constraint asks even at the **Silent** [Safe Mode](/features/safe-mode) level. Any other save asks at **Alert** and above. A save that recreates the table asks on its rebuild script instead. At **Safe Mode** and **Safe Mode (Full)**, Touch ID follows the answer.
+A save asks at most once, on a sheet showing the statements it will run. One that removes a column, an index, a key or a check constraint, changes a column's type or character set, adds NOT NULL, changes the primary key, adds or rewrites a check constraint, or [converts existing columns](#converting-existing-columns) asks even at the **Silent** [Safe Mode](/features/safe-mode) level. Any other save asks at **Alert** and above. A save that recreates the table asks on its rebuild script instead. At **Safe Mode** and **Safe Mode (Full)**, Touch ID follows the answer.
 
 From **Save Changes** until the save ends, the tab shows **Saving Changes…**, takes no edits, and ignores a second **Save Changes**. A rebuild script runs only while the queue is still the one it was built from; edit the queue with the script on screen and the rebuild stops, so save again to review the new one.
 
@@ -242,6 +248,38 @@ Lists **Name**, **Timing** (BEFORE, AFTER, INSTEAD OF), **Event** (INSERT, UPDAT
 Triggers are available for MySQL, MariaDB, PostgreSQL, SQLite, SQL Server, Oracle, libSQL, and Cloudflare D1; the tab is hidden elsewhere. Oracle does not return the trigger body, so the viewer and the editor start from the trigger header alone.
 </Info>
 
+## Options tab
+
+A MySQL or MariaDB table has a default character set and collation, the pair a new column takes when it names none, and an AUTO_INCREMENT counter. Change any of the three here. Views, temporary tables, and tables on TiDB or OceanBase have no Options tab.
+
+Edits queue with the rest of the structure: **Preview SQL** shows the `ALTER TABLE`, **Save Changes** runs it, and `Cmd+Z` takes it back. At the **Read-Only** [safe mode](/features/safe-mode) level the fields are dimmed, with the reason under them.
+
+<Frame>
+  <img className="block dark:hidden" src="/images/structure-options.png" alt="Options tab of a MySQL table with Character Set and Collation menus, a Convert existing columns option, and a Next Auto Increment field" />
+  <img className="hidden dark:block" src="/images/structure-options-dark.png" alt="Options tab of a MySQL table with Character Set and Collation menus, a Convert existing columns option, and a Next Auto Increment field" />
+</Frame>
+
+| Field | What it sets |
+|-------|--------------|
+| **Character Set** | The table's default character set. Picking one sets **Collation** to that set's default |
+| **Collation** | The table's default collation, from the collations of the chosen character set. The set's default is marked **(default)** |
+| **Convert existing columns** | Off, only columns added later take the new pair. On, every existing text column is rewritten to it as well |
+| **Next Auto Increment** | The value the next inserted row takes. Shown while a column has **Auto Inc** set to YES |
+
+### Converting existing columns
+
+With **Convert existing columns** off, the save runs `ALTER TABLE … DEFAULT CHARACTER SET = … COLLATE = …` and no stored text changes.
+
+Turn it on and the save runs `ALTER TABLE … CONVERT TO CHARACTER SET … COLLATE …` instead. Every text column is rewritten to the new pair, and a character the new set cannot hold is lost. A `TEXT` column can come back as `MEDIUMTEXT`, and the server copies the whole table while the statement runs. The save asks first, even at the **Silent** [Safe Mode](/features/safe-mode) level.
+
+A convert cannot go out in the same save as a changed column or a changed primary key. **Save Changes** refuses it with **Save column and primary key changes before converting existing columns.** Save those changes first, then convert. Adding or dropping columns in the same save is fine.
+
+### Next Auto Increment
+
+The field takes a whole number from 1 to the largest value the AUTO_INCREMENT column's type holds: 2147483647 for `INT`, 4294967295 for `INT UNSIGNED`. Outside that range, **Enter a whole number from 1 to …** appears under the field and **Save Changes** refuses until you fix or clear it. The range is the column's as the save leaves it, so a column widened to `BIGINT` in the same save takes a larger value.
+
+The server never sets the counter at or below the highest value already in the column: a value there becomes that value plus one. After the save, the field shows the counter read back from the server, not the number typed.
+
 ## DDL tab
 
 Read-only `CREATE TABLE` with syntax highlighting and font size controls. **Copy**, **Export** as a `.sql` file, and **Open in Editor** send it onward. On PostgreSQL the `CREATE SEQUENCE` and `CREATE TYPE … AS ENUM` statements the table depends on are prepended, so the script runs on an empty database, and the table's `COMMENT ON` statements follow it.
@@ -254,7 +292,9 @@ Lists partitions and parts from `system.parts`. **Optimize** merges parts; **Dro
 
 ## Creating a new table
 
-Click **+** at the foot of the sidebar and choose **New Table…**, or choose **Database > New Table…**. The tab holds a **Table Name** field, a **Comment** field on engines that store table comments (with Engine, Charset, and Collation pickers on MySQL and MariaDB), the same three editing grids as tabs, each with its own **+** and **−** at its foot, and a **SQL Preview** tab carrying the live statements it will run. **Create Table** (`Cmd+Enter` or `Cmd+S`) executes it and opens the new table. Where the engine cannot roll DDL back, as on MySQL, a statement that fails after `CREATE TABLE` leaves the table created: it opens on its Structure tab with the error, so finish the change there.
+Click **+** at the foot of the sidebar and choose **New Table…**, or choose **Database > New Table…**. The tab holds a **Table Name** field, a **Comment** field on engines that store table comments, the same three editing grids as tabs, each with its own **+** and **−** at its foot, and a **SQL Preview** tab carrying the live statements it will run. **Create Table** (`Cmd+Enter` or `Cmd+S`) executes it and opens the new table. Where the engine cannot roll DDL back, as on MySQL, a statement that fails after `CREATE TABLE` leaves the table created: it opens on its Structure tab with the error, so finish the change there.
+
+On MySQL, MariaDB, TiDB and OceanBase, **Engine**, **Charset** and **Collation** menus sit beside the name. They list what the server has: the engines it can create a table with, its character sets, and the collations of the chosen set, with the default engine and the set's default collation marked **(default)**. They start at what a new table in the target database gets anyway, the database's own character set and collation and the server's default engine, and the `CREATE TABLE` writes the engine, or the character set and collation as a pair, only when you change them. The Columns grid's **Charset** and **Collation** cells work as they do on the [Columns tab](#charset-and-collation).
 
 On the **Foreign Keys** grid, **Columns**, **Ref Table**, and **Ref Columns** open menus of the new table's own columns, the database's tables, and the referenced table's columns. Each menu ends in **Custom…** for a name the list does not carry, and picking a second entry in a comma-separated cell appends to it.
 
