@@ -130,9 +130,9 @@ Any other action name is refused. Autocomplete inserts a template for the common
 
 ## Creating and changing tables
 
-**New Table…** opens a form rather than a column grid: the partition and sort key with their types, on-demand or provisioned capacity, the table class, deletion protection, up to 20 global and 5 local secondary indexes. **Preview** shows the `CreateTable` request it will send. A local secondary index can only be defined here, when the table is created. The new table opens empty until DynamoDB finishes creating it.
+**New Table…** opens a form rather than a column grid: the partition and sort key with their types, on-demand or provisioned capacity, the table class, deletion protection, up to 20 global and 5 local secondary indexes. The **DDL** tab beside **Form** shows the `CreateTable` request it will send. A local secondary index can only be defined here, when the table is created. The new table opens empty until DynamoDB finishes creating it.
 
-<Frame caption="Preview shows the request before Create Table sends it">
+<Frame caption="DDL shows the request before Create Table sends it">
   <img className="block dark:hidden" src="/images/dynamodb-create-table.png" alt="Create Table form with Primary Key, Capacity, Settings and secondary index sections" />
   <img className="hidden dark:block" src="/images/dynamodb-create-table-dark.png" alt="Create Table form with Primary Key, Capacity, Settings and secondary index sections" />
 </Frame>

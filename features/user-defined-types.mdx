@@ -74,7 +74,7 @@ Right-click a type in the sidebar. **Rename** edits the name in place. **Drop Ty
 
 ## Using a type in a column
 
-In a table's **Structure** tab, the column type picker opens with a **User-Defined** group listing the types of every schema the sidebar's [schema filter](/features/connection-window#filtering-schemas) keeps, and of the table's own schema, ahead of the engine's. Every entry is schema-qualified and quoted where the name needs it, `sales.status` or `app."Order Status"`, so the column definition names the type and never a built-in of the same name. See [Table Structure](/features/table-structure#columns-tab).
+In a table's **Structure** tab, the column type picker opens with a **User-Defined** group listing the types of every schema the sidebar's [schema filter](/features/connection-window#filtering-schemas) keeps, and of the table's own schema, ahead of the engine's. Every entry is schema-qualified and quoted where the name needs it, `sales.status` or `app."Order Status"`, so the column definition names the type and never a built-in of the same name. See [Table Structure](/features/table-structure#columns).
 
 On Cassandra and ScyllaDB the group lists the types of the table's own keyspace, the only one a column can use, by name, quoted where the name needs it. An entry comes wrapped as `frozen<address>` where a plain column cannot hold the type: when a field is a collection that is not frozen, on Cassandra before 3.6, and on ScyllaDB.
 

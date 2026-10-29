@@ -151,7 +151,7 @@ A view's definition is rebuilt to run anywhere. Every table it reads is schema-q
 
 `REFRESH MATERIALIZED VIEW` runs from **Refresh Materialized View…**. A plain refresh holds an `ACCESS EXCLUSIVE` lock, so nothing reads the view until it finishes. **Refresh concurrently** takes `EXCLUSIVE` instead and leaves readers working, and PostgreSQL accepts it only for a populated view with a valid unique index on plain columns, no `WHERE` clause and no expressions; a partial or expression index does not qualify. The refresh runs on its own connection, outside any transaction a query editor holds open. Refreshing needs ownership of the view, or the `MAINTAIN` privilege from PostgreSQL 17.
 
-**Edit Comment…** writes `COMMENT ON`, picking `TABLE`, `VIEW`, `MATERIALIZED VIEW` or `FOREIGN TABLE` to match the object. Column comments are written from the Columns tab as `COMMENT ON COLUMN`. Clearing the field writes `IS NULL`, which removes the comment. Only the object's owner may comment on it.
+**Edit Comment…** writes `COMMENT ON`, picking `TABLE`, `VIEW`, `MATERIALIZED VIEW` or `FOREIGN TABLE` to match the object. Column comments are written from the Columns section as `COMMENT ON COLUMN`. Clearing the field writes `IS NULL`, which removes the comment. Only the object's owner may comment on it.
 
 An SQL export writes those statements back for tables, views and materialized views, so a dump and a restore keep their comments. See [Import & Export](/features/import-export).
 
@@ -161,7 +161,7 @@ PostgreSQL refuses `INSERT`, `UPDATE` and `DELETE` on a materialized view, so it
 
 ## Invalid indexes
 
-A `CREATE INDEX CONCURRENTLY` or `REINDEX CONCURRENTLY` that fails or is cancelled leaves an invalid index on the table. The **Indexes** tab names it, and exports leave it out as `pg_dump` does. [Table Structure](/features/table-structure#invalid-indexes) covers dropping or rebuilding it.
+A `CREATE INDEX CONCURRENTLY` or `REINDEX CONCURRENTLY` that fails or is cancelled leaves an invalid index on the table. The **Indexes** section names it, and exports leave it out as `pg_dump` does. [Table Structure](/features/table-structure#invalid-indexes) covers dropping or rebuilding it.
 
 ## Cross-database tabs
 

@@ -139,7 +139,7 @@ Click **+** at the foot of the sidebar and choose **New View…** to write a new
 
 A materialized view holds stored rows, so refreshing it is a server operation. Right-click one and choose **Refresh Materialized View…**, or use **Database > Refresh Materialized View…**. The confirmation names the view and warns that other sessions cannot read it while the refresh runs. **Refresh concurrently** leaves readers alone; it is available on PostgreSQL for a view that has been populated and carries a unique index on plain columns with no `WHERE` clause, and the alert says which of the two is missing when it is dimmed. Tabs showing the view reload when the refresh finishes. A plain view stores nothing, so `Cmd+R` re-runs its query instead.
 
-Comments are edited per object. Right-click a table or view and choose **Edit Comment…**, or type in the **Comment** field at the top of its [Structure tab](/features/table-structure#table-comment); saving an empty field removes the comment. Column comments live in the [Columns tab](/features/table-structure#columns-tab).
+Comments are edited per object. Right-click a table or view and choose **Edit Comment…**, or open its Structure view with nothing selected and type in the inspector's [**Comment**](/features/table-structure#table-comment) field; saving an empty field removes the comment. Column comments live in the [Columns section](/features/table-structure#columns).
 
 | Engine | Comments on |
 |--------|-------------|

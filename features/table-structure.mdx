@@ -7,24 +7,41 @@ import StagedUntilSave from "/snippets/staged-until-save.mdx";
 
 This is a DDL editor with a grid in front of it. Rename a column, add an index, change a key, and what you get is a pending `ALTER TABLE` you can read before it runs; the table on the server is untouched until you apply it.
 
-<Frame caption="Table structure view">
-  <img className="block dark:hidden" src="/images/table-structure.png" alt="Table Structure" />
-  <img className="hidden dark:block" src="/images/table-structure-dark.png" alt="Table Structure" />
+<Frame caption="Every section on one page, with the inspector editing what is selected">
+  <img className="block dark:hidden" src="/images/table-structure.png" alt="The Definition tab of a MySQL orders table: Columns, Indexes, Foreign Keys and Check Constraints stacked with their counts, each with + and − under its table, beside the inspector editing a column just added, with Name, Type, Nullable, Default, Generated, Expression, Primary Key and Comment" />
+  <img className="hidden dark:block" src="/images/table-structure-dark.png" alt="The Definition tab of a MySQL orders table: Columns, Indexes, Foreign Keys and Check Constraints stacked with their counts, each with + and − under its table, beside the inspector editing a column just added, with Name, Type, Nullable, Default, Generated, Expression, Primary Key and Comment" />
 </Frame>
 
 Open a table and switch the result view to **Structure**, or right-click it in the sidebar and choose **Show Structure**.
 
-The tabs are **Columns**, **Indexes**, **Foreign Keys**, **Constraints**, **Triggers**, **Options** (MySQL and MariaDB only), **DDL**, and **Parts** (ClickHouse only); the first five carry item counts. A tab the engine has no concept of is hidden: ClickHouse has no Foreign Keys, Redshift no Triggers, Redis no Constraints. Every grid has a filter field, and clicking a header sorts by that one column.
+The tabs are **Definition**, **Triggers**, **DDL**, and **Parts** (ClickHouse only). **Triggers** is hidden on an engine without triggers, such as Redshift.
 
-## Table comment
+## Definition tab
 
-On an engine that stores table comments, a **Comment** field sits above the tabs. An edit there is a structure change like any other: **Preview SQL** shows the statement, **Save Changes** (`Cmd+S`) runs it with the rest, and `Cmd+Z` takes it back. Clearing the field removes the comment. The field is dimmed while [safe mode](/features/safe-mode) blocks writes. [Table Operations](/features/table-operations#views) lists which engines comment on what.
+**Definition** is one scrolling page of four sections: **Columns**, **Indexes**, **Foreign Keys** and **Check Constraints**. A section the engine has no concept of is hidden: ClickHouse has no Foreign Keys, Redis no Check Constraints. Each section has a disclosure triangle, a count, its own table, and its own **+** and **−** under the table.
+
+- Click a section's header to collapse it. It stays collapsed on every table until you open it again.
+- The **Filter** field at the top filters every section at once, and opens collapsed ones while it holds text.
+- Click a column header to sort that section by the one column.
+- A section the server fails to read shows the error and **Try Again**, and the other sections load as usual. The **Triggers** and **DDL** tabs do the same.
+
+Each table shows the fields read at a glance. Columns hides **On Update**, **Auto Inc**, **Charset**, **Collation**, **Generated** and **Expression** until you show them, and Foreign Keys hides **Ref Schema**. Right-click a column header and choose **Show All Columns** to bring them in, or **Hide Column** to take one out. The choice holds for every table, and the inspector always shows every field.
+
+## The inspector
+
+Select a row in any section and the inspector (**View > Show Inspector**, `Cmd+Option+I`) edits it as a form, with the same menus and pickers its cells use. Each field you change is one undo step. Selecting a row in one section clears the selection in the others. With several rows selected the inspector counts them instead, and a row marked for deletion stays read-only there until you undo the delete.
+
+With nothing selected, the inspector shows the table itself: **Comment** where the engine stores table comments, the [table options](#table-options) on MySQL and MariaDB, then its size, row count and metadata.
+
+### Table comment
+
+An edit to **Comment** is a structure change like any other: **Preview SQL** shows the statement, **Save Changes** (`Cmd+S`) runs it with the rest, and `Cmd+Z` takes it back. Clearing the field removes the comment. The field is dimmed while [safe mode](/features/safe-mode) blocks writes. [Table Operations](/features/table-operations#views) lists which engines comment on what.
 
 ## What each object accepts
 
-A view is not a table, and the grid offers only the edits the server will take on the object open in front of it. A refused **+** or **-** stays on screen, dimmed, with the reason in its tooltip; a cell the object will not let you change beeps instead of opening an editor.
+A view is not a table, and the grid offers only the edits the server will take on the object open in front of it. A refused **+** or **−** stays on screen, dimmed, with the reason in its tooltip; a cell the object will not let you change beeps instead of opening an editor.
 
-PostgreSQL and PGlite answer this per operation, so the tab does too:
+PostgreSQL and PGlite answer this per operation, so the page does too:
 
 | Object | What it accepts |
 |--------|-----------------|
@@ -38,17 +55,17 @@ A view and a materialized view differ in both directions: `ALTER TABLE … SET D
 
 Every other engine edits a table and a partitioned table only. A view, a materialized view, a foreign table and a system table are read-only there. A MongoDB collection takes two edits, a field rename and a field removal; see [MongoDB collections](#mongodb-collections).
 
-## Columns tab
+## Columns
 
-Columns are edited in place. **Nullable**, **Primary Key**, and **Auto Inc** are YES/NO dropdowns; **Primary Key** set to YES forces **Nullable** to NO and holds it there until the key comes back off. **Type** opens a picker of the engine's types by category: search to filter, or type a parametric value such as `VARCHAR(255)` and press Return to use it as written. The cell reads the declared type and writes back what was typed. On PostgreSQL and PGlite the picker opens with a **User-Defined** group of enums, composites, domains and ranges from the schemas the sidebar's schema filter keeps and the table's own schema, each listed schema-qualified as `sales.status`. See [User-Defined Types](/features/user-defined-types).
+Edit a column in its row or in the inspector. **Nullable**, **Primary Key**, **Auto Inc** and **On Update** are checkboxes; selecting **Primary Key** deselects **Nullable** and holds it there until the key comes back off. **Type** opens a picker of the engine's types by category: search to filter, or type a parametric value such as `VARCHAR(255)` and press Return to use it as written. The cell reads the declared type and writes back what was typed. On PostgreSQL and PGlite the picker opens with a **User-Defined** group of enums, composites, domains and ranges from the schemas the sidebar's schema filter keeps and the table's own schema, each listed schema-qualified as `sales.status`. See [User-Defined Types](/features/user-defined-types).
 
-Which remaining columns appear is the driver's choice. **Comment** is there on most engines and writes the column comment. MySQL and MariaDB add **Charset**, **Collation**, and **On Update**; **On Update** set to YES on a `TIMESTAMP` or `DATETIME` column adds `ON UPDATE CURRENT_TIMESTAMP` at that column's own precision, so `TIMESTAMP(6)` gets `ON UPDATE CURRENT_TIMESTAMP(6)`.
+Which fields a column has is the driver's choice. **Comment** is there on most engines and writes the column comment. MySQL and MariaDB add **Charset**, **Collation**, and **On Update**; **On Update** selected on a `TIMESTAMP` or `DATETIME` column adds `ON UPDATE CURRENT_TIMESTAMP` at that column's own precision, so `TIMESTAMP(6)` gets `ON UPDATE CURRENT_TIMESTAMP(6)`.
 
 ### Charset and collation
 
-Both cells are menus of what the server lists. **Charset** starts with **Table Default**, which drops the column's own character set so it takes the table's, followed by the server's character sets. Picking one sets **Collation** to that set's default. **Collation** lists the collations of the row's character set, or of the table's when the row has none, with the default marked **(default)**.
+Both fields are menus of what the server lists. **Charset** starts with **Table Default**, which drops the column's own character set so it takes the table's, followed by the server's character sets. Picking one sets **Collation** to that set's default. **Collation** lists the collations of the row's character set, or of the table's when the row has none, with the default marked **(default)**.
 
-A name typed into either cell has to be one the server lists, and a collation that belongs to another character set moves the column to that set. Both cells are read-only on a type that takes no character set, which is anything but `CHAR`, `VARCHAR`, the `TEXT` types, `ENUM` and `SET`. Changing **Type** to such a type empties both. If the server's list cannot be read, the menu says **Couldn't read the character sets** and the cells stay read-only; open the menu again to retry.
+A name typed into either cell has to be one the server lists, and a collation that belongs to another character set moves the column to that set. Both fields are read-only on a type that takes no character set, which is anything but `CHAR`, `VARCHAR`, the `TEXT` types, `ENUM` and `SET`. Changing **Type** to such a type empties both. If the server's list cannot be read, the menu says **Couldn't read the character sets** and the fields stay read-only; open the menu again to retry.
 
 ### Default
 
@@ -66,24 +83,24 @@ Typing straight into the cell is the same as **SQL expression**, so `pending` is
 
 On MySQL and MariaDB a nullable column declared without a default has `DEFAULT NULL`, so its cell reads **NULL**, and **No default** on a nullable column saves as **NULL**.
 
-Setting **Nullable** to NO, or **Primary Key** to YES, clears a NULL default. A column you change so that it refuses NULL and defaults to NULL is reported before anything is saved.
+Deselecting **Nullable**, or selecting **Primary Key**, clears a NULL default. A column you change so that it refuses NULL and defaults to NULL is reported before anything is saved.
 
 Auto-increment has its own **Auto Inc** field.
 
 <Frame caption="Every Default cell carries the chevron that opens the list">
-  <img className="block dark:hidden" src="/images/structure-default-picker.png" alt="The Columns tab of a SQLite table, with a chevron on the right of every Default cell" />
-  <img className="hidden dark:block" src="/images/structure-default-picker-dark.png" alt="The Columns tab of a SQLite table, with a chevron on the right of every Default cell" />
+  <img className="block dark:hidden" src="/images/structure-default-picker.png" alt="Columns of a SQLite table, with a chevron on the right of every Default cell" />
+  <img className="hidden dark:block" src="/images/structure-default-picker-dark.png" alt="Columns of a SQLite table, with a chevron on the right of every Default cell" />
 </Frame>
 
 Changing the default of a column that already exists takes a different route per engine. Most run `ALTER TABLE … SET DEFAULT`. SQLite, libSQL and Cloudflare D1 have no such statement, so the change is made by recreating the table, reviewed first like any other rebuild. Snowflake can only remove a default, and saving one there is refused with **Unsupported schema operation**.
 
 ### Generated columns
 
-PostgreSQL, CockroachDB, PGlite, MySQL, MariaDB and SQLite add two more fields. **Generated** is a menu of Not generated, STORED and VIRTUAL; **Expression** holds the SQL the value is computed from. Set both on a new row and the column is created as `GENERATED ALWAYS AS (expression)`. PostgreSQL 11 and earlier have no generated columns, so on those servers neither field appears.
+PostgreSQL, CockroachDB, PGlite, MySQL, MariaDB and SQLite add two more fields, both hidden in the table until you show them. **Generated** is a menu of Not generated, STORED and VIRTUAL; **Expression** holds the SQL the value is computed from. Set both on a new row and the column is created as `GENERATED ALWAYS AS (expression)`. PostgreSQL 11 and earlier have no generated columns, so on those servers neither field appears.
 
 The keyword is always written out. PostgreSQL 17 and earlier accept STORED only, PostgreSQL 18 made VIRTUAL the default, and MySQL and MariaDB default to VIRTUAL, so leaving it implicit would mean different columns on different servers.
 
-<Frame caption="Generated column fields on the Columns tab">
+<Frame caption="Generated column fields in the Columns section">
   <img className="block dark:hidden" src="/images/structure-generated-columns.png" alt="A column row with Generated set to VIRTUAL and an Expression beside it" />
   <img className="hidden dark:block" src="/images/structure-generated-columns-dark.png" alt="A column row with Generated set to VIRTUAL and an Expression beside it" />
 </Frame>
@@ -95,9 +112,9 @@ Two limits apply to a column that already exists. Switching **Generated** on it 
   <img className="hidden dark:block" src="/images/structure-type-picker-dark.png" alt="Type picker popover" />
 </Frame>
 
-Add a column with **+** at the right of the status bar or `Cmd+Shift+N`. Select rows and click **-** or press `Delete` to mark them for removal.
+Add a column with **+** under the Columns table. `Cmd+Shift+N` adds a row to the section holding the selection, or to Columns when nothing is selected, and `Cmd+Shift+D` duplicates the selected rows. Select rows and click **−** or press `Delete` to mark them for removal.
 
-Flag **Primary Key** on one column, or several for a composite key in one `PRIMARY KEY (col1, col2)` clause. On an existing table that becomes a drop of the old constraint followed by an add.
+Select **Primary Key** on one column, or on several for a composite key in one `PRIMARY KEY (col1, col2)` clause. On an existing table, each column you add to or take out of the key changes the table's key, saved as a drop of the old constraint followed by an add.
 
 Drag a column row by its row number to reorder it, or right-click one and choose **Move Column Up** or **Move Column Down**. Both are dimmed with the reason spelled out under them while unsaved changes exist, while the list is filtered or sorted, on anything but a table, and on an engine that cannot change column order.
 
@@ -112,16 +129,16 @@ What the drag does depends on the engine:
 
 Everything that runs goes to query history rather than the change queue.
 
-## Indexes tab
+## Indexes
 
 | Field | Description |
 |-------|-------------|
 | **Columns** | Key columns and expressions in key order, such as `tenant_id, lower(email)`. MySQL prefix lengths are written as `email(20)`. A PostgreSQL index's `INCLUDE` columns are not listed, and editing the index keeps them. Pasted into a table on another engine, an index leaves its `INCLUDE` columns behind and each expression becomes a column name the row flags until you replace it |
 | **Type** | The type the server reports, such as `HNSW` from pgvector or `CLUSTERED` on SQL Server. The menu lists that type beside BTREE, HASH, FULLTEXT and SPATIAL (MySQL), GIN, GIST, SPGIST (PostgreSQL 9.2 and later) and BRIN (PostgreSQL 9.5 and later). On SQL Server, a duplicated or pasted `CLUSTERED` index is `NONCLUSTERED` while the table keeps another clustered index, and turns `CLUSTERED` again when you delete that index in the same save. Pasted into a table on another database type, a FULLTEXT or SPATIAL index is refused by PostgreSQL before anything runs, and any other type that engine has no index of is written as its default index |
 | **Unique** | Whether the index enforces uniqueness |
-| **Condition** | `WHERE` predicate for partial indexes (PostgreSQL, SQLite, libSQL, Cloudflare D1) |
+| **Condition** | `WHERE` predicate for partial indexes (PostgreSQL, SQLite, libSQL, Cloudflare D1). MySQL and MariaDB have no such field |
 
-To replace an index, delete it and add the new one under the same name in one save, or choose **Duplicate** on its row, edit the copy and delete the original. The old index is dropped before the new one is created. Renames in one save may pass names along, such as `b` to `a` and `c` to `b`: each runs once the name it takes is free, and two indexes that swap names are dropped and created again. On MySQL and MariaDB, an index you change or replace in a save that changes no column runs as one `ALTER TABLE`, so a replacement the server rejects leaves the original index in place. Neither takes an index named `PRIMARY`, in any letter case, because that name belongs to the primary key: change the key with **Primary Key** on the Columns tab. DynamoDB takes one index change per save, see [DynamoDB](/databases/dynamodb#creating-and-changing-tables).
+To replace an index, delete it and add the new one under the same name in one save, or choose **Duplicate** on its row, edit the copy and delete the original. The old index is dropped before the new one is created. Renames in one save may pass names along, such as `b` to `a` and `c` to `b`: each runs once the name it takes is free, and two indexes that swap names are dropped and created again. On MySQL and MariaDB, an index you change or replace in a save that changes no column runs as one `ALTER TABLE`, so a replacement the server rejects leaves the original index in place. Neither takes an index named `PRIMARY`, in any letter case, because that name belongs to the primary key: change the key with **Primary Key** in the Columns section. DynamoDB takes one index change per save, see [DynamoDB](/databases/dynamodb#creating-and-changing-tables).
 
 ### Expression keys
 
@@ -148,17 +165,17 @@ A materialized view's indexes list, add and drop the same way a table's do. The 
 | Line | What to do |
 |------|------------|
 | This view can be refreshed concurrently. | Nothing. Select **Refresh concurrently** in the refresh dialog |
-| Concurrent refresh needs a valid unique index on the view's columns, with no WHERE clause and no expressions. | Add an index here with **Unique** set to YES, listing plain columns only, and save |
+| Concurrent refresh needs a valid unique index on the view's columns, with no WHERE clause and no expressions. | Add an index here with **Unique** selected, listing plain columns only, and save |
 | Concurrent refresh needs the view to be populated first. Refresh it once without that option. | Refresh the view once without the option. A view created `WITH NO DATA` stays unpopulated until its first refresh |
 
-The server answers the question, so an index left invalid by a failed `CREATE UNIQUE INDEX CONCURRENTLY` does not count, even though it lists with **Unique** set to YES. The line updates after every save and every refresh.
+The server answers the question, so an index left invalid by a failed `CREATE UNIQUE INDEX CONCURRENTLY` does not count, even though it lists with **Unique** selected. The line updates after every save and every refresh.
 
 <Frame caption="The unique index on day and region is what qualifies the view">
-  <img className="block dark:hidden" src="/images/structure-matview-indexes.png" alt="Indexes tab of the daily_totals materialized view: a unique index on day and region, an index on lower(region), and a line under the list saying the view can be refreshed concurrently" />
-  <img className="hidden dark:block" src="/images/structure-matview-indexes-dark.png" alt="Indexes tab of the daily_totals materialized view: a unique index on day and region, an index on lower(region), and a line under the list saying the view can be refreshed concurrently" />
+  <img className="block dark:hidden" src="/images/structure-matview-indexes.png" alt="Indexes of the daily_totals materialized view: a unique index on day and region, an index on lower(region), and a line under the list saying the view can be refreshed concurrently" />
+  <img className="hidden dark:block" src="/images/structure-matview-indexes-dark.png" alt="Indexes of the daily_totals materialized view: a unique index on day and region, an index on lower(region), and a line under the list saying the view can be refreshed concurrently" />
 </Frame>
 
-## Foreign keys tab
+## Foreign keys
 
 | Field | Description |
 |-------|-------------|
@@ -167,9 +184,9 @@ The server answers the question, so an index left invalid by a failed `CREATE UN
 | **Ref Schema** | Referenced schema, for cross-schema references |
 | **On Delete / On Update** | Dropdowns listing only the actions the engine takes |
 
-Right-click a foreign key and choose **Open [table]** to jump to the referenced table. Right-click any row in these three grids for **Copy** (the cell under the pointer), **Copy Name**, **Copy Definition**, **Copy As** (CSV, JSON, SQL), **Duplicate**, and **Delete** (`Delete`). A row already marked for deletion offers **Undo Delete**. The same menu appears whether or not the row was already selected, and its row commands act on the whole selection.
+Right-click a foreign key and choose **Open [table]** to jump to the referenced table. Right-click a row in any section for **Copy** (the cell under the pointer), **Copy Name**, **Copy Definition**, **Copy As** (CSV, JSON, SQL), **Duplicate**, and **Delete** (`Delete`). A row already marked for deletion offers **Undo Delete**. The same menu appears whether or not the row was already selected, and its row commands act on the whole selection.
 
-**Add Foreign Key** and **Remove Foreign Key** sit under the list. Both are dimmed on an object that cannot carry a key and on an engine that cannot edit foreign keys, with the reason in the tooltip.
+The section's **+** and **−** are dimmed on an object that cannot carry a key and on an engine that cannot edit foreign keys, with the reason in the tooltip.
 
 What the save does depends on the engine:
 
@@ -183,7 +200,7 @@ A rebuild carries everything else staged in the same save, and ends in `PRAGMA f
 
 A column renamed or dropped in the same save runs as its own `ALTER TABLE` after the rebuild, so the new name reaches every index, trigger and view. A drop that would leave one of those naming a column that is gone fails the whole save rather than committing it broken.
 
-## Constraints tab
+## Check constraints
 
 Check constraints are table-level, so a rule spanning two columns is one row here rather than something hidden on a column.
 
@@ -193,7 +210,7 @@ Check constraints are table-level, so a rule spanning two columns is one row her
 | **Expression** | The condition every row must satisfy |
 | **Columns** | Columns the expression references, read-only |
 
-<Frame caption="Constraints tab">
+<Frame caption="Check Constraints section">
   <img className="block dark:hidden" src="/images/structure-constraints.png" alt="Two check constraints, one of them spanning two columns" />
   <img className="hidden dark:block" src="/images/structure-constraints-dark.png" alt="Two check constraints, one of them spanning two columns" />
 </Frame>
@@ -204,22 +221,57 @@ Renaming a constraint runs a single `RENAME CONSTRAINT` where the engine has one
 
 A constraint named `C` beside one named `c` is refused before anything runs, on every engine, because SQLite and MariaDB treat the two as one name. Give the second constraint another name.
 
-The tab is hidden on engines with no check constraints. SQL Server lists and edits them, but has computed columns rather than generated ones, so it gets this tab and not the two column fields.
+The section is hidden on engines with no check constraints. SQL Server lists and edits them, but has computed columns rather than generated ones, so it gets this section and not the two column fields.
 
 It is hidden on MySQL before 8.0.16, MariaDB before 10.2.1, TiDB before 7.2 and OceanBase before 4.0 as well. Those servers accept a `CHECK` clause, answer `Query OK`, and throw the rule away, so there is nothing to list and nothing a save could keep. Upgrade, or enforce the rule with a trigger.
 
-SQLite is the one engine where listing and editing part company. The tab appears on every version, but **+** and **-** need SQLite 3.53.0 or later, the release that added `ADD CONSTRAINT` and `DROP CONSTRAINT` to `ALTER TABLE`. The driver links the system SQLite, so the version is the one macOS ships. On an older one the constraints still list, read-only.
+SQLite is the one engine where listing and editing part company. The section appears on every version, but **+** and **−** need SQLite 3.53.0 or later, the release that added `ADD CONSTRAINT` and `DROP CONSTRAINT` to `ALTER TABLE`. The driver links the system SQLite, so the version is the one macOS ships. On an older one the constraints still list, read-only.
 
 SQLite also accepts two constraints under one name, treats `c` and `C` as the same name, and `DROP CONSTRAINT` removes the first one it finds. When two listed constraints share a name, a save that changes or deletes one of them and leaves the other is refused before anything runs: change or delete all of them in the same save. A save that leaves them both alone goes through.
+
+## Table options
+
+A MySQL or MariaDB table has a default character set and collation, the pair a new column takes when it names none, and an AUTO_INCREMENT counter. Change any of the three under **Options** in the inspector, with nothing selected on the Definition tab. Views, temporary tables, and tables on TiDB or OceanBase have no **Options**.
+
+Edits queue with the rest of the structure: **Preview SQL** shows the `ALTER TABLE`, **Save Changes** runs it, and `Cmd+Z` takes it back. At the **Read-Only** [safe mode](/features/safe-mode) level the fields are dimmed, with the reason under them.
+
+<Frame>
+  <img className="block dark:hidden" src="/images/structure-options.png" alt="The inspector for a MySQL table with nothing selected: a Comment field, then Character Set and Collation menus, a Convert existing columns checkbox and a Next Auto Increment field under Options, then the table's size, row count, engine and collation" />
+  <img className="hidden dark:block" src="/images/structure-options-dark.png" alt="The inspector for a MySQL table with nothing selected: a Comment field, then Character Set and Collation menus, a Convert existing columns checkbox and a Next Auto Increment field under Options, then the table's size, row count, engine and collation" />
+</Frame>
+
+| Field | What it sets |
+|-------|--------------|
+| **Character Set** | The table's default character set. Picking one sets **Collation** to that set's default |
+| **Collation** | The table's default collation, from the collations of the chosen character set. The set's default is marked **(default)** |
+| **Convert existing columns** | Off, only columns added later take the new pair. On, every existing text column is rewritten to it as well |
+| **Next Auto Increment** | The value the next inserted row takes. Shown while a column has **Auto Inc** selected |
+
+### Converting existing columns
+
+With **Convert existing columns** off, the save runs `ALTER TABLE … DEFAULT CHARACTER SET = … COLLATE = …` and no stored text changes.
+
+Turn it on and the save runs `ALTER TABLE … CONVERT TO CHARACTER SET … COLLATE …` instead. Every text column is rewritten to the new pair, and a character the new set cannot hold is lost. A `TEXT` column can come back as `MEDIUMTEXT`, and the server copies the whole table while the statement runs. The save asks first, even at the **Silent** [Safe Mode](/features/safe-mode) level.
+
+A convert cannot go out in the same save as a changed column or a changed primary key. **Save Changes** refuses it with **Save column and primary key changes before converting existing columns.** Save those changes first, then convert. Adding or dropping columns in the same save is fine.
+
+### Next Auto Increment
+
+The field takes a whole number from 1 to the largest value the AUTO_INCREMENT column's type holds: 2147483647 for `INT`, 4294967295 for `INT UNSIGNED`. Outside that range, **Enter a whole number from 1 to …** appears under the field and **Save Changes** refuses until you fix or clear it. The range is the column's as the save leaves it, so a column widened to `BIGINT` in the same save takes a larger value.
+
+The server never sets the counter at or below the highest value already in the column: a value there becomes that value plus one. After the save, the field shows the counter read back from the server, not the number typed.
 
 ## Saving changes
 
 <StagedUntilSave what="Column, index and key changes" />
 
-[Change Tracking](/features/change-tracking) covers the queue, undo (`Cmd+Z`) and redo (`Cmd+Shift+Z`). A save runs on the tab's own connection, database, and schema, the ones it was opened on, and never moves the sidebar or the toolbar.
+[Change Tracking](/features/change-tracking) covers the queue, undo (`Cmd+Z`) and redo (`Cmd+Shift+Z`). **Edit > Undo** names the step it takes back, such as **Undo Add Column** or **Undo Change Primary Key**. A save runs on the tab's own connection, database, and schema, the ones it was opened on, and never moves the sidebar or the toolbar.
 
 - **Save Changes** (`Cmd+S` or the toolbar checkmark) applies the queue.
-- **Preview SQL** (`Cmd+Shift+P`) shows the statements **Save Changes** would run, on the tab's own schema, and runs none of them. A save that recreates the table previews as its rebuild script, with what the rebuild cannot carry over.
+- **Preview SQL** (`Cmd+Shift+P`) shows the statements **Save Changes** would run, on the tab's own schema. **Save Changes** on its sheet runs them, and **Cancel** runs none. A queue holding an incomplete change, which **Save Changes** would refuse, opens **Some Changes Are Incomplete** instead. A save that recreates the table previews as its rebuild script, with what the rebuild cannot carry over.
+- **File > Discard Changes…** empties the queue after a confirmation that counts the changes it drops.
+
+Switch the tab to **Data** with changes queued and **Save Changes** still applies them, as long as the grid holds no edits of its own.
 
 A save asks at most once, on a sheet showing the statements it will run. One that removes a column, an index, a key or a check constraint, changes a column's type or character set, adds NOT NULL, changes the primary key, adds or rewrites a check constraint, or [converts existing columns](#converting-existing-columns) asks even at the **Silent** [Safe Mode](/features/safe-mode) level. Any other save asks at **Alert** and above. A save that recreates the table asks on its rebuild script instead. At **Safe Mode** and **Safe Mode (Full)**, Touch ID follows the answer.
 
@@ -228,8 +280,8 @@ From **Save Changes** until the save ends, the tab shows **Saving Changes…**, 
 The queue outlives everything short of an explicit discard: closing the tab, closing the window, quitting, and **Refresh** all ask first. A save that never reaches the server leaves the tab open with its queue intact.
 
 <Frame caption="Generated DDL preview">
-  <img className="block dark:hidden" src="/images/schema-change-preview.png" alt="Schema change preview with ALTER TABLE statements" />
-  <img className="hidden dark:block" src="/images/schema-change-preview-dark.png" alt="Schema change preview with ALTER TABLE statements" />
+  <img className="block dark:hidden" src="/images/schema-change-preview.png" alt="Preview SQL sheet with ALTER TABLE statements, Cancel and Save Changes" />
+  <img className="hidden dark:block" src="/images/schema-change-preview-dark.png" alt="Preview SQL sheet with ALTER TABLE statements, Cancel and Save Changes" />
 </Frame>
 
 A save runs on a connection of its own, so it never joins a transaction you have left open in a query tab.
@@ -248,38 +300,6 @@ Lists **Name**, **Timing** (BEFORE, AFTER, INSTEAD OF), **Event** (INSERT, UPDAT
 Triggers are available for MySQL, MariaDB, PostgreSQL, SQLite, SQL Server, Oracle, libSQL, and Cloudflare D1; the tab is hidden elsewhere. Oracle does not return the trigger body, so the viewer and the editor start from the trigger header alone.
 </Info>
 
-## Options tab
-
-A MySQL or MariaDB table has a default character set and collation, the pair a new column takes when it names none, and an AUTO_INCREMENT counter. Change any of the three here. Views, temporary tables, and tables on TiDB or OceanBase have no Options tab.
-
-Edits queue with the rest of the structure: **Preview SQL** shows the `ALTER TABLE`, **Save Changes** runs it, and `Cmd+Z` takes it back. At the **Read-Only** [safe mode](/features/safe-mode) level the fields are dimmed, with the reason under them.
-
-<Frame>
-  <img className="block dark:hidden" src="/images/structure-options.png" alt="Options tab of a MySQL table with Character Set and Collation menus, a Convert existing columns option, and a Next Auto Increment field" />
-  <img className="hidden dark:block" src="/images/structure-options-dark.png" alt="Options tab of a MySQL table with Character Set and Collation menus, a Convert existing columns option, and a Next Auto Increment field" />
-</Frame>
-
-| Field | What it sets |
-|-------|--------------|
-| **Character Set** | The table's default character set. Picking one sets **Collation** to that set's default |
-| **Collation** | The table's default collation, from the collations of the chosen character set. The set's default is marked **(default)** |
-| **Convert existing columns** | Off, only columns added later take the new pair. On, every existing text column is rewritten to it as well |
-| **Next Auto Increment** | The value the next inserted row takes. Shown while a column has **Auto Inc** set to YES |
-
-### Converting existing columns
-
-With **Convert existing columns** off, the save runs `ALTER TABLE … DEFAULT CHARACTER SET = … COLLATE = …` and no stored text changes.
-
-Turn it on and the save runs `ALTER TABLE … CONVERT TO CHARACTER SET … COLLATE …` instead. Every text column is rewritten to the new pair, and a character the new set cannot hold is lost. A `TEXT` column can come back as `MEDIUMTEXT`, and the server copies the whole table while the statement runs. The save asks first, even at the **Silent** [Safe Mode](/features/safe-mode) level.
-
-A convert cannot go out in the same save as a changed column or a changed primary key. **Save Changes** refuses it with **Save column and primary key changes before converting existing columns.** Save those changes first, then convert. Adding or dropping columns in the same save is fine.
-
-### Next Auto Increment
-
-The field takes a whole number from 1 to the largest value the AUTO_INCREMENT column's type holds: 2147483647 for `INT`, 4294967295 for `INT UNSIGNED`. Outside that range, **Enter a whole number from 1 to …** appears under the field and **Save Changes** refuses until you fix or clear it. The range is the column's as the save leaves it, so a column widened to `BIGINT` in the same save takes a larger value.
-
-The server never sets the counter at or below the highest value already in the column: a value there becomes that value plus one. After the save, the field shows the counter read back from the server, not the number typed.
-
 ## DDL tab
 
 Read-only `CREATE TABLE` with syntax highlighting and font size controls. **Copy**, **Export** as a `.sql` file, and **Open in Editor** send it onward. On PostgreSQL the `CREATE SEQUENCE` and `CREATE TYPE … AS ENUM` statements the table depends on are prepended, so the script runs on an empty database, and the table's `COMMENT ON` statements follow it.
@@ -292,17 +312,19 @@ Lists partitions and parts from `system.parts`. **Optimize** merges parts; **Dro
 
 ## Creating a new table
 
-Click **+** at the foot of the sidebar and choose **New Table…**, or choose **Database > New Table…**. The tab holds a **Table Name** field, a **Comment** field on engines that store table comments, the same three editing grids as tabs, each with its own **+** and **−** at its foot, and a **SQL Preview** tab carrying the live statements it will run. **Create Table** (`Cmd+Enter` or `Cmd+S`) executes it and opens the new table. Where the engine cannot roll DDL back, as on MySQL, a statement that fails after `CREATE TABLE` leaves the table created: it opens on its Structure tab with the error, so finish the change there.
+Click **+** at the foot of the sidebar and choose **New Table…**, or choose **Database > New Table…**. The tab opens on **Definition**, the same page an existing table's structure uses, with a **Table Name** field at the top and one empty column to fill in. **DDL** beside it shows the statements the new table takes, and follows every edit. On an engine with a form of its own, such as DynamoDB, the pair reads **Form** and **DDL**.
 
-On MySQL, MariaDB, TiDB and OceanBase, **Engine**, **Charset** and **Collation** menus sit beside the name. They list what the server has: the engines it can create a table with, its character sets, and the collations of the chosen set, with the default engine and the set's default collation marked **(default)**. They start at what a new table in the target database gets anyway, the database's own character set and collation and the server's default engine, and the `CREATE TABLE` writes the engine, or the character set and collation as a pair, only when you change them. The Columns grid's **Charset** and **Collation** cells work as they do on the [Columns tab](#charset-and-collation).
+Click **Create Table** in the toolbar, or press `Cmd+S` or `Cmd+Enter`, to run it. The new table opens in a tab of its own. Where the engine cannot roll DDL back, as on MySQL, a statement that fails after `CREATE TABLE` leaves the table created: it opens on its Structure tab with the error, so finish the change there.
 
-On the **Foreign Keys** grid, **Columns**, **Ref Table**, and **Ref Columns** open menus of the new table's own columns, the database's tables, and the referenced table's columns. Each menu ends in **Custom…** for a name the list does not carry, and picking a second entry in a comma-separated cell appends to it.
+A row that is started and unfinished is never dropped from the generated SQL. A list under **Table Name** names what still stands in the way, section and row first, such as **Foreign Keys row 1: This foreign key needs a referenced table.**, and **Create Table** stays dimmed until the list is empty. Click an entry that names a row to select that row.
+
+With nothing selected, the inspector holds the new table's **Comment** on engines that store table comments. On MySQL, MariaDB, TiDB and OceanBase it adds **Engine**, **Character Set** and **Collation** menus. They list what the server has: the engines it can create a table with, its character sets, and the collations of the chosen set, with the default engine and the set's default collation marked **(default)**. They start at what a new table in the target database gets anyway, the database's own character set and collation and the server's default engine, and the `CREATE TABLE` writes the engine, or the character set and collation as a pair, only when you change them. The **Charset** and **Collation** fields of a column work as they do on an existing table; see [Charset and collation](#charset-and-collation).
+
+In the **Foreign Keys** section, **Columns**, **Ref Table**, and **Ref Columns** open menus of the new table's own columns, the database's tables, and the referenced table's columns. Each menu ends in **Custom…** for a name the list does not carry, and picking a second entry in a comma-separated cell appends to it.
 
 **Name** is optional on a foreign key. Left blank, no `CONSTRAINT` clause is written and the engine names the constraint itself.
 
-A row that is started and unfinished is never dropped from the generated SQL. **Create Table** dims and the reason sits beside it, naming the grid and the row: a foreign key with no referenced table, an index with no name, two columns sharing a name. Delete the row or finish it.
-
-Indexes run as their own `CREATE INDEX` statements after the table, in one transaction where the engine has transactional DDL.
+The **Check Constraints** section appears where the engine can add a check constraint. Indexes and check constraints run as their own statements after the `CREATE TABLE`, in one transaction where the engine has transactional DDL.
 
 <Info>
 Visual table creation is supported for MySQL, MariaDB, PostgreSQL, PGlite, SQLite, SQL Server, ClickHouse, DuckDB, Oracle, Snowflake, libSQL, Cloudflare D1, Trino, Presto, Teradata, Dameng, and [MongoDB](/databases/mongodb#creating-a-collection). DynamoDB uses a form instead. On every other engine **New Table…** is dimmed.
@@ -312,14 +334,13 @@ Visual table creation is supported for MySQL, MariaDB, PostgreSQL, PGlite, SQLit
 
 A collection's fields are inferred from its first 200 documents: top-level field names are unioned across the sample, and each field takes its most common BSON type. Fields the collection's `$jsonSchema` validator declares follow, including ones no sampled document holds. A field is nullable when the validator takes null in it, as [missing fields and null](/databases/mongodb#missing-fields-and-null) describes; `required` decides only whether a document must have the field. `_id` comes first, marked as the primary key. The DDL tab shows indexes as `createIndex()` commands for `mongosh`, plus the validator and capped-collection options where present.
 
-Edit a field's **Name** to rename it in every document, or remove its row to remove it from every document. **Type**, **Nullable**, adding a field and the **Indexes** tab stay read-only. [Renaming and removing fields](/databases/mongodb#renaming-and-removing-fields) shows the statements a save runs and what refuses one.
+Edit a field's **Name** to rename it in every document, or remove its row to remove it from every document. **Type**, **Nullable**, adding a field and the **Indexes** section stay read-only. [Renaming and removing fields](/databases/mongodb#renaming-and-removing-fields) shows the statements a save runs and what refuses one.
 
 ## Limitations
 
-- **Changing a primary key on an existing table** works on MySQL, MariaDB, PostgreSQL, PGlite, SQL Server, DuckDB, Snowflake, and Dameng. Elsewhere the dropdown accepts the edit and the save produces nothing for it: rebuild the table by hand.
-- **Check constraints and generated columns** have no field in the grid. Both show in the DDL tab; change them by running DDL yourself.
+- **Changing a primary key on an existing table** works on MySQL, MariaDB, PostgreSQL, PGlite, SQL Server, DuckDB, Snowflake, and Dameng. Elsewhere a save that changes the key is refused before anything runs, with the change named in the error: rebuild the table by hand.
 - **Cassandra / ScyllaDB**: add and drop column only, no index editing, no visual table creation.
-- **ClickHouse**: the Indexes tab drops a data-skipping index but cannot add or change one. A save or a new table that tries is refused before anything runs. Run `ALTER TABLE … ADD INDEX … TYPE bloom_filter` in the SQL editor instead.
+- **ClickHouse**: the Indexes section drops a data-skipping index but cannot add or change one. A save or a new table that tries is refused before anything runs. Run `ALTER TABLE … ADD INDEX … TYPE bloom_filter` in the SQL editor instead.
 - **Redshift, CockroachDB, BigQuery, Bigtable, Spanner, Elasticsearch, Typesense, SurrealDB, Beancount, Firestore, Firebase Realtime Database**: structure is read-only.
 - **Redis, etcd, DynamoDB**: no table schema to edit.
 

@@ -130,11 +130,11 @@ Once set, the value renders as `LegacyJavaUUID("…")` and reads that way everyw
 
 ## Creating a collection
 
-Choose **Database > New Table…**. Each row of the grid is a field, and its type is one of the BSON types in the list: `objectId`, `string`, `int`, `long`, `double`, `decimal`, `date`, `bool`, `array`, `object` and the rest. **Create Table** turns the rows into a `$jsonSchema` validator and runs `db.createCollection("articles", {"validator": …})`, which **SQL Preview** shows first.
+Choose **Database > New Table…**. Each row of the grid is a field, and its type is one of the BSON types in the list: `objectId`, `string`, `int`, `long`, `double`, `decimal`, `date`, `bool`, `array`, `object` and the rest. **Create Table** turns the rows into a `$jsonSchema` validator and runs `db.createCollection("articles", {"validator": …})`, which the **DDL** tab shows first.
 
 <Frame caption="Nullable fields also accept null; NOT NULL ones go in required">
-  <img className="block dark:hidden" src="/images/mongodb-create-collection.png" alt="SQL Preview tab of Create Table showing db.createCollection for articles with a $jsonSchema listing _id, title, tags, date and schemaVersion" />
-  <img className="hidden dark:block" src="/images/mongodb-create-collection-dark.png" alt="SQL Preview tab of Create Table showing db.createCollection for articles with a $jsonSchema listing _id, title, tags, date and schemaVersion" />
+  <img className="block dark:hidden" src="/images/mongodb-create-collection.png" alt="DDL tab of Create Table showing db.createCollection for articles with a $jsonSchema listing _id, title, tags, date and schemaVersion" />
+  <img className="hidden dark:block" src="/images/mongodb-create-collection-dark.png" alt="DDL tab of Create Table showing db.createCollection for articles with a $jsonSchema listing _id, title, tags, date and schemaVersion" />
 </Frame>
 
 | Row | Becomes |
