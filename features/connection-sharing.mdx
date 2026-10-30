@@ -41,7 +41,7 @@ The saved query options appear only when there are saved queries to export, and 
 
 ### Encrypted export
 
-<Info>Needs a [Starter license](/features/licensing).</Info>
+<Info>Needs a [Starter plan](/features/licensing).</Info>
 
 Turn on **Include Credentials** in the export sheet and enter a passphrase of 8 characters or more. Credentials go out under AES-256-GCM, keyed from the passphrase with PBKDF2 at 600,000 iterations. Importing asks for the passphrase.
 
@@ -127,7 +127,7 @@ Groups and saved queries come across the way they do on the Mac. The review list
 
 ## Linked Folders
 
-<Info>Needs a [Starter license](/features/licensing).</Info>
+<Info>Needs a [Starter plan](/features/licensing).</Info>
 
 Press `Cmd+,`, then **Settings > General > Linked Folders > Add Folder…** and point it at a directory of `.tablepro` files: a Git repo, a Dropbox folder, a network drive. Those connections appear read-only in the sidebar, and each person enters their own password.
 
@@ -138,13 +138,13 @@ Press `Cmd+,`, then **Settings > General > Linked Folders > Add Folder…** and 
 
 ## Team Catalog
 
-<Info>Needs a [Team license](/features/licensing).</Info>
+<Info>Needs a [Team plan](/features/licensing).</Info>
 
 **Share > Publish to Team Catalog…** writes each selected connection as its own `.tablepro` file into a shared folder, asking for the folder the first time. Republishing overwrites the file, and passwords, passphrases, TOTP secrets, and saved queries are never written. Teammates add that folder as a Linked Folder. An older TablePro skips the file of a connection inside a nested group, as [File format](#file-format) explains.
 
 ## Environment variables
 
-<Info>Needs a [Starter license](/features/licensing).</Info>
+<Info>Needs a [Starter plan](/features/licensing).</Info>
 
 Write `$VAR` or `${VAR}` in a `.tablepro` file and it resolves from TablePro's process environment at connect time. An app launched from the Dock inherits no shell exports, so set the variable with `launchctl setenv NAME value` or launch TablePro from a terminal.
 
