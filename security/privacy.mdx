@@ -7,7 +7,7 @@ Three requests leave a stock install without you asking: usage data to PostHog, 
 
 | Channel | Goes to | On by default | Off switch |
 | --- | --- | --- | --- |
-| [Usage data](#usage-data) | `eu.i.posthog.com` | Yes | **Settings > General**, under Privacy |
+| [Usage data](#usage-data) | `eu.i.posthog.com`, `eu-assets.i.posthog.com` | Yes | **Settings > General**, under Privacy |
 | [Update check](#update-checks) | `updates.tablepro.app` | Yes | **Settings > General**, under Software Update |
 | [Plugin catalog](#the-plugin-catalog) | `updates.tablepro.app` | Yes | None |
 | [AI provider](#ai-providers) | whichever provider you add | No provider is configured on a fresh install | Delete the provider, or turn off **Enable AI Features** |
@@ -124,7 +124,7 @@ There is no setting that turns the catalog fetch off.
 
 With no account signed in and no license key on the Mac, the app never calls the account server.
 
-**Sign In** opens `https://account.tablepro.app/oauth/authorize` in a browser sheet, carrying the Mac's name, the app version and the macOS version, so the confirmation screen can name the Mac. The code it returns is exchanged at `/oauth/token` on the same host. The app then registers the Mac with `POST https://api.tablepro.app/v2/devices`: its machine ID (a SHA-256 of the hardware UUID, or of a random ID stored where that cannot be read), the platform, the Mac's name, the app version and the macOS version. It fetches the signed copy of your plan from `/v2/devices/{id}/entitlement` with the app and macOS versions, on the schedule in [Licensing](/features/licensing#offline-use). Opening **Settings > Account** reads your account, teams and licenses from `/v2/me` and your devices from `/v2/devices`. **Sign Out** revokes the sign-in at `/oauth/revoke`.
+**Sign In** opens `https://account.tablepro.app/oauth/authorize` in a browser sheet, carrying the Mac's name, the app version and the macOS version, so the confirmation screen can name the Mac. The code it returns is exchanged at `/oauth/token` on the same host. The app then registers the Mac with `POST https://api.tablepro.app/v2/devices`: its machine ID (a SHA-256 of the hardware UUID, or of a random ID stored where that cannot be read), the platform, the Mac's name, the app version and the macOS version. It fetches the signed copy of your plan from `/v2/devices/{id}/entitlement` with the app and macOS versions, on the schedule in [Licensing](/features/licensing#offline-use). Opening **Settings > Account** reads your account, teams and licenses from `/v2/me` and your devices from `/v2/devices`. **Remove** on a device sends `DELETE /v2/devices/{id}`. **Sign Out** revokes the sign-in at `/oauth/revoke`.
 
 The first launch that finds a license key from an older version sends it once to `/oauth/token`, with the machine ID, the Mac's name, the platform and both versions, and deletes the key from the Mac when the exchange works. **Use License Key…** sends the same fields.
 
@@ -134,7 +134,7 @@ The Mac's name is the only field in any request that tends to hold a person's na
 
 The server keeps each device with its machine ID, name, platform, versions, and when it last checked in. The account's audit log records each sign-in and new device with the IP address and browser it came from.
 
-Team Library needs a seat on a team, and only owners and admins publish to it. **Share > Publish to Team Library…** and **Publish Saved Queries to Team…** send the connection definitions and the saved query text to `/v2/teams/{id}/library/changes`; the publish path builds the export envelope without credentials, so passwords, key passphrases, and TOTP secrets are not in it, and the server refuses any field named like one. Each member's app pulls changes from the same path at launch, every 15 minutes, and after each publish.
+Team Library needs a seat on a team, and only owners and admins publish to it. **Share > Publish to Team Library…** and **Publish Saved Queries to Team…** send the connection definitions and the saved query text to `/v2/teams/{id}/library/changes`; the publish path builds the export envelope without credentials, so passwords, key passphrases, and TOTP secrets are not in it, and the server refuses any field named like one. Each member's app pulls changes from the same path at launch, every 15 minutes, and after each publish, and every one of those syncs starts with `GET /v2/me` for your teams and roles.
 
 Versions before TablePro accounts call `https://api.tablepro.app/v1/license` only after you activate a key. Activation and the check every 7 days send the license key, the machine ID, the Mac's name, the app version, and the OS version; deactivation sends the key and the machine ID. Their Team Library goes through `/v1/license/library`, pulled weekly and right after a publish.
 
