@@ -26,7 +26,7 @@ Events go to PostHog, the product analytics service, at `https://eu.i.posthog.co
 | `app_opened` | Once per local day | `database_types` and `connection_count` of the connections open at that moment, such as `PostgreSQL` |
 | `connection_attempted`, `connection_succeeded`, `first_query_executed` | Once per install | `database_type`, such as `MySQL` or `SQL Server` |
 | `feature_gate_shown` | Once per paid feature per launch, when its overlay or dialog shows | `feature`, such as `query_insights`, and `reason`: `signed_out`, `not_included`, `expired`, or `refresh_failed` |
-| `upgrade_clicked` | On a click through to the pricing page or the portal's billing | `source`, where the click came from: `app-support`, `app-about`, `app-settings`, or `app-gate-` and the feature |
+| `upgrade_clicked` | On a click through to the pricing page or the portal's billing | `source`, where the click came from: `app-support`, `app-settings`, or `app-gate-` and the feature |
 | `signed_in` | On each sign-in | `method`: `interactive`, `license_key` for **Use License Key…**, or `migration` for the first launch's key exchange |
 | `signed_out` | When you click **Sign Out** | none |
 
