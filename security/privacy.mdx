@@ -34,7 +34,7 @@ A Mac updated from a version before TablePro accounts keeps its first-connection
 
 Before you sign in, events carry a random ID that the library makes on the Mac, and PostHog builds no person profile from it. After sign-in they carry your account ID, and the profile holds `app_version`, `os_version`, `architecture` (`arm64` or `x86_64`), and `locale`, the app's language setting. That links an install to its sign-ins and purchases. **Sign Out** sends `signed_out`, then starts a new random ID. A sign-in the server ended, such as a removed device, starts a new ID without sending anything.
 
-posthog-ios adds to every event the Mac's model, screen size, time zone and language, whether it is on Wi-Fi, the app's version, build and bundle ID, the macOS version, the library's version, and a random session ID. PostHog sees the IP address of each request and derives an approximate location from it, such as the country and city. While the switch is on, the library also fetches its settings from `eu-assets.i.posthog.com` and feature flags from `eu.i.posthog.com`.
+PostHog's library, posthog-ios, adds to every event the Mac's model, screen size, time zone and language, whether it is on Wi-Fi, the app's version, build and bundle ID, the macOS version, the library's version, and a random session ID. PostHog sees the IP address of each request and derives an approximate location from it, such as the country and city. While the switch is on, the library also fetches its settings from `eu-assets.i.posthog.com` and feature flags from `eu.i.posthog.com`.
 
 No query text. No hostnames, ports, database names, or usernames. No email address, no file paths, no connection names. No machine ID, no license state, and no update settings either.
 
