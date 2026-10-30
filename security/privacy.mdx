@@ -3,52 +3,46 @@ title: Privacy
 description: "Every outbound request the app can make, what each one carries, and where its off switch is"
 ---
 
-Three requests leave a stock install without you asking: one usage heartbeat a day, an update check, and a fetch of the plugin catalog. None of the three carries a query, a row, a hostname, or a password. Every other channel in this table is one you switch on yourself.
+Three requests leave a stock install without you asking: usage data to PostHog, an update check, and a fetch of the plugin catalog. None of the three carries a query, a row, a hostname, or a password. A Mac updated from a version that held a license key also trades that key once for a sign-in. Every other channel in this table is one you switch on yourself.
 
 | Channel | Goes to | On by default | Off switch |
 | --- | --- | --- | --- |
-| [Usage heartbeat](#usage-heartbeat) | `api.tablepro.app` | Yes | **Settings > General**, under Privacy |
+| [Usage data](#usage-data) | `eu.i.posthog.com` | Yes | **Settings > General**, under Privacy |
 | [Update check](#update-checks) | `updates.tablepro.app` | Yes | **Settings > General**, under Software Update |
 | [Plugin catalog](#the-plugin-catalog) | `updates.tablepro.app` | Yes | None |
 | [AI provider](#ai-providers) | whichever provider you add | No provider is configured on a fresh install | Delete the provider, or turn off **Enable AI Features** |
 | [iCloud sync](#icloud-sync) | your own iCloud account | No | **Settings > Sync** |
 | [MCP clients](#the-mcp-server) | nowhere: it listens on `127.0.0.1` | No | **Settings > MCP** |
-| [License and team library](#license-checks-and-the-team-library) | `api.tablepro.app` | Only after you activate a license | Do not activate one |
+| [Account and Team Library](#your-account-and-the-team-library) | `account.tablepro.app`, `api.tablepro.app` | Only after you sign in, or an update finds a license key | **Sign Out** in **Settings > Account** |
 | [Your databases](#your-database-connections) | the hosts you type into the connection form | Only what you connect to | Do not connect |
-| Crash reports | Nowhere. The app has no crash reporter. | - | - |
+| Crash reports | Nowhere. The crash reporter inside PostHog's library is turned off. | - | - |
 
-## Usage heartbeat
+## Usage data
 
-One `POST` to `https://api.tablepro.app/v1/analytics`, ten seconds after the app first becomes active and every 24 hours it keeps running. A 20-hour cooldown is stamped in preferences, so quitting and reopening does not send a second one.
+Events go to PostHog, the product analytics service, at `https://eu.i.posthog.com` in the EU. Nothing asks first: `app_opened` goes about ten seconds after launch.
 
-The JSON body holds these fields and no others:
+| Event | Sent | Properties |
+| --- | --- | --- |
+| `app_opened` | Once per local day | `database_types` and `connection_count` of the connections open at that moment, such as `PostgreSQL` |
+| `connection_attempted`, `connection_succeeded`, `first_query_executed` | Once per install | `database_type`, such as `MySQL` or `SQL Server` |
+| `feature_gate_shown` | Once per paid feature per launch, when its overlay or dialog shows | `feature`, such as `query_insights`, and `reason`: `signed_out`, `not_included`, `expired`, or `refresh_failed` |
+| `upgrade_clicked` | On a click through to the pricing page or the portal's billing | `source`, where the click came from: `app-support`, `app-about`, `app-settings`, or `app-gate-` and the feature |
+| `signed_in` | On each sign-in | `method`: `interactive`, `license_key` for **Use License Key…**, or `migration` for the first launch's key exchange |
+| `signed_out` | When you click **Sign Out** | none |
 
-| Field | What it is |
-| --- | --- |
-| `machine_id` | SHA-256 of the Mac's hardware UUID, read from IOKit |
-| `platform` | always `macos` |
-| `app_version`, `os_version`, `architecture` | for example `0.67.0`, `macOS 15.1.0`, `arm64` |
-| `locale` | the language setting: `system`, `en`, `vi`, `zh-Hans`, `zh-Hant`, `ko`, `tr`, or `fr` |
-| `database_types` | the types of the connections open at that moment, such as `MySQL` |
-| `connection_count` | how many connections are open |
-| `has_license` | whether a license key is stored |
-| `connection_attempted_at`, `connection_succeeded_at` | when you first tried to connect on this Mac, and when a connection first succeeded |
-| `update_install_mode` | how updates install: `automatic`, `notify`, or `off` |
-| `update_check_interval` | seconds between update checks, absent when checks are off |
+A Mac updated from a version before TablePro accounts keeps its first-connection dates and does not send those three events again.
 
-The **Get beta updates** switch is not in the body. A beta build shows only in `app_version`, which then reads like `0.82.0-beta.1`.
+Before you sign in, events carry a random ID that the library makes on the Mac, and PostHog builds no person profile from it. After sign-in they carry your account ID, and the profile holds `app_version`, `os_version`, `architecture` (`arm64` or `x86_64`), and `locale`, the app's language setting. That links an install to its sign-ins and purchases. **Sign Out** sends `signed_out`, then starts a new random ID. A sign-in the server ended, such as a removed device, starts a new ID without sending anything.
 
-No query text. No hostnames, ports, database names, or usernames. No email address, no file paths, no connection names.
+posthog-ios adds to every event the Mac's model, screen size, time zone and language, whether it is on Wi-Fi, the app's version, build and bundle ID, the macOS version, the library's version, and a random session ID. PostHog sees the IP address of each request and derives an approximate location from it, such as the country and city. While the switch is on, the library also fetches its settings from `eu-assets.i.posthog.com` and feature flags from `eu.i.posthog.com`.
 
-An `X-Signature` header carries an HMAC-SHA256 of the body. It proves the payload arrived unaltered; it is not encryption, and it carries nothing about you.
+No query text. No hostnames, ports, database names, or usernames. No email address, no file paths, no connection names. No machine ID, no license state, and no update settings either.
 
-`machine_id` hashes a hardware identifier, never anything you typed, so two heartbeats from one Mac count as one Mac. Where that identifier cannot be read, a random one is stored instead and does not survive a reset.
+Each event is sent as it is captured. One still waiting for the network sits in a file under `~/Library/Application Support/com.TablePro`, with the random ID and the library's settings.
 
-The server stores each heartbeat with the IP address it came from. A [license check](#license-checks-and-the-team-library) sends the same `machine_id`, so heartbeats from a Mac with an activated license can be linked to that license. The [privacy policy](https://tablepro.app/privacy#mac-usage-report) says what the server keeps.
+**Share usage data** in **Settings > General** is on by default. With it off, the app sends PostHog nothing, not even the sign-in that links an account. A launch with it off never starts the library, and a build without a PostHog project key, such as one built from source, never sends usage data at all.
 
-**Share usage data** in **Settings > General** is on by default. With it off, the send returns before the payload is built, and nothing queues for later.
-
-On iPhone and iPad the heartbeat is off until you choose **Share Usage Data**, and its `platform` is `ios`. See [iPhone and iPad](/ios#privacy).
+Versions before TablePro accounts send a heartbeat instead, under the same switch: one `POST` to `https://api.tablepro.app/v1/analytics` ten seconds after launch and every 24 hours, carrying a SHA-256 of the Mac's hardware UUID, the app and macOS versions, the architecture and language, the open connections' types and count, whether a license key is stored, when you first tried and first managed to connect, and the update settings. The server forwards it to PostHog as a `heartbeat` event about that machine, with Cloudflare's country and without the IP address, the license key, or the update settings. The iPhone and iPad app sends a heartbeat of the same kind, with `platform` `ios`, and only after you choose **Share Usage Data**; see [iPhone and iPad](/ios#privacy).
 
 ## AI providers
 
@@ -88,7 +82,7 @@ Eight record types sync: `Connection`, `ConnectionGroup`, `ConnectionTag`, `AppS
 Passwords are not one of those record types. The **Passwords** toggle nested under Connections instead marks keychain items as synchronizable, so Apple's iCloud Keychain carries them end to end encrypted. It is off by default, and it applies to items written after you turn it on.
 
 <Warning>
-That flag is set on every keychain item the app writes, not only connection passwords: AI provider keys and the license key go through the same helper. MCP tokens and Google sign-in refresh tokens do not; their stores always write device-only items.
+That flag is set on every keychain item the app writes, not only connection passwords: AI provider keys and a license key an older version stored go through the same helper. MCP tokens, Google sign-in refresh tokens and your TablePro account's sign-in do not; their stores always write device-only items.
 </Warning>
 
 With password sync off, secrets are written `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, which keeps them on that one Mac. Query history, the activity log, the execution log, tab state, MCP settings, and the sync settings themselves are never synced. Individual connections can be marked **Local only**. Full detail in [iCloud Sync](/features/icloud-sync).
@@ -126,19 +120,27 @@ Installing a plugin downloads its ZIP over HTTPS from the URL in that catalog an
 
 There is no setting that turns the catalog fetch off.
 
-## License checks and the team library
+## Your account and the Team Library
 
-With no license activated, the app never calls the license API. Activation sends the license key or invite code, the hashed machine ID, the Mac's name, the app version, and the OS version to `https://api.tablepro.app/v1/license`. The same fields go out on re-validation, which runs every 7 days, and on deactivation.
+With no account signed in and no license key on the Mac, the app never calls the account server.
+
+**Sign In** opens `https://account.tablepro.app/oauth/authorize` in a browser sheet, carrying the Mac's name, the app version and the macOS version, so the confirmation screen can name the Mac. The code it returns is exchanged at `/oauth/token` on the same host. The app then registers the Mac with `POST https://api.tablepro.app/v2/devices`: its machine ID (a SHA-256 of the hardware UUID, or of a random ID stored where that cannot be read), the platform, the Mac's name, the app version and the macOS version. It fetches the signed copy of your plan from `/v2/devices/{id}/entitlement` with the app and macOS versions, on the schedule in [Licensing](/features/licensing#offline-use). Opening **Settings > Account** reads your account, teams and licenses from `/v2/me` and your devices from `/v2/devices`. **Sign Out** revokes the sign-in at `/oauth/revoke`.
+
+The first launch that finds a license key from an older version sends it once to `/oauth/token`, with the machine ID, the Mac's name, the platform and both versions, and deletes the key from the Mac when the exchange works. **Use License Key…** sends the same fields.
 
 <Info>
-The Mac's name is the only field in any request that tends to hold a person's name, because macOS builds it from the account name. It goes to the license API, never to the analytics endpoint.
+The Mac's name is the only field in any request that tends to hold a person's name, because macOS builds it from the account name. It goes to the account server, never to PostHog.
 </Info>
 
-Team Library is a Team-tier feature and it publishes only when you ask. **Share > Publish to Team Library…** uploads the connection definitions and the saved query text to `https://api.tablepro.app/v1/license/library`; the publish path builds the export envelope without credentials, so passwords, key passphrases, and TOTP secrets are not in it. A member's app pulls the library on its own weekly timer, and again straight after anyone publishes.
+The server keeps each device with its machine ID, name, platform, versions, and when it last checked in. The account's audit log records each sign-in and new device with the IP address and browser it came from.
+
+Team Library needs a seat on a team, and only owners and admins publish to it. **Share > Publish to Team Library…** and **Publish Saved Queries to Team…** send the connection definitions and the saved query text to `/v2/teams/{id}/library/changes`; the publish path builds the export envelope without credentials, so passwords, key passphrases, and TOTP secrets are not in it, and the server refuses any field named like one. Each member's app pulls changes from the same path at launch, every 15 minutes, and after each publish.
+
+Versions before TablePro accounts call `https://api.tablepro.app/v1/license` only after you activate a key. Activation and the check every 7 days send the license key, the machine ID, the Mac's name, the app version, and the OS version; deactivation sends the key and the machine ID. Their Team Library goes through `/v1/license/library`, pulled weekly and right after a publish.
 
 ## Crash reports
 
-There are none. The app links no crash reporting SDK, its only remote packages being Sparkle, swift-certificates, and Yams, so nothing uploads a crash log, a stack trace, or a diagnostic file. Logging goes through OSLog and stays in the system log store on your Mac.
+There are none. PostHog's library, which the app ships for usage data, compiles a crash reporter that the app leaves turned off, so nothing uploads a crash log, a stack trace, or a diagnostic file. Logging goes through OSLog and stays in the system log store on your Mac.
 
 ## Your database connections
 
@@ -178,13 +180,16 @@ Every path here is under `~/Library/Application Support/TablePro/` unless it say
 | `LastSession.json`, `LastOpenConnections.json` | What to reopen for **Reopen Last Session**, and which of those connections dial on their own. |
 | `Plugins/` | Plugins you installed yourself. |
 | `Registry/URLCache/` | The cached plugin catalog. |
-| `team_library.json` | The cached team library. |
+| `TeamLibrary/` | One file per team: the cached Team Library, the sync position, and changes and conflicts not sent yet. |
+| `team_library.json` | An older version's cached Team Library, removed once every team has synced. |
+| `Account/entitlement.jwt` | The signed copy of your plan, or the offline file you imported. |
 | `linked_sql_index.db` | File metadata for linked SQL folders. |
-| `~/Library/Preferences/com.TablePro.plist` | Settings, and the signed license blob, which carries the email on the license. |
+| `~/Library/Preferences/com.TablePro.plist` | Settings, and until its key is exchanged, the signed license an older version stored, which carries the email on the license. |
+| `~/Library/Application Support/com.TablePro/` | PostHog's random ID, settings, and events not sent yet. |
 
 ## Passwords and secrets
 
-Secrets live in the macOS keychain, under the `com.TablePro` service and in the data protection keychain: connection passwords, SSH passwords, key passphrases, SSL client key passphrases, TOTP secrets, plugin secure fields, AI provider keys, and the license key. Google sign-in refresh tokens for BigQuery and Spanner are kept in the same keychain under `com.TablePro.GoogleOAuth`, one per OAuth client ID. MCP tokens are the exception, stored as a salted SHA-256 hash; the plaintext is shown once at creation and never written down.
+Secrets live in the macOS keychain, under the `com.TablePro` service and in the data protection keychain: connection passwords, SSH passwords, key passphrases, SSL client key passphrases, TOTP secrets, plugin secure fields, AI provider keys, and a license key an older version stored, until it is exchanged. Your TablePro account's sign-in is a refresh token kept only on this Mac, never in iCloud Keychain; the short-lived access token stays in memory. Google sign-in refresh tokens for BigQuery and Spanner are kept in the same keychain under `com.TablePro.GoogleOAuth`, one per OAuth client ID. MCP tokens are the exception, stored as a salted SHA-256 hash; the plaintext is shown once at creation and never written down.
 
 A connection can name a [password source](/features/connection-sharing#password-sources) instead of using the keychain: a file, an environment variable, a shell command, 1Password, HashiCorp Vault, AWS Secrets Manager, or a Vault database role. Those resolve at connect time, on your machine, and are never synced, since a path or a command belongs to one Mac. A Vault database role sends your Vault token to the address it names, and the database password it gets back stays in memory.
 
