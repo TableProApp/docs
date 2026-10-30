@@ -1,30 +1,30 @@
 ---
 title: FAQ
-description: Short answers on licensing, privacy, offline use, database coverage, syncing, and moving from another client
+description: Short answers on plans and accounts, privacy, offline use, database coverage, syncing, and moving from another client
 ---
 
 import DriverCounts from "/snippets/driver-counts.mdx";
 
 Short answers only, each linking to the page that carries the detail. Anything not covered is worth an issue on [GitHub](https://github.com/TableProApp/TablePro/issues), where driver requests and support questions are tracked in the open.
 
-## Cost and licensing
+## Cost and plans
 
 <AccordionGroup>
 
 <Accordion title="Is TablePro free?">
-Yes, and there is no trial countdown. A license adds the features in the tier table and changes nothing else. See [Licensing](/features/licensing).
+Yes, with no account and no trial countdown. A paid plan adds the features in the plan table and changes nothing else. See [Licensing](/features/licensing).
 </Accordion>
 
-<Accordion title="What does a license add?">
-Two tiers. Starter covers iCloud Sync, encrypted connection export, environment variables in connection fields, Linked Folders, Query Insights, result charts, Compare & Sync, and Data Rewind. Team adds the Team Catalog and the Team Library on top of Starter. [Licensing](/features/licensing) shows what each one does without a license, and prices are on [tablepro.app/pricing](https://tablepro.app/pricing).
+<Accordion title="What does a paid plan add?">
+Two plans. Starter covers iCloud Sync, encrypted connection export, environment variables in connection fields, Linked Folders, Query Insights, result charts, Compare & Sync, and Data Rewind. Team adds the Team Catalog and the Team Library on top of Starter. Sign in to a TablePro account on up to 3 devices to use them. [Licensing](/features/licensing) shows what each one does without a plan, and prices are on [tablepro.app/pricing](https://tablepro.app/pricing).
 </Accordion>
 
 <Accordion title="Can I use it at work?">
-Yes. Nothing counts seats. To share connections and saved queries with teammates, the Team tier hands out seats from your account on tablepro.app, and each teammate activates with an invite code instead of a key. See [Team Plan](/features/team).
+Yes, free or paid. To share connections and saved queries with teammates, a Team plan hands out seats from the account portal: each teammate accepts an emailed invitation and signs in with an account of their own. See [Team Plan](/features/team).
 </Accordion>
 
 <Accordion title="What license is the source code under?">
-The GNU Affero General Public License v3.0, plugins included. A TablePro license key is a separate thing: it activates the paid features, not the app.
+The GNU Affero General Public License v3.0, plugins included. A TablePro plan is a separate thing: it unlocks the paid features, not the app.
 </Accordion>
 
 </AccordionGroup>
@@ -34,7 +34,7 @@ The GNU Affero General Public License v3.0, plugins included. A TablePro license
 <AccordionGroup>
 
 <Accordion title="Is my data sent anywhere?">
-Your queries, results, and schemas stay on your Mac. One usage heartbeat goes out every 24 hours. It carries a hashed machine ID and facts about the app, such as its version and the types of the open connections, with no query text, hostnames, database names, or connection names; [Privacy](/security/privacy#usage-heartbeat) lists every field in it. Turn it off with **Share usage data** in **Settings > General**. AI is the exception, since the context you allow reaches the provider you configured.
+Your queries, results, and schemas stay on your Mac. Usage data goes to PostHog: a few app events, such as one a day with the types of the open connections, plus the Mac's model and versions, under a random ID before you sign in and your account ID after. It carries no query text, hostnames, database names, or connection names; [Privacy](/security/privacy#usage-data) lists every event. Turn it off with **Share usage data** in **Settings > General**. Versions before TablePro accounts send a daily heartbeat with a hashed machine ID instead. AI is the exception, since the context you allow reaches the provider you configured.
 </Accordion>
 
 <Accordion title="Is my password safe?">
@@ -80,11 +80,11 @@ An app update can raise the plugin interface version, and a plugin built against
 <AccordionGroup>
 
 <Accordion title="Does it work offline?">
-Connecting, browsing, and querying need nothing but the database. What does need the network: installing or updating a plugin, and any AI provider that is not local. A license keeps working for 30 days past its last successful validation when the license server cannot be reached. See [Licensing](/features/licensing).
+Connecting, browsing, and querying need nothing but the database. What does need the network: installing or updating a plugin, and any AI provider that is not local. A paid plan keeps working offline until its signed copy expires, 14 days at most after the last refresh, and a Mac that never goes online imports an offline file instead. See [Licensing](/features/licensing#offline-use).
 </Accordion>
 
 <Accordion title="Does it sync between Macs?">
-Through iCloud, with a Starter or Team license. Sync is off by default and each category has its own toggle: connections, groups and tags, SSH and credential profiles, saved queries, table and database favorites, table folders, and settings. Passwords are a separate opt-in that rides iCloud Keychain, and a connection can be marked **Local only** to stay off iCloud. See [iCloud Sync](/features/icloud-sync).
+Through iCloud, with a Starter or Team plan. Sync is off by default and each category has its own toggle: connections, groups and tags, SSH and credential profiles, saved queries, table and database favorites, table folders, and settings. Passwords are a separate opt-in that rides iCloud Keychain, and a connection can be marked **Local only** to stay off iCloud. See [iCloud Sync](/features/icloud-sync).
 </Accordion>
 
 <Accordion title="Is there an iPhone app?">

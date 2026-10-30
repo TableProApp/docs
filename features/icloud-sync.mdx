@@ -3,7 +3,7 @@ title: iCloud Sync
 description: Sync connections, groups, tags, and saved queries to your Macs, iPhone, and iPad, and settings, table favorites, and SSH profiles between Macs
 ---
 
-Sync needs a Starter or Team [license](/features/licensing) and starts off. Press `Cmd+,`, open **Settings > Sync**, turn on **Sync this Mac with iCloud**, pick the categories, and click **Sync Now**. The iPhone and iPad app shares the same CloudKit data but carries connections, groups, tags, and saved queries only.
+Sync needs a Starter or Team [plan](/features/licensing) and starts off. Press `Cmd+,`, open **Settings > Sync**, turn on **Sync this Mac with iCloud**, pick the categories, and click **Sync Now**. The iPhone and iPad app shares the same CloudKit data but carries connections, groups, tags, and saved queries only.
 
 <Frame caption="iCloud Sync settings">
   <img className="block dark:hidden" src="/images/settings-sync.png" alt="Sync pane with the Sync this Mac with iCloud switch and its Starter badge" />
@@ -91,6 +91,6 @@ iCloud refused the changes counted under **Sync Now** and accepted the rest. The
 
 Signing in to a different iCloud account starts sync over for that account: the next sync is a full fetch rather than a delta, and changes waiting on this Mac go to the new account. Expect the first sync to take longer.
 
-When a license expires, sync stops and local data stays where it is. Re-activate to resume.
+When your plan ends, sync stops and local data stays where it is. Sync resumes once a plan with iCloud Sync is back on the Mac.
 
-A license TablePro has not been able to check for 30 days pauses sync separately, under **Sync Paused** rather than **Sync Off**. Click the indicator, or **Check Again** in **Settings > Sync**, to try the server again. Local data stays where it is either way.
+When the signed copy of your plan expires before TablePro could refresh it, **Settings > Sync** shows **Sync Paused** with **Renew License**. Signed in with no copy fetched yet, it shows **Sync Paused** with **Check Again**, which tries the server again. Local data stays where it is either way. See [Offline use](/features/licensing#offline-use).
