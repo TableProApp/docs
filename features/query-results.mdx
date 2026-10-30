@@ -7,9 +7,9 @@ import RowCap from "/snippets/row-cap.mdx";
 
 Every statement you run gets its own result. The next run reuses an unpinned one rather than adding to the pile, so a result survives only as long as you leave it unpinned.
 
-<Frame caption="The result chooser in the status bar under the grid">
-  <img className="block dark:hidden" src="/images/query-results.png" alt="Query results and the result chooser" />
-  <img className="hidden dark:block" src="/images/query-results-dark.png" alt="Query results and the result chooser" />
+<Frame caption="Three results as tabs above the grid, the first one pinned">
+  <img className="block dark:hidden" src="/images/query-results.png" alt="A query tab with artist, album and genre result tabs and the result pull-down" />
+  <img className="hidden dark:block" src="/images/query-results-dark.png" alt="A query tab with artist, album and genre result tabs and the result pull-down" />
 </Frame>
 
 ## Naming
@@ -21,20 +21,24 @@ A result is named after the table it came from. When there is no single table, t
 SELECT count(*) FROM orders;
 ```
 
-names its result `monthly totals`. Names longer than 28 characters are truncated with an ellipsis, and a result no statement stands behind falls back to `Result 1`.
+names its result `monthly totals`. Names longer than 28 characters are truncated with an ellipsis, and a result no statement stands behind is numbered by where it lands, `Result 3` after two pinned results. Two results with the same name read `users` and `users (2)`.
 
 ## Choosing a result
 
-The chooser sits at the left of the bar under the grid and reads **Result 2 of 4**, or the result's own name when there is only one. A pin in front of the title means the result on screen is pinned.
+With two to six results, a row of tabs above the grid shows one tab per result. Click a tab to show that result. A pinned result's tab carries a pin.
+
+The result pull-down lists every result and holds the commands for the one on screen. With tabs it sits at the end of the tab row and reads **2 of 4**. With one result it sits at the left of the bar under the grid and reads the result's name. With more than six results, or a pane too narrow for the tab names, the row keeps only the pull-down.
 
 | Action | How |
 |---|---|
-| Switch result | `Cmd+Option+[` and `Cmd+Option+]`, or pick it from the chooser |
-| Pin | Chooser > **Pin Result**, `Cmd+Option+P`, or **View > Pin Result** |
-| Compare with another result | Chooser > **Compare Result With…**, or **View > Compare Result With…** |
-| Close | Chooser > **Close Result**, or `Cmd+Shift+W` |
-| Close the rest | Chooser > **Close Other Results** |
+| Switch result | Click its tab, press `Cmd+Option+[` or `Cmd+Option+]`, or pick it from the pull-down |
+| Pin | Pull-down > **Pin Result**, `Cmd+Option+P`, or **View > Pin Result** |
+| Compare with another result | Pull-down > **Compare Result With…**, or **View > Compare Result With…** |
+| Close | Pull-down > **Close Result**, or `Cmd+Shift+W` |
+| Close the rest | Pull-down > **Close Other Results** |
 | Show or hide the panel | `Cmd+Option+R`, or **View > Show Results** |
+
+Closing the result on screen shows the one that takes its place. Closing, clearing or switching away from a result with unsaved cell edits asks first.
 
 The next query opens a new result instead of overwriting a pinned one. Pinned results cannot be closed or cleared until you unpin them.
 
@@ -104,4 +108,4 @@ The lines are read after every statement run from the editor, so each result hol
 
 ## Failed statements
 
-A failed statement shows a red banner above the results with the database's own error message and a **Fix with AI** button. See [AI Assistant](/features/ai-assistant). A control character or zero-width space in the message shows as its short name in angle brackets, such as `<BS>`; see [Invisible characters](/features/sql-editor#invisible-characters).
+A failed statement shows a red banner above the results with the database's own error message and a **Fix with AI** button. In a script, the statement that failed gets a result named `Error`, and the banner shows only on that result. Its banner has no dismiss button, since the error is all that result holds. See [AI Assistant](/features/ai-assistant). A control character or zero-width space in the message shows as its short name in angle brackets, such as `<BS>`; see [Invisible characters](/features/sql-editor#invisible-characters).
