@@ -1,0 +1,57 @@
+---
+title: StarRocks
+description: Connect to StarRocks on its MySQL port and browse default_catalog and external catalogs such as Iceberg and Hive
+---
+
+Point the connection at a frontend's MySQL port, 9030, not the 8030 HTTP port. The bundled MySQL driver connects, then confirms the server is StarRocks with `SELECT current_version()`; a MySQL server saved under this type fails at connect and asks for the type to be changed. No minimum StarRocks version is enforced.
+
+## Quick setup
+
+A single-node cluster in Docker:
+
+```bash
+docker run -d -p 9030:9030 -p 8030:8030 -p 8040:8040 starrocks/allin1-ubuntu
+```
+
+Connect as `root` with an empty password once the frontend reports ready, about a minute after start.
+
+## Connection settings
+
+| Field | Default | Notes |
+|-------|---------|-------|
+| **Port** | `9030` | The frontend's MySQL port |
+| **Database** | empty | Optional. `catalog.database`, a catalog, or a database of `default_catalog` |
+| **SSL Mode** | Preferred | TLS first, plain text if the server refuses |
+
+Host, user, password and SSH tunnels work as on [MySQL](/databases/mysql).
+
+## Connection URL
+
+No URL scheme opens a StarRocks connection. Create it in the form. **Copy Connection String** gives a `mysql://` URL, which other MySQL clients accept.
+
+## Catalogs and databases
+
+Catalogs fill the database level and each catalog's databases fill the schema level, so the sidebar shows `default_catalog` and every external catalog, with their databases beneath. `Cmd+K` switches catalog, and the database picker switches database within it.
+
+The Database field takes the same two levels. Write `glue_iceberg.sales` to open on database `sales` in catalog `glue_iceberg`. A name with no dot opens that catalog when the server has one, and otherwise a database of `default_catalog`. Leave the field empty to start in `default_catalog`.
+
+The sidebar hides `_statistics_`, `information_schema` and `sys`.
+
+## Editing rows
+
+StarRocks reports no primary keys to the driver, so a row edit or delete matches on every column of the row. ARRAY, MAP, STRUCT, JSON, BITMAP, HLL, PERCENTILE, BINARY and VARBINARY columns are left out of that match. Edits save one statement at a time with no transaction. Whether an external catalog's table accepts `UPDATE` or `DELETE` is up to its connector; a refused save shows the server's error.
+
+JSON and VARIANT columns read as text in the grid and the inspector.
+
+## Limitations
+
+- No indexes, foreign keys, triggers, routines, events or partitions. The Structure tab shows columns only, and does not edit them.
+- No Create Database, Drop Database, renames or import. Create catalogs and databases in the SQL editor.
+- No Users & Roles, Server Dashboard or Table Maintenance, and the table info panel shows no row counts or sizes.
+- Not available on iPhone and iPad.
+
+## Related
+
+- [MySQL](/databases/mysql), for connection fields, SSL/TLS, and troubleshooting
+- [Trino](/databases/trino), which browses catalogs the same way
+- [SSH Tunneling](/connections/ssh-tunneling)
