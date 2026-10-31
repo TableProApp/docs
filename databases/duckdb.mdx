@@ -32,8 +32,8 @@ Pick a `.duckdb` file to open a database, or a `.parquet`, `.csv`, `.tsv`, `.jso
 
 | Path | What you get |
 |-------|-------------|
-| `.duckdb`, `.ddb` | The database in that file. A path that does not exist yet is created |
-| `.parquet`, `.csv`, `.tsv`, `.json`, `.ndjson` | An in-memory database holding two read-only views over the file, one named `file` and one named after the file. A path that does not exist is reported instead of created |
+| `.duckdb`, `.ddb`, or a DuckDB or SQLite file under any other name | The database in that file. A path that does not exist yet is created |
+| `.parquet`, `.csv`, `.tsv`, `.json`, `.jsonl`, `.ndjson`, also gzip or zstd compressed | An in-memory database holding two read-only views over the file, one named `file` and one named after the file. A path that does not exist is reported instead of created |
 | `:memory:` | An empty database, discarded on disconnect |
 
 In Local File mode the path is the whole connection, and it is required; the form shows no host, port or Database field.
