@@ -3,7 +3,7 @@ title: StarRocks
 description: Connect to StarRocks on its MySQL port and browse default_catalog and external catalogs such as Iceberg and Hive
 ---
 
-Point the connection at a frontend's MySQL port, 9030, not the 8030 HTTP port. The bundled MySQL driver connects, then confirms the server is StarRocks with `SELECT current_version()`; a MySQL server saved under this type fails at connect and asks for the type to be changed. No minimum StarRocks version is enforced.
+Point the connection at a frontend's MySQL port, 9030, not the 8030 HTTP port. The StarRocks driver is a plugin that installs the first time you pick StarRocks, and is built from the MySQL driver. It confirms the server is StarRocks with `SELECT current_version()`; a MySQL server saved under this type fails at connect and asks for the type to be changed. No minimum StarRocks version is enforced.
 
 ## Quick setup
 
@@ -20,20 +20,24 @@ Connect as `root` with an empty password once the frontend reports ready, about 
 | Field | Default | Notes |
 |-------|---------|-------|
 | **Port** | `9030` | The frontend's MySQL port |
-| **Database** | empty | Optional. `catalog.database`, a catalog, or a database of `default_catalog` |
+| **Database** | empty | Optional. `catalog.database`, `catalog.` for a catalog alone, or a database of `default_catalog` |
 | **SSL Mode** | Preferred | TLS first, plain text if the server refuses |
 
 Host, user, password and SSH tunnels work as on [MySQL](/databases/mysql).
 
 ## Connection URL
 
-No URL scheme opens a StarRocks connection. Create it in the form. **Copy Connection String** gives a `mysql://` URL, which other MySQL clients accept.
+```text
+starrocks://root:password@fe.example.com:9030/glue_iceberg.sales
+```
+
+The path is the Database field, so it takes `catalog.database` too. **Copy Connection String** gives the same form.
 
 ## Catalogs and databases
 
 Catalogs fill the database level and each catalog's databases fill the schema level, so the sidebar shows `default_catalog` and every external catalog, with their databases beneath. `Cmd+K` switches catalog, and the database picker switches database within it.
 
-The Database field takes the same two levels. Write `glue_iceberg.sales` to open on database `sales` in catalog `glue_iceberg`. A name with no dot opens that catalog when the server has one, and otherwise a database of `default_catalog`. Leave the field empty to start in `default_catalog`.
+The Database field takes the same two levels. Write `glue_iceberg.sales` to open on database `sales` in catalog `glue_iceberg`, or `glue_iceberg.` to open the catalog with no database selected. A name with no dot is a database of `default_catalog`, as in other StarRocks clients. Leave the field empty to start in `default_catalog`.
 
 Materialized views in `default_catalog` list apart from views, and open on their `CREATE MATERIALIZED VIEW`. The sidebar hides `_statistics_`, `information_schema` and `sys`.
 
@@ -48,7 +52,7 @@ What a save can do depends on the table's key model. Edits save one statement at
 | Duplicate key | Every column | No, the server refuses `UPDATE` | Yes |
 | External catalog table | Every column | Up to the connector | Up to the connector |
 
-A match on every column leaves out ARRAY, MAP, STRUCT, JSON, BITMAP, HLL, PERCENTILE, BINARY and VARBINARY columns. To change a row the server refuses to update, delete it and insert it again in the SQL editor.
+A match on every column leaves out ARRAY, MAP, STRUCT, JSON, BITMAP, HLL, PERCENTILE, BINARY and VARBINARY columns, and compares FLOAT columns as text. A delete from a duplicate key table reports 0 rows even when it removes some, so a delete matched on every column is not checked against the row count. To change a row the server refuses to update, delete it and insert it again in the SQL editor.
 
 JSON and VARIANT columns read as text in the grid and the inspector.
 
