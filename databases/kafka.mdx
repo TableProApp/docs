@@ -150,8 +150,8 @@ where retention has removed messages from the middle of a compacted topic.
 
 Schema Registry is not read. A binary `value` column of Protobuf messages decodes field by field
 with **Display As > Protobuf**, which reads the five-byte Confluent wire-format prefix and shows the
-schema ID; see [Binary value viewer](/features/json-viewer#binary-value-viewer). Avro values show
-as raw bytes.
+schema ID; see [Binary value viewer](/features/json-viewer#binary-value-viewer). Avro values decode
+with **Display As > Avro Schema…** and the topic's `.avsc` file, past the same prefix.
 
 Creating a topic, editing topic configuration, and resetting consumer group offsets are not
 available. Deleting a topic is, as the paragraph above describes.
