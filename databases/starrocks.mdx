@@ -35,19 +35,30 @@ Catalogs fill the database level and each catalog's databases fill the schema le
 
 The Database field takes the same two levels. Write `glue_iceberg.sales` to open on database `sales` in catalog `glue_iceberg`. A name with no dot opens that catalog when the server has one, and otherwise a database of `default_catalog`. Leave the field empty to start in `default_catalog`.
 
-The sidebar hides `_statistics_`, `information_schema` and `sys`.
+Materialized views in `default_catalog` list apart from views, and open on their `CREATE MATERIALIZED VIEW`. The sidebar hides `_statistics_`, `information_schema` and `sys`.
 
 ## Editing rows
 
-StarRocks reports no primary keys to the driver, so a row edit or delete matches on every column of the row. ARRAY, MAP, STRUCT, JSON, BITMAP, HLL, PERCENTILE, BINARY and VARBINARY columns are left out of that match. Edits save one statement at a time with no transaction. Whether an external catalog's table accepts `UPDATE` or `DELETE` is up to its connector; a refused save shows the server's error.
+What a save can do depends on the table's key model. Edits save one statement at a time with no transaction.
+
+| Key model | Row matched on | Edit a cell | Delete a row |
+|---|---|---|---|
+| Primary key | Key columns | Yes | Yes |
+| Unique key, aggregate key | Key columns | No, the server refuses `UPDATE` | Yes |
+| Duplicate key | Every column | No, the server refuses `UPDATE` | Yes |
+| External catalog table | Every column | Up to the connector | Up to the connector |
+
+A match on every column leaves out ARRAY, MAP, STRUCT, JSON, BITMAP, HLL, PERCENTILE, BINARY and VARBINARY columns. To change a row the server refuses to update, delete it and insert it again in the SQL editor.
 
 JSON and VARIANT columns read as text in the grid and the inspector.
 
 ## Limitations
 
-- No indexes, foreign keys, triggers, routines, events or partitions. The Structure tab shows columns only, and does not edit them.
+- No indexes, foreign keys, triggers, routines, events or partitions. The Structure tab shows columns, with key columns marked, and does not edit them.
 - No Create Database, Drop Database, renames or import. Create catalogs and databases in the SQL editor.
-- No Users & Roles, Server Dashboard or Table Maintenance, and the table info panel shows no row counts or sizes.
+- The table info panel shows row counts and sizes for `default_catalog` tables only. An external catalog's tables show none.
+- `EXPLAIN ANALYZE` is not in the plan menu. Run it in the SQL editor; its report carries terminal color codes.
+- No Users & Roles, Server Dashboard or Table Maintenance.
 - Not available on iPhone and iPad.
 
 ## Related
