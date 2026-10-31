@@ -319,6 +319,7 @@
               "features/join-builder",
               "features/explain-visualization",
               "features/server-dashboard",
+              "features/table-health",
               "features/users-roles"
             ]
           },
