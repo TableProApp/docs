@@ -269,6 +269,7 @@
               "databases/sap-hana",
               "databases/snowflake",
               "databases/spanner",
+              "databases/starrocks",
               "databases/sqlite",
               "databases/surrealdb",
               "databases/teradata",
