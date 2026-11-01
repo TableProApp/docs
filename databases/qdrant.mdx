@@ -35,7 +35,7 @@ Every grid has `id` first and the vectors last. `id` is the primary key and read
 
 Payload columns are the top-level indexed fields, then the fields found in the first 100 points. Arrays and objects render as JSON in the cell. An index on a nested path such as `metadata.source` or `tags[]` is listed in the **Indexes** section of the **Structure** tab, and its value shows inside the `metadata` or `tags` column. A field that appears only in later points shows up in a query result but not as a grid column.
 
-Unsorted pages load through `POST /points/scroll`, which pages by point id. Paging forward reuses the id the last page ended on, and a jump to a far page reads point ids alone up to that row.
+Pages load through `POST /points/query` in id order, with the offset applied by Qdrant, so a page always shows the rows at that position now. A node older than 1.10 has no Query API, so its pages walk the point ids from the start.
 
 ## Sorting
 
