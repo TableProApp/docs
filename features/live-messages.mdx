@@ -1,0 +1,55 @@
+---
+title: Live Messages
+description: Watch PostgreSQL notifications, Redis channels and Kafka topics as messages arrive, and send test messages
+---
+
+A Live tab shows messages that flow past a connection instead of being stored: PostgreSQL `NOTIFY`, Redis Pub/Sub and new Kafka records. Each row has the time, the channel or topic and the payload. The tab reads on a connection of its own, so your query tabs and their transactions are never touched, and closing the tab closes that connection.
+
+## Turn it on
+
+Live Messages is a module, off by default. Select **Live Messages** under **Modules** in **Settings > Extensions**. That adds **Database > Live Messages…**. Deselecting the checkbox removes the command and closes every Live tab.
+
+## Engine support
+
+| Engine | What you follow | Send field | Extra columns |
+|---|---|---|---|
+| PostgreSQL | Channels, with `LISTEN` | `NOTIFY`, sent with `pg_notify` | None |
+| Redis | Channels with `SUBSCRIBE`, patterns with `PSUBSCRIBE` | `PUBLISH` | Pattern |
+| Kafka | Topics, from the end of each partition | Produce to the topic's first partition | Partition, Offset, Key |
+
+Other engines have no Live tab, Redshift, CockroachDB and PGlite included.
+
+## Start following
+
+<Steps>
+  <Step title="Open the sheet">
+    Choose **Database > Live Messages…** on a connected PostgreSQL, Redis or Kafka connection. On Kafka, the topic open in the front tab is filled in.
+  </Step>
+  <Step title="Name the channels or topics">
+    Separate names with commas. On Redis, the **Patterns** field takes glob patterns such as `news.*`.
+  </Step>
+  <Step title="Start">
+    Click **Listen**, **Subscribe** or **Follow**. The new tab connects and starts listing messages, newest at the top.
+  </Step>
+</Steps>
+
+## Work with the list
+
+- **Pause** freezes the list. Messages keep arriving underneath, and the count of new ones shows beside the button. **Resume** shows them.
+- **Clear** empties the list.
+- The filter field matches the channel, the payload and the Kafka key.
+- **Copy** copies the selected rows, or every shown row when none is selected, as tab-separated text. Command-C does the same.
+- **Export…** saves the shown rows as a CSV file.
+- The tab keeps the newest 10,000 messages. Older ones are dropped as new ones arrive.
+
+To send a test message, type the channel or topic and a payload in the bar at the bottom and click **Send**.
+
+## Dropped connections
+
+When the connection drops, a **Connection lost** row marks the gap, and the tab connects and subscribes again on its own, waiting 1 second, then 2, then longer, up to 30 seconds between tries. Messages sent while it was down are not received, except on Kafka, where nothing is lost from the log but reading starts again at the end. A name that fails on the first try, such as a Kafka topic that does not exist, ends the tab with the error instead.
+
+## Engine notes
+
+- **PostgreSQL**: a channel name is an identifier, so `Orders` and `orders` are different channels, matching `LISTEN "Orders"`. The payload limit is the server's, 8000 bytes by default.
+- **Redis**: Cluster mode subscribes on one node, which receives every `PUBLISH` in the cluster. Sharded Pub/Sub (`SSUBSCRIBE`) is not followed. A second connection opens the first time you send, because a subscribed connection cannot run `PUBLISH`.
+- **Kafka**: the tab reads with plain fetches and no consumer group, so it never joins a group or moves committed offsets. A key or payload that is not valid UTF-8 shows as hex. The time is the record's own timestamp.

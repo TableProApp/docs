@@ -1,0 +1,71 @@
+---
+title: Data Masking
+description: Hide column values such as emails and card numbers in the grid, copies, exports, the AI assistant and MCP
+---
+
+Turn on masking before a screen share, a pairing session or a recorded demo on production data. A masked column still shows a value in every row, so you see that a column holds an email, or that two rows share one, without seeing the address.
+
+## Add a rule
+
+In the [connection form](/connections/connection-form#options), open the **Options** tab and find **Masking**. Click **Add Rule**, then set three things:
+
+| Field | What it takes |
+|-------|---------------|
+| **Match** | **Column** matches a column by name, **Type** matches its declared type |
+| **Pattern** | `table.column` or `column`. `*` stands for any run of characters and `?` for one. Case does not matter |
+| **Mask** | How the value shows, from the table that follows |
+
+Some patterns:
+
+| Pattern | Masks |
+|---------|-------|
+| `*.email` | Every column named `email`, in any table |
+| `users.ssn` | `ssn` in the `users` table |
+| `*password*` | Any column whose name contains `password` |
+| `inet` with **Match** set to **Type** | Every column declared as `inet` |
+
+<Frame caption="Two rules in the Masking section of the Options tab">
+  <img className="block dark:hidden" src="/images/data-masking.png" alt="Masking section of the connection form with a Column rule on *.email set to Email and a Column rule on users.ssn set to Last 4 Characters" />
+  <img className="hidden dark:block" src="/images/data-masking-dark.png" alt="Masking section of the connection form with a Column rule on *.email set to Email and a Column rule on users.ssn set to Last 4 Characters" />
+</Frame>
+
+When two rules match one column, the first in the list wins. Rules save with the connection, sync through [iCloud](/features/icloud-sync) and travel with a connection published to the [Team Catalog](/features/team).
+
+## Masks
+
+| Mask | `jane.doe@example.com` shows as |
+|------|----------------------------------|
+| **Full** | `••••` |
+| **Last 4 Characters** | `••••.com` |
+| **Email** | `j•••@example.com` |
+| **Stable Hash** | 12 hex characters, the same for equal values |
+| **NULL** | `NULL` |
+
+A value that is already NULL stays NULL. **Last 4 Characters** shows `••••` for a value of four characters or fewer, and **Email** shows `••••` for a value with no `@`. A **Stable Hash** stays the same until TablePro quits, so it matches equal values across the grid, an export and an MCP result from one session.
+
+## Where values are masked
+
+One rule covers every place a value leaves TablePro:
+
+- The data grid and a query tab's results, with an eye-slash icon in the header of each masked column.
+- The row inspector, charts, **Copy**, **Copy As** and **Export Results**.
+- **File > Export**, for every format.
+- The AI assistant, both the results summary it reads and the queries it runs.
+- Every [MCP](/features/mcp) tool that returns rows, and AppleScript and Shortcuts results.
+- The referenced-row preview of a foreign key, Server Dashboard tiles and the [Routine Debugger](/features/routine-debugger) result grid.
+
+A query result has no source table for most engines, so a `table.column` rule matches a query result by its column name alone. `users.ssn` then also masks an `ssn` column a query reads from another table.
+
+## Editing and Reveal
+
+A grid that shows a masked column is read-only, since a mask cannot be written back or used to find its row. To see or edit the real values, right-click a masked column's header and choose **Reveal Masked Values…**. TablePro asks for Touch ID, or your macOS password on a Mac without it, and reloads the tab unmasked. A query tab whose statement is not a read reveals on its next run instead.
+
+Reveal lasts until the tab closes or opens another table. Other tabs, exports from other tabs, the AI assistant and MCP stay masked.
+
+## Limits
+
+Masking hides values inside TablePro. It does not replace database permissions: anyone with the connection's credentials can read the data with another client.
+
+- Filters, sorts and `WHERE` clauses run on the server against the stored values, so a filter on a masked column finds the real matches.
+- A rule matches the column name a result reports. A query that renames or computes the column, such as `SELECT email AS contact`, returns it unmasked, and that includes queries an MCP client or the AI assistant writes. A **Type** rule catches a renamed column that keeps its type.
+- **Copy To**, copying objects to another database and Compare move the stored values, not the masks.

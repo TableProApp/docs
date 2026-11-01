@@ -76,9 +76,13 @@ Click **Show** beside a line to open those rows in a new tab, filtered. The save
 
 The counts come from `SELECT COUNT(*)` queries under the connection's query timeout. Counting stops after 5 seconds, and a table not counted by then, or whose count failed, shows as not counted rather than as a number. Only foreign keys declared in the table's own schema are checked, and the prompt says so when the database has other schemas. When a transaction is open on the connection and the counts cannot see its uncommitted rows, the prompt says that too. SQLite and libSQL enforce foreign keys only on a connection that ran `PRAGMA foreign_keys = ON`, and MySQL and MariaDB skip them while `foreign_key_checks` is 0. With the keys off nothing cascades, and the prompt says the referencing rows stay as they are.
 
+Rows deleted through a view are counted against the table the view reads, since foreign keys point at that table and never at the view. When that table is in another database, the prompt says the delete could not be checked.
+
 ## When the grid will not edit
 
-A tab opened from the sidebar edits its table directly. Views, materialized views, sequences and external tables open read-only; to change what a view shows, edit the tables it reads from.
+A tab opened from the sidebar edits its table directly. Materialized views, sequences and external tables open read-only.
+
+On PostgreSQL, MySQL, MariaDB and SQL Server, a view is editable when the server writes through it without a rule or an `INSTEAD OF` trigger, and it shows every primary key column of the one table it reads. Edits go to the view, keyed on those columns, renamed or not. Computed columns stay read-only, and **Add Row** and **Delete** appear only when the server accepts an insert or a delete through the view. Any other view opens read-only, and hovering the grid says why: the server cannot write through it, its writes run rules or triggers, it reads more than one table, its table or key is hidden from the connection, its table has no primary key, it leaves a key column out, or the check could not finish. A query tab that reads a view follows the same rules. On other engines every view opens read-only; to change what one shows, edit the tables it reads from.
 
 A query tab edits only when the app can prove the rows came from exactly one table:
 
@@ -154,7 +158,7 @@ Only what TablePro wrote is restored. Triggers that fired, audit rows they wrote
 
 A deleted row whose key the server allocates comes back under the same key. SQL Server restores it inside `SET IDENTITY_INSERT`, which needs ALTER permission on the table, and PostgreSQL writes it with `OVERRIDING SYSTEM VALUE`. Other engines have no way to write such a key, so the restore stops and says so, and so does a save that an earlier version recorded without noting which columns were identity.
 
-A save is not restorable at all when it also truncated or dropped a table. Within a save, a row is skipped when the table has no primary key, when a column was set to `DEFAULT` or a function such as `NOW()` whose stored value the app never read back, when the server chose the key of an inserted row, or when a value was larger than 1 MB.
+A save is not restorable at all when it also truncated or dropped a table. Within a save, a row is skipped when the table has no primary key, when a column was set to `DEFAULT` or a function such as `NOW()` whose stored value the app never read back, when the server chose the key of an inserted row, or when a value was larger than 1 MB. Through a view, a deleted row is skipped because the view may not show every column of its table, and so is a row the view no longer shows.
 
 ## Structure changes
 
