@@ -258,6 +258,7 @@
               "databases/kingbasees",
               "databases/libsql",
               "databases/mariadb",
+              "databases/memcached",
               "databases/mssql",
               "databases/mongodb",
               "databases/mysql",
