@@ -154,8 +154,9 @@ With a **Schema Registry URL** on the connection, set **Display As > Schema Regi
 `value` or `key` column. Each value names its schema by the ID in its five-byte Confluent wire-format
 prefix. TablePro fetches that Avro, Protobuf or JSON schema, with any files a Protobuf schema imports,
 and keeps it until you quit. A cell shows the stored bytes until its schema arrives, then redraws. A
-schema that cannot be fetched leaves the cell as hex, and the viewer shows the registry's reason. The
-registry is reached directly from this Mac, not through the connection's SSH tunnel.
+schema that cannot be fetched leaves the cell as hex, and the viewer shows the registry's reason;
+**Refresh** or opening the value asks again. A change to the registry settings applies from the next
+connect. The registry is reached directly from this Mac, not through the connection's SSH tunnel.
 
 Without a registry, a `value` column of Protobuf messages decodes field by field with **Display As >
 Protobuf**, or with field names through **Display As > Protobuf Schema…** and the topic's `.proto`
