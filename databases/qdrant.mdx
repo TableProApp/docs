@@ -48,13 +48,13 @@ Sorting by `id` ascending is the default order. These sorts are refused with a m
 
 ## Filtering
 
-A field with a payload index is filtered as its index type. A field without one may hold different types in different points, so a value matches every type it can be: `42` finds the text `"42"`, the number 42, and a list holding either.
+A payload index does not limit what a field holds, so a value matches every type it can be: `42` finds the text `"42"`, the number 42, and a list holding either. The index still speeds up the part of the filter of its own type.
 
 | Operators | What Qdrant runs |
 |----------|------------------|
-| equals, not equals | `match.value` for text, integers and booleans. A float or a date matches as a closed `range` |
-| greater than, greater or equal, less than, less or equal, between | `range`, numbers and dates only |
-| in list, not in list | Equals for each value: `match.any` for text or integers, one `range` per float or date |
+| equals, not equals | `match.value` for the text, plus a closed `range` when it is a number and a boolean match for `true`, `false`, `1` or `0` |
+| greater than, greater or equal, less than, less or equal, between | `range`, on numbers, or on dates for any other text |
+| in list, not in list | Equals for each value, collapsed to `match.any` when every value is plain text |
 | contains, not contains | `match.text`, with or without a full-text index. It matches whole words and ignores case, so `world` finds `Hello World` but `lo Wo` finds nothing. A number, a boolean or a vector matches nothing |
 | is NULL, is not NULL | `is_empty`: the key is missing, `null`, or an empty list |
 | is empty, is not empty | `is_empty`, or the empty string on a text field |
