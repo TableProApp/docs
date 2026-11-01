@@ -129,4 +129,4 @@ Request limits are keyed by token id, and `subscriptions/listen` is exempt. Fail
 | Create, change, or read other tokens | no |
 | Create or edit connection records | no |
 
-Statements that reach the filesystem or run server-side code are refused before they reach the driver, on every tool. The reachable surface is the [tool catalog](/developers/mcp-tools), the [resources](/developers/mcp-resources), and the [prompts](/developers/mcp-prompts). Nothing outside those lists is exposed.
+Statements that reach the filesystem or run server-side code are refused before they reach the driver, on every tool, along with the rest of [what no external caller may send](/developers#what-read-only-allows). The reachable surface is the [tool catalog](/developers/mcp-tools), the [resources](/developers/mcp-resources), and the [prompts](/developers/mcp-prompts). Nothing outside those lists is exposed.

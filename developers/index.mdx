@@ -97,6 +97,33 @@ Each request lands in the activity log with the token behind it, and a statement
 SHA-256 digest rather than as text. Open **Settings > MCP** and click **View Activity** to
 read it.
 
+### What Read Only allows
+
+**Read Only** is a check on the statement's text, made before the statement reaches the driver. A
+statement from an MCP client, a script or a shortcut runs only when TablePro can tell for certain
+that it reads, by the rules in [What counts as a read](/features/safe-mode#what-counts-as-a-read).
+Anything else fails with "This connection is read only for external clients."
+
+These fail at every level, **Read & Write** included:
+
+- Text holding more than one statement, or ending inside a block it opened, with "Send one
+  statement at a time." A SQL Server script is the exception: it runs batch by batch at its `GO`
+  lines.
+- A statement that reads or writes files, or runs code on the server, such as `COPY`, `ATTACH`,
+  `LOAD`, `VACUUM INTO`, DuckDB's file readers like `read_csv`, ClickHouse's `file`, `url` and `s3`,
+  and T-SQL that runs a string through `EXEC` or `sp_executesql`.
+- A request in the form TablePro builds for its own grid on engines such as BigQuery,
+  Elasticsearch and Typesense. Send the statement it stands for.
+
+The AI assistant's `execute_query` makes the same three refusals. The assistant answers to the
+connection's AI policy and Safe Mode rather than to **External Clients**; see
+[Tool calling](/features/ai-assistant#tool-calling).
+
+A statement that clears the check runs as the connection's login, with every privilege that login
+holds. Those privileges are the final limit. For a connection where an unwanted write matters, save
+it with a login that can only read, or set **External Clients** to **Blocked** and **AI Policy** to
+**Never**.
+
 ## Publish it
 
 Listed integrations appear at [tablepro.app/integrations](https://tablepro.app/integrations), and
