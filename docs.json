@@ -268,6 +268,7 @@
               "databases/oracle",
               "databases/pglite",
               "databases/postgresql",
+              "databases/qdrant",
               "databases/redis",
               "databases/sap-hana",
               "databases/snowflake",

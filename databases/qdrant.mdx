@@ -1,0 +1,134 @@
+---
+title: Qdrant
+description: Connect to Qdrant, browse collections as points, edit payloads and vectors by id, and run REST requests
+---
+
+import RegistryPlugin from "/snippets/registry-plugin.mdx";
+
+Collections are tables, points are rows, and the point `id` is the primary key. The editor takes Qdrant REST requests, not SQL, so a vector search such as `POST /collections/docs/points/query` runs from the editor and its points and scores land in the grid.
+
+<RegistryPlugin name="Qdrant" plugin="Qdrant Driver" />
+
+## Quick setup
+
+Click **New Connection…**, select **Qdrant**, enter host and port, paste an **API Key** if the node needs one, then click **Save & Connect**.
+
+There is no Database field. One connection reaches one Qdrant instance, and its collections are the objects.
+
+For a node on a private server, open the **Network** tab and set **Connect via** to **SSH Tunnel**, then set **Host** to the address Qdrant listens on as the SSH server sees it, usually `localhost`. See [SSH Tunneling](/connections/ssh-tunneling).
+
+## Connection settings
+
+| Field | Description |
+|-------|-------------|
+| **Host** | Node hostname. `localhost` for Docker, the cluster URL's host for Qdrant Cloud |
+| **Port** | `6333` by default, the REST port. Qdrant Cloud also answers on `6333` |
+| **API Key** | Sent as the `api-key` header. Leave it empty for a node started without `QDRANT__SERVICE__API_KEY` |
+
+Qdrant Cloud requires the API key and HTTPS. Set **SSL Mode** to **Verify Identity** with no CA certificate: the certificate is checked against the system trust store.
+
+## Browsing collections
+
+The sidebar lists collections from `GET /collections`.
+
+Every grid has `id` first and the vectors last. `id` is the primary key and read-only. A collection with one unnamed vector shows a `vector` column. A collection with named or sparse vectors shows one column per name, such as `vector.image`. A dense vector is a JSON number array, a multivector an array of them, and a sparse vector its `indices` and `values`.
+
+Payload columns are the top-level indexed fields, then the fields found in the first 100 points. Arrays and objects render as JSON in the cell. An index on a nested path such as `metadata.source` or `tags[]` is listed in the **Indexes** section of the **Structure** tab, and its value shows inside the `metadata` or `tags` column. A field that appears only in later points shows up in a query result but not as a grid column.
+
+Pages load through `POST /points/query` in id order, with the offset applied by Qdrant, so a page always shows the rows at that position now. A node older than 1.10 has no Query API, so its pages walk the point ids from the start.
+
+## Sorting
+
+Sort by one payload field that has an `integer`, `float` or `datetime` payload index. Points with a value in that field come first, in order. Points without one follow, by id. Every point stays reachable, and the row count still matches the collection.
+
+Sorting by `id` ascending is the default order. These sorts are refused with a message:
+
+- `id` descending, a vector, or more than one column.
+- A field that holds a list in any point, since Qdrant would list that point once per value.
+
+## Filtering
+
+A payload index does not limit what a field holds, so a value matches every type it can be: `42` finds the text `"42"`, the number 42, and a list holding either. The index still speeds up the part of the filter of its own type.
+
+| Operators | What Qdrant runs |
+|----------|------------------|
+| equals, not equals | `match.value` for the text, plus a closed `range` when it is a number and a boolean match for `true`, `false`, `1` or `0` |
+| greater than, greater or equal, less than, less or equal, between | `range`, on numbers, or on dates for any other text |
+| in list, not in list | Equals for each value, collapsed to `match.any` when every value is plain text |
+| contains, not contains | `match.text`, with or without a full-text index. It matches whole words and ignores case, so `world` finds `Hello World` but `lo Wo` finds nothing. A number, a boolean or a vector matches nothing |
+| is NULL, is not NULL | `is_empty`: the key is missing, `null`, or an empty list |
+| is empty, is not empty | `is_empty`, or the empty string on a text field |
+
+Not equals, not in list and not contains also match points the key is missing from. On `id`, equals and in list become `has_id`, and contains finds a whole id only. **Starts with**, **ends with** and **REGEX** have no Qdrant equivalent, and a filter Qdrant cannot run reports why instead of returning the whole collection. The raw filter row takes one Qdrant condition as JSON, such as `{"key": "city", "match": {"value": "Berlin"}}`.
+
+Filtered row counts come from `POST /points/count` with `exact` set.
+
+## Editing points
+
+Grid edits are REST requests keyed by `id`, shown in the review sheet before they run.
+
+| Change | Request |
+|--------|---------|
+| New row | `POST /collections/{name}/points` first, to check that no point has the id, then `PUT /collections/{name}/points` with an `update_filter` that matches no point, so an id taken in between is left alone. An empty `id` gets a new UUID. Vector cells you fill are stored with the point. Needs Qdrant 1.15 or later, since older nodes ignore the filter and overwrite the point |
+| Edited payload cells | `POST /collections/{name}/points/payload`, which sets only the edited keys |
+| Edited vector cells | `PUT /collections/{name}/points/vectors`. Setting a vector to NULL sends `POST /collections/{name}/points/vectors/delete` |
+| Deleted row | `POST /collections/{name}/points/delete` |
+
+A cell is written back as the type its column holds: a `keyword` field stays a string even when it reads `42`, and a `bool` field takes `true`, `false`, `1` or `0`. A column whose points hold different types, such as text in one and a number in another, has the type `json`: its text shows in quotes, and a cell saves as the JSON it spells, so `"42"` stays text and `42` a number. A value that does not fit, such as `4.5` in an `integer` column or a vector that is not a number array, stops the save and names the column. **Truncate** deletes every point with an empty filter and keeps the collection. **Drop** removes the collection.
+
+## REST editor
+
+Type a request line, then a JSON body on the same line, on the lines under it, or starting on the line and going on under it:
+
+```http
+POST /collections/docs/points/query
+{"query": [0.1, 0.2, 0.3, 0.4], "limit": 10, "with_payload": true}
+```
+
+A response that lists points, from `query`, `scroll`, `search` or a retrieve by id, renders as a grid with `id`, then `score` when there is one, the payload fields, and any vectors returned. Anything else is shown as formatted JSON.
+
+Read-only mode allows `GET`, `POST /collections/{name}/facet`, and the read endpoints under `/points`: `query`, `scroll`, `search`, `count`, `recommend`, `discover`, their batch and group forms, and a retrieve by id. A `DELETE`, a path ending in `delete` or `clear`, and `points/batch` count as destructive. A snapshot request is flagged as reaching the server's disk.
+
+## SSL/TLS
+
+New connections start on **Disabled**, plain HTTP. Every other mode goes over HTTPS.
+
+| SSL Mode | What is checked |
+|----------|-----------------|
+| Preferred, Required (skip verify) | Nothing. A self-signed certificate is accepted |
+| Verify CA | The certificate chains to the CA certificate you choose and is issued for a server. The hostname is not checked |
+| Verify Identity | The certificate chains to the CA certificate, or to the system trust store when none is chosen, and names the host |
+
+For a node that enforces mutual TLS, choose a **Client Certificate** and its **Client Key**. See [SSL/TLS](/connections/ssl).
+
+## Limitations
+
+- SQL is not available. Use the REST editor.
+- gRPC is not used.
+- Payload indexes and collection settings are not edited from Structure. Send the REST request, such as `PUT /collections/{name}/index`.
+- A field that holds a list in any point cannot be sorted.
+- Adding rows from the grid needs Qdrant 1.15 or later. On an older node, upsert from the REST editor.
+- The plugin is registry-only. It is not on iPhone or iPad.
+
+## Troubleshooting
+
+### Must provide an API key
+
+The node was started with an API key and **API Key** is empty. Paste the key and connect again.
+
+### Invalid API key or JWT
+
+The key was rejected. The health check reads `/collections`, which needs the key, so a revoked key also drops a live session.
+
+### No range index for `order_by` key
+
+The sorted column has no `integer`, `float` or `datetime` payload index. Create one with `PUT /collections/{name}/index`, or clear the sort.
+
+### A row with this key already exists
+
+A new row's `id` is already taken. Clear the `id` cell to get a new UUID, or edit the existing point instead.
+
+## Related
+
+- [Import & Export](/features/import-export)
+- [Filtering](/features/filtering)
