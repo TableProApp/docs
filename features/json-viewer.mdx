@@ -1,6 +1,6 @@
 ---
 title: Cell and Row Viewers
-description: View and edit JSON, PHP serialized, image and binary cell values, decode MessagePack, Protobuf, igbinary and Avro, set per-column display formats, and inspect whole rows in the sidebar
+description: View and edit JSON, PHP serialized, image and binary cell values, decode MessagePack, Protobuf, igbinary and Avro, with schemas from a file or a Schema Registry, set per-column display formats, and inspect whole rows in the sidebar
 ---
 
 Click the chevron on a JSON or blob cell to open its value in a popover anchored to that cell. Which viewer opens follows the column: its declared type, or the **Display As** choice on its header, and that choice changes rendering only, never what is stored.
@@ -23,6 +23,8 @@ Right-click a column header and pick **Display As**. The submenu lists the forma
 | PHP Serialized | text | Opens the cell in the PHP serialized viewer |
 | MessagePack, Protobuf, igbinary | binary | Decodes the bytes and opens the cell in the [binary value viewer](#binary-value-viewer) |
 | Avro Schema… | binary | Asks for the `.avsc` file the values were written with, then decodes like the formats above |
+| Protobuf Schema… | binary | Asks for the `.proto` file or descriptor set the values were written with, and the message type, then shows field names |
+| Schema Registry | binary, text | Fetches each value's schema from the connection's Schema Registry. Offered when the connection names one |
 
 An override persists per column, scoped to the connection and table. A column with a format set copies in that format when you copy the single cell; a block of cells or a whole row always copies the stored value.
 
@@ -102,7 +104,7 @@ An array or object row copies as its summary, such as `[2 items]`, not as its co
 
 ## Binary value viewer
 
-Set **Display As > MessagePack**, **Protobuf** or **igbinary** on a binary column, or pick **Avro Schema…** and choose the column's schema file. The grid shows each value decoded on one line, and double-click or `Enter` opens the viewer. It is read-only. On an editable table the chevron still opens the hex editor, and so does double-clicking a NULL cell.
+Set **Display As > MessagePack**, **Protobuf** or **igbinary** on a binary column, pick **Avro Schema…** or **Protobuf Schema…** and choose the column's schema file, or pick **Schema Registry** on a connection that names one. The grid shows each value decoded on one line, and double-click or `Enter` opens the viewer. It is read-only. On an editable table the chevron still opens the hex editor, and so does double-clicking a NULL cell.
 
 | Mode | MessagePack, Avro | Protobuf | igbinary |
 | --- | --- | --- | --- |
@@ -112,7 +114,11 @@ Set **Display As > MessagePack**, **Protobuf** or **igbinary** on a binary colum
 
 Protobuf without its schema has no field names or types. A length-delimited field reads as a nested message when its bytes parse as one, else as text when they are UTF-8, else as escaped bytes, so a short string can read as a message. A value that starts with a Schema Registry frame, as Kafka producers write it, shows its schema ID and message index above the tree.
 
+**Protobuf Schema…** takes a `.proto` file or a descriptor set from `protoc --descriptor_set_out`. Use a descriptor set built with `--include_imports` when the message uses types from other files: a `.proto` file is read alone, so a field of an imported type shows by number. When the file defines more than one message, TablePro asks which one the column holds, and the menu names the format after it, as in **Protobuf (Order)**. The tree shows each field by name, badged with its declared type, enums by value name, and maps as `key` and `value` entries. **Text** mode prints the value as `protoc --decode` does, except that UTF-8 text keeps its characters. A field the schema does not declare, or declares with another wire type, shows by number as it would without a schema. TablePro keeps a copy of the file, as it does for Avro.
+
 Avro reads each value as one datum written with the chosen schema. A record shows its fields in schema order, a union shows the branch it holds, and logical types read as what they stand for: `decimal` as a number, `uuid`, `date`, `time` and `duration` as text, `timestamp` in UTC, `local-timestamp` without a zone. The menu names the column's format after the schema's root type, as in **Avro (Order)**. TablePro keeps a copy of the schema, so moving or deleting the file later changes nothing; pick **Avro Schema…** again to replace it. A value with the Kafka wire-format prefix decodes past it, and the viewer shows its schema ID. A value in Avro's single-object encoding, as Java's `toByteBuffer()` writes it, decodes when its schema fingerprint matches the chosen schema, and the viewer shows the fingerprint.
+
+**Schema Registry** reads the schema ID from each value's wire-format prefix and fetches the schema from the registry named in the connection's settings, see [Kafka](/databases/kafka). Avro and Protobuf values decode as above, a Protobuf message picked by the message index in the prefix, and JSON Schema values open in the JSON tree. A cell shows the stored bytes while its schema is being fetched. A value with no prefix, or whose schema the registry does not return, stays hex, and the viewer says why.
 
 A value that does not decode stays hex in the grid, and the viewer says where it broke above its hex dump. Copying a single cell copies the decoded text, cut at 40,000 characters. **Find** searches the decoded text.
 

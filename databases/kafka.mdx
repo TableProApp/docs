@@ -28,6 +28,8 @@ record format every message has used since.
 | **SASL Mechanism** | `PLAIN`, `SCRAM-SHA-256`, or `SCRAM-SHA-512`, for the two SASL protocols |
 | **Username** / **Password** | The SASL credentials |
 | **Broker Addresses** | Whether to dial the addresses the cluster advertises, or stay on the bootstrap. Leave this on **Use the addresses the cluster advertises** unless those addresses are unreachable from this Mac |
+| **Schema Registry URL** | Optional. The Confluent Schema Registry that **Display As > Schema Registry** fetches schemas from, such as `http://localhost:8081` |
+| **Schema Registry User** / **Schema Registry Password** | Optional. Basic authentication for the registry, such as a Confluent Cloud API key and secret |
 
 There is no Database field. A connection is one cluster, and the sidebar shows its topics directly.
 Set the whole attempt's **Connect timeout** under **Options**; an empty field uses 30 seconds.
@@ -148,10 +150,17 @@ through the log, one page older each time.
 Row counts are approximate. The count is the end offset minus the start offset, which overcounts
 where retention has removed messages from the middle of a compacted topic.
 
-Schema Registry is not read. A binary `value` column of Protobuf messages decodes field by field
-with **Display As > Protobuf**, which reads the five-byte Confluent wire-format prefix and shows the
-schema ID; see [Binary value viewer](/features/json-viewer#binary-value-viewer). Avro values decode
-with **Display As > Avro Schema…** and the topic's `.avsc` file, past the same prefix.
+With a **Schema Registry URL** on the connection, set **Display As > Schema Registry** on the
+`value` or `key` column. Each value names its schema by the ID in its five-byte Confluent wire-format
+prefix. TablePro fetches that Avro, Protobuf or JSON schema, with any files a Protobuf schema imports,
+and keeps it until you quit. A cell shows the stored bytes until its schema arrives, then redraws. A
+schema that cannot be fetched leaves the cell as hex, and the viewer shows the registry's reason. The
+registry is reached directly from this Mac, not through the connection's SSH tunnel.
+
+Without a registry, a `value` column of Protobuf messages decodes field by field with **Display As >
+Protobuf**, or with field names through **Display As > Protobuf Schema…** and the topic's `.proto`
+file. Avro values decode with **Display As > Avro Schema…** and the topic's `.avsc` file. Each reads
+past the same prefix; see [Binary value viewer](/features/json-viewer#binary-value-viewer).
 
 Creating a topic, editing topic configuration, and resetting consumer group offsets are not
 available. Deleting a topic is, as the paragraph above describes.
