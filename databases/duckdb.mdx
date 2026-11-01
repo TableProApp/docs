@@ -105,6 +105,10 @@ Read-only is not a way to keep writing from somewhere else. A read-write connect
 
 Releasing hands the file to whoever wants it next, which may not be you. A query run after another process has taken it fails until that process lets go; reconnect once it has.
 
+## Back up and restore
+
+**File > Backup Dump…** runs over the open connection. It copies the whole database into a `.duckdb` file, or exports it as a folder of Parquet files. **File > Restore Dump…** takes the `.duckdb` file. For the folder, and what each format carries, see [Backup & Restore](/features/backup-restore#what-a-dump-carries).
+
 ## Limitations
 
 - A DuckDB file takes one writer at a time. A connect against a file another process holds fails, naming that process and its process ID. Quit the `duckdb` CLI, the Python process or the other TablePro window first, or set **Release the File Lock After**.

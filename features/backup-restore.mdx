@@ -92,15 +92,19 @@ Each database runs on its own. A failure stops that one and the run carries on, 
   </Step>
 </Steps>
 
-No `--clean` is passed, so restoring on top of a schema that already holds conflicting objects produces errors instead of replacing them. A DuckDB restore behaves the same way, and reports the first object whose name is already taken.
+No `--clean` is passed, so restoring on top of a schema that already holds conflicting objects produces errors instead of replacing them. A DuckDB restore behaves the same way, and reports the first object whose name is already taken. SQLite stops at the first error, and a dump TablePro wrote is one transaction, so none of it is kept: restore it into an empty database file.
 
 Restore covers the whole file. There is no table picker on the way back in.
+
+A MySQL, MariaDB or SQLite restore runs the file as SQL and nothing else. The client's own commands in it, `source` and `system` for MySQL and MariaDB or `.read` and `.shell` for SQLite, are not run, and `LOAD DATA LOCAL INFILE` is refused.
 
 ## What a dump carries
 
 `mysqldump` runs with `--single-transaction --routines --triggers --events`, so a MySQL dump is consistent with itself and carries stored routines, triggers and scheduled events. `pg_dump -Fc` carries the whole database. `sqlite3 .dump` writes the schema and every row as SQL.
 
 DuckDB writes one of two things. A `.duckdb` file carries tables, views, indexes, foreign keys and sequences, and only DuckDB reads it, which is also true of `pg_dump`'s archive and MongoDB's. A Parquet folder holds `schema.sql`, `load.sql` and one Parquet file per table, which pandas, Spark and BigQuery read directly. Pick the file to restore into TablePro later, the folder to hand the data to something else.
+
+The folder restores too, except on TablePro 0.83.1 and 0.84.0-beta.2, where **File > Restore Dump…** takes only the `.duckdb` file. The folder is imported first into a separate DuckDB instance that can read nothing outside it, then copied into the database. A `schema.sql` or `load.sql` that reaches for another file, a database or an extension fails there, and the database is left as it was.
 
 ## SSH tunnels and SSL
 
@@ -159,7 +163,7 @@ SqlPackage is the exception. It accepts a password only inside its connection st
 
 ## Failures
 
-A non-zero exit shows the last 64 KB of the tool's stderr in a scrollable monospaced view, and DuckDB's own error text in the same place. Four causes account for most of them.
+A non-zero exit shows the last 64 KB of the tool's stderr in a scrollable monospaced view, and DuckDB's own error text in the same place. Most come down to one of these.
 
 | What you see | What to do |
 |---|---|
@@ -169,5 +173,6 @@ A non-zero exit shows the last 64 KB of the tool's stderr in a scrollable monosp
 | *"could not tell whether … is MySQL's client or MariaDB's"* | The tool on `PATH` did not answer `--version`, and the two families take different SSL flags. Reinstall `mysql-client` or `mariadb` |
 | Objects that conflict with the dump | Restore into a fresh database, or drop the conflicting objects first |
 | *"a single transaction can only write to a single attached database"* | A DuckDB query tab has an open transaction that has already written. Commit or roll it back, then run the backup again |
+| *"The backup could not be imported, so this database was not changed. …"* | A DuckDB Parquet folder failed in its separate instance, and DuckDB's error follows. Check that `schema.sql` and `load.sql` name only files in that folder, or restore a `.duckdb` backup |
 
 One non-zero exit is not a failure. A `pg_restore` newer than the server sets parameters the server does not have, such as `transaction_timeout` on anything before PostgreSQL 17, and exits 1 after restoring everything. When those are its only errors, the restore reports complete and names the settings the server skipped. Any other error in the same run still fails it. So does a server whose `lc_messages` is not English, because its errors cannot be read.
