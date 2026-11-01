@@ -55,7 +55,7 @@ A field with a payload index is filtered as its index type. A field without one 
 | equals, not equals | `match.value` for text, integers and booleans. A float or a date matches as a closed `range` |
 | greater than, greater or equal, less than, less or equal, between | `range`, numbers and dates only |
 | in list, not in list | Equals for each value: `match.any` for text or integers, one `range` per float or date |
-| contains, not contains | `match.text` on a text field, with or without a full-text index. It matches whole words and ignores case, so `world` finds `Hello World` but `lo Wo` finds nothing |
+| contains, not contains | `match.text`, with or without a full-text index. It matches whole words and ignores case, so `world` finds `Hello World` but `lo Wo` finds nothing. A number, a boolean or a vector matches nothing |
 | is NULL, is not NULL | `is_empty`: the key is missing, `null`, or an empty list |
 | is empty, is not empty | `is_empty`, or the empty string on a text field |
 
