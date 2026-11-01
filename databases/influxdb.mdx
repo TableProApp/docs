@@ -1,0 +1,107 @@
+---
+title: InfluxDB
+description: Connect to InfluxDB 2 or 3, browse measurements, and run SQL, InfluxQL or Flux
+---
+
+import RegistryPlugin from "/snippets/registry-plugin.mdx";
+
+Databases (buckets on 2.x) are the containers, measurements are tables, and each point is a row with `time` first. The editor runs the languages the server accepts: SQL and InfluxQL on 3.x, Flux and InfluxQL on 2.x.
+
+<RegistryPlugin name="InfluxDB" plugin="InfluxDB Driver" />
+
+## Quick setup
+
+Click **New Connection…**, select **InfluxDB**, enter host, port and token, then click **Save & Connect**.
+
+For a server on a private network, open the **Network** tab and set **Connect via** to **SSH Tunnel**, then set **Host** to the address InfluxDB listens on as the SSH server sees it, usually `localhost`. See [SSH Tunneling](/connections/ssh-tunneling).
+
+## Connection settings
+
+| Field | Description |
+|-------|-------------|
+| **Host** | Server hostname. `localhost` for Docker |
+| **Port** | `8086` by default, the 2.x port. InfluxDB 3 Core and Enterprise listen on `8181` |
+| **Token** | An API token. Leave it empty for a 3.x server started with `--without-auth` |
+| **Database** | The database (3.x) or bucket (2.x) the sidebar opens. Switch it later from the database list |
+| **Organization** | 2.x only. Optional when the token sees one organization |
+| **Skip TLS Verification** | Options tab. Trusts any certificate, even under **Verify CA** or **Verify Identity** |
+
+TablePro reads the server version from `/ping` when it connects, and picks the API from it: `/api/v3` on 3.x, `/api/v2` and the v1 `/query` endpoint on 2.x. The token is then checked by listing databases or buckets, so a wrong token fails the connection instead of the first query.
+
+## Browsing measurements
+
+The sidebar lists databases or buckets, and the measurements in the one that is open. `_internal`, `_monitoring` and `_tasks` show as system databases.
+
+Columns come back with `time` first and the rest by name. Each has a type: `timestamp` for `time`, `tag` for a tag, and the field type (`float`, `integer`, `unsigned`, `string`, `boolean`) for a field.
+
+A page opens newest first. Timestamps show as RFC 3339 text in UTC, such as `2024-10-27T03:34:20Z`, not as nanosecond integers.
+
+On 3.x the grid runs SQL and sorts by any column. On 2.x it runs InfluxQL, which sorts by `time` only, so a sort on another column keeps the time order.
+
+## Filtering
+
+| Operators | 3.x SQL | 2.x InfluxQL |
+|----------|---------|--------------|
+| equals, not equals, greater than, less than and the rest | `=`, `!=`, `>`, `<` | Same |
+| contains, not contains, starts with, ends with, REGEX | `~` and `!~` with an escaped pattern | `=~` and `!~` with a `/regex/` |
+| in list, not in list | `=` joined by `OR`, `!=` joined by `AND` | Same |
+| between | Two inclusive bounds | Same |
+| is NULL, is not NULL | `IS NULL`, `IS NOT NULL` | An empty tag, `= ''`. Fields have no null test |
+
+A filter on `time` takes an RFC 3339 timestamp. A tag value is always text, so `host = 1` matches the tag `"1"`.
+
+## Query editor
+
+Type a statement and run it. The language is chosen from the text:
+
+| Server | What runs |
+|--------|-----------|
+| 3.x | SQL. A `SHOW MEASUREMENTS`, `SHOW TAG KEYS` or `SHOW FIELD KEYS`, a `GROUP BY time(...)` or a duration such as `now() - 1h` runs as InfluxQL |
+| 2.x | InfluxQL. A script with a `\|>` pipe, or one starting with `from(`, `import` or `buckets(`, runs as Flux |
+
+To choose the language yourself, start the first line with a comment naming it: `-- influxql`, `-- sql` or `// flux`. A language the server does not accept reports which ones it does.
+
+```sql
+SELECT date_bin(INTERVAL '5 minutes', time) AS bucket, avg(usage)
+FROM cpu
+WHERE time >= now() - INTERVAL '1 hour'
+GROUP BY bucket
+ORDER BY bucket
+```
+
+A Flux result arrives as one table per series. The grid shows them as one, with the columns of every table, so a `pivot()` reads as one row per timestamp.
+
+## Safe Mode and read-only connections
+
+A Flux script reads unless it calls `to()` or `wideTo()`, which write points. One that uses the `http`, `sql` or a notification package counts as reaching outside the database. SQL and InfluxQL are read like any SQL: `SELECT ... INTO` writes, `DROP MEASUREMENT` destroys data.
+
+## SSL/TLS
+
+New connections start on **Disabled**, plain HTTP. Every other mode goes over HTTPS. **Preferred** and **Required (skip verify)** accept a self-signed certificate. See [SSL/TLS](/connections/ssl).
+
+## Limitations
+
+- The grid is read-only. Points are written with line protocol, which TablePro does not send.
+- InfluxDB 1.x is not supported.
+- On 3.x an empty string field and a missing field both show as NULL: the CSV format the driver reads writes them the same way.
+- There are no views, routines, foreign keys or schema edits.
+- The plugin is registry-only. It is not on iPhone or iPad.
+
+## Troubleshooting
+
+### InfluxDB refused the token
+
+The token is wrong, expired, or has no read access to the database or bucket. On 3.x with auth on, even `/ping` needs the token.
+
+### InfluxDB 2 needs an organization
+
+The token sees more than one organization. Set **Organization** to the one that owns the bucket.
+
+### Flux is not available on this server
+
+The server is 3.x, which has no Flux. Write the query in SQL or InfluxQL.
+
+## Related
+
+- [Import & Export](/features/import-export)
+- [Filtering](/features/filtering)
