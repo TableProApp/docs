@@ -33,7 +33,7 @@ The bar along the bottom carries **Test Connection**, **Cancel** and **Save**, p
 | **Username** | Not pre-filled. Empty means the driver's own default |
 | **Password** | Stored in the macOS Keychain. **Show password** reveals a saved one after Touch ID or your Mac's password. A connection whose password comes from a [password source](/features/connection-sharing#password-sources) shows the source here, with **Test Source** |
 | **Prompt for password** | Stores nothing, asks on every connect. Reads **Prompt for API token** on API-only drivers |
-| **Use Password File** | PostgreSQL, Redshift, and CockroachDB. Reads `~/.pgpass`, and reports underneath whether the file exists, has `chmod 0600`, and holds a matching line |
+| **Use ~/.pgpass** | PostgreSQL, Redshift, CockroachDB, and KingbaseES. Reads `~/.pgpass`, and reports underneath whether the file exists, has `chmod 0600`, and holds a matching line |
 
 SQLite, DuckDB, libSQL, and Beancount replace the host fields with a file path. **Browse…** picks a file that exists. **New…** names one that does not, and the file is made when you connect; Beancount opens only an existing ledger, so it has no **New…**.
 
@@ -179,6 +179,7 @@ Metadata connections are the extra ones opened to read a database's object list 
 | [TiDB](/databases/tidb) | 4000 | Yes | Yes | Yes | No | Yes | Yes |
 | [Databend](/databases/databend) | 3307 | Yes | Yes | Yes | No | Yes | Yes |
 | [OceanBase](/databases/oceanbase) | 2881 | Yes | Yes | Yes | No | Yes | Yes |
+| [StarRocks](/databases/starrocks) | 9030 | Yes | Yes | Yes | No | Yes | Yes |
 | [PostgreSQL](/databases/postgresql) | 5432 | Yes | Yes | Yes | Yes | Yes | Yes |
 | [Amazon Redshift](/databases/redshift) | 5439 | Yes | Yes | Yes | No | Yes | Yes |
 | [CockroachDB](/databases/cockroachdb) | 26257 | Yes | Yes | Yes | No | Yes | Yes |
@@ -198,6 +199,7 @@ Metadata connections are the extra ones opened to read a database's object list 
 | [Elasticsearch](/databases/elasticsearch) | 9200 | Yes | Yes | Yes | No | Yes | Yes |
 | [Typesense](/databases/typesense) | 8108 | Yes | Yes | Yes | No | Yes | Yes |
 | [Weaviate](/databases/weaviate) | 8080 | Yes | Yes | Yes | No | Yes | Yes |
+| [Qdrant](/databases/qdrant) | 6333 | Yes | Yes | Yes | No | Yes | Yes |
 | [SAP HANA](/databases/sap-hana) | 443 | No | Yes | No | No | No | No |
 | [Snowflake](/databases/snowflake) | 443 | No | No | No | No | No | No |
 | [SQLite](/databases/sqlite) | File | No | No | No | No | No | No |

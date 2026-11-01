@@ -28,7 +28,8 @@ end tell
 
 Read Only is the default and the right level for most connections: reporting and export scripts
 need nothing more. Raise a connection to Read & Write with **External Clients** on its **Options**
-tab only when a script has to write to it.
+tab only when a script has to write to it. [What Read Only allows](/developers#what-read-only-allows)
+has what counts as a read and what is refused at every level.
 
 Read & Write is not a way past Safe Mode. A statement that drops or truncates always raises a
 confirmation naming the app that sent it, whatever the level says, and Safe Mode's authentication
@@ -139,7 +140,7 @@ fails with error -10000.
 
 `row limit` defaults to 500 and caps at 10000. `timeout` defaults to 30 seconds and caps at 600.
 Several statements in one call are refused, as are statements that read files or run server-side
-code.
+code and the requests TablePro builds for its own grid.
 
 SQL Server is the exception to one statement per call: send the whole script, and it runs batch by
 batch at its `GO` lines, as the query editor runs it. The record is the first result set,
@@ -148,7 +149,7 @@ than one. `row limit` caps each result set on its own.
 
 ```applescript
 tell application "TablePro"
-  set r to run query "EXEC sp_help 'dbo.orders'" in connection "Warehouse"
+  set r to run query "SELECT TOP 5 * FROM dbo.orders; SELECT COUNT(*) FROM dbo.orders" in connection "Warehouse"
   set sets to results of r
   repeat with one in sets
     columns of one
@@ -227,7 +228,7 @@ end try
 |---|---|
 | `-1728` | No connection or tab by that name or id |
 | `-50` | The request is malformed: several statements in one call, or no database to run against |
-| `-10000` | Refused by Safe Mode or by **External Clients**, or cancelled at the confirmation |
+| `-10000` | Refused by Safe Mode, by **External Clients** or by a [check that holds at every level](/developers#what-read-only-allows), or cancelled at the confirmation |
 
 ## Related
 

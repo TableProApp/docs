@@ -201,6 +201,8 @@ When a linked folder sits inside a Git working copy, a changed file carries a le
 
 A file with no letter matches its last commit. Letters refresh when a file changes, when the repository changes, and when you switch back to TablePro.
 
+The letters come from a status read with every Git filter switched off, so a file that Git LFS or git-crypt rewrites can show **M** until you stage it.
+
 <Frame caption="Comparing a commit of a linked file with the current version">
   <img className="block dark:hidden" src="/images/linked-file-history.png" alt="Sidebar with M and U letters beside linked files, next to a history tab listing three commits and a split diff" />
   <img className="hidden dark:block" src="/images/linked-file-history-dark.png" alt="Sidebar with M and U letters beside linked files, next to a history tab listing three commits and a split diff" />
@@ -230,5 +232,5 @@ Only the checked files are staged and committed. Files outside the linked folder
 While a command runs, a spinner sits on the folder's row and the Git commands are hidden. When one fails, the alert shows what Git printed.
 
 <Warning>
-Link only repositories you trust. Reading a file's status runs the repository's own content filters, and committing, pulling, and pushing run its hooks, exactly as `git` in Terminal does.
+Link only repositories you trust. **Commit…**, **Pull**, and **Push** run the repository's hooks and filters, exactly as `git` in Terminal does.
 </Warning>

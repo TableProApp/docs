@@ -85,7 +85,7 @@ Connect by hostname, never an IP address: the ticket is for the service principa
 
 ### Password file
 
-Turn on **Use Password File** to read the password from `~/.pgpass` instead of typing one. Entries are `hostname:port:database:username:password`, `*` matches any field, first match wins. An empty **Username** matches your macOS login name, and a socket connection matches as described in [Unix socket](#unix-socket). The form reports what it found, including `~/.pgpass has incorrect permissions (needs chmod 0600)`, the one that silently blocks a connect.
+Turn on **Use ~/.pgpass** to read the password from `~/.pgpass` instead of typing one. Entries are `hostname:port:database:username:password`, `*` matches any field, first match wins. An empty **Username** matches your macOS login name, and a socket connection matches as described in [Unix socket](#unix-socket). The form reports what it found, including `~/.pgpass has incorrect permissions (needs chmod 0600)`, the one that silently blocks a connect.
 
 ## Databases and schemas
 
@@ -179,7 +179,7 @@ Sessions run in `UTF8` whatever encoding the database was created with, and the 
 
 ## Tools
 
-`EXPLAIN` and `EXPLAIN ANALYZE` run with `FORMAT JSON` and render as a plan diagram or tree. See [EXPLAIN Visualization](/features/explain-visualization). **Database > Users & Roles** shows where each privilege comes from before you grant or revoke it. **Backup Dump** and **Restore Dump** shell out to your local `pg_dump` and `pg_restore`; see [Backup & Restore](/features/backup-restore). The [Routine Debugger](/features/routine-debugger) steps through PL/pgSQL functions and procedures once the server has the `pldbgapi` extension.
+`EXPLAIN` and `EXPLAIN ANALYZE` run with `FORMAT JSON` and render as a plan diagram or tree. See [EXPLAIN Visualization](/features/explain-visualization). **Database > Users & Roles** shows where each privilege comes from before you grant or revoke it. **Backup Dump** and **Restore Dump** shell out to your local `pg_dump` and `pg_restore`; see [Backup & Restore](/features/backup-restore). The [Routine Debugger](/features/routine-debugger) steps through PL/pgSQL functions and procedures once the server has the `pldbgapi` extension. A [Live tab](/features/live-messages) runs `LISTEN` on a session of its own and shows each `NOTIFY` as it arrives.
 
 ## SSL/TLS
 
