@@ -97,7 +97,7 @@ Every request needs a token, including one from your own Mac. The bundled bridge
 - AI access is set per connection, including blocking a connection from external clients entirely. A blocked connection is not even listed.
 - Tokens carry scopes and can be limited to named connections. An unauthenticated local caller is read-only and can never be more.
 - Writes go through the connection's [Safe Mode](/features/safe-mode#external-clients). `DROP` and `TRUNCATE` need a full-access token and the user's approval every time.
-- Statements that read or write files, or run server-side code, are refused before they reach the driver.
+- Statements that read or write files, or run server-side code, are refused before they reach the driver. [What Read Only allows](/developers#what-read-only-allows) lists the rest.
 - The reachable surface is the [tool catalog](/developers/mcp-tools), the [resources](/developers/mcp-resources) and the [prompts](/developers/mcp-prompts). Nothing else.
 - Reaching the server from another machine means forwarding the port over SSH yourself, and owning what that exposes.
 
