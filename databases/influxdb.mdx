@@ -26,7 +26,7 @@ For a server on a private network, open the **Network** tab and set **Connect vi
 | **Organization** | 2.x only. Optional when the token sees one organization |
 | **Skip TLS Verification** | Options tab. Trusts any certificate, even under **Verify CA** or **Verify Identity** |
 
-TablePro reads the server version from `/ping` when it connects, and picks the API from it: `/api/v3` on 3.x, `/api/v2` and the v1 `/query` endpoint on 2.x. The token is then checked by listing databases or buckets, so a wrong token fails the connection instead of the first query.
+TablePro reads the server version from `/ping` when it connects, and picks the API from it: `/api/v3` on 3.x, `/api/v2` and the v1 `/query` endpoint on 2.x. A wrong token fails the connection instead of the first query: 3.x checks it on `/ping`, and on 2.x TablePro lists one bucket with it. A 1.x server is refused at connect.
 
 ## Browsing measurements
 
@@ -44,11 +44,13 @@ On 3.x the grid runs SQL and sorts by any column. On 2.x it runs InfluxQL, which
 |----------|---------|--------------|
 | equals, not equals, greater than, less than and the rest | `=`, `!=`, `>`, `<` | Same |
 | contains, not contains, starts with, ends with, REGEX | `~` and `!~` with an escaped pattern | `=~` and `!~` with a `/regex/` |
-| in list, not in list | `=` joined by `OR`, `!=` joined by `AND` | Same |
+| in list, not in list | `IN`, `NOT IN` | `=` joined by `OR`, `!=` joined by `AND` |
 | between | Two inclusive bounds | Same |
-| is NULL, is not NULL | `IS NULL`, `IS NOT NULL` | An empty tag, `= ''`. Fields have no null test |
+| is NULL, is not NULL | `IS NULL`, `IS NOT NULL` | `= ''` and `!= ''` on a tag. InfluxQL has no null test for a field |
 
 A filter on `time` takes an RFC 3339 timestamp. A tag value is always text, so `host = 1` matches the tag `"1"`.
+
+A filter the language cannot run on that column, such as a null test on a 2.x field or a regex on a number, shows an error instead of an empty grid.
 
 ## Query editor
 
@@ -59,7 +61,7 @@ Type a statement and run it. The language is chosen from the text:
 | 3.x | SQL. A `SHOW MEASUREMENTS`, `SHOW TAG KEYS` or `SHOW FIELD KEYS`, a `GROUP BY time(...)` or a duration such as `now() - 1h` runs as InfluxQL |
 | 2.x | InfluxQL. A script with a `\|>` pipe, or one starting with `from(`, `import` or `buckets(`, runs as Flux |
 
-To choose the language yourself, start the first line with a comment naming it: `-- influxql`, `-- sql` or `// flux`. A language the server does not accept reports which ones it does.
+To choose the language yourself, make the first line a comment naming it, such as `-- influxql`, `-- sql` or `// flux`. Either comment style works for any language, and TablePro removes the line before sending the statement. A language the server does not accept reports which ones it does.
 
 ```sql
 SELECT date_bin(INTERVAL '5 minutes', time) AS bucket, avg(usage)
@@ -73,7 +75,7 @@ A Flux result arrives as one table per series. The grid shows them as one, with 
 
 ## Safe Mode and read-only connections
 
-A Flux script reads unless it calls `to()` or `wideTo()`, which write points. One that uses the `http`, `sql` or a notification package counts as reaching outside the database. SQL and InfluxQL are read like any SQL: `SELECT ... INTO` writes, `DROP MEASUREMENT` destroys data.
+A Flux script reads when every package it imports only reads, such as `strings`, `date`, `array`, `csv` or `influxdata/influxdb/schema`, and it never names `to()` or `wideTo()`. Any other package, such as `http`, `sql`, `experimental/influxdb` or a notification package, counts as a write that reaches outside the database. A `host:` argument, which reads another server, and a `file:` argument, which reads the server's disk, count as reaching outside without writing. SQL and InfluxQL are read like any SQL: `SELECT ... INTO` writes, `DROP MEASUREMENT` destroys data.
 
 ## SSL/TLS
 
