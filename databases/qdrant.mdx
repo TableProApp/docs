@@ -48,7 +48,7 @@ Sorting by `id` ascending is the default order. These sorts are refused with a m
 
 ## Filtering
 
-Filter values are typed from the payload index, or from the values in the sampled points when the field has no index.
+A field with a payload index is filtered as its index type. A field without one may hold different types in different points, so a value matches every type it can be: `42` finds the text `"42"`, the number 42, and a list holding either.
 
 | Operators | What Qdrant runs |
 |----------|------------------|
