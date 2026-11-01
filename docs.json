@@ -254,6 +254,7 @@
               "databases/firebase",
               "databases/bigquery",
               "databases/bigtable",
+              "databases/influxdb",
               "databases/kafka",
               "databases/kingbasees",
               "databases/libsql",
