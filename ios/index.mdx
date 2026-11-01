@@ -140,7 +140,14 @@ On iPhone Duo the system draws the toolbar and the tab bar down the side of the 
 
 ### Browsing
 
-A row in the list previews four of its fields, and eight where the display is wide enough. Search the table list by name. A PostgreSQL materialized view sits under **Views** and opens read only. Page a table at 50, 100, 200, or 500 rows, jump to a page number, sort by a column, search text columns, and stack filters with AND or OR.
+Rows show as cards or as a grid. Pick **Cards** or **Grid** in a table's **More** menu, or in the **More** menu of **Query** once it has results, and the choice applies everywhere. iPhone starts with cards and iPad with the grid. A card previews four of its fields, and eight where the display is wide enough. The grid shows one row per line under a fixed header, and the row's key column stays at the leading edge while the other columns scroll sideways. Touch and hold a row in either layout to share, copy, or delete it.
+
+<Frame caption="The key column stays put while the other columns scroll">
+  <img className="block dark:hidden" src="/images/ios-row-grid.png" alt="Track table as a grid on iPhone, scrolled sideways with TrackId held at the left, beside the More menu with Grid checked under Cards" />
+  <img className="hidden dark:block" src="/images/ios-row-grid-dark.png" alt="Track table as a grid on iPhone, scrolled sideways with TrackId held at the left, beside the More menu with Grid checked under Cards" />
+</Frame>
+
+Search the table list by name. A PostgreSQL materialized view sits under **Views** and opens read only. Page a table at 50, 100, 200, or 500 rows, jump to a page number, sort by a column, search text columns, and stack filters with AND or OR.
 
 To follow a foreign key, tap the link under its value on a row, or long-press a row in the list and pick the key. A sheet previews the row it points at, titled with the table and, when it differs from the one open, the schema. A value in the preview that is itself a foreign key opens the next row in the same sheet, and **Back** returns one step. **Open Table** opens that table filtered to the key, and when one row matches it lands on that row, ready to edit. **Back** then returns to the filtered list and to the row you started from. While that row has an edit open, **Open Table** is dimmed.
 
