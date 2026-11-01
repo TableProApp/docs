@@ -29,7 +29,7 @@ The certificate rows appear only once **SSL Mode** is anything but Disabled. Eac
 | **Certificate**, under **CA Certificate** | Verify CA and Verify Identity only | The PEM or DER certificate the server's certificate chains to, for example `/path/to/ca-cert.pem`. Saving without it is blocked, except under Verify Identity on ClickHouse, Kafka, Presto, SAP HANA and Trino, which check the system trust store when it is empty |
 | **Client Certificate** | Any mode but Disabled | Your certificate, for a server that enforces mutual TLS. Optional otherwise |
 | **Client Key** | Any mode but Disabled | The matching private key. Required once a client certificate is set |
-| **Key Passphrase** | Once **Client Key** has a path, on drivers that support it (Cassandra and ScyllaDB) | The passphrase of an encrypted key. Stored in the Keychain |
+| **Key Passphrase** | Once **Client Key** has a path, on drivers that support it (Cassandra, ScyllaDB and MongoDB) | The passphrase of an encrypted key. Stored in the Keychain |
 
 SQL Server shows no certificate fields at all and verifies against the system trust store. See [SQL Server](/databases/mssql#limitations). Under Verify Identity, SAP HANA and Kafka verify against the system trust store when **Certificate** is left empty. See [SAP HANA](/databases/sap-hana#ssl%2Ftls).
 
