@@ -18,7 +18,7 @@ Passwords stay in your Keychain, so every route here hands over a connection def
 
 Right-click a connection > **Share > Export to File…**, selecting several first to export them together, or **File > Export > Export Connections…** for all of them.
 
-The file carries what the connection form holds, from host and port through SSH and SSL configuration, color, icon, tags, the full group path, Safe Mode level, startup commands, AI policy, the Local only flag, and any driver field the plugin does not mark secret. Passwords, key passphrases, TOTP secrets, and secret driver fields stay behind.
+The file carries what the connection form holds, from host and port through SSH and SSL configuration, color, icon, tags, the full group path, Safe Mode level, startup commands, AI policy, the Local only flag, and any driver field the plugin does not mark secret. Passwords, key passphrases, TOTP secrets, and secret driver fields stay behind, and so do the settings [Import](#import) strips.
 
 <Frame caption="Export connections">
   <img className="block dark:hidden" src="/images/connection-export-menu.png" alt="Export connections" />
@@ -83,7 +83,20 @@ Group and folder paths match by name from the top down: an existing group or fol
   <img className="hidden dark:block" src="/images/connection-import-preview-dark.png" alt="Import preview" />
 </Frame>
 
-Anything that decides where a credential comes from is stripped on the way in, from a file and from a link alike: AWS options including IAM authentication, the region, the profile and the RDS endpoint; **Use Password File**; **Prompt for password**; the SSL client key passphrase; the pre-tunnel host and port; and the **Pre-Connect Script** and **Post-Disconnect Script**. Startup SQL and tunnel commands run on every connect, so a file brings them only if you agree: importing lists each one and asks, and **Import Without Commands** is the default. A link's sheet shows its startup SQL in full before you add it.
+Anything that decides where a credential comes from, or runs code on your Mac, is stripped on the way in, from a file and from a link alike:
+
+- AWS options including IAM authentication, the region, the profile and the RDS endpoint
+- MongoDB's **AWS IAM** auth mechanism, which imports as **Default**, and the secrets a pasted MongoDB connection string carried
+- **Application (Client) ID**, **Directory (Tenant) ID** and the signed-in account of a Microsoft Entra ID connection
+- Snowflake's **CLI Connection Name** and Spanner's **REST Endpoint**
+- Beancount's **Run Ledger Plugins**
+- **Use ~/.pgpass** and **Prompt for password**
+- The SSL client key passphrase, and the pre-tunnel host and port
+- **Pre-Connect Script** and **Post-Disconnect Script**
+
+Set them again on the imported connection. A credential profile new to this Mac arrives set to ask for its password; see [Credential Profiles](/connections/credential-profiles#sharing-and-sync).
+
+Startup SQL and tunnel commands run on every connect, so a file brings them only if you agree: importing lists each one and asks, and **Import Without Commands** is the default. A link's sheet shows its startup SQL in full before you add it.
 
 ## Share via link
 
@@ -218,13 +231,13 @@ JSON, in format version 1 or 2. Saved queries and nested groups need version 2, 
 }
 ```
 
-A `ref` links records inside one file and means nothing outside it. Refs must be unique within each kind. A ref that points at nothing, or a parent chain that loops, fails the import with an error naming the ref.
+A `ref` links records inside one file and means nothing outside it. Refs must be unique within each kind. A ref that points at nothing, or a parent chain that loops, fails the import with an error naming the ref. So does an SSH tunnel whose host or user, or a jump host's, holds a character `ssh` refuses, such as a quote, a `;` or a leading `-`; that error names the connection.
 
 | Key | Holds |
 |---|---|
 | `groups` | Groups with a `ref`, a `name`, and an optional `color` and `iconName`, nested through `parentRef`. A connection points at the innermost one with `groupRef` |
 | `tags` | Tag colors. A connection lists its tags in `tagNames`, and a name missing here imports with no color |
-| `credentialProfiles` | Profiles with `ref`, `name`, `username`, and `passwordMode` (`stored`, `prompt`, or `pgpass`), named by a connection's `credentialProfileRef`. A profile's password never travels, so a `stored` one imports as `prompt` |
+| `credentialProfiles` | Profiles with `ref`, `name`, `username`, and `passwordMode` (`stored`, `prompt`, or `pgpass`), named by a connection's `credentialProfileRef`. A profile's password never travels, and a profile new to this Mac imports as `prompt` whatever its mode |
 | `queryFolders` | Saved query folders with a `ref` and a `name`, nested through `parentRef`. A `connectionRef` scopes a folder to that connection; without one it is global |
 | `savedQueries` | A `ref`, `name`, and `sql`, and an optional `keyword`, `folderRef`, and `connectionRef`. Without a `connectionRef` a query is global |
 | `credentials` | Only inside an encrypted file: secrets keyed by connection `ref` |

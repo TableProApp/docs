@@ -71,6 +71,8 @@ Pick an alias from the **Config Host** picker and `HostName`, `User`, `Port`, `I
 
 `Match` blocks take the criteria ssh does, `localnetwork` and `tagged` included. A tunnel counts as `sessiontype none` with an empty `command`, and a criterion TablePro does not know keeps its block from applying.
 
+`CanonicalizeHostname` completes a short name with each `CanonicalDomains` suffix in turn, skipping a name with more dots than `CanonicalizeMaxDots`, and applies to a host reached through a jump only when set to `always`. The completed name is the one dialed and the one its host key is stored under. A DNS alias (CNAME) replaces it only where a `CanonicalizePermittedCNAMEs` rule covers both names. With `CanonicalizeFallbackLocal no`, a name no suffix resolves stops the connection instead of being dialed as typed.
+
 `IdentityFile` picks which agent key is offered, not only which key file is read, and a `.pub` is enough. That is how a 1Password or Secretive key gets pinned to a host. `IdentitiesOnly yes` then drops every agent key the config did not name, which is what keeps a thirty-key agent inside a server's `MaxAuthTries`.
 
 Once a connection opens, the hosts, ports and usernames it reached through the config sync to [iPhone and iPad](/ios#route-from-mac), so it opens there too. The config file, keys and key paths stay on the Mac.
@@ -199,6 +201,14 @@ An RSA host key keeps working once the server signs with `rsa-sha2-512` or `rsa-
 ### "TablePro and the SSH server have no signature algorithm in common for this key."
 
 The key is RSA, and the server accepts RSA keys only with `ssh-rsa` signatures, which use SHA-1. TablePro signs RSA keys with `rsa-sha2-256` or `rsa-sha2-512`. Add those to `PubkeyAcceptedAlgorithms` in `sshd_config` (`PubkeyAcceptedKeyTypes` before OpenSSH 8.5), or sign in with an Ed25519 or ECDSA key. A server older than OpenSSH 7.2 cannot check either signature, so it needs a key of another type.
+
+### "The SSH host … contains characters ssh does not allow in a host name." / "The SSH user … contains characters ssh does not allow in a user name."
+
+The name in the message holds a character `ssh` refuses, such as a quote, a backtick, one of `;&|<>(){}`, or a leading `-`. A host also refuses whitespace, `$`, `,` and a backslash. Find the name in **SSH Host**, **SSH User**, a jump host, or a `HostName` line in `~/.ssh/config`, and correct it.
+
+### "… was not found in any of the CanonicalDomains in ~/.ssh/config, and CanonicalizeFallbackLocal is set to no."
+
+None of the `CanonicalDomains` suffixes turned the host into a name DNS resolves, and the config forbids dialing the short name. Check that the full name resolves for the domain you expect: `dscacheutil -q host -a name db.example.com`. Add the missing domain to `CanonicalDomains`, or set `CanonicalizeFallbackLocal yes` for that host.
 
 ### "Jump host … failed: …"
 
