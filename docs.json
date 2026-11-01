@@ -316,6 +316,7 @@
               "features/table-structure",
               "features/routines-triggers",
               "features/routine-debugger",
+              "features/live-messages",
               "features/user-defined-types",
               "features/table-operations",
               "features/er-diagram",
