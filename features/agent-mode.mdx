@@ -93,11 +93,13 @@ The conversation column is replaced by the same unavailable screen browsing show
 
 ## What Agent mode dims
 
-The commands that act on the browse content have nothing to act on while the conversation fills the detail column, so the menu bar dims them: **Refresh**, **Save**, **Add Row**, **Restore Previous Values…**, **Preview SQL**, **Show Results**, **Show Query History**, **New Tab**, **Open Quickly…**, **Export Tables…**, **Import Data…**, **Server Dashboard**, **Back** and **Forward**.
+The tabs, the grid, the editor and the object browser stay where you left them, out of sight, so the menu bar dims every command that acts on them and every sheet they open: **New Table…**, **Execute Query**, **Copy**, **Export Tables…**, **Server Dashboard** and **Query Insights** among them.
 
 The [toolbar](/features/connection-window#what-each-context-leaves-out) drops Refresh and the commit control outright, and dims any of the rest you added to it.
 
-Everything that acts on the window or the session stays live: **Switch Connection…**, **Close Connection**, **Safe Mode Level**, **Mode**, and every command under **File > Session**.
+Everything that acts on the window, the connection or the session stays live: **Switch Connection…**, **Close Connection**, **Open Database…**, **Safe Mode Level**, **Release File Lock**, **Mode**, **Undo** and **Redo**, and every command under **File > Session**.
+
+`Cmd+W` closes the database or the connection, as it does in a window with no tab left. The tabs behind the conversation are never closed by it.
 
 ## Starting from the welcome window
 
