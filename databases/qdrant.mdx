@@ -1,0 +1,112 @@
+---
+title: Qdrant
+description: Connect to Qdrant, browse collections as points, edit payloads by id, and run REST requests
+---
+
+import RegistryPlugin from "/snippets/registry-plugin.mdx";
+
+Collections are tables, points are rows, and the point `id` is the primary key. The editor takes Qdrant REST requests, not SQL, so a vector search such as `POST /collections/docs/points/query` runs from the editor and its points and scores land in the grid.
+
+<RegistryPlugin name="Qdrant" plugin="Qdrant Driver" />
+
+## Quick setup
+
+Click **New Connection…**, select **Qdrant**, enter host and port, paste an **API Key** if the node needs one, then click **Save & Connect**.
+
+There is no Database field. One connection reaches one Qdrant instance, and its collections are the objects.
+
+For a node on a private server, open the **Network** tab and set **Connect via** to **SSH Tunnel**, then set **Host** to the address Qdrant listens on as the SSH server sees it, usually `localhost`. See [SSH Tunneling](/connections/ssh-tunneling).
+
+## Connection settings
+
+| Field | Description |
+|-------|-------------|
+| **Host** | Node hostname. `localhost` for Docker, the cluster URL's host for Qdrant Cloud |
+| **Port** | `6333` by default, the REST port. Qdrant Cloud also answers on `6333` |
+| **API Key** | Sent as the `api-key` header. Leave it empty for a node started without `QDRANT__SERVICE__API_KEY` |
+| **Skip TLS Verification** | Options tab. Trusts any certificate, even under **Verify CA** or **Verify Identity** |
+
+Qdrant Cloud requires the API key and HTTPS. Set **SSL Mode** to **Required**, or **Verify Identity** if you have the CA.
+
+## Browsing collections
+
+The sidebar lists collections from `GET /collections`.
+
+Every grid has `id` first and the vectors last. `id` is the primary key, and both are read-only. A collection with one unnamed vector shows a `vector` column. A collection with named or sparse vectors shows one column per name, such as `vector.image`. A vector is shown as a JSON number array, and a sparse vector as its `indices` and `values`.
+
+Payload columns are the indexed payload fields, then the fields found in the first 100 points. Arrays and objects render as JSON in the cell. A field that appears only in later points shows up in a query result but not as a grid column.
+
+Unsorted pages load through `POST /points/scroll`, which pages by point id. Paging forward reuses the id the last page ended on. A jump to a far page first reads point ids alone up to that row. A sort becomes an `order_by` on `POST /points/query`, which needs a range payload index on that field. Qdrant orders by one field, so only the first sorted column counts. Sorting by `id` keeps the default order.
+
+## Filtering
+
+Filter values are typed from the payload index, or from the values in the sampled points when the field has no index.
+
+| Operators | What Qdrant runs |
+|----------|------------------|
+| equals, not equals | `match.value` for text, integers and booleans. A float or a date matches as a closed `range` |
+| greater than, greater or equal, less than, less or equal, between | `range`, numbers and dates only |
+| in list, not in list | `match.any`, `match.except` over a comma-separated list |
+| contains, not contains | `match.text`, which needs a full-text payload index on the field |
+| is NULL, is not NULL | `is_null` |
+| is empty, is not empty | `is_empty` |
+
+On `id`, equals and in list become `has_id`. **Starts with**, **ends with** and **REGEX** have no Qdrant equivalent, and a filter Qdrant cannot run reports why instead of returning the whole collection. The raw filter row takes one Qdrant condition as JSON, such as `{"key": "city", "match": {"value": "Berlin"}}`.
+
+Filtered row counts come from `POST /points/count` with `exact` set.
+
+## Editing points
+
+Grid edits are REST requests keyed by `id`, shown in the review sheet before they run.
+
+| Change | Request |
+|--------|---------|
+| New row | `PUT /collections/{name}/points` with `update_mode` set to `insert_only`, so an id that already exists is left alone. An empty `id` gets a new UUID. The point is stored without vectors |
+| Edited cells | `POST /collections/{name}/points/payload`, which sets only the edited keys |
+| Deleted row | `POST /collections/{name}/points/delete` |
+
+A cell is written back as the type its column holds: a `keyword` field stays a string even when it reads `42`. **Truncate** deletes every point with an empty filter and keeps the collection. **Drop** removes the collection.
+
+## REST editor
+
+Type a request line, then a JSON body on the same line or on the lines under it:
+
+```http
+POST /collections/docs/points/query
+{"query": [0.1, 0.2, 0.3, 0.4], "limit": 10, "with_payload": true}
+```
+
+A response that lists points, from `query`, `scroll`, `search` or a retrieve by id, renders as a grid with `id`, then `score` when there is one, the payload fields, and any vectors returned. Anything else is shown as formatted JSON.
+
+Read-only mode allows `GET` and the read endpoints under `/points`: `query`, `scroll`, `search`, `count`, `recommend`, `discover`, `facet`, their batch and group forms, and a retrieve by id. A `delete`, a `clear` and `points/batch` count as destructive.
+
+## SSL/TLS
+
+New connections start on **Disabled**, plain HTTP. Every other mode goes over HTTPS. **Preferred** and **Required (skip verify)** accept a self-signed certificate. See [SSL/TLS](/connections/ssl).
+
+## Limitations
+
+- SQL is not available. Use the REST editor.
+- gRPC is not used.
+- Payload indexes and collection settings are not edited from Structure. Send the REST request, such as `PUT /collections/{name}/index`.
+- A new row has no vectors. Upsert vectors through the REST editor.
+- The plugin is registry-only. It is not on iPhone or iPad.
+
+## Troubleshooting
+
+### Must provide an API key
+
+The node was started with an API key and **API Key** is empty. Paste the key and connect again.
+
+### Invalid API key or JWT
+
+The key was rejected. The health check reads `/collections`, which needs the key, so a revoked key also drops a live session.
+
+### No range index for `order_by` key
+
+The sorted column has no range payload index. Create one with `PUT /collections/{name}/index`, or clear the sort.
+
+## Related
+
+- [Import & Export](/features/import-export)
+- [Filtering](/features/filtering)
