@@ -59,7 +59,7 @@ A field with a payload index is filtered as its index type. A field without one 
 | is NULL, is not NULL | `is_empty`: the key is missing, `null`, or an empty list |
 | is empty, is not empty | `is_empty`, or the empty string on a text field |
 
-Not equals, not in list and not contains also match points the key is missing from. On `id`, equals and in list become `has_id`. **Starts with**, **ends with** and **REGEX** have no Qdrant equivalent, and a filter Qdrant cannot run reports why instead of returning the whole collection. The raw filter row takes one Qdrant condition as JSON, such as `{"key": "city", "match": {"value": "Berlin"}}`.
+Not equals, not in list and not contains also match points the key is missing from. On `id`, equals and in list become `has_id`, and contains finds a whole id only. **Starts with**, **ends with** and **REGEX** have no Qdrant equivalent, and a filter Qdrant cannot run reports why instead of returning the whole collection. The raw filter row takes one Qdrant condition as JSON, such as `{"key": "city", "match": {"value": "Berlin"}}`.
 
 Filtered row counts come from `POST /points/count` with `exact` set.
 
