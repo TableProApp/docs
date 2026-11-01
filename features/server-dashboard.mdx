@@ -13,7 +13,7 @@ What this screen shows is what your account is allowed to see. An empty or half-
 | MongoDB | Only your own operations; metrics and slow queries fail | `clusterMonitor`, `dbAdmin` on the database you browse for its profiler, and `hostManager` to cancel another user's operation |
 | Redis | A panel fails with `NOPERM` naming the command | `+client\|list`, `+client\|id`, `+info` and `+slowlog\|get` in the user's ACL, plus `+client\|kill` and `+client\|unblock` to act on a client |
 
-Open it from **Database > Server Dashboard**, or from **Server Dashboard** under **Actions** in the toolbar.
+Open it with `Cmd+Option+Shift+D`, from **Database > Server Dashboard**, from **Server Dashboard** under **Actions** in the toolbar, or by right-clicking a live connection in the [workspace rail](/features/workspace-rail).
 
 <Frame caption="Server Dashboard showing active sessions, metrics, and slow queries">
   <img
@@ -100,4 +100,4 @@ The interval menu offers 1s, 2s, 5s (the default), 10s, 30s, and Off. **Pause** 
 
 On Oracle, a pluggable database shows its own sessions and metrics, and the root container shows every container's. On a Redis Cluster, the sessions and metrics come from one primary, the node TablePro sends commands without a key to, and the slow log comes from every node. While a `MULTI` block is open on a Redis connection, the panels say so and send nothing into it until it ends.
 
-Every other engine, SQLite and DuckDB included, has no dashboard. The menu item dims and **Actions** leaves the entry out.
+Every other engine, SQLite and DuckDB included, has no dashboard. The menu item dims, and **Actions** and the rail's menu leave the entry out.
