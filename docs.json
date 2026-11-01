@@ -261,6 +261,7 @@
               "databases/mssql",
               "databases/mongodb",
               "databases/mysql",
+              "databases/neo4j",
               "databases/oceanbase",
               "databases/oracle",
               "databases/pglite",
