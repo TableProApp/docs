@@ -1,0 +1,86 @@
+---
+title: Memcached
+description: Browse Memcached keys with their values and TTLs, edit them in the grid, and run text protocol commands
+---
+
+import RegistryPlugin from "/snippets/registry-plugin.mdx";
+
+Memcached 1.4 and later work over the text protocol on port 11211.
+
+<RegistryPlugin name="Memcached" plugin="Memcached Driver" />
+
+## Quick setup
+
+Create a connection, select **Memcached**, enter host and port, then click **Save & Connect**. Memcached has no databases, so there is no Database field.
+
+## Connection settings
+
+| Field | Description |
+|-------|-------------|
+| **Host** | Memcached server hostname or IP. `localhost` by default |
+| **Port** | `11211` by default |
+| **Username / Password** | A user from the server's auth file. Leave both empty on a server without one |
+
+SSL and SSH tunnels work as on other connections. TLS needs a server built with TLS and started with `-Z`.
+
+## Authentication
+
+Fill in **Username** and **Password** for a server started with `-Y <auth file>`, the text protocol's login in Memcached 1.5.15 and later. Without them such a server answers every command with `CLIENT_ERROR unauthenticated`, and the connection fails with "This Memcached server requires a username and password".
+
+SASL is not supported. It needs the binary protocol, which Memcached has deprecated.
+
+## Connection URL
+
+```text
+memcached://127.0.0.1:11211
+```
+
+## Browsing keys
+
+The sidebar shows one table, **keys**, with the item count from `stats`. The grid gives one row per key: **Key**, **Value**, **TTL** and **Flags**. TTL is the seconds left, and empty for an item that never expires.
+
+The text protocol has no command that lists keys, so the list comes from one of two places:
+
+| Server | Listing |
+|--------|---------|
+| 1.4.31 and later, with the LRU crawler on (the default) | `lru_crawler metadump all`. Every key |
+| Older, or started with `-o no_lru_crawler` | `stats cachedump` per slab class. A sample: the server caps each slab's reply, so keys can be missing |
+
+The table's comment says which one the connection uses. Neither is a snapshot: the server walks its LRU lists while it keeps moving items between them, so a key changed during the walk can be missing until the next refresh. A listing stops at 1,000,000 keys. Sorting is by key, and filters apply to **Key** only: `=`, `!=`, contains, starts with, ends with, `IN`, `NOT IN` and regex. Values are read with `get` for the rows on the current page.
+
+## Editing
+
+Saving edits generates commands:
+
+| Change | Command |
+|--------|---------|
+| **Value** or **Flags** | `set`, keeping the current TTL |
+| **TTL** alone | `touch`. Empty or `0` keeps the item until it is evicted |
+| New row | `set` with the row's key, value, TTL and flags |
+| Deleted row | `delete` |
+
+A TTL over 30 days is sent as the time it ends, because Memcached reads a larger exptime as a Unix time. **Key** cannot be edited: add a row with the new key and delete the old one. Truncating the table runs `flush_all`, which empties the whole server.
+
+## Command editor
+
+The editor takes text protocol commands with the value as the last argument instead of a data block. Quote a value that holds spaces. Inside double quotes, `\n`, `\r`, `\t`, `\xHH`, `\"` and `\\` are escapes; single quotes take everything as written.
+
+```bash
+get user:1 user:2
+set user:1 0 300 "Ada Lovelace"
+append user:1 0 0 " (1815)"
+cas user:1 0 300 42 "new value"
+touch user:1 600
+incr page:hits 1
+delete user:1
+stats items
+lru_crawler metadump all
+```
+
+The whole vocabulary is `get`, `gets`, `gat`, `gats`, `set`, `add`, `replace`, `append`, `prepend`, `cas`, `touch`, `delete`, `incr`, `decr`, `flush_all`, `stats`, `version` and `lru_crawler metadump`. Anything else comes back as "Unsupported Memcached command" without reaching the server. Storage commands take `<key> <flags> <exptime> <value>`, the order of the text protocol.
+
+Safe Mode reads `get`, `gets`, `version`, `stats` and `lru_crawler metadump` as reads, `delete` and `flush_all` as destructive, and everything else, `stats reset` included, as a write.
+
+## Server Dashboard
+
+The Server Dashboard shows used memory against `limit_maxbytes`, items, hit ratio, evictions, connections and uptime, all from `stats`.
