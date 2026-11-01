@@ -1,6 +1,6 @@
 ---
 title: Qdrant
-description: Connect to Qdrant, browse collections as points, edit payloads by id, and run REST requests
+description: Connect to Qdrant, browse collections as points, edit payloads and vectors by id, and run REST requests
 ---
 
 import RegistryPlugin from "/snippets/registry-plugin.mdx";
@@ -24,19 +24,27 @@ For a node on a private server, open the **Network** tab and set **Connect via**
 | **Host** | Node hostname. `localhost` for Docker, the cluster URL's host for Qdrant Cloud |
 | **Port** | `6333` by default, the REST port. Qdrant Cloud also answers on `6333` |
 | **API Key** | Sent as the `api-key` header. Leave it empty for a node started without `QDRANT__SERVICE__API_KEY` |
-| **Skip TLS Verification** | Options tab. Trusts any certificate, even under **Verify CA** or **Verify Identity** |
 
-Qdrant Cloud requires the API key and HTTPS. Set **SSL Mode** to **Required**, or **Verify Identity** if you have the CA.
+Qdrant Cloud requires the API key and HTTPS. Set **SSL Mode** to **Verify Identity** with no CA certificate: the certificate is checked against the system trust store.
 
 ## Browsing collections
 
 The sidebar lists collections from `GET /collections`.
 
-Every grid has `id` first and the vectors last. `id` is the primary key, and both are read-only. A collection with one unnamed vector shows a `vector` column. A collection with named or sparse vectors shows one column per name, such as `vector.image`. A vector is shown as a JSON number array, and a sparse vector as its `indices` and `values`.
+Every grid has `id` first and the vectors last. `id` is the primary key and read-only. A collection with one unnamed vector shows a `vector` column. A collection with named or sparse vectors shows one column per name, such as `vector.image`. A dense vector is a JSON number array, a multivector an array of them, and a sparse vector its `indices` and `values`.
 
-Payload columns are the indexed payload fields, then the fields found in the first 100 points. Arrays and objects render as JSON in the cell. A field that appears only in later points shows up in a query result but not as a grid column.
+Payload columns are the top-level indexed fields, then the fields found in the first 100 points. Arrays and objects render as JSON in the cell. An index on a nested path such as `metadata.source` or `tags[]` is listed in the **Indexes** section of the **Structure** tab, and its value shows inside the `metadata` or `tags` column. A field that appears only in later points shows up in a query result but not as a grid column.
 
-Unsorted pages load through `POST /points/scroll`, which pages by point id. Paging forward reuses the id the last page ended on. A jump to a far page first reads point ids alone up to that row. A sort becomes an `order_by` on `POST /points/query`, which needs a range payload index on that field. Qdrant orders by one field, so only the first sorted column counts. Sorting by `id` keeps the default order.
+Unsorted pages load through `POST /points/scroll`, which pages by point id. Paging forward reuses the id the last page ended on, and a jump to a far page reads point ids alone up to that row.
+
+## Sorting
+
+Sort by one payload field that has an `integer`, `float` or `datetime` payload index. Points with a value in that field come first, in order. Points without one follow, by id. Every point stays reachable, and the row count still matches the collection.
+
+Sorting by `id` ascending is the default order. These sorts are refused with a message:
+
+- `id` descending, a vector, or more than one column.
+- A field that holds a list in any point, since Qdrant would list that point once per value.
 
 ## Filtering
 
@@ -46,12 +54,12 @@ Filter values are typed from the payload index, or from the values in the sample
 |----------|------------------|
 | equals, not equals | `match.value` for text, integers and booleans. A float or a date matches as a closed `range` |
 | greater than, greater or equal, less than, less or equal, between | `range`, numbers and dates only |
-| in list, not in list | `match.any`, `match.except` over a comma-separated list |
-| contains, not contains | `match.text`, which needs a full-text payload index on the field |
-| is NULL, is not NULL | `is_null` |
-| is empty, is not empty | `is_empty` |
+| in list, not in list | Equals for each value: `match.any` for text or integers, one `range` per float or date |
+| contains, not contains | `match.text` on a text field, with or without a full-text index. It matches whole words and ignores case, so `world` finds `Hello World` but `lo Wo` finds nothing |
+| is NULL, is not NULL | `is_empty`: the key is missing, `null`, or an empty list |
+| is empty, is not empty | `is_empty`, or the empty string on a text field |
 
-On `id`, equals and in list become `has_id`. **Starts with**, **ends with** and **REGEX** have no Qdrant equivalent, and a filter Qdrant cannot run reports why instead of returning the whole collection. The raw filter row takes one Qdrant condition as JSON, such as `{"key": "city", "match": {"value": "Berlin"}}`.
+Not equals, not in list and not contains also match points the key is missing from. On `id`, equals and in list become `has_id`. **Starts with**, **ends with** and **REGEX** have no Qdrant equivalent, and a filter Qdrant cannot run reports why instead of returning the whole collection. The raw filter row takes one Qdrant condition as JSON, such as `{"key": "city", "match": {"value": "Berlin"}}`.
 
 Filtered row counts come from `POST /points/count` with `exact` set.
 
@@ -61,15 +69,16 @@ Grid edits are REST requests keyed by `id`, shown in the review sheet before the
 
 | Change | Request |
 |--------|---------|
-| New row | `PUT /collections/{name}/points` with `update_mode` set to `insert_only`, so an id that already exists is left alone. An empty `id` gets a new UUID. The point is stored without vectors |
-| Edited cells | `POST /collections/{name}/points/payload`, which sets only the edited keys |
+| New row | `POST /collections/{name}/points` first, to check that no point has the id, then `PUT /collections/{name}/points` with `update_mode` set to `insert_only`. An empty `id` gets a new UUID. Vector cells you fill are stored with the point |
+| Edited payload cells | `POST /collections/{name}/points/payload`, which sets only the edited keys |
+| Edited vector cells | `PUT /collections/{name}/points/vectors`. Setting a vector to NULL sends `POST /collections/{name}/points/vectors/delete` |
 | Deleted row | `POST /collections/{name}/points/delete` |
 
-A cell is written back as the type its column holds: a `keyword` field stays a string even when it reads `42`. **Truncate** deletes every point with an empty filter and keeps the collection. **Drop** removes the collection.
+A cell is written back as the type its column holds: a `keyword` field stays a string even when it reads `42`, and a `bool` field takes `true`, `false`, `1` or `0`. A value that does not fit, such as `4.5` in an `integer` column or a vector that is not a number array, stops the save and names the column. **Truncate** deletes every point with an empty filter and keeps the collection. **Drop** removes the collection.
 
 ## REST editor
 
-Type a request line, then a JSON body on the same line or on the lines under it:
+Type a request line, then a JSON body on the same line, on the lines under it, or starting on the line and going on under it:
 
 ```http
 POST /collections/docs/points/query
@@ -78,18 +87,26 @@ POST /collections/docs/points/query
 
 A response that lists points, from `query`, `scroll`, `search` or a retrieve by id, renders as a grid with `id`, then `score` when there is one, the payload fields, and any vectors returned. Anything else is shown as formatted JSON.
 
-Read-only mode allows `GET` and the read endpoints under `/points`: `query`, `scroll`, `search`, `count`, `recommend`, `discover`, `facet`, their batch and group forms, and a retrieve by id. A `delete`, a `clear` and `points/batch` count as destructive.
+Read-only mode allows `GET`, `POST /collections/{name}/facet`, and the read endpoints under `/points`: `query`, `scroll`, `search`, `count`, `recommend`, `discover`, their batch and group forms, and a retrieve by id. A `DELETE`, a path ending in `delete` or `clear`, and `points/batch` count as destructive. A snapshot request is flagged as reaching the server's disk.
 
 ## SSL/TLS
 
-New connections start on **Disabled**, plain HTTP. Every other mode goes over HTTPS. **Preferred** and **Required (skip verify)** accept a self-signed certificate. See [SSL/TLS](/connections/ssl).
+New connections start on **Disabled**, plain HTTP. Every other mode goes over HTTPS.
+
+| SSL Mode | What is checked |
+|----------|-----------------|
+| Preferred, Required (skip verify) | Nothing. A self-signed certificate is accepted |
+| Verify CA | The certificate chains to the CA certificate you choose. The hostname is not checked |
+| Verify Identity | The certificate chains to the CA certificate, or to the system trust store when none is chosen, and names the host |
+
+For a node that enforces mutual TLS, choose a **Client Certificate** and its **Client Key**. See [SSL/TLS](/connections/ssl).
 
 ## Limitations
 
 - SQL is not available. Use the REST editor.
 - gRPC is not used.
 - Payload indexes and collection settings are not edited from Structure. Send the REST request, such as `PUT /collections/{name}/index`.
-- A new row has no vectors. Upsert vectors through the REST editor.
+- A field that holds a list in any point cannot be sorted.
 - The plugin is registry-only. It is not on iPhone or iPad.
 
 ## Troubleshooting
@@ -104,7 +121,11 @@ The key was rejected. The health check reads `/collections`, which needs the key
 
 ### No range index for `order_by` key
 
-The sorted column has no range payload index. Create one with `PUT /collections/{name}/index`, or clear the sort.
+The sorted column has no `integer`, `float` or `datetime` payload index. Create one with `PUT /collections/{name}/index`, or clear the sort.
+
+### A row with this key already exists
+
+A new row's `id` is already taken. Clear the `id` cell to get a new UUID, or edit the existing point instead.
 
 ## Related
 
