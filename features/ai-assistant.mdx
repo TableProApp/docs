@@ -100,6 +100,8 @@ In Edit and Agent modes each tool call appears as a card in the reply. Read-only
 
 Safe Mode **Silent** auto-approves write tools and **Read-Only** auto-denies them. Destructive operations are the exception: `confirm_destructive_operation` always needs a click, Silent does not auto-approve it, **Always for this connection** is refused for it, and the model must pass the verbatim phrase `I understand this is irreversible`.
 
+`execute_query` refuses what [external clients cannot send at any level](/developers#what-read-only-allows), several statements in one call among them. Text stored in the database can steer the model, so on a connection where an unwanted write matters, connect with a login that can only read: the database holds that limit whatever the model sends.
+
 Every provider can call tools. Claude Agent reaches them through the MCP server, so that has to be on, and local models depend on the model.
 
 A reply pauses after 25 tool calls, keeps everything it has done, and offers **Continue** for a fresh budget or **Adjust Limit** to change the number, 5 to 200, under **Agent** in **Settings > AI**. Every call is another request with the schema attached, so a higher limit costs tokens.

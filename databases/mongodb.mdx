@@ -30,10 +30,13 @@ The query tab is a JavaScript shell. Write `db.orders.find({status: "new"})` the
 | **Database** | - | Opens straight into that database. Leave it empty to browse them all |
 | **Auth Database** | - | Options tab. Where your user account lives, usually `admin` |
 | **Auth Mechanism** | Default | SCRAM-SHA-1, SCRAM-SHA-256, X.509, or AWS IAM, under Authentication |
+| **AWS Session Token** | - | Under Authentication, once **Auth Mechanism** is AWS IAM. Kept in the Keychain |
 
 Naming a **Database** skips listing every database on the server, which is worth doing on a cluster with hundreds. Leave it empty and the first non-system database opens instead. `Cmd+K` switches either way, on the same connection, with no reconnect.
 
 **Auth Database** is a separate question: it says where your account is defined, not what you browse. Left empty, it follows the **Database** field, except under X.509 and AWS IAM, which authenticate against `$external`. An account defined in `admin` needs **Auth Database** set to `admin` whenever **Database** names something else, or authentication fails. SRV connections authenticate against `admin` regardless, unless told otherwise. Switching databases in the app never changes it, so browsing a database your user has no account in is fine.
+
+AWS IAM takes the access key ID in **Username** and the secret access key in **Password**. Temporary credentials also need their session token in **AWS Session Token**.
 
 Also on the Options tab: **Read Preference**, **Write Concern**, **Use SRV Record**, **Replica Set** name, and **Legacy UUID Encoding**. The server has to be MongoDB 4.0 or later; the driver refuses to connect to anything older.
 
@@ -55,6 +58,8 @@ mongodb+srv://user:password@cluster.mongodb.net/database
 
 `mongodb+srv://` resolves hosts through DNS SRV records and takes no port; one pasted into the field is stripped before connecting. Plain `mongodb://` keeps whatever port you give it. See [Connection URL Reference](/connections/urls).
 
+Secrets in a pasted string do not stay among its options. `tlsCertificateKeyFilePassword` lands in **Key Passphrase** and an `AWS_SESSION_TOKEN` in `authMechanismProperties` lands in **AWS Session Token**, both in the Keychain, and `proxyPassword` is dropped. [MongoDB parameters](/connections/urls#mongodb) lists the ones that fill a field.
+
 ## MongoDB Atlas (SRV)
 
 An Atlas connection needs the cluster hostname, a username, and a password. Atlas requires SRV and TLS, so a host ending in `.mongodb.net` gets both turned on for you, TLS only if the SSL mode was still Disabled. Elsewhere the **Use SRV Record** toggle in Advanced does the same job. Add your current IP to the cluster's access list in the Atlas console first: traffic from an address that is not on it times out rather than failing.
@@ -70,9 +75,7 @@ mongodb://user:pass@host1:27017,host2:27017,host3:27017/db?replicaSet=rs0
 ```
 
 <Warning>
-<Warning>
 Over an SSH tunnel only the first host is used and the rest of the list is dropped. Replica set discovery and failover are off for that session, with nothing on screen to say so.
-</Warning>
 </Warning>
 
 ## Browsing collections
@@ -375,7 +378,7 @@ valid at the cursor; see [Autocomplete](/features/autocomplete#mongodb). For a q
 
 New connections default to **Disabled**, and the driver has no TLS fallback: **Preferred** behaves exactly as **Required**, which is what the Network tab warns about. For an unencrypted local instance use **Disabled** or [SSH tunneling](/connections/ssh-tunneling). See [SSL/TLS](/connections/ssl).
 
-The driver reads a client certificate and its private key from one file. A key chosen in its own file is joined with the certificate in a temporary file only your user can read, removed when the connection closes.
+The driver reads a client certificate and its private key from one file. A key chosen in its own file is joined with the certificate in a temporary file only your user can read, removed when the connection closes. An encrypted key takes its passphrase in **Key Passphrase**, which appears once **Client Key** has a path.
 
 ## On iPhone and iPad
 

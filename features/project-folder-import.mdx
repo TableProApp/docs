@@ -62,6 +62,8 @@ The one file it reads outside the folder you picked is `wp-config.php` one level
 
 Some settings point elsewhere instead of holding a value, like `${{Postgres.DATABASE_URL}}` on Railway or a Rails credential lookup. Those are left out rather than guessed at, so a row you expected can be missing. Fill those in by hand, or paste the URL with [Import from URL](/connections/urls).
 
+A `${VAR}` reference is filled from the `.env` files in the folder, never from your shell or TablePro's environment, and Spring config gets only the default in `${VAR:default}`. A value that needs a variable from your shell is not filled in: type it into the form before you save.
+
 ## Related
 
 - [Connection Sharing](/features/connection-sharing) for importing from other database apps

@@ -165,7 +165,7 @@ New connections default to **Disabled**. SNI is sent in every TLS mode.
 - Redis Cluster serves database 0 only, and so does Valkey unless `cluster-databases` is above 1, in which case the sidebar lists each database. A cluster whose primaries refuse `CONFIG` shows `db0` alone. The Database Index field is hidden in Cluster mode, and a cluster connection always opens on `db0`.
 - A command whose keys span hash slots, such as `RENAME`, `SMOVE`, or the `*STORE` commands, is refused in Cluster mode before it is sent. Give the keys a shared hash tag, like `{user}:1` and `{user}:2`.
 - A key that is not valid UTF-8 never appears in the grid or the tree. Reach it from the CLI; values have no such limit.
-- Pub/Sub has no grid support. `PUBLISH` runs in the CLI, and there is no subscriber view.
+- Pub/Sub has no grid support. Follow channels in a [Live tab](/features/live-messages), or run `PUBLISH` in the CLI.
 - The sidebar tree loads at most 50,000 keys and a filter scans at most 10,000 matches. Narrow the pattern, or `SCAN` from the CLI.
 - Values and TTLs cannot be filtered on. Redis has no server-side primitive for either; filter by key pattern and type only.
 - No import. Export works as it does elsewhere.

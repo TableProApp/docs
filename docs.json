@@ -258,9 +258,11 @@
               "databases/kingbasees",
               "databases/libsql",
               "databases/mariadb",
+              "databases/memcached",
               "databases/mssql",
               "databases/mongodb",
               "databases/mysql",
+              "databases/neo4j",
               "databases/oceanbase",
               "databases/oracle",
               "databases/pglite",
@@ -270,6 +272,7 @@
               "databases/sap-hana",
               "databases/snowflake",
               "databases/spanner",
+              "databases/starrocks",
               "databases/sqlite",
               "databases/surrealdb",
               "databases/teradata",
@@ -314,12 +317,14 @@
               "features/table-structure",
               "features/routines-triggers",
               "features/routine-debugger",
+              "features/live-messages",
               "features/user-defined-types",
               "features/table-operations",
               "features/er-diagram",
               "features/join-builder",
               "features/explain-visualization",
               "features/server-dashboard",
+              "features/table-health",
               "features/users-roles"
             ]
           },
@@ -403,6 +408,7 @@
               "security/privacy",
               "security/managed-updates",
               "features/safe-mode",
+              "features/data-masking",
               "features/acknowledgements"
             ]
           }

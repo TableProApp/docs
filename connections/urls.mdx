@@ -106,7 +106,7 @@ An omitted `db_host` defaults to `127.0.0.1`.
 
 ## Query parameters
 
-Names are matched case-insensitively. Anything unrecognized is ignored, except on a MongoDB URL, where every unknown parameter is passed to the driver unchanged.
+Names are matched case-insensitively. Anything unrecognized is ignored, except on a MongoDB URL, where an unknown parameter is passed to the driver unchanged unless it holds a secret. See [MongoDB](#mongodb).
 
 ### Connection
 
@@ -226,6 +226,9 @@ mongodb://user:pass@host1:27017,host2:27017,host3:27017/mydb?replicaSet=rs0
 ```
 
 - `uuidRepresentation` sets **Legacy UUID Encoding**.
+- `tlsCertificateKeyFile` sets **Client Certificate** and **Client Key** to that file.
+- `tlsCertificateKeyFilePassword` sets **Key Passphrase**, and an `AWS_SESSION_TOKEN` inside `authMechanismProperties` sets **AWS Session Token**. Both go to the Keychain, and the rest of `authMechanismProperties` stays an option.
+- `proxyPassword` is dropped.
 - **Copy Connection String** writes an SRV connection as `mongodb+srv://` with no port, and every option percent-encoded.
 
 ## What the path component means
