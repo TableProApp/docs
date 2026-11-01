@@ -406,6 +406,7 @@
               "security/privacy",
               "security/managed-updates",
               "features/safe-mode",
+              "features/data-masking",
               "features/acknowledgements"
             ]
           }
