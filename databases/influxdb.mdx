@@ -63,6 +63,8 @@ Type a statement and run it. The language is chosen from the text:
 
 To choose the language yourself, make the first line a comment naming it, such as `-- influxql`, `-- sql` or `// flux`. Either comment style works for any language, and TablePro removes the line before sending the statement. A language the server does not accept reports which ones it does.
 
+Run InfluxQL one statement at a time. 2.x runs every statement it receives, so an InfluxQL statement with a `;` anywhere but at its end is refused, even inside a value or a comment.
+
 ```sql
 SELECT date_bin(INTERVAL '5 minutes', time) AS bucket, avg(usage)
 FROM cpu
@@ -75,7 +77,7 @@ A Flux result arrives as one table per series. The grid shows them as one, with 
 
 ## Safe Mode and read-only connections
 
-A Flux script reads when every package it imports only reads, such as `strings`, `date`, `array`, `csv` or `influxdata/influxdb/schema`, and it never names `to()` or `wideTo()`. Any other package, such as `http`, `sql`, `experimental/influxdb` or a notification package, counts as a write that reaches outside the database. A `host:` argument, which reads another server, and a `file:` argument, which reads the server's disk, count as reaching outside without writing. SQL and InfluxQL are read like any SQL: `SELECT ... INTO` writes, `DROP MEASUREMENT` destroys data.
+A Flux script reads when every package it imports only reads, such as `strings`, `date`, `array`, `csv` or `influxdata/influxdb/schema`, and it never names `to()` or `wideTo()`. Any other package, such as `http`, `sql`, `experimental/influxdb` or a notification package, counts as a write that reaches outside the database. A `host:` argument, which reads another server, and a `file:` argument, which reads the server's disk, count as reaching outside without writing. Before running a Flux script, TablePro has the 2.x server parse it and refuses one the server reads as writing or reaching outside where TablePro's own check did not. SQL and InfluxQL are read like any SQL: `SELECT ... INTO` writes, `DROP MEASUREMENT` destroys data.
 
 ## SSL/TLS
 
