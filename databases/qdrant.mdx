@@ -74,7 +74,7 @@ Grid edits are REST requests keyed by `id`, shown in the review sheet before the
 | Edited vector cells | `PUT /collections/{name}/points/vectors`. Setting a vector to NULL sends `POST /collections/{name}/points/vectors/delete` |
 | Deleted row | `POST /collections/{name}/points/delete` |
 
-A cell is written back as the type its column holds: a `keyword` field stays a string even when it reads `42`, and a `bool` field takes `true`, `false`, `1` or `0`. An indexed field that holds lists has the type `json(keyword)` or similar: it takes a JSON list such as `["a", "b"]`, or one value of the index's type. A value that does not fit, such as `4.5` in an `integer` column or a vector that is not a number array, stops the save and names the column. **Truncate** deletes every point with an empty filter and keeps the collection. **Drop** removes the collection.
+A cell is written back as the type its column holds: a `keyword` field stays a string even when it reads `42`, and a `bool` field takes `true`, `false`, `1` or `0`. A column whose points hold different types, such as text in one and a number in another, has the type `json`: its text shows in quotes, and a cell saves as the JSON it spells, so `"42"` stays text and `42` a number. A value that does not fit, such as `4.5` in an `integer` column or a vector that is not a number array, stops the save and names the column. **Truncate** deletes every point with an empty filter and keeps the collection. **Drop** removes the collection.
 
 ## REST editor
 
