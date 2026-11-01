@@ -85,18 +85,29 @@ Each database runs on its own. A failure stops that one and the run carries on, 
     `pg_restore` runs with `--no-owner --no-acl`, so the connection user ends up owning the restored objects. `mongorestore` is scoped with `--nsInclude` to the database picked.
   </Step>
   <Step title="Confirm">
-    The dump is replayed into a database that already has contents. Objects it names are overwritten.
+    Read what the restore does to the objects already in the database, then click **Restore**. Each engine does something different: [Objects already in the database](#objects-already-in-the-database).
   </Step>
   <Step title="Wait it out">
     Restore shows no percentage. **Cancel** confirms and stops the run, and the target database is left as it stands: drop it and restore into a fresh one, or clean up the partial objects yourself.
   </Step>
 </Steps>
 
-No `--clean` is passed, so restoring on top of a schema that already holds conflicting objects produces errors instead of replacing them. A DuckDB restore behaves the same way, and reports the first object whose name is already taken. SQLite stops at the first error, and a dump TablePro wrote is one transaction, so none of it is kept: restore it into an empty database file.
-
 Restore covers the whole file. There is no table picker on the way back in.
 
 A MySQL, MariaDB or SQLite restore runs the file as SQL and nothing else. The client's own commands in it, `source` and `system` for MySQL and MariaDB or `.read` and `.shell` for SQLite, are not run, and `LOAD DATA LOCAL INFILE` is refused.
+
+### Objects already in the database
+
+| Engine | Objects already there | At an error |
+|---|---|---|
+| PostgreSQL, Redshift | Kept, since no `--clean` is passed. The dump's rows go into them, except into a table where a key collides | Carries on, and the restore reports failed at the end |
+| MongoDB | Kept, since no `--drop` is passed. The dump's documents are added, except one whose `_id` is taken | Carries on |
+| MySQL, MariaDB | Dropped and recreated when a TablePro backup names them. The rest are left alone | Stops, and keeps what ran before it |
+| SQLite, libSQL | Kept. A taken key or name is an error, except a table created with a quoted name, which gets the dump's rows | Stops. A dump in one transaction, as every TablePro backup is, keeps none of it. Any other keeps what ran before the error |
+| DuckDB | Kept. A taken name stops the restore before anything is copied | Stops |
+| SQL Server | The import needs an empty database, and stops if this one holds objects | Stops |
+
+Restore a SQLite dump into an empty database file. Every table TablePro creates has a quoted name, so one the file already holds gets the dump's rows beside its own.
 
 ## What a dump carries
 
