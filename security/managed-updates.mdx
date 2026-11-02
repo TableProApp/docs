@@ -3,16 +3,16 @@ title: Managed updates
 description: "Pinning update behavior across a fleet with a configuration profile"
 ---
 
-TablePro reads its update preferences from the `com.TablePro` domain before falling back to the values inside the app. A managed preference written by MDM therefore wins over anything a person picks in **Settings > General**. The switch is not dimmed: it takes the click, and then reads back at the pinned value.
+TablePro reads its update preferences from the `com.TablePro` domain before falling back to the values inside the app. A managed preference written by MDM therefore wins over anything a person picks in **Settings > General**. The control is not dimmed: it takes the click, and then reads back at the pinned value.
 
 Four keys decide the behavior.
 
 | Key | Type | Meaning | Shipped default |
 | --- | --- | --- | --- |
-| `SUEnableAutomaticChecks` | Boolean | Whether the app checks for updates at all. `false` leaves **Check for Updates…** as the only route. | `true` |
+| `SUEnableAutomaticChecks` | Boolean | Whether the app checks for updates at all. `false` leaves **Check Now** and **Check for Updates…** as the only routes. | `true` |
 | `SUAutomaticallyUpdate` | Boolean | Whether a new version downloads and installs on quit without being accepted first. | `true` |
 | `SUScheduledCheckInterval` | Integer | Seconds between checks. `86400` is daily, `604800` weekly. Sparkle clamps anything under one hour. | `86400` |
-| `com.TablePro.updates.receivesBetaUpdates` | Boolean | Whether checks offer [betas](/beta-updates) as well as stable releases. | `false` |
+| `com.TablePro.updates.receivesBetaUpdates` | Boolean | Whether checks offer [betas](/beta-updates) as well as stable releases. `true` is the **Beta** update channel. | `false` |
 
 Pinning `SUAutomaticallyUpdate` on its own does nothing while `SUEnableAutomaticChecks` is `false`. Sparkle derives the install setting from the check setting, so the install never runs and the switch stays dimmed.
 
@@ -46,7 +46,7 @@ Pinning `SUEnableAutomaticChecks` to `false` means security fixes never arrive o
 
 ## What this does not change
 
-**Check for Updates…** still works and still reaches the feed. It is a person asking, not a background check, so no key here suppresses it.
+**Check Now** and **Check for Updates…** still work and still reach the feed. It is a person asking, not a background check, so no key here suppresses it.
 
 Signature checking is not configurable. The feed and every build are verified against the EdDSA public key inside the app before anything installs, and there is no key that turns that off. [Privacy](/security/privacy#update-checks) covers what an update check sends.
 

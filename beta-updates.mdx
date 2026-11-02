@@ -8,11 +8,11 @@ Every new minor version ships as one or more betas before its stable release, su
 ## Getting betas
 
 <Steps>
-  <Step title="Turn on Get beta updates">
-    Open **Settings > General** and, under Software Update, select **Get beta updates**.
+  <Step title="Switch to the Beta channel">
+    Open **Settings > General** and, under Software Update, set **Update channel** to **Beta**.
   </Step>
   <Step title="Check now">
-    Click **Check for Updates…**, or wait for the next daily check. The newest release wins, beta or stable.
+    Click **Check Now**, or wait for the next daily check. The newest release wins, beta or stable.
   </Step>
 </Steps>
 
@@ -20,7 +20,7 @@ Every new minor version ships as one or more betas before its stable release, su
 
 ## Going back to stable
 
-Deselect **Get beta updates**. The beta stays installed, because an update never moves to a lower version. The first stable release above it replaces it: on `0.82.0-beta.2`, that is `0.82.0`.
+Set **Update channel** back to **Stable**. The beta stays installed, because an update never moves to a lower version. The first stable release above it replaces it: on `0.82.0-beta.2`, that is `0.82.0`.
 
 To leave sooner, download the current stable from [Installation](/installation) and install it over the beta. A beta never writes connections or settings that the stable release before it cannot read.
 
@@ -30,4 +30,4 @@ Open an issue on [GitHub](https://github.com/TableProApp/TablePro/issues) with t
 
 ## For administrators
 
-The setting is the `com.TablePro.updates.receivesBetaUpdates` key, which a configuration profile can pin for a fleet. See [Managed updates](/security/managed-updates).
+The channel is the `com.TablePro.updates.receivesBetaUpdates` key, `true` for Beta, which a configuration profile can pin for a fleet. See [Managed updates](/security/managed-updates).
