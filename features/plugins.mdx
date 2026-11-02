@@ -71,7 +71,7 @@ Every plugin is verified before it loads. A registry download must match the SHA
 Registry plugins follow the app. After a TablePro update, each plugin installed from the registry with an older build than the app is fetched again at launch:
 
 - A plugin that is not loaded, such as one rejected after the update, installs and loads at once.
-- A plugin that is loaded downloads in the background and replaces the old one the next time TablePro starts. Its row in **Settings > Extensions** reads "Updates when TablePro restarts" until then.
+- A plugin that is loaded downloads in the background and replaces the old one the next time TablePro starts. Its row in **Settings > Extensions** reads "Updates when TablePro relaunches" until then. **Relaunch to Update**, in a connection window's title bar, loads it now.
 
 Offline, the check waits and runs once the Mac is back online. If the registry has no newer build yet, the check tries again in the background, on the schedule in [A plugin will not install or load](/troubleshooting#a-plugin-will-not-install-or-load). Connecting to a database whose plugin is outdated checks again first.
 
@@ -82,7 +82,7 @@ An app update can raise the plugin interface version. A plugin built for an olde
 | Action | Meaning |
 |--------|---------|
 | **Update Now** | A compatible build is in the registry. One click installs it. |
-| **Update TablePro** | The plugin requires a newer app version. |
+| **Check for Updates…** | The plugin requires a newer app version. Once one is found or downloaded, the button reads **Update Available…** or **Relaunch to Update**, as the app menu does. |
 | No button | No compatible build is published yet. The update check keeps trying. |
 | **Remove** | Deletes the rejected plugin from disk. |
 
@@ -93,7 +93,7 @@ In **Settings > Extensions**:
 - **Uninstall** removes a user-installed plugin from disk. Bundled plugins cannot be uninstalled.
 - The detail pane shows version, bundle ID, capabilities, database type, and default port. Plugins with their own settings show them here.
 
-macOS cannot fully unload a plugin's code until relaunch, so a banner offers **Quit & Reopen** after you remove one.
+macOS cannot fully unload a plugin's code, so removing one leaves a banner: "Relaunch TablePro to finish removing plugins." **Relaunch** quits, reopens your last session, and installs an app update that already downloaded.
 
 Saved connections survive a removal. A connection whose driver cannot load stays in the list, and opening it lands on "Could not connect" with the button for the cause:
 

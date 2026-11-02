@@ -36,7 +36,7 @@ The JSON body holds these fields and no others:
 | `update_install_mode` | how updates install: `automatic`, `notify`, or `off` |
 | `update_check_interval` | seconds between update checks, absent when checks are off |
 
-The **Get beta updates** switch is not in the body. A beta build shows only in `app_version`, which then reads like `0.82.0-beta.1`.
+The **Update channel** setting is not in the body. A beta build shows only in `app_version`, which then reads like `0.82.0-beta.1`.
 
 No query text. No hostnames, ports, database names, or usernames. No email address, no file paths, no connection names.
 
@@ -110,11 +110,11 @@ Every call is written to the local activity log with the token behind it, statem
 
 ## Update checks
 
-Sparkle fetches `https://updates.tablepro.app/appcast.xml` once a day, and once for every **Check for Updates…** you press. It is a plain `GET` with no query parameters: system profiling is off, so nothing about your Mac rides along. The user agent names the app and its version, and GitHub Pages, which hosts the feed, sees your IP address as it would for any web request. **Get beta updates** sends nothing extra: the one feed lists stable releases and betas, and your Mac picks between them. Versions without **Get beta updates** fetch `https://raw.githubusercontent.com/TableProApp/TablePro/main/appcast.xml` instead.
+Sparkle fetches `https://updates.tablepro.app/appcast.xml` once a day, and once for every check you start with **Check Now** or **Check for Updates…**. It is a plain `GET` with no query parameters: system profiling is off, so nothing about your Mac rides along. The user agent names the app and its version, and GitHub Pages, which hosts the feed, sees your IP address as it would for any web request. The **Beta** channel sends nothing extra: the one feed lists stable releases and betas, and your Mac picks between them. Versions up to 0.81 fetch `https://raw.githubusercontent.com/TableProApp/TablePro/main/appcast.xml` instead.
 
 Updates download from the GitHub release named in the feed. Sparkle checks the feed's EdDSA signature, and each build's, against the public key inside the app, and refuses either one that does not match before it unpacks anything.
 
-**Automatically check for updates** in **Settings > General** is on by default. With it off, **Check for Updates…** in the same section is the only thing that reaches the feed.
+**Automatically check for updates** in **Settings > General** is on by default. With it off, only a check you start reaches the feed: **Check Now** in the same section, or **TablePro > Check for Updates…**.
 
 **Download and install updates automatically** is also on by default, so a new build downloads without being accepted first and installs when TablePro quits. The download is the same signed archive from the same GitHub release, and nothing is sent to fetch it. Turn it off to be asked each time.
 
