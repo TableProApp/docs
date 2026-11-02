@@ -91,7 +91,7 @@ Press `Ctrl+Cmd+C` for **Switch Connection**. Whatever is already open sits at t
 
 Switching leaves the query tab you were in on its own connection. To take it with you, press `Ctrl+Option+Cmd+C` for **Move Tab to Connection…** instead. See [Moving a query tab to another connection](/features/tabs#moving-a-query-tab-to-another-connection).
 
-A footer under that list names the transport the window's connection runs on. On an SSH tunnel or a SOCKS proxy it also carries the bytes that have crossed since the transport opened, received and sent, with the current rate beside each direction while something is moving.
+A footer under that list names the transport the window's connection runs on. On an SSH tunnel or a SOCKS proxy it also carries the bytes that have crossed since the transport opened, received and sent, with the current rate beside each direction while something is moving. While the connection is connecting, reconnecting or lost, the footer shows that state in place of the byte counts.
 
 The rest show their name alone. Cloudflare Tunnel, Cloud SQL Auth Proxy and Tunnel Command each run a separate binary that holds the connection end to end, a [remote database file](/connections/remote-database-files) is fetched once and then read from disk, and a direct connection's socket belongs to the database driver.
 
@@ -103,6 +103,18 @@ The rest show their name alone. Cloudflare Tunnel, Cloud SQL Auth Proxy and Tunn
 </Frame>
 
 Leaving **Database** empty on MySQL, MariaDB, MongoDB, SQL Server, and ClickHouse browses every database the user can reach. PostgreSQL and Redshift need one to connect at all: use `postgres` (Redshift: `dev`) and switch with `Cmd+K`. System databases such as `mysql`, `information_schema` and `master` sit at the end of the switcher under **System**. To hide the rest, choose **View > Filter Databases** and select the ones you want; the choice is saved per connection and never hides a system database from the switcher. **View > Filter Schemas** does the same for the schemas of the database you are in. See [Filtering schemas](/features/connection-window#filtering-schemas).
+
+## When a connection drops
+
+A tunnel or proxy that dies under a connection, or a server that stops answering the [health check](/connections/connection-form#connection-health), leaves the tabs and their rows on screen. A bar above them reads **Reconnecting to \<name\> (1 of 10)** with the cause underneath, such as **SSH tunnel disconnected.**, and the count goes up with each try.
+
+The first try comes 2 seconds after the drop, then 4 and 8, doubling to 2 minutes between tries: 10 tries in about 10 minutes. **Cancel** on the bar stops the tries at once. When the tries run out, or you cancel, the pane reads **Disconnected from \<name\>** with the reason and a **Reconnect** button, and the tabs come back once it connects.
+
+Waking the Mac from sleep checks the tunnel of every open connection, and each one that died reconnects alongside the others rather than in turn.
+
+The connections strip, the welcome window and the connection switcher mark a reconnecting connection with a spinner and a lost one with a crossed-out bolt. [Connection state](/features/workspace-rail#connection-state) lists every mark. Hover one to read the cause.
+
+On the strip's right-click menu and in the **Database** menu, the connection command follows the state: **Connect**, **Reconnect**, **Stop Connecting** or **Stop Reconnecting**. The welcome window's right-click menu offers **Reconnect** for a lost connection and **Connect** for the rest. **Disconnect** stays on all three menus while a connection reconnects or is lost, and ends it without waiting for the next try.
 
 ## Edit, delete, and where it all lives
 
