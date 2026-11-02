@@ -1,6 +1,6 @@
 ---
 title: iPhone and iPad
-description: Browse tables, run queries, and edit rows on twelve database engines from a synced connection list
+description: Browse tables, run queries, and edit rows on thirteen database engines from a synced connection list
 ---
 
 You need iOS 18 or later. Builds ship on their own schedule, so a feature in a Mac release note may not be on your phone yet. Your version and build are under **Settings > About**. Connections and saved queries from a Mac come over iCloud; the rest of your Mac setup stays on the Mac.
@@ -28,7 +28,7 @@ Both answers can change later, under **Settings > iCloud** and **Settings > Priv
 
 ## Supported databases
 
-Every driver is compiled in, so there is no plugin system and nothing to install. The type picker offers these twelve:
+Every driver is compiled in, so there is no plugin system and nothing to install. The type picker offers these thirteen:
 
 | Type | Notes |
 | --- | --- |
@@ -39,6 +39,7 @@ Every driver is compiled in, so there is no plugin system and nothing to install
 | **SQL Server** | TDS, including Microsoft Entra ID sign-in on a connection synced from the Mac |
 | **Oracle** | Service name or SID |
 | **ClickHouse** | Port 8123 by default, the HTTP interface |
+| **Cloudflare D1** | No host or port: an **Account ID** and an **API Token**, then pick the database from the account |
 | **MongoDB** | Port 27017 by default. **Hosts** takes every server of a replica set |
 | **Redis** | Port 6379 by default |
 | **SQLite** | Copies the file you pick into the app |
@@ -93,7 +94,7 @@ Four things a connection depends on are per device and never sync:
 | A jump host's key file | The hop under **Jump Hosts** reads **No key on this device** | Open the hop and pick or paste its key, or turn on **Same Key as SSH Server** |
 | SQLite and DuckDB files | Opening one says the file isn't available on this device | Edit the connection and pick the file here |
 
-Passwords are a separate opt-in, off by default, at **Settings > iCloud > Sync Passwords**. They ride iCloud Keychain and only new saves are affected, so re-save a password on the Mac to push it across. A private key saved on this device, a jump host's included, follows the same setting: with **Sync Passwords** on, iCloud Keychain copies the key to your other iPhones and iPads, which use it, and to your Mac, which does not. Pull down on the connection list to sync now; a background refresh runs about every 30 minutes.
+Passwords, a Cloudflare D1 API token included, are a separate opt-in, off by default, at **Settings > iCloud > Sync Passwords**. They ride iCloud Keychain and only new saves are affected, so re-save a password on the Mac to push it across. A private key saved on this device, a jump host's included, follows the same setting: with **Sync Passwords** on, iCloud Keychain copies the key to your other iPhones and iPads, which use it, and to your Mac, which does not. Pull down on the connection list to sync now; a background refresh runs about every 30 minutes.
 
 When a sync cannot finish, the connection list and **Settings > iCloud** name the reason, and changes made meanwhile wait on the device. For **iCloud Storage Is Full**, open the Settings app, tap your name, then tap **iCloud**, and free up space or add storage. The upload is tried again after 5 minutes, then twice as long each time up to an hour; pull down on the list to try at once. For **TablePro Data Was Removed from iCloud**, choose **Upload Again** to send everything on the device back up, or **Turn Off iCloud Sync** to keep it here only.
 
@@ -264,7 +265,7 @@ A connection that drops with a transaction open reconnects and says the server r
 
 ## What is missing
 
-- **Schema changes.** Truncating and dropping a table is the whole list; creating or altering tables, columns, indexes, triggers, and views is Mac only.
+- **Schema changes.** Truncating and dropping a table is the whole list; creating or altering tables, columns, indexes, triggers, and views is Mac only, and so is creating or dropping a Cloudflare D1 database.
 - **Changing Redis data.** Keys open read only; change them in **Query**.
 - **Whole MongoDB documents.** **Edit Document…**, **Insert Document…** and renaming or removing a field are Mac only; edit field by field here, or use **Query**.
 - **Socket connections.** A MySQL or MariaDB connection that uses a socket on the Mac opens there only. The connection list shows **Mac socket** and the path, marked **Opens on Mac only**, and a tap says why. Importing a `.tablepro` file marks such a row the same way. Its socket path syncs here and back intact.
