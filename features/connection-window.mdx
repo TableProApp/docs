@@ -174,6 +174,19 @@ The ellipsis at the trailing end holds that surface's own commands: **Fields** a
 
 `Cmd+Option+I` opens and closes the pane, and `Cmd+Option+A` swaps an open inspector for the assistant rather than closing the column. **View > Show Inspector** and **View > Show Assistant** are the same two, each reading **Hide** once its surface is on screen.
 
+## Work still running
+
+Quit, **Relaunch to Update**, closing a window, a connection or a tab, and Disconnect each check for work still running there and ask once, in one alert that lists it:
+
+- a query run from an editor tab
+- a restore, backup, import, export, table transfer or object copy
+- an agent reply, including one waiting for your answer
+- a comparison or a sync script in Compare & Sync
+
+**Quit Anyway**, **Relaunch Anyway**, **Close Anyway** or **Disconnect Anyway** stops each item on the list. **Cancel**, or Escape, keeps everything running. Quitting lists unsaved tabs on the same alert, and closing or disconnecting lists an open transaction there. When you close a window or a connection, unsaved edits still get **Do you want to save changes?** after it.
+
+A stopped restore can leave the database partly restored, and a stopped sync script keeps the statements it already ran.
+
 ## Related
 
 - [Query Tabs](/features/tabs) for the strip under the toolbar and what a tab is bound to

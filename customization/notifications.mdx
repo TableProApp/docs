@@ -17,19 +17,24 @@ You only get told when the result is somewhere you are not. That means TablePro 
 | **Notify when long-running work finishes** | On | Every kind of work below |
 | **Only after** | 20 seconds | How long work has to run to count: 5, 10, 20 or 30 seconds, or 1, 2, 5 or 10 minutes |
 
-The kinds that count: editor queries including Explain, Execute All Statements as one notification for the batch, saving edited rows, structure changes, imports, exports, Copy To and Duplicate Database, database dumps, fetching every row of a truncated result, and queries an AI assistant, an MCP client or [a script](/developers/applescript) runs.
+The kinds that count: editor queries including Explain, Execute All Statements as one notification for the batch, saving edited rows, structure changes, imports, exports, Copy To and Duplicate Database, database dumps and restores, comparisons and sync scripts from [Compare & Sync](/features/compare-sync), fetching every row of a truncated result, and queries an AI assistant, an MCP client or [a script](/developers/applescript) runs.
+
+Two more ignore **Only after**, because they need you rather than report a result:
+
+- An [agent session](/features/agent-mode) that is waiting for your answer, or whose reply failed, while it is not on screen. Answering removes the notification, and clicking it opens the session.
+- A [plugin](/features/plugins) update that failed in the background.
 
 Keep **Only after** below the [query timeout](/customization/general-settings#query-timeout), or a query that times out finishes before its notification is due.
 
 ## What a notification carries
 
-The connection name is the title, the database is the subtitle, and the body is the outcome with a duration: "1,204 rows in 3m 12s", or "Failed after 2m 45s" with the reason. A failure adds a **Copy Error** button, and anything that wrote a file adds **Show in Finder**. Clicking the notification brings TablePro forward on the tab that ran the work.
+The connection name is the title, the database is the subtitle, and the body is the outcome with a duration: "1,204 rows in 3m 12s", or "Failed after 2m 45s" with the reason. A failure adds a **Copy Error** button, and anything that wrote a file adds **Show in Finder**. Clicking the notification brings TablePro forward on the tab that ran the work, or on the Compare & Sync window for a comparison.
 
 Banners group by connection. Re-running the same kind of work in the same tab replaces that tab's earlier banner instead of stacking a second one.
 
-## The tab dot
+## The tab mark
 
-A tab whose work finished while you were looking elsewhere carries a dot beside its name until you select it. That dot is not a notification: it appears whatever the settings say, and whether or not you ever granted permission.
+A tab whose work finished while you were looking elsewhere carries a mark beside its name until you select it: a checkmark when the work succeeded, a red triangle when it failed. The mark is not a notification: it appears whatever the settings say, and whether or not you ever granted permission.
 
 ## Permission
 
