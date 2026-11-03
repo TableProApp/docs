@@ -62,6 +62,8 @@ A registry plugin installs where you need it:
 - A `.duckdb` file opened from Finder, which asks for the DuckDB driver.
 - **Install Parquet Export…** at the end of the format menu in the Export dialog. Parquet is selected once the download finishes.
 
+A sheet shows the download and then the install. **Cancel**, or Escape, stops the download and leaves nothing behind; once the install step starts it runs to the end. **Settings > Extensions** shows the same install at the bottom of the list, with its own **Cancel**.
+
 On a Mac with no network, install from a file: drag a `.tableplugin` or `.zip` onto **Settings > Extensions**, or click the **+** button there. A file for a plugin that is already loaded replaces it the next time TablePro starts. User-installed plugins live in `~/Library/Application Support/TablePro/Plugins`.
 
 Every plugin is verified before it loads. A registry download must match the SHA-256 checksum in the registry manifest, and the bundle must be signed by TablePro. A bundle signed by anyone else, ad-hoc signed or unsigned is refused, with no override.
@@ -71,7 +73,9 @@ Every plugin is verified before it loads. A registry download must match the SHA
 Registry plugins follow the app. After a TablePro update, each plugin installed from the registry with an older build than the app is fetched again at launch:
 
 - A plugin that is not loaded, such as one rejected after the update, installs and loads at once.
-- A plugin that is loaded downloads in the background and replaces the old one the next time TablePro starts. Its row in **Settings > Extensions** reads "Updates when TablePro relaunches" until then. **Relaunch to Update**, in a connection window's title bar, loads it now.
+- A plugin that is loaded downloads in the background and replaces the old one the next time TablePro starts. Its row in **Settings > Extensions** reads **Downloading update…** while it runs and "Updates when TablePro relaunches" after. **Relaunch to Update**, in a connection window's title bar, loads it now.
+
+An update that fails stays on the plugin's row with the reason, **Try Again** and **Dismiss**, and posts a notification when **Settings > Notifications** has notifications on.
 
 Offline, the check waits and runs once the Mac is back online. If the registry has no newer build yet, the check tries again in the background, on the schedule in [A plugin will not install or load](/troubleshooting#a-plugin-will-not-install-or-load). Connecting to a database whose plugin is outdated checks again first.
 
