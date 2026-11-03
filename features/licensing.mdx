@@ -11,10 +11,10 @@ There are two tiers, Starter and Team. Team includes everything in Starter.
 
 | Feature | Required tier | Without a license |
 |---------|---------------|-------------------|
-| [iCloud Sync](/features/icloud-sync) | Starter | Dimmed, with a **STARTER** badge |
-| [Encrypted connection export](/features/connection-sharing) | Starter | Dimmed, with a **STARTER** badge |
+| [iCloud Sync](/features/icloud-sync) | Starter | Dimmed, with a row naming the plan and **Activate License…** |
+| [Encrypted connection export](/features/connection-sharing) | Starter | Dimmed, with a row naming the plan and **Activate License…** |
 | [Environment variables in connection fields](/features/connection-sharing) | Starter | References stay unresolved |
-| [Linked Folders](/features/connection-sharing) | Starter | Dimmed, with a **STARTER** badge |
+| [Linked Folders](/features/connection-sharing) | Starter | Dimmed, with a row naming the plan and **Activate License…** |
 | [Query Insights](/features/query-insights) | Starter | Overlay with **Activate License…** |
 | [Result charts](/features/data-grid#chart-mode) | Starter | Overlay with **Activate License…** |
 | [Compare & Sync](/features/compare-sync) | Starter | Dialog naming the requirement |
@@ -24,7 +24,7 @@ There are two tiers, Starter and Team. Team includes everything in Starter.
 
 **Settings > License** lists these features under **Starter Plan** and **Team Plan** and marks each plan your license includes. On a Starter license, **Upgrade Plan** sits beside **Team Plan**. Everything else in the app works.
 
-Click a badge for the pricing page, or hover it for one line on what the feature does.
+The **Activate License…** dialog also links to the pricing page. A license you already hold never gets that offer: every gate says what the top of **Settings > License** says for its state, so an expired license offers **Renew License**, a suspended one says so, and one that has not reached the server in 30 days offers **Try Again**.
 
 ## Buy a license
 
@@ -53,7 +53,7 @@ It waits out the first five minutes after launch and any running query, and appe
 
 Open **Settings > License** (`Cmd+,`), paste your license key (`XXXXX-XXXXX-XXXXX-XXXXX-XXXXX`), and click **Activate**.
 
-The welcome window has an **Activate License** link to the same dialog until a license is active. When the license has not been checked in 30 days, an orange **Starter** or **Team** badge takes its place; the link does not come back, because activating again cannot help a Mac that is offline. The field also takes a team invite code, which TablePro tells apart from a key on its own. See [Team Plan](/features/team).
+Without a license, the welcome window has an **Activate License** link to the same dialog. With one, the link names the license's state whenever the pane would: **License Expiring Soon** and **License Expired** open the renewal page, **Could Not Check This License** opens **Settings > License** and checks again, and **License Suspended** or **License Removed** opens the pane. The field also takes a team invite code, which TablePro tells apart from a key on its own. See [Team Plan](/features/team).
 
 <Frame caption="Settings > License with a license active">
   <img className="block dark:hidden" src="/images/license-settings.png" alt="A license pane listing email, a masked key, plan and expiry above a list of activated Macs" />
@@ -83,7 +83,7 @@ Activation stores a signed license on your Mac, and the license key goes to the 
 - If the server is unreachable, the license keeps working for 30 days after the last successful validation. After that the pane says **Could Not Check This License** and offers **Try Again**, and paid features pause until a validation succeeds. Nothing in that state asks for a license key: the way out is a working connection.
 - If the server answers that the license is suspended, expired, or no longer activated on this Mac, paid features pause at that check. The 30-day grace period only covers a server TablePro could not reach.
 
-**Refresh** in **Settings > License** re-validates with the server and reloads the device list, and a gated screen offers **Retry Validation**. Inside the last week before expiry, the pane carries a renewal notice linking to tablepro.app.
+**Refresh** in **Settings > License** re-validates with the server and reloads the device list, and a gated screen or row offers **Try Again**. When a check cannot reach the server, the reason shows under the button and stays until a check succeeds. Inside the last week before expiry, the pane carries a renewal notice linking to tablepro.app.
 
 ## What syncs
 
