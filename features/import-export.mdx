@@ -316,8 +316,6 @@ The import runs on the connection's own session, and afterwards puts back the se
 
 On SQL Server a file that holds a `GO` line runs a batch at a time, cut at its `GO` lines the way `sqlcmd` cuts it, so every count and failure here is a batch rather than a statement. A file with no `GO` line runs a statement at a time. See [Scripts and batches](/databases/mssql#scripts-and-batches).
 
-**Stop** in the progress sheet asks first. It says the import rolls back when the import runs in its own transaction, every target table rolls back, and nothing has committed yet. Otherwise it says what was already imported may stay. That covers MyISAM tables, a transaction you opened yourself, an engine without transactions, and a SQL file on MySQL, MariaDB or SQL Server, where `CREATE`, `ALTER`, `DROP` or a `GO` batch can commit on its own.
-
 Skip and Continue collects up to 1,000 failures with their line numbers and messages, and the summary counts successes against failures behind a **Copy Details** button. **Save Report…** writes them all to a CSV with a line, a statement and the database's own error per row, so a large import's failures can be sorted and searched rather than scrolled. A stop shows the line, the database's own message, and the failing statement, with the dialog still open behind it, ready for a changed setting and another run. The alert shows the first 10,000 characters of a longer statement and the first five errors of a batch that raised more, and **Copy Details** copies all of them.
 
 ### Disabling foreign key checks
