@@ -6,8 +6,8 @@ description: Sync connections, groups, tags, and saved queries to your Macs, iPh
 Sync needs a Starter or Team [license](/features/licensing) and starts off. Press `Cmd+,`, open **Settings > Sync**, turn on **Sync this Mac with iCloud**, pick the categories, and click **Sync Now**. The iPhone and iPad app shares the same CloudKit data but carries connections, groups, tags, and saved queries only.
 
 <Frame caption="iCloud Sync settings">
-  <img className="block dark:hidden" src="/images/settings-sync.png" alt="Sync pane with the Sync this Mac with iCloud switch and its Starter badge" />
-  <img className="hidden dark:block" src="/images/settings-sync-dark.png" alt="Sync pane with the Sync this Mac with iCloud switch and its Starter badge" />
+  <img className="block dark:hidden" src="/images/settings-sync.png" alt="Sync pane with the Sync this Mac with iCloud switch dimmed above a row that names the plan and offers Activate License" />
+  <img className="hidden dark:block" src="/images/settings-sync-dark.png" alt="Sync pane with the Sync this Mac with iCloud switch dimmed above a row that names the plan and offers Activate License" />
 </Frame>
 
 ## What syncs
@@ -49,11 +49,11 @@ When the same connection changed on two devices, TablePro merges field by field,
 
 ## Troubleshooting
 
-A condition that a retry cannot clear shows as a notice at the top of **Settings > Sync**, with the action that clears it. While it lasts, edits stop going up on every change: they wait on this Mac, and nothing local is deleted.
+A condition that a retry cannot clear shows as a notice at the top of **Settings > Sync**, with the action that clears it. Its title also shows as a link on the welcome window that opens the pane, except **iCloud Is Not Ready**, which clears by itself. While it lasts, edits stop going up on every change: they wait on this Mac, and nothing local is deleted.
 
 ### iCloud Storage Is Full
 
-Every upload fails, deletions included, until iCloud has room. Changes from your other devices still arrive. Click **Manage Storage…**, or open **System Settings**, click your name, then click **iCloud**, and free up space or add storage. The upload is tried again after 5 minutes, then twice as long each time up to an hour; click **Sync Now** to try at once.
+Every upload fails, deletions included, until iCloud has room. Changes from your other devices still arrive. Click **Manage Storage…**, or open **System Settings**, click your name, then click **iCloud**, and free up space or add storage. The upload is tried again after 5 minutes, then twice as long each time up to an hour; click **Try Again** in the notice to try at once.
 
 ### Not Signed In to iCloud
 
@@ -69,7 +69,7 @@ Screen Time or a device management profile does not allow iCloud on this Mac. Sy
 
 ### TablePro Data Was Removed from iCloud
 
-TablePro's data is no longer in iCloud, most often because it was deleted under **Manage Storage**. Nothing uploads until you choose: **Upload Again** sends everything on this Mac back up, and **Turn Off Sync** keeps it on this Mac only. If another device uploads first, this Mac picks that up and syncs normally again.
+TablePro's data is no longer in iCloud, most often because it was deleted under **Manage Storage**. Nothing uploads until you choose: **Upload Again** sends everything on this Mac back up, and **Turn Off iCloud Sync** keeps it on this Mac only. If another device uploads first, this Mac picks that up and syncs normally again.
 
 ### Update Required
 
@@ -91,6 +91,6 @@ iCloud refused the changes counted under **Sync Now** and accepted the rest. The
 
 Signing in to a different iCloud account starts sync over for that account: the next sync is a full fetch rather than a delta, and changes waiting on this Mac go to the new account. Expect the first sync to take longer.
 
-When a license expires, sync stops and local data stays where it is. Re-activate to resume.
+When a license expires, sync stops and local data stays where it is. The switch dims, and the row under it offers **Renew License**.
 
-A license TablePro has not been able to check for 30 days pauses sync separately, under **Sync Paused** rather than **Sync Off**. Click the indicator, or **Check Again** in **Settings > Sync**, to try the server again. Local data stays where it is either way.
+A license that has not reached the license server in 30 days pauses sync the same way. The row under the switch says **Could Not Check This License** and offers **Try Again**; a check that fails again says why under the button.
