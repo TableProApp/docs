@@ -21,6 +21,8 @@ Each row has a drag grip, a checkbox, a column picker, an operator, a value fiel
 | Row grip, or right-click > **Move Up** / **Move Down** | Reorders the list. Order never changes the result |
 | ⋯ > **Remove All Filters** | Deletes every saved row for this table |
 
+An edit to a row waits for **Apply** or `Enter`. Until then, turning a page, sorting, refreshing or counting rows reruns the filter that last ran, not the edited rows.
+
 Filters are saved per connection, database, schema, and table, and survive a relaunch, unchecked rows and rows you never applied included. **Clear** keeps the rows and stops filtering, so they come back when you reopen the table. A table with an active filter opens in a new tab rather than replacing the current one.
 
 <Info>
@@ -64,7 +66,7 @@ Eighteen of them, and the menu shows the SQL each one produces.
 
 ## Case sensitivity
 
-Contains, not contains, starts with, and ends with ignore case. Equals, not equals, IN, NOT IN, and regex respect it. Open the operator menu and use **Match Case** to flip either one for that row; an `Aa` badge marks a row that is not on its usual setting.
+Contains, not contains, starts with, and ends with ignore case. Equals, not equals, IN, NOT IN, and regex respect it. Open the operator menu and use **Match Case** to flip either one for that row; an `Aa` badge marks a row that is not on its usual setting. Picking another operator returns the row to that operator's usual setting.
 
 <Info>
 On MySQL, MariaDB, SQL Server, SQLite, libSQL, and Cloudflare D1 the column's collation decides, and no query can override it, so **Match Case** is dimmed. Their default collations already ignore case. Cassandra and Redis have no case-insensitive matching at all, so it is dimmed there too.
@@ -113,17 +115,23 @@ Rows sharing an array and set to **same element** group together, and **Match al
 
 ## Raw SQL
 
-A new row starts in raw SQL, unless **Default Column** in the settings says otherwise, and picking a column from its picker switches it to column mode. Type any WHERE condition:
+A new row starts in raw SQL, unless **Default Column** in the settings says otherwise. Type one WHERE condition:
 
 ```sql
 created_at > NOW() - INTERVAL 7 DAY
 ```
 
-Autocomplete offers the table's columns and SQL keywords, after AND and OR included, on the same rules as the [query editor](/features/autocomplete): a typed character opens it, so does a dot and a `::` cast, and a position where the whole column list would be noise stays shut. Nothing in the list is selected until `Up` or `Down` selects it, so `Return` applies the filter. Once a suggestion is selected, `Return` or `Tab` inserts it. `Escape` dismisses the list without closing the filter bar. On a database that does not speak SQL the row is labeled **Raw Filter** and takes that database's own syntax: on MongoDB, a filter document such as `{"customer.country": "US"}`.
+One condition means no comment, no second statement, and every quote and parenthesis closed. **Apply** refuses anything else with `A raw SQL filter must be one condition: no comment, no second statement, and every quote and parenthesis closed.` and the rows on screen stay as they were.
 
 <Warning>
-The text goes into the WHERE clause as written. A condition whose syntax does not match the database fails the query.
+A condition that passes that check runs as written. Syntax the database does not accept fails the query.
 </Warning>
+
+Autocomplete offers the table's columns and SQL keywords, after AND and OR included, on the same rules as the [query editor](/features/autocomplete): a typed character opens it, so does a dot and a `::` cast, and a position where the whole column list would be noise stays shut. Nothing in the list is selected until `Up` or `Down` selects it, so `Return` applies the filter. Once a suggestion is selected, `Return` or `Tab` inserts it. `Escape` dismisses the list without closing the filter bar.
+
+The column picker moves a row between raw SQL and a column, or from one column to another, and the text stays exactly as you typed it. Type `paid` into a new row, then pick `status`, and the row compares `status` with `paid`.
+
+On a database that does not speak SQL the row is labeled **Raw Filter** and takes that database's own syntax: on MongoDB, a filter document such as `{"customer.country": "US"}`. etcd, DynamoDB, Memcached, Weaviate, InfluxDB and Kafka have no raw row, and [Kafka](/databases/kafka#limitations) cannot filter a topic at all.
 
 ## Presets and settings
 

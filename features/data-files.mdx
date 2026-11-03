@@ -41,7 +41,9 @@ When a guess is wrong, choose **Edit > Data > File Properties…** to set the de
 
 ## Filter, search and sort
 
-`Cmd+Shift+F` shows the filter bar. It is the filter bar a table tab uses, run over the file instead of a database: all 18 operators, **Match all** or **Match any**, a checkbox per row, **Match Case**, and saved presets. It has no raw SQL row. See [Filtering](/features/filtering) for how each operator reads a value.
+`Cmd+Shift+F` shows the filter bar. It is the filter bar a table tab uses, run over the file instead of a database: all 18 operators, **Match all** or **Match any**, a checkbox per row, **Match Case**, and saved presets. See [Filtering](/features/filtering) for how each operator reads a value.
+
+There is no raw SQL row to add, but presets are shared with table tabs, so a preset can bring in a raw SQL row or a row on a column the file lacks. **Apply** refuses either one with `This file cannot filter rows with these conditions.` in the status bar, and the rows stay as they were. Delete that row, or pick one of the file's columns for it. A running filter stops with the same message when the file no longer has its column, after switching the header row for instance.
 
 A comparison is numeric whenever the cell and the value both read as numbers, so `> 50` keeps `100` and drops `9`. Anything else compares as text. A CSV cell is never NULL, so **is NULL** matches nothing and **is empty** matches blank cells. In JSON, a `null` value and a missing key are both NULL.
 
