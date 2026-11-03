@@ -1,0 +1,92 @@
+---
+title: HydraDB
+description: Connect over Bolt, browse graph entities, and export their properties
+---
+
+import RegistryPlugin from "/snippets/registry-plugin.mdx";
+
+Enter the server's token in the password field and use a nonempty username. The database field selects the graph or scoped database alias provided by the server operator.
+
+## Quick setup
+
+Open **New Connection…**, select **HydraDB**, and enter the server host and Bolt port. The default port is `7687`.
+
+<RegistryPlugin name="HydraDB" plugin="HydraDB Driver" />
+
+Use a server build with native Bolt node and relationship results, `RETURN 1`, `db.labels()` and `db.relationshipTypes()`. The minimum released server version is pending [HydraDB's compatibility change](https://github.com/hydra-db/hydradb/issues/297). Earlier servers accept scalar queries but cannot supply the browser's entity results and metadata.
+
+## Connection settings
+
+| Field | Value |
+|---|---|
+| **Host** | The server host name |
+| **Port** | The Bolt port, default `7687` |
+| **Username** | Any nonempty username accepted by the deployment |
+| **Password** | The server's bearer token |
+| **Database** | Optional. Empty selects `default`; enter a scoped alias to open another graph |
+
+Database switching is unavailable within a connection. Create a separate connection for each database or scoped alias; tabs remain bound to that connection.
+
+## Connection URL
+
+Create the connection from the database picker. Connection URLs are not registered for this driver.
+
+## Authentication
+
+Obtain the token and database alias from the server operator. Access follows the server's credential and scope policy. A Bolt read routing hint does not grant or restrict permissions.
+
+## Nodes and relationships
+
+The sidebar groups node labels under **Labels** and relationship types under **Relationship Types**. Opening a label shows `<id>`, the node's opaque element id, and `<labels>`, its complete label list. Other columns are properties.
+
+A relationship row has `<id>`, `<start>` and `<end>`, followed by properties. Parallel relationships keep distinct element ids. Treat every element id as an opaque string.
+
+Column discovery samples the first 1,000 entities. Loading a page adds property keys found on that page. An absent property appears as an empty cell.
+
+Property filters support case-sensitive `=`, `<>`, `<`, `<=`, `>`, `>=` and `STARTS WITH`. Numeric and boolean comparisons use their column types. Unsupported operators and filters on graph identity columns report an error. Run a supported Cypher query in the editor for other selections.
+
+## Cypher and export
+
+Run one statement at a time. Whole entity results retain their labels or relationship type, endpoint identities and properties.
+
+```cypher
+MATCH (n:Person) RETURN n ORDER BY elementId(n) LIMIT 100
+MATCH ()-[r:FOLLOWS]->() RETURN r, elementId(r)
+```
+
+Export reads the whole label or relationship type to collect property names, then streams the selected rows. This preserves properties that occur after the column-discovery sample. If a new property appears between those reads, the export fails with a retry message. See [Import and Export](/features/import-export).
+
+## SSL/TLS
+
+SSL starts at **Disabled**, with no TLS fallback. Use **Verify Identity** for a deployed server to check its certificate and host name. **Verify CA** checks the certificate chain without checking the host name; **Required** encrypts without certificate verification. **Preferred** retries without TLS when negotiation fails.
+
+The [SSH tunnel](/connections/ssh-tunneling) and [SSL/TLS](/connections/ssl) settings use the connection's server host name when verifying a tunneled server.
+
+## Limitations
+
+- The grid and structure are read-only. Change data with supported Cypher in the editor.
+- Schema DDL, index metadata, views, import and explicit transactions are unavailable. See [server operations](https://github.com/hydra-db/hydradb/blob/main/USING-HYDRADB.md) for the supported administration interfaces.
+- Cluster routing and writer failover are not followed. Connect directly to the endpoint selected by the server operator; clustered writes require a routing-aware client.
+- Health checks and browsing require the server compatibility change linked in **Quick setup**. Use that build before connecting.
+- Read-only mode is not advertised as a server permission guarantee. Configure restricted credentials on the server.
+- Safe Mode conservatively treats statements as writes, including reads. Review the statement when prompted.
+
+## Troubleshooting
+
+### row execution supports MATCH ... RETURN queries
+
+The server rejected the health query. Check that its build includes standalone `RETURN` support. Upgrade to the compatible build.
+
+### This filter or sort is not supported by HydraDB.
+
+The selected grid operation is outside the driver's supported subset. Check the operator and column. Use a supported property filter or write the selection in Cypher.
+
+### Properties changed during export. Retry the export.
+
+A property absent from the discovery pass appeared during row streaming. Check for concurrent graph changes. Retry after those writes finish.
+
+## Related
+
+- [Safe Mode](/features/safe-mode)
+- [Import and Export](/features/import-export)
+- [HydraDB Cypher support](https://github.com/hydra-db/hydradb/blob/main/cypher-compat.md)
