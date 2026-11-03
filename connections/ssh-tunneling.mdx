@@ -37,7 +37,7 @@ To share one SSH config across connections, save it with **Save Current as Profi
   <img className="hidden dark:block" src="/images/ssh-tunnel-config-dark.png" alt="Network section with SSH Tunnel selected and a saved profile in the Profile picker" />
 </Frame>
 
-**SSH Tunnel** is not offered on SQLite, DuckDB, PGlite, libSQL, Turso, Beancount, BigQuery, Bigtable, Spanner, Cloudflare D1, Cloudflare R2 SQL, DynamoDB, or Snowflake: each is reached over a local file, a loopback socket, or a vendor HTTP API. For SAP HANA, forward the port yourself, as its [Limitations](/databases/sap-hana#limitations) show.
+Which databases offer **SSH Tunnel** is in the [transport table](/connections/connection-form#which-drivers-get-which-transports). DuckDB offers it once **Connection Type** is **Remote (Quack, experimental)**, and forwards to the **Host** and **Port** that mode shows on General. For SAP HANA, forward the port yourself, as its [Limitations](/databases/sap-hana#limitations) show.
 
 ## Authentication methods
 

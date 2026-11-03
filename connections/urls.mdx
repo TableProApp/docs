@@ -231,6 +231,25 @@ mongodb://user:pass@host1:27017,host2:27017,host3:27017/mydb?replicaSet=rs0
 - `proxyPassword` is dropped.
 - **Copy Connection String** writes an SRV connection as `mongodb+srv://` with no port, and every option percent-encoded.
 
+### DuckDB remote
+
+On a `quack://` URL, `sslmode` sets the **SSL Mode** among the Remote fields on General.
+
+| SSL Mode | In the URL |
+|---|---|
+| Automatic | No `sslmode` |
+| Disabled | `sslmode=disable` |
+| Required (skip verify) | `sslmode=require`, or `prefer` |
+| Verify Identity | `sslmode=verify-full`, or `verify-ca` |
+| Verify Fingerprint | Nothing. A copy leaves `sslmode` out and imports as Automatic: set the mode and paste **Certificate Fingerprint** again |
+
+**Copy Connection String** writes the first value in each row. `ssl`, `tls` and `tlsmode` read as the mode they name in [SSL/TLS](#ssl%2Ftls), so `ssl=false` is Disabled. A connection behind an SSH tunnel copies as `quack+ssh://`, with the server's own host and port after the SSH server:
+
+```text
+quack://quack.internal:9495/remotedb?sslmode=verify-full
+quack+ssh://deploy@bastion.example.com:2222/quack.internal:9495/remotedb?sslmode=require
+```
+
 ## What the path component means
 
 The part after the host is the database name on most schemes. Seven read it differently:
