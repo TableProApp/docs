@@ -83,6 +83,8 @@ The whole vocabulary is `get`, `put`, `del` (or `delete`), `watch`, `lease grant
 
 Lease IDs take decimal or hex, and hex is detected by its letters. Prefix an all-digit hex ID with `0x` (`--lease=0x69407712`) or it reads as decimal and resolves to another lease.
 
+Quote a key that holds a space, a quote or an invisible character. Inside quotes, `\n`, `\t`, `\\` and `\"` are escapes, and `\xHH` is one byte, so `get "/app/\xff" --prefix` reaches keys that are not UTF-8. Put a key that starts with `--` after a bare `--`: `del --prefix -- --cache/`.
+
 ## SSL/TLS
 
 TLS here is set by **TLS Mode** on the Options tab, not by the connection's SSL mode, and it starts **Disabled**. **Required (skip verify)** encrypts without checking the certificate, **Verify CA** checks it against the **CA Certificate** you name, and **Verify Identity** adds the hostname check. **Client Certificate** and **Client Key** cover mutual TLS under either verifying mode. See [SSL/TLS](/connections/ssl) for the concepts.
@@ -93,7 +95,7 @@ The **CA Certificate** may be PEM or DER. **Verify CA** needs one, since it chec
 
 - No transactions. Each command, and each row you save, is its own gateway request.
 - The form takes one endpoint and does not fail over to another member. Point it at a member that is up; `member list` shows the rest.
-- A value that is not valid UTF-8 shows in the grid as `<b64:…>` wrapping its base64, and text you type is sent as UTF-8. Write binary values with `etcdctl`.
+- A key or value that is not valid UTF-8 shows in the grid as hex and saves back byte for byte. Text you type in a cell is sent as UTF-8.
 - No schema editing and no import.
 
 ## Troubleshooting
