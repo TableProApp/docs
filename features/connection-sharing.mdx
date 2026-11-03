@@ -9,10 +9,10 @@ Passwords stay in your Keychain, so every route here hands over a connection def
 |---|---|---|---|
 | `.tablepro` file | One-off, any number of connections | Only with **Include Credentials** | Nothing |
 | `tablepro://` link | One connection, pasted into a chat | Never | Nothing |
-| [Linked Folder](#linked-folders) | A shared set has to stay current | Never | Starter |
+| [Linked Folder](#linked-folders) | A shared set has to stay current | Never | Pro |
 | [Team Catalog](#team-catalog) | Your team already shares a repo or a drive | Never | Team |
 | [Team Library](/features/team#share-connections-with-your-team) | Your team shares nothing on disk | Never | Team |
-| [iCloud Sync](/features/icloud-sync) | Your own second Mac, not a colleague | Optional | Starter |
+| [iCloud Sync](/features/icloud-sync) | Your own second Mac, not a colleague | Optional | Pro |
 
 ## Export
 
@@ -41,7 +41,7 @@ The saved query options appear only when there are saved queries to export, and 
 
 ### Encrypted export
 
-<Info>Needs a [Starter license](/features/licensing).</Info>
+<Info>Needs a [Pro license](/features/licensing).</Info>
 
 Turn on **Include Credentials** in the export sheet and enter a passphrase of 8 characters or more. Credentials go out under AES-256-GCM, keyed from the passphrase with PBKDF2 at 600,000 iterations. Importing asks for the passphrase.
 
@@ -140,7 +140,7 @@ Groups and saved queries come across the way they do on the Mac. The review list
 
 ## Linked Folders
 
-<Info>Needs a [Starter license](/features/licensing).</Info>
+<Info>Needs a [Pro license](/features/licensing).</Info>
 
 Press `Cmd+,`, then **Settings > General > Linked Folders > Add Folder…** and point it at a directory of `.tablepro` files: a Git repo, a Dropbox folder, a network drive. Those connections appear read-only in the sidebar, and each person enters their own password.
 
@@ -167,7 +167,7 @@ Each folder's row says what the last scan found: how many connections, or why it
 
 ## Environment variables
 
-<Info>Needs a [Starter license](/features/licensing).</Info>
+<Info>Needs a [Pro license](/features/licensing).</Info>
 
 Write `$VAR` or `${VAR}` in a `.tablepro` file and it resolves from TablePro's process environment at connect time. An app launched from the Dock inherits no shell exports, so set the variable with `launchctl setenv NAME value` or launch TablePro from a terminal.
 
