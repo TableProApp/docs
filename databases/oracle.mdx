@@ -177,7 +177,7 @@ The SSL mode offers no certificate rows there, so **Verify Identity** checks the
 
 ### ORA-28002: the password will expire within … days
 
-The login worked, and the password is in its grace period. Oracle AI Database 26ai sends `ORA-28098: Profile limits PASSWORD_LIFE_TIME and PASSWORD_GRACE_TIME are not unlimited, password will expire within … days.` instead. The message stays in a yellow banner above the editor until you dismiss it, and comes back on every connect. Change the password with `ALTER USER name IDENTIFIED BY "new password"`, or ask the DBA to, before the grace period ends: after that the login fails with ORA-28001.
+The login worked, and the password is in its grace period. Oracle AI Database 26ai sends `ORA-28098: Profile limits PASSWORD_LIFE_TIME and PASSWORD_GRACE_TIME are not unlimited, password will expire within … days.` instead. The message stays in a bar above the editor until you dismiss it, and comes back on every connect. Change the password with `ALTER USER name IDENTIFIED BY "new password"`, or ask the DBA to, before the grace period ends: after that the login fails with ORA-28001.
 
 ### PROCEDURE … was created with compilation errors
 
