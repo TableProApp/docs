@@ -69,7 +69,7 @@ Substitution happens after the split, so a value carrying a space stays a single
 
 ## While the connection is open
 
-The process is held for the life of the connection and killed with its whole process group on disconnect, which is what takes an `aws ssm` session's helper down with it. If it exits on its own while the connection is still open, the connection reconnects and starts it again, up to ten attempts with a widening delay. That covers an SSM session hitting its idle timeout and a `kubectl port-forward` losing its pod.
+The process is held for the life of the connection and killed with its whole process group on disconnect, which is what takes an `aws ssm` session's helper down with it. If it exits on its own while the connection is still open, the connection starts it again and [reconnects](/connections#when-a-connection-drops), with its rows still on screen. That covers an SSM session hitting its idle timeout and a `kubectl port-forward` losing its pod.
 
 The local port shares the connection's **Connect timeout** under **Options**, which uses 30 seconds
 when empty. Past that deadline the connect fails, and the error carries the last lines the command

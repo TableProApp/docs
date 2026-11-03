@@ -16,19 +16,22 @@ A hidden strip comes back on its own while the connection you are on has nothing
 
 ## What an entry shows
 
-The icon is the database engine's symbol, and its shape changes with the connection's state. A connection you gave a color shows it as a dot in the icon's corner. The first line under the icon names the connection, the second names the database or schema it browses, and each line shortens in the middle when long. To read more of a long name, drag the line between the strip and the object browser to widen the strip, up to 240 points. New windows open the strip at its last saved width. Hovering gives the full connection name, host, and database or schema; VoiceOver reads those plus the connection state. The entry you are in is highlighted, in each window separately.
+The icon is the database engine's symbol on a rounded tile, the same tile the welcome window and the connection switcher draw. A connection you gave a color fills the tile with it. The first line under the icon names the connection, the second names the database or schema it browses, and each line shortens in the middle when long. To read more of a long name, drag the line between the strip and the object browser to widen the strip, up to 240 points. New windows open the strip at its last saved width. Hovering gives the full connection name, engine, host, database or schema, color, and any state or transaction the entry carries, with its cause; VoiceOver reads all of it but the host. The entry you are in is highlighted, in each window separately.
 
 On servers that group objects by schema, an entry stands for a schema. On an engine that switches neither databases nor schemas, such as SQLite or Redis, a connection has one entry and one line, the connection name.
 
-## Icon states
+## Connection state
 
-Shape carries the state, not just color.
+A mark before the name carries the state, and the welcome window and the connection switcher show the same marks. Shape tells the states apart, not only color.
 
-| Icon | State | What to do |
+| Mark | State | What to do |
 |------|-------|------------|
-| Engine symbol | Connected, or connecting | Nothing |
-| Filled warning triangle | The last connect failed | Click the entry: the pane carries the driver's own error, **Try Again**, and **Copy Details** |
-| Bolt in a circle | The session ended, tabs kept | Click the entry, then **Reconnect** on the pane, or **Database > Reconnect** |
+| None | Connected, or not connected | Nothing |
+| Spinner | Connecting, or [reconnecting](/connections#when-a-connection-drops) after a drop | Wait, or right-click and choose **Stop Connecting** or **Stop Reconnecting** |
+| Crossed-out bolt, orange | The connection was lost, tabs kept | Click the entry, then **Reconnect** on the pane |
+| Warning triangle, red | The last connect failed | Click the entry: the pane carries the driver's own error, **Try Again**, and **Copy Details** |
+
+The right-click menu leads with the command the state calls for; see [When a connection drops](/connections#when-a-connection-drops).
 
 ## When an entry appears
 
@@ -48,7 +51,7 @@ Each entry keeps its own tabs. Clicking one shows its tabs and returns you to th
 
 Moving between schemas inside one database, such as PostgreSQL's, keeps the entry and its tabs. Tables of the same name in two schemas are told apart by their schema-qualified tab titles.
 
-On PostgreSQL, Redshift, and CockroachDB every database entry keeps its own server connection, so moving between two entries reconnects nothing and leaves each database's open transaction and temp tables where they were. Closing an entry closes its connection and rolls back a transaction still open there, so it asks first when there is one. An hourglass on the entry's icon means a transaction is open there; on other engines it marks every entry of the connection, since one connection holds the transaction for all of them.
+On PostgreSQL, Redshift, and CockroachDB every database entry keeps its own server connection, so moving between two entries reconnects nothing and leaves each database's open transaction and temp tables where they were. Closing an entry closes its connection and rolls back a transaction still open there, so it asks first when there is one. A badge on the corner of the entry's icon marks a transaction: an orange hourglass while one is open, a red warning triangle once a statement in it failed and only a rollback is left. On other engines the badge marks every entry of the connection, since one connection holds the transaction for all of them.
 
 The strip takes the keyboard too. Click into it, then use the arrow keys to move the highlight. Type the start of a connection, database, or schema name to jump to it, and press `Return` to open the entry.
 
@@ -70,7 +73,7 @@ Right-click an entry and choose **Close Database “\<name\>”** to close that 
 
 **Close Connection “\<name\>”**, below it, closes the whole connection: every tab across every database it has open, its session, and all of its entries. The window closes too if that was its last connection, and **File > Close Connection** does the same for the connection on screen. A connection down to one entry has nothing else left, so closing that entry closes it. Nothing is lost for good: reopen the connection, from the connection list or **Database > Switch Connection…**, and its tabs come back as they were.
 
-**Disconnect**, on the same menu while the connection is live, ends the session and keeps everything else. No window closes, no entry disappears, and the tabs are saved first; the connection shows a Reconnect pane in their place until **Database > Reconnect**, or the pane's own button, brings both back. **Database > Disconnect** does the same for the connection on screen, asking first when a transaction is open, a query is running, or changes are unsaved. Nothing reconnects on its own, a relaunch included: a connection you disconnected comes back on the strip as **Not connected**.
+**Disconnect**, on the same menu while the connection is up, reconnecting or lost, ends the session and keeps everything else. No window closes, no entry disappears, and the tabs are saved first; the pane reads **Disconnected from \<name\>** in their place until its **Reconnect** button, or **Connect** on the right-click menu or the **Database** menu, brings both back. **Database > Disconnect** does the same for the connection on screen, asking first when a transaction is open, a query is running, or changes are unsaved. Nothing reconnects on its own, a relaunch included: a connection you disconnected comes back on the strip as **Not connected**.
 
 ## Reordering
 

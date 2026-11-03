@@ -13,7 +13,7 @@ What this screen shows is what your account is allowed to see. An empty or half-
 | MongoDB | Only your own operations; metrics and slow queries fail | `clusterMonitor`, `dbAdmin` on the database you browse for its profiler, and `hostManager` to cancel another user's operation |
 | Redis | A panel fails with `NOPERM` naming the command | `+client\|list`, `+client\|id`, `+info` and `+slowlog\|get` in the user's ACL, plus `+client\|kill` and `+client\|unblock` to act on a client |
 
-Open it with `Cmd+Option+Shift+D`, from **Database > Server Dashboard**, from **Server Dashboard** under **Actions** in the toolbar, or by right-clicking a live connection in the [workspace rail](/features/workspace-rail).
+Open it with `Cmd+Option+Shift+D`, from **Database > Server Dashboard**, from **Server Dashboard** under **Actions** in the toolbar, or by right-clicking a live connection in the [connections strip](/features/workspace-rail).
 
 <Frame caption="Server Dashboard showing active sessions, metrics, and slow queries">
   <img

@@ -131,7 +131,7 @@ A database on a socket cannot negotiate TLS, so SSL is switched off for the conn
 
 ## If the tunnel drops
 
-A keep-alive goes out every 30 seconds. When one fails the session drops to connecting and the tunnel is rebuilt, retrying at 2s, 4s, 8s and doubling to a 120-second ceiling, ten attempts at most. A query in flight dies with the tunnel and is not replayed. After ten failures the session ends with **SSH tunnel disconnected. Click to reconnect.**
+A keep-alive goes out every 30 seconds. When one fails, the rows stay on screen while the tunnel is rebuilt and the connection [reconnects](/connections#when-a-connection-drops), up to 10 tries. A query in flight dies with the tunnel and is not replayed. If every try fails, the pane reads **Disconnected from \<name\>**, gives the cause as **SSH tunnel disconnected.**, and offers **Reconnect**.
 
 If tunnels keep dropping on an idle network, the keep-alive is not the missing piece: check the server's `ClientAliveInterval` and the idle timeouts on any firewall or load balancer in between.
 

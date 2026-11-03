@@ -30,7 +30,7 @@ flowchart LR
     Driver -->|"loopback"| Relay -->|"SOCKS5"| SOCKS -->|"TCP"| Database
 ```
 
-No helper binary is involved: the relay is part of the app. It listens on a free loopback port and carries each connection through the proxy. If the relay dies mid-session, the connection reconnects and rebuilds it, up to ten attempts with a widening delay.
+No helper binary is involved: the relay is part of the app. It listens on a free loopback port and carries each connection through the proxy. If the relay dies mid-session, the connection rebuilds it and [reconnects](/connections#when-a-connection-drops) with its rows still on screen.
 
 ## Setting up
 

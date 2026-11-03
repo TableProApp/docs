@@ -194,15 +194,13 @@ A file in the themes folder that breaks one of these is listed under **Not Loade
 
 Assign one with **Color** on the connection form's **Appearance** tab: None, Red, Orange, Yellow, Green, Blue, Purple, Pink, or Gray. With None, no color cue appears. Connection groups take a color the same way, from their right-click menu on the welcome window.
 
-In the workspace rail the color is a dot on the corner of the database icon, and it stays visible on the selected row. In the welcome window list, the connection switcher and the query history drawer, it is a dot beside the name. The color's name is in the connection's tooltip and its VoiceOver label.
-
-The database icon keeps its engine's own color everywhere, whichever color the connection carries.
+The connections strip, the welcome window list and the connection switcher draw the database icon on a rounded tile, and the color fills the tile, the selected row included. The engine's symbol on it turns white or black, whichever reads on that color. With None the tile is gray and the symbol keeps its engine's own color. In the query history drawer the color tints the network symbol beside the connection's name. On the strip, the color's name is in the entry's tooltip and its VoiceOver label.
 
 <Tip>
 Use red for production databases as a visual reminder to be careful with queries.
 </Tip>
 
-<Frame caption="Connection color in the workspace rail and the welcome list">
-  <img className="block dark:hidden" src="/images/connection-colors-sidebar.png" alt="Connection colors on rail dots and welcome list rows" />
-  <img className="hidden dark:block" src="/images/connection-colors-sidebar-dark.png" alt="Connection colors on rail dots and welcome list rows" />
+<Frame caption="Connection color in the connections strip and the welcome list">
+  <img className="block dark:hidden" src="/images/connection-colors-sidebar.png" alt="Connection colors filling the icon tiles on the connections strip and in the welcome list" />
+  <img className="hidden dark:block" src="/images/connection-colors-sidebar-dark.png" alt="Connection colors filling the icon tiles on the connections strip and in the welcome list" />
 </Frame>
