@@ -70,10 +70,11 @@ The macOS build links neither the `quack` extension nor `httpfs`, which carries 
 duckdb:///path/to/database.duckdb
 quack://host:9494/alias
 quack://host:9494/alias?sslmode=verify-full
+quack://host:9494/alias?ssl_fingerprint=4A:1F:9C:02:7E:B3:58:D6:11:E0:3C:A7:92:5B:F4:08:6D:21:C9:7A:E5:30:4F:B8:17:93:DA:6E:02:C5:8B:F1
 quack+ssh://deploy@bastion.example.com/localhost:9494/alias
 ```
 
-`sslmode` sets **SSL Mode**, and a connection behind an SSH tunnel copies as `quack+ssh://`. [DuckDB remote](/connections/urls#duckdb-remote) lists the values, and what happens to Verify Fingerprint, which no URL carries.
+`sslmode` sets **SSL Mode**, `ssl_fingerprint` sets Verify Fingerprint and its pin, and a connection behind an SSH tunnel copies as `quack+ssh://`. [DuckDB remote](/connections/urls#duckdb-remote) has every value.
 
 ## Databases and schemas
 
@@ -208,6 +209,10 @@ The file moved or was deleted while the connection was idle with its lock releas
 ### Port must be a number between 1 and 65535
 
 **Port** holds something else. The Quack default is `9494`.
+
+### This connection sets SSL Mode, which the installed DuckDB driver does not support yet
+
+The loaded DuckDB driver is older than **SSL Mode**, and this connection sets a mode other than Automatic, so it is refused before anything is dialed. After an app update the new driver downloads in the background and loads at the next launch. Check the driver's row in **Settings > Extensions**, relaunch once it reads "Updates when TablePro relaunches", then connect again. [Updates](/features/plugins#updates) has the details.
 
 ### DuckDB could not install its … extension
 
