@@ -90,6 +90,8 @@ Each operation lists the object kinds it applies to, so a view offers only the o
 
 PostgreSQL VACUUM carries FULL (rewrites the table and blocks access), ANALYZE, and VERBOSE toggles. MySQL CHECK TABLE offers QUICK, FAST, MEDIUM (the default), EXTENDED, and CHANGED. The options come from the driver, so an engine that adds one shows it without an app change. No other engine reports maintenance operations, so the submenu is hidden there, and in read-only safe mode.
 
+A run that comes back clean shows nothing more. When the server answers with a note, such as MySQL's "Table does not support optimize, doing recreate + analyze instead" or a problem SQLite's integrity check found, a sheet lists it.
+
 ## Generate test rows
 
 Right-click a table and choose **Generate Rows…** to fill it with made-up data. Set the number of rows, from 1 to 1,000,000, pick a generator for each column on the left, and check the first 10 rows in the preview before anything runs.

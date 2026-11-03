@@ -14,13 +14,13 @@ This page covers the **Settings > MCP** pane. The protocol itself, the tool cata
 
 ## Starting and stopping
 
-Open **Settings > MCP** and turn on **Enable MCP Server**. The **Status** row underneath is how you check it before touching a client config: it reads **Running on port 23508**, or **Stopped**, or the reason it failed.
+Open **Settings > MCP** and turn on **Enable MCP Server**. The **Status** row underneath is how you check it before touching a client config: it reads **Running on port 23508**, or **Stopped**, or **Couldn't start** with the reason below it. **Try Again** beside a failure starts the server again.
 
 With the toggle off, nothing starts the server. A client that launches the bundled `tablepro-mcp` bridge gets "The TablePro MCP server is turned off" within a second instead of a timeout, and pairing an extension stops at the same message with **Open MCP Settings**.
 
 While it is only answering a client, TablePro stays out of the Dock and the app switcher. It appears in both, with its menu bar, once it has a window on screen, including one a client asked it to open. A TablePro the bridge launched while the toggle is off quits again.
 
-The default port is **23508**. If it is taken, TablePro asks the kernel for a free one instead. Either way the real port goes to `~/Library/Application Support/TablePro/mcp-handshake.json`, which the bridge reads, so a client config never carries a port.
+The default port is **23508**. If it is taken, TablePro asks the kernel for a free one instead, and the **Status** row says the port you set was in use. Either way the real port goes to `~/Library/Application Support/TablePro/mcp-handshake.json`, which the bridge reads, so a client config never carries a port.
 
 ## Server configuration
 
