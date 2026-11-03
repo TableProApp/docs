@@ -53,7 +53,7 @@ A call that has to open a connection with a pre-connect script also waits for th
 |------|-----------|---------|
 | `list_connections` | `purpose` (optional) | `connections[]` with `id`, `name`, `type`, `host`, `port`, `database`, `is_connected`, `ai_policy`, `external_access`, `safe_mode`, `tags`, plus `color` and `group` when set. `is_connected` is false once a connection stops answering, before it is disconnected |
 | `connect` | `connection_id` | `status` (`connected`), `connection_id`, `current_database`, plus `current_schema` and `server_version` when known. Returns once the driver is up |
-| `disconnect` | `connection_id` | `status` (`disconnected`), `connection_id` |
+| `disconnect` | `connection_id` | `status` (`disconnected`), `connection_id`. Refused with `denied` while the connection has running work, an open transaction or unsaved changes in TablePro, or when TablePro cannot tell whether a transaction is open |
 | `get_connection_status` | `connection_id` | `status` (`connected`, `connecting`, `disconnected`, `error`), `connection_id`, `current_database`, plus `current_schema`, `server_version`, `connected_at`, `last_active_at` and `error` when they apply |
 | `switch_database` | `connection_id`, `database` | `status` (`switched`), `connection_id`, `current_database` |
 | `switch_schema` | `connection_id`, `schema` | `status` (`switched`), `connection_id`, `current_schema` |
