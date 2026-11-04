@@ -299,14 +299,18 @@ The extension picks the format, so one command covers all of them. A file no for
 |--------|-------------|---------|
 | On error | Stop and Rollback, Stop and Commit, or Skip and Continue | Stop and Rollback |
 | Encoding | UTF-8, UTF-16, UTF-16 LE, UTF-16 BE, Latin-1, Windows-1252, ASCII, Shift JIS, EUC-JP, GB 18030, Big5, or EUC-KR | UTF-8 |
-| Wrap in transaction | Runs every statement inside one transaction. Dimmed in Skip and Continue | Yes |
+| Wrap in transaction | Starts an import transaction when the connection has none. An existing transaction stays under your control. Dimmed in Skip and Continue | Yes |
 | Disable foreign key checks | Suspends constraint checks for the import | Yes |
 
 | Mode | What happens on a failed statement |
 |------|-----------|
-| **Stop and Rollback** | Stops there. With the transaction on, everything rolls back, except on MySQL and MariaDB after a `CREATE`, `ALTER` or `DROP`: those commit as they run, and the error says some statements were kept |
-| **Stop and Commit** | Stops there, keeping what already succeeded |
-| **Skip and Continue** | Logs it and carries on, including a line the parser cannot read. No transaction |
+| **Stop and Rollback** | Stops there and rolls back the transaction the import still controls. Changes outside that transaction can stay |
+| **Stop and Commit** | Stops there and commits the transaction the import still controls. A failed transaction can only roll back |
+| **Skip and Continue** | Logs it and carries on, including a line the parser cannot read. No import transaction |
+
+Keep the default **Stop and Rollback** unless you want to retain partial work or continue past errors. These options handle errors; clicking **Stop** asks separately what to do with the work already done.
+
+Rollback does not undo changes already committed, writes to nontransactional tables, or other effects the database cannot roll back. For example, MySQL and MariaDB `CREATE`, `ALTER`, and `DROP` statements can commit earlier work. Review the result before retrying a file.
 
 **UTF-16** reads the byte order from the mark at the start of the file and falls back to big-endian, which is what a file with no mark means. Pick **UTF-16 LE** or **UTF-16 BE** for a file that has no mark and is not big-endian. Latin-1 and Windows-1252 differ over the bytes `0x80` to `0x9F`: a dump written by MySQL keeps its curly quotes, en dashes and euro sign there, so Windows-1252 is the one to pick for it.
 
@@ -316,7 +320,24 @@ The import runs on the connection's own session, and afterwards puts back the se
 
 On SQL Server a file that holds a `GO` line runs a batch at a time, cut at its `GO` lines the way `sqlcmd` cuts it, so every count and failure here is a batch rather than a statement. A file with no `GO` line runs a statement at a time. See [Scripts and batches](/databases/mssql#scripts-and-batches).
 
-Skip and Continue collects up to 1,000 failures with their line numbers and messages, and the summary counts successes against failures behind a **Copy Details** button. **Save Report…** writes them all to a CSV with a line, a statement and the database's own error per row, so a large import's failures can be sorted and searched rather than scrolled. A stop shows the line, the database's own message, and the failing statement, with the dialog still open behind it, ready for a changed setting and another run. The alert shows the first 10,000 characters of a longer statement and the first five errors of a batch that raised more, and **Copy Details** copies all of them.
+SQL Server SQL imports do not automatically commit or roll back after a file batch runs, even with **Wrap in transaction** selected and even without a `GO` line. A batch can change which transaction is open. Read the completion message: if a transaction remains open, commit or roll it back on this connection. This also applies after a successful import. Imports into a selected table from CSV, JSON, or XLSX use the row-import transaction options instead.
+
+Skip and Continue collects up to 1,000 failures with their line numbers and messages, and the summary counts successes against failures behind a **Copy Details** button. **Save Report…** writes them all to a CSV with a line, a statement and the database's own error per row, so a large import's failures can be sorted and searched rather than scrolled. An error that stops the import shows the line, the database's own message, and the failing statement, with the dialog still open behind it, ready for a changed setting and another run. The alert shows the first 10,000 characters of a longer statement and the first five errors of a batch that raised more, and **Copy Details** copies all of them.
+
+### Stop an import
+
+<Frame caption="Choose what to do with the paused import">
+  <img className="block dark:hidden" src="/images/import-stop.png" alt="Stop Import dialog offering rollback, commit, and Continue for genre rows" />
+  <img className="hidden dark:block" src="/images/import-stop-dark.png" alt="Stop Import dialog offering rollback, commit, and Continue for genre rows" />
+</Frame>
+
+Click **Stop** during a SQL or row import. **Pausing…** means a database operation already in progress is finishing. The **Stop Import?** question appears after that operation finishes; no further import work starts while you decide.
+
+Choose **Continue** to resume. When the import still controls a healthy open transaction and can identify its changes, the question offers **Stop and Rollback** and **Stop and Commit**. It names transactional tables separately from tables whose changes stay either way. In other cases, **Stop Import** ends the run with the limits described in the question. A message that changes may stay is not a promise of rollback.
+
+After stopping, read the result for each file: not imported, direct changes rolled back, changes committed or kept, changes still in an open transaction, or changes that may stay. Row counts describe rows submitted in completed writes, not an exact count of rows inserted. A failed write can have made additional changes. **Copy Details** includes the recorded errors and transaction or session cleanup failures.
+
+If a transaction was already open before the import, commit or roll it back yourself. The same applies when the file opens or replaces a transaction. A failed open transaction needs rollback. The result lists table creation and table clearing done before row import separately; rolling back the rows does not undo preparation already committed.
 
 ### Disabling foreign key checks
 
@@ -395,7 +416,7 @@ Saved mappings stay on this Mac. They follow a renamed table and are forgotten w
 
 ### Row imports
 
-CSV and JSON insert in batches, and the on-error and transaction options behave as they do for SQL. They add **Delete existing rows before import**, which clears the target table inside the import transaction, so a failure in the default Stop and Rollback mode brings the rows back. A row where no field matches a mapped column writes nothing and is reported rather than counted.
+CSV and JSON insert in batches, and the on-error and transaction options behave as they do for SQL. They add **Delete existing rows before import**, which clears the target table before writing rows. The deletion rolls back only if it belongs to a transaction the import rolls back and the table supports rollback. A row where no field matches a mapped column writes nothing and is reported rather than counted.
 
 ### Update existing rows
 
@@ -434,14 +455,14 @@ Select several files in **Import Data…**, or a folder, and each one loads into
 
 Each file starts on the table its name matches, ignoring case, or on a new table under the name a single import would propose. No two files get the same new name: `sales.csv` and `sales.json` propose `sales` and `sales_2`. In a file's row, pick another destination from the menu, clear the checkbox to leave the file out, or click **Edit…** for the one-file sheet: the column mapping of an existing table, starting from its saved mapping, or the columns of a new table. A run only inserts, so that sheet has no **Import as**: [update existing rows](#update-existing-rows) one file at a time.
 
-The options under the list apply to every file of that format. With **Auto-detect** set, the delimiter and encoding are still read from each file. A run that mixes formats shows the options of each, and their **On error** and **Wrap in transaction** have to match, because the run has one transaction.
+The options under the list apply to every file of that format. With **Auto-detect** set, the delimiter and encoding are still read from each file. A run that mixes formats shows the options of each, and their **On error** and **Wrap in transaction** have to match, because the run shares one transaction when transaction wrapping is available.
 
 | On error | What a failure in one file does |
 |---|---|
-| **Stop and Rollback** | Stops there and rolls back the rows of every file, the finished ones included |
-| **Stop and Commit** | Stops there, keeping every file before it and the rows of the failing file that went in |
-| **Skip and Continue** | Skips the failing row, or the whole file when it cannot be read, and carries on. No transaction |
+| **Stop and Rollback** | Stops there and rolls back the shared transaction if it is still under import control. Direct changes to transactional tables roll back together; nontransactional changes stay |
+| **Stop and Commit** | Stops there and commits completed writes in the shared import transaction, unless that transaction has failed |
+| **Skip and Continue** | Skips the failing row, or the whole file when it cannot be read, and carries on. No import transaction |
 
-New tables are created before any rows go in, so a run that rolls back leaves them empty, and running it again from the same sheet reuses them. [Safe Mode](/features/safe-mode) asks once for the whole run. The summary lists each file with its table and row count, and **Copy Details** adds every skipped row's error.
+New tables are created before any rows go in. Retrying from the same sheet can reuse and clear those tables before row import starts. Review the preparation details in a stopped or failed result; a later rollback does not undo a clearing operation already committed. [Safe Mode](/features/safe-mode) asks once for the whole run. The summary lists each file with its table and row count, and **Copy Details** adds every skipped row's error. [Stopping the run](#stop-an-import) reports each file's outcome separately, including files already processed and files not reached.
 
 Two files can fill one existing table, except with **Delete existing rows before import** on: the second file would clear the first one's rows.
