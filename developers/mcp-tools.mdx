@@ -41,11 +41,11 @@ Past the scope, a call clears three more gates:
 2. **Connection policy.** **External Clients** set to **Blocked** hides the connection: `list_connections` omits it and any tool that names it is refused. An AI policy of **Never** does the same, except that [`purpose: "display"`](#listing-for-display) still lists it. Otherwise the first call that touches a connection asks the user, as often as **Settings > MCP > Approval** says. That question is always a dialog on the user's Mac, never an elicitation: a client that could answer it could also grant itself the connection. It has no deadline, so the client owns the timeout, and a refusal stands for 60 seconds before the question can be put again.
 3. **Safe Mode.** A write goes through the connection's Safe Mode, which may ask the user to confirm it or to authenticate. See [Approvals](/developers/mcp-protocol#approvals-and-input-required).
 
-A call that has to open a connection with a pre-connect script also waits for the user to run the script, in a dialog on their Mac. **Cancel** returns `denied`. With no answer in 60 seconds the dialog closes and the call returns `timeout`.
+A call that opens a connection may also need approval on the Mac for a pre-connect script, environment variables, or [local sign-in credentials](/connections/connection-form#sign-ins-from-this-mac). A refusal returns `denied`; an unanswered prompt returns `timeout`.
 
 `confirm_destructive_operation` needs `admin` as well, so it takes a Full Access token, and **Read Only** refuses it outright whatever the token carries. No token skips the user's approval.
 
-**Read Only** refuses any statement that is not a read, with `denied`. At every level, every tool refuses a statement that reads or writes files or runs server-side code, and a request in the form TablePro builds for its own grid, also with `denied`. More than one statement in a call fails with `invalid_argument`, and so does a statement a `GO 5` line would run five times, except in a SQL Server script sent to [`execute_query`](#execute_query). Examples of each, and the limit the connection's login sets, are in [What Read Only allows](/developers#what-read-only-allows).
+**Read Only** refuses a statement classified as a write with `denied`. Reads also use the driver's read-only mode where supported. [What Read Only allows](/developers#what-read-only-allows) lists engine limits and the statements refused at every access level. Multiple statements return `invalid_argument`, except for SQL Server scripts sent to [`execute_query`](#execute_query) or [`confirm_destructive_operation`](#writing-data).
 
 ## Connections
 
@@ -157,9 +157,9 @@ Without filters this returns the engine's fast estimate unless `exact` is set. W
 
 ### `execute_query`
 
-One statement, 100 KB at most. `DROP` and `TRUNCATE` are refused here; use `confirm_destructive_operation`. With `read_only: true`, a statement that is not a read fails with `denied` before the user is asked anything, even on a connection set to **Read & Write** and with a token that carries `tools:write`. On MongoDB, a statement is a read only when it is one call with literal arguments, as [Safe Mode](/features/safe-mode#what-counts-as-a-read) describes; any other JavaScript is a write and needs `tools:write`. When the request carries a `progressToken`, the tool emits progress at 0.0 (resolving), 0.3 (executing) and 1.0 (done).
+One statement, 100 KB at most. Destructive statements are refused here; use [`confirm_destructive_operation`](#writing-data). With `read_only: true`, a statement that is not a read fails with `denied` before the user is asked anything, even on a connection set to **Read & Write** and with a token that carries `tools:write`. On MongoDB, a statement is a read only when it is one call with literal arguments, as [Safe Mode](/features/safe-mode#what-counts-as-a-read) describes; any other JavaScript is a write and needs `tools:write`. When the request carries a `progressToken`, the tool emits progress at 0.0 (resolving), 0.3 (executing) and 1.0 (done).
 
-On SQL Server, send the whole script instead. A variable exists only in the batch that declares it, so a `DECLARE` and the `SELECT`s that read it belong in one call. The script is cut into batches at its `GO` lines, as the query editor cuts it, and `GO 5` runs a batch five times. The gates judge the script by its worst statement: one write anywhere needs `tools:write` and Safe Mode, and one `DROP` refuses the call. `DECLARE` and `EXEC` of a procedure count as writes, `sp_help` included. `EXEC` of a string and `sp_executesql` run server-side code and are refused.
+On SQL Server, send the whole script instead. A variable exists only in the batch that declares it, so a `DECLARE` and the `SELECT`s that read it belong in one call. The script is cut into batches at its `GO` lines, as the query editor cuts it, and `GO 5` runs a batch five times. The gates judge the script by its worst statement: one write anywhere needs `tools:write` and Safe Mode, and any destructive statement refuses the call. `DECLARE` and `EXEC` of a procedure count as writes, `sp_help` included. `EXEC` of a string and `sp_executesql` run server-side code and are refused.
 
 The top-level fields describe the first result set, with `rows_affected` counting the whole script. When the script returns more than one result set, `result_sets[]` lists every one in order, each with `columns`, `rows`, `row_count` and `is_truncated`. `max_rows` caps each result set on its own. `status_message` says when the script left a transaction open.
 
@@ -178,12 +178,12 @@ Formats are `csv`, `json` and `sql`; pass exactly one of `query` or `tables[]`. 
 | Tool | Arguments | Returns |
 |------|-----------|---------|
 | `insert_rows` | `connection_id`, `table`, `columns`, `rows` (`database`, `schema`) | `table`, `rows_submitted`, `rows_affected` |
-| `confirm_destructive_operation` | `connection_id`, `query` (`timeout_seconds`, `database`, `schema`) | A result set |
+| `confirm_destructive_operation` | `connection_id`, `query` (`timeout_seconds`, `database`, `schema`) | A result set, plus `result_sets[]` for a SQL Server script |
 | `transaction_control` | `connection_id`, `action` (`database`, `schema`) | `status`, the action that completed, and `connection_id` |
 
-`insert_rows` binds parameters, so values are never spliced into SQL text. Each row is an array with one value per column, and a call carries at most 1,000 rows.
+`insert_rows` binds parameters. Its confirmation shows the values that will be written, and the approved values run in the named database and schema. Each row is an array with one value per column, and a call carries at most 1,000 rows.
 
-`confirm_destructive_operation` runs one `DROP`, `TRUNCATE` or `ALTER … DROP`. Anything that is not destructive is rejected; use `execute_query` for those. The user approves it first, through your elicitation prompt if your client supports elicitation, otherwise through TablePro's own dialog on their Mac.
+`confirm_destructive_operation` runs one destructive statement, or a SQL Server script containing a destructive statement. This includes `DROP`, `TRUNCATE`, `ALTER … DROP`, and `DELETE` without `WHERE`. Other statements are rejected; use `execute_query` for those. The user approves it first, through your elicitation prompt if your client supports elicitation, otherwise through TablePro's own dialog on their Mac.
 
 `transaction_control` takes `action` as `begin`, `commit` or `rollback`. The transaction stays open across calls until it is committed or rolled back, and it runs on the same session as the user's own tabs, so their editor runs and their grid saves land inside it while it is open. TablePro shows it above the connection's tabs and on its connections strip entry, with **Roll Back** and **Commit**, until it ends. Leave nothing open.
 

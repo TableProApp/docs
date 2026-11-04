@@ -71,6 +71,8 @@ Pick an alias from the **Config Host** picker and `HostName`, `User`, `Port`, `I
 
 `Match` blocks take the criteria ssh does, `localnetwork` and `tagged` included. A tunnel counts as `sessiontype none` with an empty `command`, and a criterion TablePro does not know keeps its block from applying.
 
+`Match exec` runs your command through `/bin/sh` in the app's inherited environment. Exit status zero matches. The command gets five seconds, then two seconds to stop before it is killed. Edit `~/.ssh/config` to control these commands. Host and user values are checked before substitution, including names resolved through DNS.
+
 `CanonicalizeHostname` completes a short name with each `CanonicalDomains` suffix in turn, skipping a name with more dots than `CanonicalizeMaxDots`, and applies to a host reached through a jump only when set to `always`. The completed name is the one dialed and the one its host key is stored under. A DNS alias (CNAME) replaces it only where a `CanonicalizePermittedCNAMEs` rule covers both names. With `CanonicalizeFallbackLocal no`, a name no suffix resolves stops the connection instead of being dialed as typed.
 
 `IdentityFile` picks which agent key is offered, not only which key file is read, and a `.pub` is enough. That is how a 1Password or Secretive key gets pinned to a host. `IdentitiesOnly yes` then drops every agent key the config did not name, which is what keeps a thirty-key agent inside a server's `MaxAuthTries`.

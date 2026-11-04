@@ -16,7 +16,7 @@ Most engines here need a command line tool that does not ship inside TablePro. I
 
 MariaDB 11.0 renamed its clients, so `mariadb-dump` and `mariadb` are accepted in place of `mysqldump` and `mysql`.
 
-The lookup takes the first match from `/usr/bin/which`, then `/opt/homebrew/bin`, `/usr/local/bin`, and Postgres.app's latest version. That path decides which client version does the work.
+The lookup takes the first executable in an absolute `PATH` folder, then checks standard tool folders such as `/usr/local/bin` and `/opt/homebrew/bin`. It also checks `/usr/local/mysql/bin` and Postgres.app's latest version. Empty and relative `PATH` entries are skipped. That path decides which client version does the work.
 
 On PostgreSQL that match is checked against the server first, for both directions. `pg_dump` and `pg_restore` refuse a server newer than themselves, 15 and later refuse servers older than 9.2, and TablePro names the database with `-d`, which arrived in 9.3. When the first match cannot reach the server, the newest one that can is taken from the Homebrew `postgresql@…` and `libpq` installs, every Postgres.app version, and `/Library/PostgreSQL`. When none can, the run stops before it starts and names the version to install: PostgreSQL 9.1 needs `pg_dump` 9.3 to 14, so `brew install postgresql@14`. A binary that does not answer `--version` is used anyway.
 
@@ -171,6 +171,8 @@ Your password never reaches the tool's argument list, which every process on the
 <Warning>
 SqlPackage is the exception. It accepts a password only inside its connection string, which means the command line, where other processes on the Mac can read it while the tool runs. A dump and a restore both ask before starting. Windows or Entra authentication avoids it entirely: leave the username empty and the tool uses integrated security.
 </Warning>
+
+The tools run directly, with connection values passed as arguments. They inherit a limited environment plus the connection's password and SSL settings. Shell startup files are not loaded. PostgreSQL password-file lookup follows [Use ~/.pgpass](/databases/postgresql#password-file).
 
 ## Failures
 

@@ -3,6 +3,8 @@ title: iCloud Sync
 description: Sync connections, groups, tags, and saved queries to your Macs, iPhone, and iPad, and settings, table favorites, and SSH profiles between Macs
 ---
 
+import LocalCredentialConsent from "/snippets/local-credential-consent.mdx";
+
 Sync needs a Pro or Team [license](/features/licensing) and starts off. Press `Cmd+,`, open **Settings > Sync**, turn on **Sync this Mac with iCloud**, pick the categories, and click **Sync Now**. The iPhone and iPad app shares the same CloudKit data but carries connections, groups, tags, and saved queries only.
 
 <Frame caption="iCloud Sync settings">
@@ -34,6 +36,12 @@ Each synced category has its own toggle under **Sync Categories**. Turning one o
 A sync runs at launch, when you switch back to the app, 2 seconds after you change anything synced, and when the network returns after a sync that could not reach iCloud.
 
 A custom theme travels as its file. Moving one to the Trash on one Mac moves it to the Trash on the others. A theme file copied into the Themes folder in Finder goes up the next time you edit it in TablePro or turn sync on. A Mac on an earlier version of TablePro switches its **Appearance** to **System** when a theme choice arrives from an updated Mac.
+
+## Sign-ins on another Mac
+
+<LocalCredentialConsent />
+
+Connections that use environment variables also need [approval on each Mac](/features/connection-sharing#environment-variables).
 
 ## Keeping a connection off iCloud
 

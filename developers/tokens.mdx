@@ -3,7 +3,7 @@ title: Tokens
 description: Token model, scopes, connection allowlists, expiry, revocation, and the activity log
 ---
 
-**Read Only** is where the **Generate Token** sheet starts, and it is the right level for a client that only reads. Move to **Read & Write** when an agent has to change data, and to **Full Access** only for `DROP` and `TRUNCATE`, which nothing below it can reach. The plaintext is shown once at creation and never again; what persists is a salted SHA-256 hash in the login keychain.
+**Read Only** is where the **Generate Token** sheet starts, and it is the right level for a client that only reads. Move to **Read & Write** when an agent has to change data, and to **Full Access** for destructive statements through [`confirm_destructive_operation`](/developers/mcp-tools#writing-data). The plaintext is shown once at creation and never again; what persists is a salted SHA-256 hash in the login keychain.
 
 <Frame caption="The MCP tab in Settings">
   <img className="block dark:hidden" src="/images/mcp-tokens.png" alt="MCP tokens" />
@@ -15,8 +15,8 @@ description: Token model, scopes, connection allowlists, expiry, revocation, and
 | Level | Scopes | What it can do |
 |-------|--------|----------------|
 | **Read Only** | `tools:read`, `resources:read` | Read schema and run `SELECT`. |
-| **Read & Write** | plus `tools:write` | `INSERT`, `UPDATE`, `DELETE`, connect and disconnect, switch database or schema, open and focus tabs. |
-| **Full Access** | plus `admin` | Also `confirm_destructive_operation`, the only tool that runs `DROP` or `TRUNCATE`. |
+| **Read & Write** | plus `tools:write` | Non-destructive writes, connect and disconnect, switch database or schema, open and focus tabs. |
+| **Full Access** | plus `admin` | Also `confirm_destructive_operation`, the tool for destructive statements. |
 
 `connections:display` sits outside the levels. Only [pairing](/developers/pairing#scopes) grants it, and only while **Allow apps to list connections hidden from AI** is on under **Settings > MCP > Connection Access**. The **Generate Token** sheet never does. It does one thing: lets [`list_connections`](/developers/mcp-tools#listing-for-display) take `purpose: "display"`. A token holding it reads **Lists connections hidden from AI** in the token list.
 
@@ -67,7 +67,7 @@ Revoking cancels every request that token has in flight and clears the connectio
 
 ## The stdio bridge token
 
-Every server start mints a token named `__stdio_bridge__` and writes it into the handshake file for the bundled bridge. It is **Read & Write**, so an agent going through the bridge can read and write but cannot call `confirm_destructive_operation`.
+Every server start mints a token named `__stdio_bridge__` and writes it into the [handshake file](/developers/mcp-protocol#local-socket-and-handshake) for the bundled bridge. The bridge sends it over the private socket after checking the socket and host process. It is **Read & Write**, so an agent going through the bridge can read and write but cannot call `confirm_destructive_operation`.
 
 It expires after an hour and is rotated 15 minutes before that, deleted when the server stops, and any stale copy is removed the next time the store loads. It is hidden from the Settings token list, though its name can appear in the activity log. For a narrower scope, skip the bridge and connect over [HTTP with a token you mint](/integrations/mcp-clients#http-transport).
 
@@ -124,9 +124,9 @@ Request limits are keyed by token id, and `subscriptions/listen` is exempt. Fail
 | Read SSH keys | no |
 | Read license data | no |
 | Read or change app settings | no |
-| Read files outside TablePro's own support directory | no |
+| Read arbitrary local files | no |
 | Change Safe Mode rules | no |
 | Create, change, or read other tokens | no |
 | Create or edit connection records | no |
 
-Statements that reach the filesystem or run server-side code are refused before they reach the driver, on every tool, along with the rest of [what no external caller may send](/developers#what-read-only-allows). The reachable surface is the [tool catalog](/developers/mcp-tools), the [resources](/developers/mcp-resources), and the [prompts](/developers/mcp-prompts). Nothing outside those lists is exposed.
+`export_data` can write a new file in Downloads under its [path rules](/developers/mcp-tools#export_data). SQL statements that reach the filesystem or run server-side code are refused before they reach the driver, on every tool, along with the rest of [what no external caller may send](/developers#what-read-only-allows). The reachable surface is the [tool catalog](/developers/mcp-tools), the [resources](/developers/mcp-resources), and the [prompts](/developers/mcp-prompts). Nothing outside those lists is exposed.

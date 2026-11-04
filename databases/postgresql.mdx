@@ -85,7 +85,9 @@ Connect by hostname, never an IP address: the ticket is for the service principa
 
 ### Password file
 
-Turn on **Use ~/.pgpass** to read the password from `~/.pgpass` instead of typing one. Entries are `hostname:port:database:username:password`, `*` matches any field, first match wins. An empty **Username** matches your macOS login name, and a socket connection matches as described in [Unix socket](#unix-socket). The form reports what it found, including `~/.pgpass has incorrect permissions (needs chmod 0600)`, the one that silently blocks a connect.
+**Use ~/.pgpass** starts off. Turn it on to read the password from `~/.pgpass` instead of typing one. With it off, an empty password does not trigger a file lookup, including during backup and restore. Entries are `hostname:port:database:username:password`, `*` matches any field, first match wins. An empty **Username** matches your macOS login name, and a socket connection matches as described in [Unix socket](#unix-socket). The form reports what it found, including `~/.pgpass has incorrect permissions (needs chmod 0600)`, the one that silently blocks a connect.
+
+Imported or synced password-file settings need [approval on this Mac](/connections/connection-form#sign-ins-from-this-mac) before use.
 
 ## Databases and schemas
 
