@@ -3,6 +3,8 @@ title: Connection form
 description: The four sections of the connection editor and the fields each driver adds
 ---
 
+import LocalCredentialConsent from "/snippets/local-credential-consent.mdx";
+
 The editor's sidebar lists the same four sections whatever the driver. Only Network is ever absent, and only for a driver that connects directly and cannot negotiate TLS.
 
 <Frame caption="A PostgreSQL connection on the General tab">
@@ -33,9 +35,13 @@ The bar along the bottom carries **Test Connection**, **Cancel** and **Save**, p
 | **Username** | Not pre-filled. Empty means the driver's own default |
 | **Password** | Stored in the macOS Keychain. **Show password** reveals a saved one after Touch ID or your Mac's password. A connection whose password comes from a [password source](/features/connection-sharing#password-sources) shows the source here, with **Test Source** |
 | **Prompt for password** | Stores nothing, asks on every connect. Reads **Prompt for API token** on API-only drivers |
-| **Use ~/.pgpass** | PostgreSQL, Redshift, CockroachDB, and KingbaseES. Reads `~/.pgpass`, and reports underneath whether the file exists, has `chmod 0600`, and holds a matching line |
+| **Use ~/.pgpass** | PostgreSQL, Redshift, CockroachDB, and KingbaseES. Off by default. See [Password file](/databases/postgresql#password-file) for lookup rules and file permissions |
 
 SQLite, DuckDB, libSQL, and Beancount replace the host fields with a file path. **Browse…** picks a file that exists. **New…** names one that does not, and the file is made when you connect; Beancount opens only an existing ledger, so it has no **New…**.
+
+## Sign-ins from this Mac
+
+<LocalCredentialConsent />
 
 ## Network
 

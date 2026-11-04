@@ -3,7 +3,7 @@ title: MCP Clients
 description: Connect Claude Desktop, Claude Code, Cursor, VS Code, Cline, Continue, Zed, Windsurf, Antigravity, Goose, and custom clients to TablePro
 ---
 
-Paste one absolute path into your client's MCP config and stop there. `tablepro-mcp` ships inside the app bundle; it starts TablePro when nothing is running, reads the port, and carries the token, so none of those end up in the file.
+Paste one absolute path into your client's MCP config and stop there. `tablepro-mcp` ships inside the app bundle; it starts TablePro when nothing is running, finds the private socket, and carries the token, so none of those end up in the file.
 
 ```json
 {
@@ -108,7 +108,7 @@ TablePro does not have to be open first, but **Enable MCP Server** has to be on.
 
 The token is not yours to manage either. Each server start mints one named `__stdio_bridge__`, writes it into the handshake file, and rotates it 15 minutes before its one-hour expiry. It is **Read & Write**, so an agent on the bridge can read and write but cannot call `confirm_destructive_operation`.
 
-The port is absent for the same reason: TablePro writes the port it actually bound into the handshake file, so a conflict resolves itself and your config never changes.
+The bridge reads the socket path from the [handshake file](/developers/mcp-protocol#local-socket-and-handshake). It checks the socket before sending a token, then checks the server instance before forwarding client requests. The HTTP port is only for clients using the HTTP transport.
 
 Two installs share that one handshake file, so the bridge reaches whichever TablePro is running rather than the bundle whose path you configured. Quit the one you do not want.
 

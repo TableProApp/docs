@@ -12,7 +12,7 @@ Three requests leave a stock install without you asking: one usage heartbeat a d
 | [Plugin catalog](#the-plugin-catalog) | `updates.tablepro.app` | Yes | None |
 | [AI provider](#ai-providers) | whichever provider you add | No provider is configured on a fresh install | Delete the provider, or turn off **Enable AI Features** |
 | [iCloud sync](#icloud-sync) | your own iCloud account | No | **Settings > Sync** |
-| [MCP clients](#the-mcp-server) | nowhere: it listens on `127.0.0.1` | No | **Settings > MCP** |
+| [MCP clients](#the-mcp-server) | Local HTTP and a private Unix socket | No | **Settings > MCP** |
 | [License and team library](#license-checks-and-the-team-library) | `api.tablepro.app` | Only after you activate a license | Do not activate one |
 | [Your databases](#your-database-connections) | the hosts you type into the connection form | Only what you connect to | Do not connect |
 | Crash reports | Nowhere. The app has no crash reporter. | - | - |
@@ -95,7 +95,7 @@ With password sync off, secrets are written `kSecAttrAccessibleAfterFirstUnlockT
 
 ## The MCP server
 
-The server listens on `127.0.0.1` and nothing else. Its listener sets `requiredLocalEndpoint` to the IPv4 loopback address, so there is no remote mode and no setting that opens it to your network. Default port 23508.
+Direct HTTP clients connect through IPv4 loopback. The bundled bridge and CLI use a private Unix socket that accepts only the same macOS user. Both listeners require authentication for data access. Neither has a remote mode. See [MCP transport and handshake](/developers/mcp-protocol#local-socket-and-handshake) for paths and permissions.
 
 It is off by default, and nothing starts it while **Enable MCP Server** is off: not the bundled bridge, not the pairing flow, not a `tablepro://integrations/start-mcp` link. What a paired client can reach is real data, so four gates stack:
 
@@ -105,6 +105,8 @@ It is off by default, and nothing starts it while **Enable MCP Server** is off: 
 4. The connection's **AI Policy** of **Never**, its [Safe Mode](/features/safe-mode) level, and the **Approval** setting under **Settings > MCP**, which decides how often a client is asked before it reaches a connection.
 
 Loopback-only describes where the server binds, not everything that can reach it. The server returns CORS headers for two remote origins, `claude.ai` and `app.cursor.com`, so a page you have open there can call your local server from your own browser. The four gates above are what stands between such a call and your data, and the first one means a page without a token gets nothing.
+
+Reads use the driver's read-only mode where supported. Writes run only as approved, in the named database and schema. Statements that access files or run server-side code are refused. [External query rules](/developers#what-read-only-allows) describe the limits.
 
 Every call is written to the local activity log with the token behind it, statements as SHA-256 digests. See [Tokens](/developers/tokens) for the whole model.
 
@@ -172,7 +174,8 @@ Every path here is under `~/Library/Application Support/TablePro/` unless it say
 | `ExecutionAudit.json` | The execution log described in this section. |
 | `TableLoadHistory.jsonl` | The table load history described in this section, 7 days. Mode `0600`. |
 | `mcp-audit.db` | The MCP activity log, 90 days, statements as digests. Mode `0600` inside a `0700` directory. |
-| `mcp-handshake.json` | The bound port and the bridge token, mode `0600`. |
+| `mcp-handshake.json` | The socket path, bridge token, host process, server instance, protocol version and expiry. Mode `0600`. |
+| `mcp.sock` | The bridge and CLI socket. See [transport paths](/developers/mcp-protocol#local-socket-and-handshake) for its fallback location. |
 | `TabState/`, `RecentlyClosedTabs/` | Open and recently closed tabs, including their query text. |
 | `FilterState/`, `ColumnLayout/` | Per-table filters and column widths. |
 | `LastSession.json`, `LastOpenConnections.json` | What to reopen for **Reopen Last Session**, and which of those connections dial on their own. |
@@ -183,6 +186,8 @@ Every path here is under `~/Library/Application Support/TablePro/` unless it say
 | `~/Library/Preferences/com.TablePro.plist` | Settings, and the signed license blob, which carries the email on the license. |
 
 ## Passwords and secrets
+
+Imported, synced and shared connections need [local sign-in approval](/connections/connection-form#sign-ins-from-this-mac) before using this Mac's cloud credentials or Kerberos tickets. Environment variable references have a [separate prompt](/features/connection-sharing#environment-variables). These approvals stay on the Mac that granted them.
 
 Secrets live in the macOS keychain, under the `com.TablePro` service and in the data protection keychain: connection passwords, SSH passwords, key passphrases, SSL client key passphrases, TOTP secrets, plugin secure fields, AI provider keys, and the license key. Google sign-in refresh tokens for BigQuery and Spanner are kept in the same keychain under `com.TablePro.GoogleOAuth`, one per OAuth client ID. MCP tokens are the exception, stored as a salted SHA-256 hash; the plaintext is shown once at creation and never written down.
 

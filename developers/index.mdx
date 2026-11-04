@@ -76,7 +76,7 @@ the directory [refuses](/developers/listing-policy#rules) an integration that re
 
 ## Security model
 
-The MCP server binds `127.0.0.1`, and on stock settings every request carries a token. A call is
+The MCP server accepts local HTTP and Unix socket clients. Every request carries a token. A call is
 allowed only where the token's scope, the token's connection allowlist, and the connection's own
 **External Clients** level all permit it; the effective permission is the lowest of them.
 [Tokens](/developers/tokens) has the full model. On top of that, an AI policy of **Never** refuses
@@ -99,30 +99,37 @@ read it.
 
 ### What Read Only allows
 
-**Read Only** is a check on the statement's text, made before the statement reaches the driver. A
-statement from an MCP client, a script or a shortcut runs only when TablePro can tell for certain
-that it reads, by the rules in [What counts as a read](/features/safe-mode#what-counts-as-a-read).
-Anything else fails with "This connection is read only for external clients."
+A statement from MCP, AppleScript or Shortcuts is
+[classified as a read or write](/features/safe-mode#what-counts-as-a-read) before it reaches the driver.
+**Read Only** refuses anything classified as a write. A token or connection with write access does
+not turn an approved read into a write: the driver receives it as read-only.
 
-These fail at every level, **Read & Write** included:
+The driver uses the engine's read-only mode where supported. Some engines still allow session or
+temporary-object changes; others depend on command checks and the database login's privileges.
+The note under **External Clients** in the connection form describes that engine's limit. Use a
+login that can only read when that limit matters. Update the driver in **Settings > Extensions**
+to get its current enforcement.
 
-- Text holding more than one statement, or ending inside a block it opened, with "Send one
-  statement at a time." A SQL Server script is the exception: it runs batch by batch at its `GO`
-  lines.
-- A statement that reads or writes files, or runs code on the server, such as `COPY`, `ATTACH`,
-  `LOAD`, `VACUUM INTO`, DuckDB's file readers like `read_csv`, ClickHouse's `file`, `url` and `s3`,
-  and T-SQL that runs a string through `EXEC` or `sp_executesql`.
-- A request in the form TablePro builds for its own grid on engines such as BigQuery,
-  Elasticsearch and Typesense. Send the statement it stands for.
+A read that needs its own read-only transaction fails while the session has a transaction open.
+Commit or roll it back in the app, then retry.
 
-The AI assistant's `execute_query` makes the same three refusals. The assistant answers to the
-connection's AI policy and Safe Mode rather than to **External Clients**; see
+These requests fail at every external access level, including **Read & Write**:
+
+- More than one statement, or an unfinished block. Send one statement per call. SQL Server scripts
+  are the exception: they run in batches at `GO` lines.
+- File access or server-side code, including `COPY`, `ATTACH`, `LOAD`, `VACUUM INTO`, DuckDB's
+  `read_csv`, ClickHouse's `file`, `url` and `s3`, and T-SQL string execution.
+- Non-built-in function calls on a connection that loads SQLite extensions. Run those in the app.
+- Private requests built for the app's grid. Send the database statement instead.
+
+The AI assistant follows the same statement rules. Its access comes from the connection's AI
+policy and Safe Mode, rather than **External Clients**. See
 [Tool calling](/features/ai-assistant#tool-calling).
 
-A statement that clears the check runs as the connection's login, with every privilege that login
-holds. Those privileges are the final limit. For a connection where an unwanted write matters, save
-it with a login that can only read, or set **External Clients** to **Blocked** and **AI Policy** to
-**Never**.
+A write goes through Safe Mode with its connection, database, schema and parameter values fixed.
+Only the approved statements run in that scope. Destructive statements always need approval,
+including `DROP`, `TRUNCATE`, `ALTER … DROP`, and `DELETE` without `WHERE`.
+MCP and the assistant route them through `confirm_destructive_operation`.
 
 ## Publish it
 

@@ -63,6 +63,25 @@ The `Host` header must name a loopback host (`localhost`, `127.0.0.1`, `::1`) an
 
 The port is `23508` by default. Make it a setting: when that port is busy the server binds another one, and the **Status** row in **Settings > MCP** shows the port in use. The handshake file is [not under the contract](/developers/versioning#what-is-not-under-the-contract).
 
+## Local socket and handshake
+
+The bridge and the `tablepro` CLI send HTTP over a Unix socket, normally
+`~/Library/Application Support/TablePro/mcp.sock`. The socket has mode `0600` in a `0700` folder.
+Only processes running as the same macOS user may connect. A bearer token is still required.
+
+If the support path is too long for a Unix socket, or its folder cannot be made private, the socket
+uses the `TablePro-MCP` folder in the user's macOS temporary directory. The handshake records the
+actual path. Use the bundled bridge instead of hard-coding a path.
+
+`~/Library/Application Support/TablePro/mcp-handshake.json` uses format version `3`. It holds
+`socketPath`, `token`, `pid`, `instanceId`, `protocolVersion`, and `expiresAt`. It has no `port` field.
+This file is [outside the stable contract](/developers/versioning#what-is-not-under-the-contract).
+
+Before sending credentials, the bridge checks the file's owner and permissions, expiry, host process,
+and socket ownership and location. It then calls `server/discover` over that socket and checks
+`app.tablepro/instanceId` against the handshake. A mismatch refuses the connection. A restart or
+socket failure requires a fresh trusted handshake; the bridge does not fall back to TCP.
+
 ## Protocol versions
 
 | Version | Era | Notes |
@@ -255,7 +274,7 @@ Without `elicitation`, TablePro shows its own confirmation dialog on the user's 
 }
 ```
 
-The `description` carries the statement verbatim, line breaks and all, up to 2,000 characters. Render it as a block rather than a one-line label: it is the only thing the person sees before they approve, and a `WHERE` clause that falls off the end changes what they agreed to.
+The `description` carries the statements as they will run, with parameter values filled in and line breaks kept. The prompt names the connection, database and schema in use. Render the text as a block. If it exceeds 2,000 UTF-16 code units, the full confirmation opens on the Mac instead of sending a shortened form.
 
 Present the form, then repeat the **same** call with the answer and the state echoed back:
 
@@ -327,7 +346,7 @@ Protocol errors are reserved for the envelope: a malformed request, a missing sc
 |-------|-------|
 | Request body | 10 MB |
 | Request headers | 16 KB |
-| Concurrent connections | 64 |
+| Concurrent connections | 64 per listener: TCP and Unix socket |
 | Idle connection timeout | 30 seconds |
 | Handler deadline | 330 seconds |
 

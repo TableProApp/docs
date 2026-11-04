@@ -3,6 +3,8 @@ title: Connection Sharing
 description: Export connections and their saved queries to a file, share links, import from other apps, and resolve passwords from secret managers
 ---
 
+import LocalCredentialConsent from "/snippets/local-credential-consent.mdx";
+
 Passwords stay in your Keychain, so every route here hands over a connection definition and leaves the other person to supply their own credential. An encrypted export is the one exception.
 
 | Route | Use it when | Passwords | Needs |
@@ -18,7 +20,7 @@ Passwords stay in your Keychain, so every route here hands over a connection def
 
 Right-click a connection > **Share > Export to File…**, selecting several first to export them together, or **File > Export > Export Connections…** for all of them.
 
-The file carries what the connection form holds, from host and port through SSH and SSL configuration, color, icon, tags, the full group path, Safe Mode level, startup commands, AI policy, the Local only flag, and any driver field the plugin does not mark secret. Passwords, key passphrases, TOTP secrets, and secret driver fields stay behind, and so do the settings [Import](#import) strips.
+The file carries host and port, SSH and SSL configuration, color, icon, tags, the group path, Safe Mode level, startup commands, AI policy, the Local only flag, and known shareable driver fields. Sign-in selectors can travel; approval to use this Mac's credentials does not. Passwords and other secrets need an [encrypted export](#encrypted-export). [Import](#import) applies its own field rules when saving a connection.
 
 <Frame caption="Export connections">
   <img className="block dark:hidden" src="/images/connection-export-menu.png" alt="Export connections" />
@@ -83,20 +85,25 @@ Group and folder paths match by name from the top down: an existing group or fol
   <img className="hidden dark:block" src="/images/connection-import-preview-dark.png" alt="Import preview" />
 </Frame>
 
-Anything that decides where a credential comes from, or runs code on your Mac, is stripped on the way in, from a file and from a link alike:
+A file or import link keeps known settings, server addresses and local file paths. It drops
+unknown driver fields, secrets, and settings that run local code. Check the affected settings after import:
 
-- AWS options including IAM authentication, the region, the profile and the RDS endpoint
-- MongoDB's **AWS IAM** auth mechanism, which imports as **Default**, and the secrets a pasted MongoDB connection string carried
-- **Application (Client) ID**, **Directory (Tenant) ID** and the signed-in account of a Microsoft Entra ID connection
-- Snowflake's **CLI Connection Name** and Spanner's **REST Endpoint**
-- Beancount's **Run Ledger Plugins**
-- **Use ~/.pgpass** and **Prompt for password**
-- The SSL client key passphrase, and the pre-tunnel host and port
-- **Pre-Connect Script** and **Post-Disconnect Script**
+- Cloud credential selectors, cached sign-ins and profiles, Windows or Kerberos authentication
+  selectors, and **Use ~/.pgpass**. Plain password, service-account and emulator choices remain
+  where the driver supports them.
+- **Run Ledger Plugins**, **Prompt for password**, **Pre-Connect Script** and **Post-Disconnect Script**.
+- Internal tunnel fields and secret driver fields. Encrypted files carry supported secrets in their
+  credentials section. A service-account key must contain the JSON key, not a path to a key on this Mac.
 
-Set them again on the imported connection. A credential profile new to this Mac arrives set to ask for its password; see [Credential Profiles](/connections/credential-profiles#sharing-and-sync).
+A new credential profile arrives set to ask for its password. Replacing a connection keeps its local
+credential settings; a changed destination still needs approval. See
+[Credential Profiles](/connections/credential-profiles#sharing-and-sync).
 
 Startup SQL and tunnel commands run on every connect, so a file brings them only if you agree: importing lists each one and asks, and **Import Without Commands** is the default. A link's sheet shows its startup SQL in full before you add it.
+
+## Sign-ins from this Mac
+
+<LocalCredentialConsent />
 
 ## Share via link
 
@@ -142,7 +149,7 @@ Groups and saved queries come across the way they do on the Mac. The review list
 
 <Info>Needs a [Pro license](/features/licensing).</Info>
 
-Press `Cmd+,`, then **Settings > General > Linked Folders > Add Folder…** and point it at a directory of `.tablepro` files: a Git repo, a Dropbox folder, a network drive. Those connections appear read-only in the sidebar, and each person enters their own password.
+Press `Cmd+,`, then **Settings > General > Linked Folders > Add Folder…** and point it at a directory of `.tablepro` files: a Git repo, a Dropbox folder, a network drive. Those connections appear read-only in the sidebar. Each person supplies their credentials. Linked definitions keep sign-in selectors, subject to [approval on this Mac](#sign-ins-from-this-mac).
 
 Each folder's row says what the last scan found: how many connections, or why it found none.
 
@@ -169,7 +176,9 @@ Each folder's row says what the last scan found: how many connections, or why it
 
 <Info>Needs a [Pro license](/features/licensing).</Info>
 
-Write `$VAR` or `${VAR}` in a `.tablepro` file and it resolves from TablePro's process environment at connect time. An app launched from the Dock inherits no shell exports, so set the variable with `launchctl setenv NAME value` or launch TablePro from a terminal.
+Write `$VAR` or `${VAR}` in a `.tablepro` file to read TablePro's process environment at connect time. **Send Environment Variables?** shows the variable names and destination before reading their values. Click **Send Values** to approve. Approval stays on this Mac; a new destination or variable asks again. Background reconnects stop until you approve through a connection you open yourself.
+
+An app launched from the Dock inherits no shell exports. Set the variable with `launchctl setenv NAME value` or launch TablePro from a terminal.
 
 ```json
 { "host": "${DB_HOST}", "username": "$DB_USER" }

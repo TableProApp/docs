@@ -3,7 +3,7 @@ title: MCP Server
 description: Built-in Model Context Protocol server that lets AI clients query your databases through TablePro
 ---
 
-The [MCP](https://modelcontextprotocol.io) server binds `127.0.0.1` and nothing else: no remote mode, no TLS certificate, no setting that opens it to your network. Claude Desktop, Claude Code, Cursor, and Zed reach your databases through the connections you already saved, and never see a password.
+Use the bundled `tablepro-mcp` bridge to connect an AI client to your saved connections. The bridge and the `tablepro` command use a private Unix socket. Direct HTTP clients use `127.0.0.1`. Neither listener opens to your network.
 
 This page covers the **Settings > MCP** pane. The protocol itself, the tool catalog, the prompts and the token model live under [Developers](/developers).
 
@@ -20,7 +20,7 @@ With the toggle off, nothing starts the server. A client that launches the bundl
 
 While it is only answering a client, TablePro stays out of the Dock and the app switcher. It appears in both, with its menu bar, once it has a window on screen, including one a client asked it to open. A TablePro the bridge launched while the toggle is off quits again.
 
-The default port is **23508**. If it is taken, TablePro asks the kernel for a free one instead, and the **Status** row says the port you set was in use. Either way the real port goes to `~/Library/Application Support/TablePro/mcp-handshake.json`, which the bridge reads, so a client config never carries a port.
+The default HTTP port is **23508**. If it is taken, the server binds a free port, shown in **Status**. The bridge uses the socket recorded in the [handshake file](/developers/mcp-protocol#local-socket-and-handshake), so its config needs no port.
 
 ## Server configuration
 
@@ -82,7 +82,7 @@ Tokens that hold this grant read **Lists connections hidden from AI** in the tok
 
 ## Authentication
 
-Every request needs a token, including one from your own Mac. The bundled bridge mints its own, so a client set up through **Connect a Client…** needs nothing from you; an HTTP client or a launcher needs a token you generate or pair. Create, scope, allowlist, expire and revoke tokens in this section, described in [Tokens](/developers/tokens).
+Every request needs a token, including one from your own Mac. The server supplies a token to the bundled bridge, so a client set up through **Connect a Client…** needs nothing from you; an HTTP client or a launcher needs a token you generate or pair. Create, scope, allowlist, expire and revoke tokens in this section, described in [Tokens](/developers/tokens).
 
 ## Activity and connected clients
 
@@ -96,8 +96,8 @@ Every request needs a token, including one from your own Mac. The bundled bridge
 - Clients work through your saved connections. Passwords never leave the Keychain and are not readable over MCP.
 - AI access is set per connection, including blocking a connection from external clients entirely. A blocked connection is not even listed.
 - Tokens carry scopes and can be limited to named connections. A request without one gets `401`, from your own Mac too. See [No token, no access](/developers/tokens#no-token-no-access).
-- Writes go through the connection's [Safe Mode](/features/safe-mode#external-clients). `DROP` and `TRUNCATE` need a full-access token and the user's approval every time.
-- Statements that read or write files, or run server-side code, are refused before they reach the driver. [What Read Only allows](/developers#what-read-only-allows) lists the rest.
+- Writes go through the connection's [Safe Mode](/features/safe-mode#external-clients). Destructive statements need a full-access token and approval every time. See [the confirmation tool](/developers/mcp-tools#writing-data).
+- Reads use the driver's read-only mode where supported. Statements that access files or run server-side code are refused. [What Read Only allows](/developers#what-read-only-allows) covers engine limits and other refusals.
 - The reachable surface is the [tool catalog](/developers/mcp-tools), the [resources](/developers/mcp-resources) and the [prompts](/developers/mcp-prompts). Nothing else.
 - Reaching the server from another machine means forwarding the port over SSH yourself, and owning what that exposes.
 

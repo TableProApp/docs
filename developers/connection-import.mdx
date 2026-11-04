@@ -3,9 +3,8 @@ title: Connection Import
 description: Every query parameter a tablepro://import link accepts, and which ones the app refuses
 ---
 
-Passwords are never accepted in an import link, and neither is anything else that decides where a
-credential comes from. What is left is the rest of the connection form, one query parameter per
-field, and a review sheet the user reads before anything is saved.
+An import link opens a review sheet before saving a connection. It carries connection settings,
+not passwords or approval to use local credentials.
 
 ```text
 tablepro://import?name=Staging&host=db.example.com&port=5432&type=postgresql&username=admin
@@ -24,7 +23,7 @@ values that contain spaces: `sslMode=Verify%20CA`.
 | Parameter | Description |
 |-----------|-------------|
 | `port` | Server port. Defaults to the type's standard port. |
-| `socket` | MySQL and MariaDB. Socket file path, in place of `host` and `port`. See [Socket](#socket). |
+| `socket` | MySQL and MariaDB take a socket file path. PostgreSQL takes its folder and keeps `port`. See [Socket](#socket). |
 | `username` | Database username. |
 | `database` | Default database name. |
 | `color` | Sidebar color: `Red`, `Orange`, `Yellow`, `Green`, `Blue`, `Purple`, `Pink`, `Gray` or `None`. Falls back to `None`. |
@@ -76,25 +75,18 @@ Set `ssh=1`, or none of these are read.
 
 ## Driver fields
 
-An `af_` prefix passes a driver-specific field straight to the plugin: `af_replicaSet=myrs` sets
-`replicaSet` on a [MongoDB](/databases/mongodb) connection. Field names come from the plugin, so the
-engine's own page is where they are listed.
+Use `af_<fieldId>` for a known driver field. For example, `af_mongoReplicaSet=myrs` sets
+`mongoReplicaSet` on a MongoDB connection. Match the field ID's case exactly.
 
-These are dropped on import, because each decides where a credential comes from or runs code on
-the Mac. The part after `af_` matches without case.
+Known settings, destination fields and local file paths are accepted. Unknown fields are dropped.
+A sign-in selector that uses local credentials is also dropped: examples include
+`af_mssqlAuthMethod=windows`, `af_awsAuth=profile`, and `af_usePgpass=true`.
+A plain selector such as `af_mssqlAuthMethod=sql` is kept.
 
-- Any name starting with `af_aws` or `af_entra`.
-- `af_beancountRunLedgerPlugins`, `af_postDisconnectScript`, `af_preConnectScript`,
-  `af_preTunnelHost`, `af_preTunnelPort`, `af_promptForPassword`, `af_snowflakeConnectionName`,
-  `af_spEndpoint`, `af_sslClientKeyPassphrase` and `af_usePgpass`.
-- `af_mongoAuthMechanism=MONGODB-AWS`.
-- MongoDB secrets: `af_mongoAWSSessionToken`, `af_mongoParam_tlsCertificateKeyFilePassword`,
-  `af_mongoParam_sslClientCertificateKeyPassword`, `af_mongoParam_proxyPassword`, and
-  `af_mongoParam_authMechanismProperties` when it carries an `AWS_SESSION_TOKEN`.
-
-The same rule covers `.tablepro` files, described in
-[Connection Sharing](/features/connection-sharing#import). Add any of these by hand in the connection
-editor afterwards.
+Secrets, internal fields and local script settings are refused under the same
+[field rules as a file import](/features/connection-sharing#import). Configure those settings in
+the connection editor. Imported connections do not carry
+[sign-in approval](/connections/connection-form#sign-ins-from-this-mac).
 
 ## What the user sees
 

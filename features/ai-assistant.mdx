@@ -84,8 +84,8 @@ The mode picker in the composer footer controls which tools the AI can call. It 
 | Mode | Tools available | When to use |
 |------|----------------|-------------|
 | **Ask** | Read-only schema lookups: `list_connections`, `get_connection_status`, `list_databases`, `list_schemas`, `list_tables`, `describe_table`, `get_table_ddl`. | Questions, exploration, drafting queries you run yourself. |
-| **Edit** | All Ask tools, plus `execute_query` for `SELECT`, `INSERT`, `UPDATE`, `DELETE`. Destructive DDL (`DROP`, `TRUNCATE`, `ALTER…DROP`) stays blocked. | Letting the AI run the queries it proposes. |
-| **Agent** | All tools, plus `confirm_destructive_operation` for destructive DDL. Runs tools in a loop. | Multi-step migrations and schema changes. |
+| **Edit** | All Ask tools, plus `execute_query` for `SELECT`, `INSERT`, `UPDATE`, `DELETE`. Destructive statements stay blocked. See [external query rules](/developers#what-read-only-allows). | Letting the AI run the queries it proposes. |
+| **Agent** | All tools, plus `confirm_destructive_operation` for destructive statements. Runs tools in a loop. | Multi-step migrations and schema changes. |
 
 Mode and [Safe Mode](/features/safe-mode) are independent gates. Agent mode does not bypass Safe Mode.
 
@@ -100,7 +100,7 @@ In Edit and Agent modes each tool call appears as a card in the reply. Read-only
 
 Safe Mode **Silent** auto-approves write tools and **Read-Only** auto-denies them. Destructive operations are the exception: `confirm_destructive_operation` always needs a click, Silent does not auto-approve it, **Always for this connection** is refused for it, and the model must pass the verbatim phrase `I understand this is irreversible`.
 
-`execute_query` refuses what [external clients cannot send at any level](/developers#what-read-only-allows), several statements in one call among them. Text stored in the database can steer the model, so on a connection where an unwanted write matters, connect with a login that can only read: the database holds that limit whatever the model sends.
+`execute_query` follows the [external query rules](/developers#what-read-only-allows), including their SQL Server script exception. Text stored in the database can steer the model, so on a connection where an unwanted write matters, connect with a login that can only read: the database holds that limit whatever the model sends.
 
 Every provider can call tools. Claude Agent reaches them through the MCP server, so that has to be on, and local models depend on the model.
 
