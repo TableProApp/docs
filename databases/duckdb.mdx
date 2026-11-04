@@ -36,7 +36,7 @@ Pick a `.duckdb` file to open a database, or a `.parquet`, `.csv`, `.tsv`, `.jso
 | `.parquet`, `.csv`, `.tsv`, `.json`, `.jsonl`, `.ndjson`, also gzip or zstd compressed | An in-memory database holding two read-only views over the file, one named `file` and one named after the file. A path that does not exist is reported instead of created |
 | `:memory:` | An empty database, discarded on disconnect |
 
-In Local File mode the path is the whole connection, and it is required; the form shows no host, port or Database field.
+In Local File mode the path is the whole connection, and it is required; the form shows no host, port or Database field, and no Network tab.
 
 Double-click a `.duckdb` or `.ddb` file in Finder to open it here. `.parquet` files list TablePro under **Open With** rather than taking the association; to make a double-click open them here, select one in Finder, press `Cmd+I`, set **Open with** to TablePro, and click **Change All…**. `.csv`, `.tsv`, `.json` and `.ndjson` open from the connection form only.
 
@@ -50,13 +50,18 @@ Quack is DuckDB's client-server protocol, served by `quack_serve`. Set **Connect
 |-------|-------|
 | **Host** | Server address. Required |
 | **Port** | `9494` by default |
-| **Token** | The token the server was started with |
+| **Token** | The token the server was started with, the `token` argument of `quack_serve`. Required |
 | **Database Alias** | The name the remote is attached under. Pre-filled with `remotedb` |
+| **SSL Mode** | **Automatic** by default. See [SSL/TLS](#ssl%2Ftls) |
+| **CA Certificate** | Under Verify Identity only. The PEM file of the CA that signed the server's certificate. Optional |
+| **Certificate Fingerprint** | Under Verify Fingerprint only. The SHA-256 fingerprint of the server's certificate. Required |
 
-**Save & Connect** attaches the remote to an in-memory DuckDB. Reach it through the alias: `SELECT * FROM remotedb.main.orders`.
+**Save & Connect** attaches the remote to an in-memory DuckDB. Reach it through the alias: `SELECT * FROM remotedb.main.orders`. **Token**, **SSL Mode** and the certificate fields are all the connection uses: a remote session reads no secret saved with `CREATE PERSISTENT SECRET` in `~/.duckdb/stored_secrets`, so a token or pin stored there for the server has no effect.
+
+For a server this Mac cannot reach directly, Remote mode adds a **Network** tab with [SSH Tunnel](/connections/ssh-tunneling), [Cloudflare Tunnel](/connections/cloudflare-tunnel), [SOCKS Proxy](/connections/socks-proxy) and [Tunnel Command](/connections/tunnel-command). **Host** and **Port** stay the server's own, named as the far end of the tunnel reaches it: `localhost` for a server on the SSH server itself. Then pick the SSL Mode from [Through a tunnel](#through-a-tunnel).
 
 <Info>
-The `quack` extension is not linked into the macOS build. DuckDB downloads it from `extensions.duckdb.org` on the first remote connect and caches it under `~/.duckdb`, so that one connect needs to reach that host.
+The macOS build links neither the `quack` extension nor `httpfs`, which carries HTTPS under every SSL Mode but Verify Fingerprint. DuckDB downloads each from `extensions.duckdb.org` the first time a connection needs it and caches it under `~/.duckdb`, so that connect needs to reach that host.
 </Info>
 
 ## Connection URL
@@ -64,9 +69,12 @@ The `quack` extension is not linked into the macOS build. DuckDB downloads it fr
 ```text
 duckdb:///path/to/database.duckdb
 quack://host:9494/alias
+quack://host:9494/alias?sslmode=verify-full
+quack://host:9494/alias?ssl_fingerprint=4A:1F:9C:02:7E:B3:58:D6:11:E0:3C:A7:92:5B:F4:08:6D:21:C9:7A:E5:30:4F:B8:17:93:DA:6E:02:C5:8B:F1
+quack+ssh://deploy@bastion.example.com/localhost:9494/alias
 ```
 
-See [Connection URL Reference](/connections/urls) for all parameters.
+`sslmode` sets **SSL Mode**, `ssl_fingerprint` sets Verify Fingerprint and its pin, and a connection behind an SSH tunnel copies as `quack+ssh://`. [DuckDB remote](/connections/urls#duckdb-remote) has every value.
 
 ## Databases and schemas
 
@@ -109,12 +117,76 @@ Releasing hands the file to whoever wants it next, which may not be you. A query
 
 **File > Backup Dump…** runs over the open connection. It copies the whole database into a `.duckdb` file, or exports it as a folder of Parquet files. **File > Restore Dump…** takes the `.duckdb` file. For the folder, and what each format carries, see [Backup & Restore](/features/backup-restore#what-a-dump-carries).
 
+## SSL/TLS
+
+A local file has no TLS. A remote connection's **SSL Mode** sits on the General tab with the other Remote fields and starts on **Automatic**. Leave it there unless the server's certificate comes from a private CA or from `quack_serve` itself. No mode falls back to another: a mismatch stops the connect with a message naming the setting to change.
+
+| SSL Mode | What the connection does | Pick it for |
+|---|---|---|
+| **Automatic** | Plain HTTP to `localhost`, `127.0.0.1` and `::1`. HTTPS to any other host, with the certificate checked against `/etc/ssl/cert.pem` and the host name | A server on this Mac, or one with a public certificate |
+| **Disabled** | Plain HTTP to any host | A plain HTTP server on another machine |
+| **Required (skip verify)** | HTTPS, with no certificate check | Testing. The token goes to whichever server answers |
+| **Verify Identity** | HTTPS, with the certificate checked against `/etc/ssl/cert.pem` plus **CA Certificate**, and the host name | A certificate from a private CA, such as one mkcert made |
+| **Verify Fingerprint** | HTTPS, with the certificate matched against **Certificate Fingerprint**. No name is checked | The certificate `quack_serve` generates, or any self-signed one |
+
+### Trusting a private CA
+
+DuckDB never reads the macOS keychain. A CA trusted there, by `mkcert -install` or in Keychain Access, does not make its certificates pass under Automatic. Give DuckDB the CA file instead:
+
+<Steps>
+  <Step title="Find the CA file">
+    Use the PEM certificate of the CA that signed the server's. For mkcert that is `rootCA.pem`, in the folder this prints:
+
+    ```bash
+    mkcert -CAROOT
+    ```
+  </Step>
+  <Step title="Choose it">
+    Set **SSL Mode** to **Verify Identity**, click **Browse…** beside **CA Certificate**, and choose the file.
+  </Step>
+</Steps>
+
+The file has to be PEM. A DER file is refused before DuckDB dials the server; convert it with `openssl x509 -inform der -in ca.der -out ca.pem`.
+
+The connection then trusts that CA on top of `/etc/ssl/cert.pem` for every HTTPS read it makes, `read_parquet('https://…')` in its editor included. Other connections are unaffected. With **CA Certificate** left empty, Verify Identity checks against `/etc/ssl/cert.pem` alone, and uses HTTPS even to `localhost`.
+
+### Pinning the server's certificate
+
+Started without a certificate of its own, `quack_serve` generates one that names no host, so no CA check can pass it. Set **SSL Mode** to **Verify Fingerprint** and paste the certificate's SHA-256 fingerprint into **Certificate Fingerprint**. On the server, the `ssl_fingerprint` column holds it:
+
+```sql
+FROM quack_server_list();
+```
+
+For a certificate file, `openssl` prints the same value:
+
+```bash
+openssl x509 -noout -fingerprint -sha256 -in cert.pem
+```
+
+The field takes the 64 hex digits with or without colons, and with or without `sha256:` in front. Once the server has a new certificate, the pin fails until you paste the new fingerprint.
+
+### Through a tunnel
+
+A tunnel hands DuckDB a port on `127.0.0.1` in place of the server's name, so no mode checks the certificate's name there. **Host** on General still decides what Automatic does.
+
+| The server | SSL Mode |
+|---|---|
+| `quack_serve` on `localhost` where the tunnel lands, serving plain HTTP | **Automatic**, with **Host** set to `localhost`. Nothing off that machine reaches the server, and the tunnel encrypts the hop. Prefer this setup |
+| HTTPS, on any host | **Verify Fingerprint**, or **Required (skip verify)** to encrypt without a check |
+| Plain HTTP, on another host | **Disabled** |
+
+Verify Identity, and Automatic with any **Host** but `localhost`, `127.0.0.1` or `::1`, are refused before DuckDB dials, with a message naming the modes that work.
+
 ## Limitations
 
 - A DuckDB file takes one writer at a time. A connect against a file another process holds fails, naming that process and its process ID. Quit the `duckdb` CLI, the Python process or the other TablePro window first, or set **Release the File Lock After**.
 - A data file opened through **Browse…** is read-only, and the file on disk is left byte for byte identical. To change its contents, open a `.duckdb` database and run `CREATE TABLE t AS SELECT * FROM 'data.parquet'`.
 - Remote (Quack) lists no tables in the sidebar. Write them out by name through the alias.
-- No **SSL Mode** and no SSH tunnel. The engine is in-process; see [SSL/TLS](/connections/ssl).
+- Local File has no tunnel. To reach a file on another machine, serve it there with `quack_serve` and connect in Remote mode.
+- Quack takes no client certificate. **Token** is the only credential a remote connection sends.
+- A remote connection's editor sees no persistent secret, an S3 one included, so a read that needs it fails. Run `CREATE SECRET` in the session instead; it lasts until the connection closes. Local File connections read persistent secrets.
+- **Required (skip verify)** turns the certificate check off for every HTTPS read the connection makes, `read_parquet('https://…')` in the editor included. Pin the server with **Verify Fingerprint** to keep those reads checked.
 - No creating or dropping a database. `ATTACH` is the way to reach a second file.
 
 ## Troubleshooting
@@ -127,10 +199,6 @@ A data-file path that is not there. Only `.duckdb` and `.ddb` are created on dem
 
 The file opened and exposed nothing to list. Check that it is a DuckDB database and not a file with a borrowed extension.
 
-### Port must be a number between 1 and 65535
-
-**Port** holds something else. The Quack default is `9494`.
-
 ### … is using sales.duckdb
 
 Another process holds the file. The message names it and its process ID. Quit it, or turn on **Open the File Read-Only** when the message says read-only would get in, which it does when the other process is itself a reader.
@@ -139,7 +207,64 @@ Another process holds the file. The message names it and its process ID. Quit it
 
 The file moved or was deleted while the connection was idle with its lock released. Point the connection at the new path, or restore the file, then reconnect.
 
+### Token is required
+
+**Token** is empty, and every Quack server has one. Find the `token` argument `quack_serve` was started with on the server, and enter it in **Token**. A token saved as a persistent DuckDB secret is not read.
+
+### Port must be a number between 1 and 65535
+
+**Port** holds something else. The Quack default is `9494`.
+
+### This connection sets SSL Mode, which the installed DuckDB driver does not support yet
+
+The loaded DuckDB driver is older than **SSL Mode**, and this connection sets a mode other than Automatic, so it is refused before anything is dialed. After an app update the new driver downloads in the background and loads at the next launch. Check the driver's row in **Settings > Extensions**, relaunch once it reads "Updates when TablePro relaunches", then connect again. [Updates](/features/plugins#updates) has the details.
+
+### DuckDB could not install its … extension
+
+The first remote connect downloads `quack`, and `httpfs` for HTTPS, from `extensions.duckdb.org`, and this Mac could not reach that host. DuckDB's own reason follows the message. Allow the host through the firewall or proxy, then connect again; once installed, the extension loads with no network.
+
+### DuckDB could not verify the server's certificate
+
+The server's certificate was signed by a CA that neither `/etc/ssl/cert.pem` nor **CA Certificate** holds, or it names another host. A CA trusted only in the macOS keychain counts as neither. Choose the CA file under **Verify Identity**, or pin the certificate under **Verify Fingerprint**, as [SSL/TLS](#ssl%2Ftls) shows.
+
+### The server uses HTTPS, and this connection sent plain HTTP
+
+**SSL Mode** is Disabled, or Automatic with a local **Host**, and the server speaks TLS. Set it to **Verify Identity**, or to **Verify Fingerprint** for a self-signed certificate. Through a tunnel, use **Verify Fingerprint** or **Required (skip verify)**.
+
+### The server did not answer the TLS handshake
+
+The connection used HTTPS, and the server serves plain HTTP or is not a Quack server. Check how `quack_serve` was started. For plain HTTP, set **SSL Mode** to **Disabled**.
+
+### The server's certificate does not match the Certificate Fingerprint
+
+The server now presents a different certificate from the one pinned, or another server answered. Read `ssl_fingerprint` again from `FROM quack_server_list();` on the server and paste it into **Certificate Fingerprint**.
+
+### The Certificate Fingerprint is not a SHA-256 fingerprint
+
+**Certificate Fingerprint** holds something other than 64 hex digits, a 40-digit SHA-1 fingerprint for instance. Copy it again from `quack_server_list()`, or from `openssl x509 -noout -fingerprint -sha256 -in cert.pem`.
+
+### The CA Certificate at … is not a PEM certificate
+
+The file under **CA Certificate** is DER, or not a certificate at all. Convert a DER file with `openssl x509 -inform der -in ca.der -out ca.pem`, then choose `ca.pem`.
+
+### TablePro could not read the CA Certificate at …
+
+The file moved, or its permissions keep it from being read. The reason follows the path. Choose the file again with **Browse…**.
+
+### DuckDB could not read the CA Certificate
+
+The file under **CA Certificate** starts like PEM, and DuckDB still rejected it. Check that it holds whole `-----BEGIN CERTIFICATE-----` blocks, or export the CA again as PEM.
+
+### Verify Identity does not work through a tunnel
+
+**SSL Mode** is Verify Identity and the Network tab has a tunnel selected. DuckDB dials the tunnel on `127.0.0.1`, so the certificate would be checked against that rather than the server's name. Set **SSL Mode** to **Verify Fingerprint**, or to **Required (skip verify)**.
+
+### Automatic does not work through a tunnel to …
+
+**Host** is not `localhost`, `127.0.0.1` or `::1`, so Automatic would use HTTPS and check the certificate against `127.0.0.1`. Set **SSL Mode** to **Verify Fingerprint**, **Required (skip verify)**, or **Disabled** for a plain HTTP server. Or run `quack_serve` on `localhost` where the tunnel lands and set **Host** to `localhost`.
+
 ## Related
 
+- [SSH Tunneling](/connections/ssh-tunneling), for a remote server behind a bastion host
 - [TablePro for iPhone and iPad](/ios), where DuckDB opens a file picked through the Files app
 - [Import & Export](/features/import-export)

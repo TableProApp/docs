@@ -157,7 +157,7 @@ postgresql://%2Ftmp:5433/shop
 |-----------|--------|-------------|
 | `sslmode` | `disable`, `prefer`, `require`, `verify-ca`, `verify-full` | SSL mode under libpq's names, in any case and with `_` for `-`, so `VERIFY_FULL` works too. ClickHouse JDBC's `strict` and `none` read as Verify Identity and Required |
 | `tlsmode` | `0`-`4` | The same modes as integers: 0=disable, 1=prefer, 2=require, 3=verify-ca, 4=verify-full |
-| `tls` / `ssl` | `true`, `false` | `true` turns TLS on: Verify Identity for Trino, Presto and ClickHouse, Required for every other database. `false` sets Disabled, even on a port that means TLS |
+| `tls` / `ssl` | `true`, `false` | `true` turns TLS on: Verify Identity for Trino, Presto, ClickHouse, SAP HANA and DuckDB, Required for every other database. `false` sets Disabled, even on a port that means TLS |
 | `SSLVerification` | `FULL`, `CA`, `NONE` | Trino's certificate check once TLS is on: Verify Identity, Verify CA, Required. Ignored while TLS is off. Verify CA also needs a CA certificate file |
 
 `sslmode` or `tlsmode` wins over `ssl`, `tls` and `SSLVerification`. With none of them, a Trino or Presto URL on port `443` and a ClickHouse URL on `443` or `8443` import as Verify Identity, as in [Ports that mean TLS](/connections/ssl#ports-that-mean-tls), and every other URL takes the driver's default from [Per-driver defaults](/connections/ssl#per-driver-defaults). **Import from URL…** and a link opened from a browser or `open` resolve the mode the same way, so `ssl=false` or `sslmode=disable` is how a link asks for plain TCP. A URL that turns TLS on and names no port opens on the driver's TLS port, `443` for Trino and Presto and `8443` for ClickHouse, and a port written in the URL is kept.
@@ -230,6 +230,26 @@ mongodb://user:pass@host1:27017,host2:27017,host3:27017/mydb?replicaSet=rs0
 - `tlsCertificateKeyFilePassword` sets **Key Passphrase**, and an `AWS_SESSION_TOKEN` inside `authMechanismProperties` sets **AWS Session Token**. Both go to the Keychain, and the rest of `authMechanismProperties` stays an option.
 - `proxyPassword` is dropped.
 - **Copy Connection String** writes an SRV connection as `mongodb+srv://` with no port, and every option percent-encoded.
+
+### DuckDB remote
+
+A `quack://` URL sets the **SSL Mode** among the Remote fields on General, and the pin with it.
+
+| SSL Mode | In the URL |
+|---|---|
+| Automatic | No TLS parameter |
+| Disabled | `sslmode=disable`, or `ssl=false` |
+| Required (skip verify) | `sslmode=require`, or `prefer` |
+| Verify Identity | `sslmode=verify-full`, or `verify-ca`. With no `sslmode`, `ssl` or `tls` set to `true`, `1` or `require` means this too, checked against `/etc/ssl/cert.pem` |
+| Verify Fingerprint | `ssl_fingerprint=`, followed by the SHA-256 fingerprint of the server's certificate. It fills **Certificate Fingerprint** |
+
+`ssl_fingerprint` wins over every other TLS parameter, and `sslmode` wins over `ssl` and `tls` as in [SSL/TLS](#ssl%2Ftls). **Copy Connection String** writes the first value in each row, with the fingerprint as **Certificate Fingerprint** holds it. A connection behind an SSH tunnel copies as `quack+ssh://`, with the server's own host and port after the SSH server and the same parameters:
+
+```text
+quack://quack.internal:9495/remotedb?sslmode=verify-full
+quack://quack.internal:9495/remotedb?ssl_fingerprint=4A:1F:9C:02:7E:B3:58:D6:11:E0:3C:A7:92:5B:F4:08:6D:21:C9:7A:E5:30:4F:B8:17:93:DA:6E:02:C5:8B:F1
+quack+ssh://deploy@bastion.example.com:2222/quack.internal:9495/remotedb?sslmode=require
+```
 
 ## What the path component means
 

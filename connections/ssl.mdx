@@ -49,7 +49,8 @@ A new connection starts on the mode that matches the driver's own default, and s
 | SAP HANA | Verify Identity | Nothing. No fallback exists, so Preferred forces TLS exactly like Required |
 | Oracle | Disabled | Connects in plain TCP, so it behaves like Disabled. A red warning appears under the picker; use Required to enforce TCPS |
 | Snowflake, BigQuery, Bigtable, Spanner, Firestore, Firebase Realtime Database, DynamoDB, Cloudflare D1, Cloudflare R2 SQL, libSQL / Turso | Always encrypted | These drivers are HTTPS and manage TLS themselves. No **SSL Mode** |
-| SQLite, DuckDB, Beancount, PGlite | None | Local files or an in-process engine. No **SSL Mode** |
+| DuckDB | Automatic, in Remote (Quack) | Nothing, and the Network tab shows no SSL settings. A remote connection sets its own **SSL Mode** among the Remote fields on General, with no Preferred, and a local file has none. See [DuckDB](/databases/duckdb#ssl%2Ftls) |
+| SQLite, Beancount, PGlite | None | Local files or an in-process engine. No **SSL Mode** |
 
 ## Ports that mean TLS
 
