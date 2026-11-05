@@ -1,0 +1,86 @@
+---
+title: Install on Linux
+description: Ubuntu and Fedora packages from the beta and stable repositories, and the .deb, .rpm and Flatpak bundle on GitHub Releases
+tag: "Beta"
+---
+
+The Linux app is in beta: only `0.1.0-beta.N` builds exist until 0.1.0 ships. It runs on amd64 and arm64, as an app of its own beside the Mac one, with the engines on [Connect](/linux/connect).
+
+Use the repository for your distribution: apt or dnf then installs every update, and so do Software Updater and GNOME Software. Take a file from GitHub Releases for another distribution, through the Flatpak bundle, or to try one exact build.
+
+## Install the beta
+
+Enable both the stable and beta repositories, then install `tablepro`:
+
+<CodeGroup>
+
+```bash Ubuntu 26.04 and 26.10
+sudo add-apt-repository ppa:tablepro/tablepro
+sudo add-apt-repository ppa:tablepro/tablepro-beta
+sudo apt install tablepro
+```
+
+```bash Fedora 44 and later
+sudo dnf copr enable @tablepro/tablepro
+sudo dnf copr enable @tablepro/tablepro-beta
+sudo dnf install tablepro
+```
+
+</CodeGroup>
+
+apt and dnf install the highest version the two hold, so a release replaces its betas and the next beta replaces that release. Without the stable repository, the last beta stays installed until the next beta.
+
+## Install a stable release
+
+From 0.1.0 on, the stable repository alone gets releases and no betas:
+
+<CodeGroup>
+
+```bash Ubuntu 26.04 and 26.10
+sudo add-apt-repository ppa:tablepro/tablepro
+sudo apt install tablepro
+```
+
+```bash Fedora 44 and later
+sudo dnf copr enable @tablepro/tablepro
+sudo dnf install tablepro
+```
+
+</CodeGroup>
+
+To stop testing betas, remove the beta repository. The installed beta stays until the stable repository has a newer version.
+
+<CodeGroup>
+
+```bash Ubuntu
+sudo add-apt-repository --remove ppa:tablepro/tablepro-beta
+```
+
+```bash Fedora
+sudo dnf copr disable @tablepro/tablepro-beta
+```
+
+</CodeGroup>
+
+## Packages on GitHub Releases
+
+Each release and beta on [GitHub Releases](https://github.com/TableProApp/TablePro/releases) carries packages and their `SHA256SUMS`. A beta is a pre-release there. These files do not update themselves.
+
+| File | For |
+|---|---|
+| `tablepro-<version>-ubuntu-<series>-<arch>.deb` | Ubuntu 26.04 or 26.10, `amd64` or `arm64` |
+| `tablepro-<version>-fedora-<release>-<arch>.rpm` | The Fedora release it names, `x86_64` or `aarch64` |
+| `tablepro-<version>-<arch>.flatpak` | Any distribution with Flatpak, `x86_64` or `aarch64` |
+
+Check the download, then install the file for your system:
+
+```bash
+sha256sum --check --ignore-missing SHA256SUMS
+sudo apt install ./tablepro-0.1.0-beta.1-ubuntu-26.04-amd64.deb
+sudo dnf install ./tablepro-0.1.0-beta.1-fedora-44-x86_64.rpm
+flatpak install --user ./tablepro-0.1.0-beta.1-x86_64.flatpak
+```
+
+The Flatpak bundle fetches the GNOME 51 runtime from Flathub, and the next bundle installs over it. Flathub does not carry TablePro itself. The bundle keeps its files under `~/.var/app/app.tablepro.TablePro/`; [Troubleshooting](/linux/troubleshooting#where-the-files-are) lists them.
+
+Other distributions build from source with the [Quickstart](https://github.com/TableProApp/TablePro/blob/main/linux/README.md#quickstart) in the app repository.

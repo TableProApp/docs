@@ -416,6 +416,23 @@
         ]
       },
       {
+        "tab": "Linux",
+        "icon": "linux",
+        "groups": [
+          {
+            "group": "TablePro for Linux",
+            "pages": [
+              "linux/install",
+              "linux/connect",
+              "linux/sql-editor",
+              "linux/data-grid",
+              "linux/keyboard-shortcuts",
+              "linux/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Developers",
         "icon": "code",
         "groups": [
