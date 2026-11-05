@@ -12,9 +12,16 @@ You need iOS 18 or later. Builds ship on their own schedule, so a feature in a M
 
 ## First launch
 
-A welcome sheet lists what the app does. When the device is signed in to iCloud, **Continue** leads to one question, **Sync with iCloud**, asked once. Swipe the sheet away and sync stays off; turn it on later under **Settings > iCloud**. After an update, a **What's New** sheet lists what changed, once per version.
+A welcome sheet lists what the app does. **Continue** leads to at most two questions, each asked once:
 
-<Frame caption="Swipe the sheet down to skip the iCloud question">
+| Question | Shown when | If you swipe the sheet away |
+| --- | --- | --- |
+| **Sync with iCloud** | The device is signed in to iCloud | Sync stays off |
+| **Share Usage Data?** | Until you answer it | Nothing is sent |
+
+Both answers can change later, under **Settings > iCloud** and **Settings > Privacy**. After an update, a **What's New** sheet lists what changed, once per version.
+
+<Frame caption="Swipe the sheet down to skip both questions">
   <img className="block dark:hidden" src="/images/ios-first-run.png" alt="Welcome to TablePro sheet with four feature rows and a Continue button" />
   <img className="hidden dark:block" src="/images/ios-first-run-dark.png" alt="Welcome to TablePro sheet with four feature rows and a Continue button" />
 </Frame>
@@ -301,7 +308,7 @@ A connection that uses an [SSH profile](/connections/ssh-profiles) on the Mac ar
 
 ## Privacy
 
-**Share Usage Data** under **Settings > Privacy** is on unless you turn it off. While it is on, the app sends events to PostHog, the product analytics service, at `https://eu.i.posthog.com` in the EU:
+Nothing is sent until you choose **Share Usage Data** on first launch, or turn on **Share Usage Data** under **Settings > Privacy**. While it is on, the app sends events to PostHog, the product analytics service, at `https://eu.i.posthog.com` in the EU:
 
 | Event | Sent | Properties |
 | --- | --- | --- |
@@ -312,7 +319,7 @@ Events carry a random ID that the library makes on the device, and PostHog build
 
 No hostname, username, password, query, or row. With the switch off the app sends PostHog nothing, and a launch with it off never starts the library.
 
-Earlier versions sent one report a day to TablePro's server instead, and only after you chose **Share Usage Data**. If you had turned it off, it stays off after the update, and a device that already sent its first connection and query does not send them again.
+Earlier versions sent one report a day to TablePro's server instead. If you had chosen **Share Usage Data**, it stays on after the update and sends to PostHog, and a device that already reported its first connection and query does not send them again. If you declined, it stays off, and if you never answered, the question comes up on the next launch.
 
 **Settings > About** holds the version, **What's New**, the privacy policy, and **Acknowledgements** for the open source libraries the app ships.
 
