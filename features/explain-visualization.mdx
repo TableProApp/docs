@@ -50,7 +50,9 @@ Then compare estimate against measurement. A node whose **Rows** estimate is ord
 
 ## View modes
 
-The segmented control above the results switches between three views. A plan the parser cannot read as a tree has no control at all and shows the raw output under a banner saying so.
+The segmented control above the results switches between three views. A plan the parser cannot read as a tree shows the raw output under a banner saying so, and has no control unless it also has output.
+
+`EXPLAIN ANALYZE` and an actual plan run the statement, so a plan whose statement printed on the server, such as a function's `RAISE NOTICE`, also offers **Output**. See [Server output](/features/query-results#server-output).
 
 The mode and the Compare baseline stay with the editor tab, so another plan in it opens in the same mode. Each plan keeps its own selected step, zoom and scroll position while its result is open. Running the statement again replaces an unpinned plan with a new one at 100%.
 
