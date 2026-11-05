@@ -64,7 +64,9 @@ sudo dnf copr disable @tablepro/tablepro-beta
 
 ## Packages on GitHub Releases
 
-Each release and beta on [GitHub Releases](https://github.com/TableProApp/TablePro/releases) carries packages and their `SHA256SUMS`. A beta is a pre-release there. These files do not update themselves.
+Each release and beta on [GitHub Releases](https://github.com/TableProApp/TablePro/releases) carries packages and their `SHA256SUMS`. A beta is a pre-release there. A standalone .deb, .rpm or .flatpak bundle gets no app updates unless you install the next file or enable the PPA or COPR for native packages.
+
+New Linux betas and their fixes are announced on that releases page. Subscribe to its [Atom feed](https://github.com/TableProApp/TablePro/releases.atom) and filter entries for tags starting with `linux-v`. The feed also includes other platforms. PPA and COPR installs get updates through apt or dnf.
 
 | File | For |
 |---|---|
@@ -84,3 +86,99 @@ flatpak install --user ./tablepro-0.1.0-beta.1-x86_64.flatpak
 The Flatpak bundle fetches the GNOME 51 runtime from Flathub, and the next bundle installs over it. Flathub does not carry TablePro itself. The bundle keeps its files under `~/.var/app/app.tablepro.TablePro/`; [Troubleshooting](/linux/troubleshooting#where-the-files-are) lists them.
 
 Other distributions build from source with the [Quickstart](https://github.com/TableProApp/TablePro/blob/main/linux/README.md#quickstart) in the app repository.
+
+## Move between native packages and Flatpak
+
+The two formats use different [data folders](/linux/troubleshooting#where-the-files-are) and [secret storage](/linux/troubleshooting#passwords). An empty connection list after switching does not mean the old data was deleted.
+
+<Steps>
+  <Step title="Back up saved work">
+    Quit the app and [back up its files](/linux/troubleshooting#back-up-saved-work), including query history, saved queries and drafts, before changing formats.
+  </Step>
+  <Step title="Export connections">
+    Reopen the current installation. Choose **Export Connections…** from the main menu and save the file outside its app data folder. Quit it before starting the other installation.
+  </Step>
+  <Step title="Import in the other installation">
+    Install the other format and choose **Import Connections…** from its main menu. Select the exported file and review the import. This transfers connection settings, not history, drafts or passwords.
+  </Step>
+  <Step title="Sign in again">
+    Re-enter database and SSH passwords and key passphrases. Set up cloud AI keys and MCP clients again if you use them. Keep the backup until you have checked your connections and saved work.
+  </Step>
+</Steps>
+
+## Uninstall
+
+Quit the app first. Package removal keeps your connections, history, drafts, preferences and saved secrets. Use the command for your installation:
+
+<CodeGroup>
+
+```bash Ubuntu
+sudo apt remove tablepro
+```
+
+```bash Fedora
+sudo dnf remove tablepro
+```
+
+```bash Flatpak
+flatpak uninstall --user app.tablepro.TablePro
+```
+
+</CodeGroup>
+
+The Flatpak commands here assume the `--user` installation in this guide. Use `--system` for a system-wide installation. For a full reset, follow the optional steps next while the app is still installed.
+
+## Optional full reset
+
+Resetting deletes saved work and credentials. [Back up saved work](/linux/troubleshooting#back-up-saved-work) first. The steps affect this desktop account, not your server databases or SQLite and DuckDB files stored elsewhere.
+
+<Steps>
+  <Step title="Reset preferences before uninstalling">
+    Quit the app. Reset GSettings while the installed package still provides its schema:
+
+    <CodeGroup>
+    ```bash Native package
+    gsettings reset-recursively app.tablepro.TablePro
+    ```
+    ```bash Flatpak
+    flatpak run --command=gsettings app.tablepro.TablePro reset-recursively app.tablepro.TablePro
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Remove saved work and secrets">
+    For native packages, remove these folders. The commands respect custom XDG locations and delete connections, history, saved queries, tabs, drafts, snippets and crash reports:
+
+    ```bash
+    rm -rf -- "${XDG_CONFIG_HOME:-$HOME/.config}/tablepro" \
+      "${XDG_STATE_HOME:-$HOME/.local/state}/tablepro" \
+      "${XDG_DATA_HOME:-$HOME/.local/share}/tablepro" \
+      "${XDG_CACHE_HOME:-$HOME/.cache}/tablepro"
+    ```
+
+    In Passwords and Keys (Seahorse) or KWallet Manager, delete only the [TablePro secret entries](/linux/troubleshooting#saved-secret-entries). Removing the folders does not remove those keyring items. Then remove the native package with the uninstall command.
+
+    For Flatpak, use this instead of the keep-data uninstall command:
+
+    ```bash
+    flatpak uninstall --user --delete-data app.tablepro.TablePro
+    ```
+
+    [The delete-data option](https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-uninstall) removes the sandbox's data and permissions, including its encrypted secret file. If the desktop keyring still lists a Secret portal item for this app, remove that item too. Native-installation keyring entries remain separate.
+  </Step>
+  <Step title="Remove repository configuration if no longer needed">
+    For native packages, remove both repositories if you enabled both:
+
+    <CodeGroup>
+    ```bash Ubuntu
+    sudo add-apt-repository --remove ppa:tablepro/tablepro-beta
+    sudo add-apt-repository --remove ppa:tablepro/tablepro
+    ```
+    ```bash Fedora
+    sudo dnf copr remove @tablepro/tablepro-beta
+    sudo dnf copr remove @tablepro/tablepro
+    ```
+    </CodeGroup>
+
+    For Flatpak, run `flatpak remotes --user`. Remove an unused bundle-origin remote with `flatpak remote-delete --user REPOSITORY`, replacing `REPOSITORY` with its listed name. Keep Flathub if other apps or runtimes use it.
+  </Step>
+</Steps>

@@ -8,11 +8,13 @@ Paths here are for the .deb and .rpm packages. The Flatpak bundle keeps the same
 
 ## Passwords
 
-Saved passwords live in the Secret Service, the desktop keyring that GNOME Keyring, KWallet and KeePassXC provide, and never in a file.
+Native packages keep saved passwords, the MCP server access token and cloud AI API keys in the Secret Service. GNOME Keyring, KWallet and KeePassXC provide this desktop service.
+
+For the bundle, see [Flatpak secret storage](/linux/connect#flatpak-connections). It needs a working desktop portal and keyring. There is no plain-text fallback when secret storage fails.
 
 ### Every connect asks for the password
 
-No Secret Service is running, so there is nowhere to keep the password, and the prompt has no **Remember Password** switch. Check for one:
+When the Secret Service or Flatpak's Secret portal is unavailable, the password prompt has no **Remember Password** switch. Check for a desktop keyring:
 
 ```bash
 busctl --user list | grep org.freedesktop.secrets
@@ -30,11 +32,39 @@ The packages recommend one of these, so a normal install has one. A minimal inst
 
 The keyring is locked. The desktop asks to unlock it when a saved password is read; dismiss that prompt and the app asks for the password instead. A keyring that never unlocks at login usually has a different password from the account, after a password change or with automatic login. Passwords and Keys (Seahorse) or KWallet Manager changes the keyring password to the login password.
 
-The saved entries are named `TablePro database password for …`, `TablePro SSH password for …` and `TablePro SSH key passphrase for …`.
+After unlocking the keyring, retry the connection and accept the unlock prompt. If saving a newly entered password failed, enter it again with **Remember Password** on.
+
+### MCP and cloud AI cannot read or save a secret
+
+**Preferences > MCP** reports that the access token cannot be read or kept. **Preferences > AI** or the assistant reports the same problem for an API key. Entering a database password at each connect does not restore these features.
+
+<Steps>
+  <Step title="Restore secret storage">
+    If no keyring is running, install or start one as described in [Every connect asks for the password](#every-connect-asks-for-the-password). For Flatpak, also check that `xdg-desktop-portal` and your desktop's portal backend are installed and running, then log in again.
+  </Step>
+  <Step title="Unlock the keyring">
+    Unlock it in Passwords and Keys or KWallet Manager. If you dismissed an unlock prompt, retry the operation and accept the prompt.
+  </Step>
+  <Step title="Retry the affected feature">
+    In **Preferences > MCP**, click **Try Again**. In **Preferences > AI**, re-enter and apply an API key whose save failed, then retry the request. A key or token already stored does not need replacing after an unlock.
+  </Step>
+</Steps>
+
+### Saved secret entries
+
+Native-installation entries have these labels in the desktop keyring:
+
+- `TablePro database password for …`
+- `TablePro SSH password for …`
+- `TablePro SSH key passphrase for …`
+- `TablePro MCP access token`
+- `TablePro API key for …`
+
+Use these labels when removing saved credentials during a [full reset](/linux/install#optional-full-reset), which also covers removing Flatpak secrets.
 
 ## SSH tunnels
 
-The tunnel runs the system `ssh` and reads `~/.ssh/config`, `~/.ssh/known_hosts` and the SSH agent as a terminal does. When a tunnel fails, try the same hop in a terminal first:
+Native packages run the system `ssh` and read `~/.ssh/config`, `~/.ssh/known_hosts` and the SSH agent as a terminal does. For the bundle, check the [Flatpak connection limits](/linux/connect#flatpak-connections). When a tunnel fails, try the same hop in a terminal first:
 
 ```bash
 ssh -v -J jump.example.com user@bastion.example.com true
@@ -54,7 +84,7 @@ The server's SHA256 fingerprint shows before anything connects, even where `ssh_
 
 ## SQL Server with Kerberos
 
-**Windows (Kerberos)** uses the ticket `klist` shows. `kinit` and `klist` come in `krb5-user` on Ubuntu and `krb5-workstation` on Fedora.
+**Windows (Kerberos)** uses an existing ticket. `kinit` and `klist` come in `krb5-user` on Ubuntu and `krb5-workstation` on Fedora. For Flatpak, check the [KCM cache and sandbox configuration](/linux/connect#flatpak-connections) too.
 
 ```bash
 kinit you@EXAMPLE.COM
@@ -63,7 +93,7 @@ klist
 
 ### KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN
 
-The server's service principal, `MSSQLSvc/<host>:<port>`, is not in the realm the lookup used. It is built from the host and port you typed and looked up in `default_realm` of `/etc/krb5.conf` only. Type the host name the SPN is registered for, not an IP address or a CNAME. A server in another realm works only when your KDC answers with a referral, as Active Directory does inside a forest.
+The server's service principal, `MSSQLSvc/<host>:<port>`, is not in the realm the lookup used. It is built from the host and port you typed and looked up in the default realm only. For native packages, check `default_realm` in `/etc/krb5.conf`; Flatpak uses its sandbox configuration. Type the host name the SPN is registered for, not an IP address or a CNAME. A server in another realm works only when your KDC answers with a referral, as Active Directory does inside a forest.
 
 A missing or expired ticket fails the same login: run `kinit` again, then retry.
 
@@ -81,9 +111,35 @@ For a detailed log, quit the app first, since a second launch hands over to the 
 RUST_LOG=debug tablepro 2> tablepro.log
 ```
 
-The log names your hosts, databases and tables, so read it before you attach it. It never holds passwords.
+Before attaching any log, crash report or diagnostic text to a public issue, read it and remove private data. Logs name hosts, databases and tables. Panic messages may include SQL, values or file paths. Keep an unedited copy privately if needed.
 
-Each crash writes a report to `~/.local/state/tablepro/crashes/`, and the next launch offers **Show Report**. Nothing is uploaded.
+Rust panics on the main UI thread write a text report in the [crash report folder](#where-the-files-are). The next launch offers **Show Report**. Nothing is uploaded. These reports do not cover native segmentation faults, native aborts, out-of-memory kills or every worker-thread panic.
+
+### Native crashes
+
+<Steps>
+  <Step title="Collect the journal from the crash time">
+    Start with the user journal command in [Logs and crash reports](#logs-and-crash-reports). For a native crash or an out-of-memory kill, also inspect system messages:
+
+    ```bash
+    journalctl --boot --since "10 minutes ago" | grep -iE 'tablepro|segfault|out of memory|killed process'
+    ```
+
+    Adjust the time to include the crash. If system journal access is denied, ask the system administrator for those messages.
+  </Step>
+  <Step title="Find crash metadata">
+    On distributions running `systemd-coredump`, use [coredumpctl](https://www.freedesktop.org/software/systemd/man/latest/coredumpctl.html):
+
+    ```bash
+    coredumpctl list tablepro
+    coredumpctl info PID
+    ```
+
+    Replace `PID` with the process ID from the row at the crash time. Read and redact the output before sharing it. If no entry exists or `coredumpctl` is unavailable, use your distribution's crash reporter and send the journal, app version and reproduction steps.
+  </Step>
+</Steps>
+
+A core dump holds process memory and may contain passwords, tokens, SQL and result rows. Never attach one publicly. Send redacted metadata first. If maintainers need a dump, email [hello@tablepro.app](mailto:hello@tablepro.app) to arrange a private transfer, as listed in [the security policy](https://github.com/TableProApp/TablePro/blob/main/SECURITY.md#reporting-a-vulnerability).
 
 ## Reporting a bug
 
@@ -91,17 +147,33 @@ Open an issue at [github.com/TableProApp/TablePro/issues](https://github.com/Tab
 
 - The text from **About TablePro > Troubleshooting > Debugging Information**. **Copy Text** puts it on the clipboard. It holds versions and no connection details.
 - Where the app came from (the PPA, COPR, a .deb, .rpm or Flatpak bundle from GitHub Releases, or a source build), the distribution and its version, and the desktop and session: `echo $XDG_CURRENT_DESKTOP $XDG_SESSION_TYPE`.
-- The log and the newest crash report from the same time, when there is one.
+- The log and newest crash report from the same time, or native crash metadata, after the [privacy review](#logs-and-crash-reports).
 
 ## After a downgrade
 
-An older version never changes a file a newer one wrote. It refuses the file until the newer version is installed again or you reset it:
+An app refuses a saved file or history database whose storage format is newer than it understands. This checks the storage format, not the app's version number. An older app may read and change files from a newer app when both use the same format.
+
+[Back up saved work](#back-up-saved-work) before changing versions. When a storage format is too new:
 
 - The connection list shows "Saved connections were created by a newer version of TablePro". **Reset…** moves the file aside, under a name the toast shows, and starts an empty list.
 - A connection's saved tabs do not reopen, and a toast says "Saved tabs could not be read", with **Reset**.
 - The query history says it could not be read.
 
-Installing the newer version again brings all of it back, unless it was reset.
+Reinstall a version that supports that storage format to reopen the files. Avoid **Reset** if you need the saved work; it starts an empty replacement instead of converting the newer format.
+
+## Back up saved work
+
+<Steps>
+  <Step title="Quit before copying">
+    Close every app window and wait for the process to exit. This stops history and draft writes during the copy.
+  </Step>
+  <Step title="Copy the app folders">
+    Copy the config, state and data folders in [Where the files are](#where-the-files-are) to a private backup location. Keep the entire state folder, including `history.db` and any `history.db-wal` or `history.db-shm` files beside it. For Flatpak, copy the entire app folder.
+  </Step>
+  <Step title="Keep preferences separately">
+    Save the output of the GSettings command in [Where the files are](#where-the-files-are) with the backup as a reference for your settings. Native keyring items are separate; an export of connections does not include their secrets.
+  </Step>
+</Steps>
 
 ## Where the files are
 
@@ -112,7 +184,10 @@ Installing the newer version again brings all of it back, unless it was reset.
 | `~/.local/state/tablepro/history.db` | Query history and saved queries |
 | `~/.local/state/tablepro/workspaces/` | Each connection's tabs, and the connections open at the last quit |
 | `~/.local/share/tablepro/drafts/` | The text of each SQL editor tab |
+| `~/.local/share/tablepro/snippets/` | Custom SQL editor snippets |
 | `~/.local/state/tablepro/crashes/` | Crash reports |
+
+These are the default paths. If you set `XDG_CONFIG_HOME`, `XDG_STATE_HOME` or `XDG_DATA_HOME`, use the `tablepro` folder under that location instead.
 
 Preferences are in GSettings: `gsettings list-recursively app.tablepro.TablePro` lists them, and `man tablepro` has the same list.
 
