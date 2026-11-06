@@ -175,6 +175,10 @@ A tab bound to a database that has no entry runs on a [metadata connection](/con
 
 In `pg_stat_activity`, each database's own connection reports `application_name` as `TablePro`, one per database entry in the strip. The [metadata connections](/connections/connection-form#connection-health) that read the sidebar and the Structure tab, and the ones a tab on a database without an entry runs on, report `TablePro Metadata`. To name them yourself, put `-c application_name=reporting` in **Connection Options**: every connection then uses that name.
 
+## Notices
+
+`RAISE NOTICE`, `RAISE WARNING` and the other notices the server sends show with the result of the statement that raised them, as psql prints them. See [Server output](/features/query-results#server-output).
+
 ## Text encoding
 
 Sessions run in `UTF8` whatever encoding the database was created with, and the server converts text both ways. Japanese in an `EUC_JP` database or accented names in a `LATIN1` one read and save intact, and stay that way after `RESET ALL` or `DISCARD ALL` in a query tab. A `-c client_encoding=…` in **Connection Options** is overridden; other settings there still apply.
