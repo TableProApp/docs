@@ -11,7 +11,7 @@ Turn off app usage data in the privacy settings if you do not want to send it. M
 | --- | --- | --- |
 | [Mac usage data](#usage-data), from 0.86.0 (first build 0.86.0-beta.1) | PostHog EU | On; **Settings > General > Privacy > Share usage data** |
 | [Linux usage data](#linux-usage-data), from 0.1.0-beta.1 | PostHog EU | On; **Preferences > General > Privacy > Share Usage Data** |
-| [iOS usage report](#iphone-and-ipad-reports) | `api.tablepro.app` | Off; **Settings > Privacy > Share Usage Data** |
+| [iOS usage data](#iphone-and-ipad-usage-data) | PostHog EU | Off; **Settings > Privacy > Share Usage Data** |
 | [Mac update check](#update-checks) | `updates.tablepro.app` | On; **Settings > General**, under Software Update |
 | [Mac plugin catalog](#the-plugin-catalog) | `updates.tablepro.app` | On; no off switch |
 | [AI provider](#ai-providers) | Your chosen provider | No provider on a fresh install; remove it or turn off **Enable AI Features** |
@@ -69,9 +69,13 @@ Before 0.86.0, the default-on switch controls a `POST` to `https://api.tablepro.
 
 `X-Signature` contains an HMAC-SHA256 of the JSON. The old Mac path does not report the first query. The current server relays the report to PostHog with Cloudflare's country, without an IP address or license key, and without creating a person profile. The machine ID can link reports to account devices. The server no longer keeps a dedicated heartbeat history; processing jobs, logs, backups and the migration archive are separate. Before the November 4, 2026 server cutover, heartbeat records included IP addresses. See [retention](https://tablepro.app/privacy#retention).
 
-### iPhone and iPad reports
+<span id="iphone-and-ipad-reports" />
 
-The shipped app starts its heartbeat only after **Share Usage Data** is enabled at onboarding or in **Settings > Privacy**. It uses the same relay endpoint. Its fields are `machine_id` (SHA-256 of Apple's identifier for vendor), `platform` (`ios`), `app_version`, `os_version`, `architecture`, `locale`, `database_types`, `connection_count`, `has_license` (always false), `connection_attempted_at`, `connection_succeeded_at` and `first_query_executed_at`. It has no update settings and makes no account, license, update or plugin check. See [iOS privacy](https://tablepro.app/privacy#ios-app) for the separate Apple diagnostics route.
+### iPhone and iPad usage data
+
+Nothing is sent until you choose **Share Usage Data** at onboarding or turn it on in **Settings > Privacy**. The app then sends `app_opened`, `connection_attempted`, `connection_succeeded` and `first_query_executed` to PostHog at `https://eu.i.posthog.com`, with a random installation ID and no person profile. [iPhone and iPad](/ios#privacy) lists their properties and what posthog-ios adds. The app makes no account, license, update or plugin check. See [iOS privacy](https://tablepro.app/privacy#ios-app) for the separate Apple diagnostics route.
+
+Earlier versions sent a daily report to the relay endpoint above instead, also only after you chose **Share Usage Data**. Its fields were `machine_id` (SHA-256 of Apple's identifier for vendor), `platform` (`ios`), `app_version`, `os_version`, `architecture`, `locale`, `database_types`, `connection_count`, `has_license` (always false), `connection_attempted_at`, `connection_succeeded_at` and `first_query_executed_at`.
 
 ## AI providers
 

@@ -17,13 +17,13 @@ A welcome sheet lists what the app does. **Continue** leads to at most two quest
 | Question | Shown when | If you swipe the sheet away |
 | --- | --- | --- |
 | **Sync with iCloud** | The device is signed in to iCloud | Sync stays off |
-| **Share Usage Data?** | Always | Nothing is sent |
+| **Share Usage Data?** | Until you answer it | Nothing is sent |
 
 Both answers can change later, under **Settings > iCloud** and **Settings > Privacy**. After an update, a **What's New** sheet lists what changed, once per version.
 
 <Frame caption="Swipe the sheet down to skip both questions">
-  <img className="block dark:hidden" src="/images/ios-first-run.png" alt="Welcome to TablePro sheet with four feature rows, beside the Share Usage Data page listing what the daily report contains" />
-  <img className="hidden dark:block" src="/images/ios-first-run-dark.png" alt="Welcome to TablePro sheet with four feature rows, beside the Share Usage Data page listing what the daily report contains" />
+  <img className="block dark:hidden" src="/images/ios-first-run.png" alt="Welcome to TablePro sheet with four feature rows and a Continue button" />
+  <img className="hidden dark:block" src="/images/ios-first-run-dark.png" alt="Welcome to TablePro sheet with four feature rows and a Continue button" />
 </Frame>
 
 ## Supported databases
@@ -308,7 +308,18 @@ A connection that uses an [SSH profile](/connections/ssh-profiles) on the Mac ar
 
 ## Privacy
 
-**Share Usage Data** under **Settings > Privacy** sends one small report a day: a hashed device identifier, the app and iOS versions, your language, the database types you use, and when you first connected and first ran a query. It is off unless you chose **Share Usage Data** on first launch, and it never carries a hostname, username, password, query, or row.
+Nothing is sent until you choose **Share Usage Data** on first launch, or turn on **Share Usage Data** under **Settings > Privacy**. While it is on, the app sends events to PostHog, the product analytics service, at `https://eu.i.posthog.com` in the EU:
+
+| Event | Sent | Properties |
+| --- | --- | --- |
+| `app_opened` | Once per local day, ten seconds after the app comes to the front | `database_types` and `connection_count` of the connections open at that moment |
+| `connection_attempted`, `connection_succeeded`, `first_query_executed` | Once per install | `database_type`, such as `PostgreSQL` or `SQL Server` |
+
+Events carry a random ID that the library makes on the device, and PostHog builds no profile from it. The library, posthog-ios, adds the device model, screen size, language, time zone, whether the device is on Wi-Fi or cellular, the app's version, build and bundle ID, the iOS version, whether the build came from TestFlight, the library's version, and a random session ID. PostHog sees the IP address of each request and derives an approximate location from it, such as the country and city. While the switch is on, the library also fetches its settings from `eu-assets.i.posthog.com`.
+
+No hostname, username, password, query, or row. With the switch off the app sends PostHog nothing, and a launch with it off never starts the library.
+
+Earlier versions sent one report a day to TablePro's server instead. If you had chosen **Share Usage Data**, it stays on after the update and sends to PostHog, and a device that already reported its first connection and query does not send them again. If you declined, it stays off, and if you never answered, the question comes up on the next launch.
 
 **Settings > About** holds the version, **What's New**, the privacy policy, and **Acknowledgements** for the open source libraries the app ships.
 
