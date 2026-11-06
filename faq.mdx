@@ -34,7 +34,7 @@ The GNU Affero General Public License v3.0, plugins included. A TablePro license
 <AccordionGroup>
 
 <Accordion title="Is my data sent anywhere?">
-Your queries, results, and schemas stay on your Mac. One usage heartbeat goes out every 24 hours. It carries a hashed machine ID and facts about the app, such as its version and the types of the open connections, with no query text, hostnames, database names, or connection names; [Privacy](/security/privacy#usage-heartbeat) lists every field in it. Turn it off with **Share usage data** in **Settings > General**. AI is the exception, since the context you allow reaches the provider you configured.
+Ordinary queries and results go to your database. Mac usage data is on by default and, from 0.86.0, goes directly to PostHog with installation or account identifiers. Turn off **Share usage data** in **Settings > General > Privacy**. [Privacy](/security/privacy#usage-data) lists events, fields and older-version behavior. AI providers and MCP clients receive authorized context and tool results. Publishing to Team Library or sending content to support shares that content too.
 </Accordion>
 
 <Accordion title="Is my password safe?">
