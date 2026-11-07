@@ -6,9 +6,8 @@ tag: "Beta"
 
 A table opened from the sidebar fills a table tab one page at a time, 1,000 rows by default. The bottom bar switches the tab between 100 and 10,000 rows per page, and **Preferences > General > Default page size** sets where new tabs start.
 
-<Frame caption="An edited cell and a new row wait in the pending changes bar until Save">
-  <img className="block dark:hidden" src="/images/linux-data-grid.png" alt="A table tab with a filter rule above the grid, one modified cell, one new row and the pending changes bar with Discard and Save" />
-  <img className="hidden dark:block" src="/images/linux-data-grid-dark.png" alt="A table tab with a filter rule above the grid, one modified cell, one new row and the pending changes bar with Discard and Save" />
+<Frame caption="Review the pending stock edit before choosing Save">
+  <img src="/images/linux-data-grid.png" alt="Products table with the Hand Grinder stock cell changed to 24 and one unsaved change" />
 </Frame>
 
 ## Pages and row counts
@@ -32,7 +31,7 @@ A table's filter is kept, and so is each tab's across a restart.
 
 ## Edit rows
 
-Editing works in a table tab on a table with a primary key. Rows a query returns in the SQL editor are read-only, and so are key, generated and auto-increment columns. Check the [cell type limits](/linux/connect#limits) before editing other columns.
+Editing works in a table tab on a table with a primary key. Query results have separate [editing requirements](/linux/sql-editor#edit-query-results). Key, generated and auto-increment columns are read-only. Check the [cell type limits](/linux/connect#limits) before editing other columns.
 
 | To | Press |
 |---|---|

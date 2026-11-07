@@ -1,38 +1,51 @@
 ---
 title: Install on Linux
-description: Ubuntu and Fedora packages from the beta and stable repositories, and the .deb, .rpm and Flatpak bundle on GitHub Releases
+description: Install the Linux beta from the PPA, COPR, or Flatpak repository, or download a release package
 tag: "Beta"
 ---
 
-The Linux app is in beta: only `0.1.0-beta.N` builds exist until 0.1.0 ships. It runs on amd64 and arm64, as an app of its own beside the Mac one, with the engines on [Connect](/linux/connect).
+Use the beta repository for your distribution to receive updates. The Linux beta runs on amd64 and arm64; [Connect](/linux/connect) lists its database engines. There is no stable Linux release yet.
 
-Use the repository for your distribution: apt or dnf then installs every update, and so do Software Updater and GNOME Software. Take a file from GitHub Releases for another distribution, through the Flatpak bundle, or to try one exact build.
+The .deb and .rpm packages need GNOME 50 libraries. Use the PPA on Ubuntu 26.04 or 26.10, COPR on Fedora 44 or 45, and Flatpak on other distributions, including older Ubuntu releases.
 
 ## Install the beta
 
-Enable both the stable and beta repositories, then install `tablepro`:
+### Ubuntu and Fedora
+
+Add the beta repository, then install `tablepro`:
 
 <CodeGroup>
 
 ```bash Ubuntu 26.04 and 26.10
-sudo add-apt-repository ppa:tablepro/tablepro
 sudo add-apt-repository ppa:tablepro/tablepro-beta
 sudo apt install tablepro
 ```
 
-```bash Fedora 44 and later
-sudo dnf copr enable @tablepro/tablepro
+```bash Fedora 44 and 45
 sudo dnf copr enable @tablepro/tablepro-beta
 sudo dnf install tablepro
 ```
 
 </CodeGroup>
 
-apt and dnf install the highest version the two hold, so a release replaces its betas and the next beta replaces that release. Without the stable repository, the last beta stays installed until the next beta.
+apt and dnf install updates, as do Software Updater and GNOME Software.
+
+### Other distributions
+
+Install from the beta Flatpak repository:
+
+```bash
+flatpak install --from https://flatpak.tablepro.app/beta-repo/app.tablepro.TablePro.flatpakref
+flatpak run --branch=beta app.tablepro.TablePro
+```
+
+Opening the [Flatpak install link](https://flatpak.tablepro.app/beta-repo/app.tablepro.TablePro.flatpakref) in a browser starts GNOME Software or KDE Discover. The package uses the GNOME 51 runtime from Flathub. The app itself comes from TablePro's repository, not Flathub.
+
+Run `flatpak update` or use your software center to install updates. If this is your first Flatpak app and the menu does not open it, follow [First Flatpak app](/linux/troubleshooting#first-flatpak-app).
 
 ## Install a stable release
 
-From 0.1.0 on, the stable repository alone gets releases and no betas:
+Once 0.1.0 is released, add the stable repository:
 
 <CodeGroup>
 
@@ -41,14 +54,14 @@ sudo add-apt-repository ppa:tablepro/tablepro
 sudo apt install tablepro
 ```
 
-```bash Fedora 44 and later
+```bash Fedora 44 and 45
 sudo dnf copr enable @tablepro/tablepro
 sudo dnf install tablepro
 ```
 
 </CodeGroup>
 
-To stop testing betas, remove the beta repository. The installed beta stays until the stable repository has a newer version.
+With both native repositories enabled, apt and dnf install the highest version: a release replaces its betas, then the next beta replaces that release. To receive only stable releases, disable the beta repository. The installed beta stays until a newer stable version is available.
 
 <CodeGroup>
 
@@ -62,30 +75,39 @@ sudo dnf copr disable @tablepro/tablepro-beta
 
 </CodeGroup>
 
+Once a stable Flatpak is published, follow the [Flatpak repository instructions](https://github.com/TableProApp/TablePro/blob/main/linux/README.md#flatpak-repository) to install it.
+
+Flatpak installs the beta and stable branches side by side. They share settings and connections, but Flatpak never switches branches by version. Choose which installed branch the app menu starts:
+
+```bash
+flatpak make-current app.tablepro.TablePro beta
+flatpak make-current app.tablepro.TablePro stable
+```
+
+After making the stable branch current, `flatpak uninstall app.tablepro.TablePro//beta` removes the beta. Before moving to an older version, read [After a downgrade](/linux/troubleshooting#after-a-downgrade).
+
 ## Packages on GitHub Releases
 
-Each release and beta on [GitHub Releases](https://github.com/TableProApp/TablePro/releases) carries packages and their `SHA256SUMS`. A beta is a pre-release there. A standalone .deb, .rpm or .flatpak bundle gets no app updates unless you install the next file or enable the PPA or COPR for native packages.
+Download a specific build from [GitHub Releases](https://github.com/TableProApp/TablePro/releases). Linux tags start with `linux-v`, and betas are marked as pre-releases. Subscribe to the [Atom feed](https://github.com/TableProApp/TablePro/releases.atom) for release announcements; it also includes other platforms.
 
-New Linux betas and their fixes are announced on that releases page. Subscribe to its [Atom feed](https://github.com/TableProApp/TablePro/releases.atom) and filter entries for tags starting with `linux-v`. The feed also includes other platforms. PPA and COPR installs get updates through apt or dnf.
+Standalone .deb and .rpm packages need manual updates unless you enable the PPA or COPR. Flatpak bundles receive updates from the corresponding Flatpak repository.
 
 | File | For |
 |---|---|
 | `tablepro-<version>-ubuntu-<series>-<arch>.deb` | Ubuntu 26.04 or 26.10, `amd64` or `arm64` |
-| `tablepro-<version>-fedora-<release>-<arch>.rpm` | The Fedora release it names, `x86_64` or `aarch64` |
+| `tablepro-<version>-fedora-<release>-<arch>.rpm` | Fedora 44 or 45, `x86_64` or `aarch64` |
 | `tablepro-<version>-<arch>.flatpak` | Any distribution with Flatpak, `x86_64` or `aarch64` |
 
-Check the download, then install the file for your system:
+Check the download against the release's `SHA256SUMS`, then install the file for your system:
 
 ```bash
 sha256sum --check --ignore-missing SHA256SUMS
 sudo apt install ./tablepro-0.1.0-beta.3-ubuntu-26.04-amd64.deb
 sudo dnf install ./tablepro-0.1.0-beta.3-fedora-44-x86_64.rpm
-flatpak install --user ./tablepro-0.1.0-beta.3-x86_64.flatpak
+flatpak install ./tablepro-0.1.0-beta.3-x86_64.flatpak
 ```
 
-The Flatpak bundle fetches the GNOME 51 runtime from Flathub, and the next bundle installs over it. Flathub does not carry TablePro itself. The bundle keeps its files under `~/.var/app/app.tablepro.TablePro/`; [Troubleshooting](/linux/troubleshooting#where-the-files-are) lists them.
-
-Other distributions build from source with the [Quickstart](https://github.com/TableProApp/TablePro/blob/main/linux/README.md#quickstart) in the app repository.
+Flatpak keeps its files under `~/.var/app/app.tablepro.TablePro/`; [Troubleshooting](/linux/troubleshooting#where-the-files-are) lists them. To build from source, follow the app repository's [Quickstart](https://github.com/TableProApp/TablePro/blob/main/linux/README.md#quickstart).
 
 ## Move between native packages and Flatpak
 
@@ -121,12 +143,12 @@ sudo dnf remove tablepro
 ```
 
 ```bash Flatpak
-flatpak uninstall --user app.tablepro.TablePro
+flatpak uninstall app.tablepro.TablePro
 ```
 
 </CodeGroup>
 
-The Flatpak commands here assume the `--user` installation in this guide. Use `--system` for a system-wide installation. For a full reset, follow the optional steps next while the app is still installed.
+For a per-user Flatpak installation, add `--user` to the commands. For a full reset, follow the optional steps next while the app is still installed.
 
 ## Optional full reset
 
@@ -160,7 +182,7 @@ Resetting deletes saved work and credentials. [Back up saved work](/linux/troubl
     For Flatpak, use this instead of the keep-data uninstall command:
 
     ```bash
-    flatpak uninstall --user --delete-data app.tablepro.TablePro
+    flatpak uninstall --delete-data app.tablepro.TablePro
     ```
 
     [The delete-data option](https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-uninstall) removes the sandbox's data and permissions, including its encrypted secret file. If the desktop keyring still lists a Secret portal item for this app, remove that item too. Native-installation keyring entries remain separate.
@@ -179,6 +201,6 @@ Resetting deletes saved work and credentials. [Back up saved work](/linux/troubl
     ```
     </CodeGroup>
 
-    For Flatpak, run `flatpak remotes --user`. Remove an unused bundle-origin remote with `flatpak remote-delete --user REPOSITORY`, replacing `REPOSITORY` with its listed name. Keep Flathub if other apps or runtimes use it.
+    For Flatpak, run `flatpak remotes`. Remove an unused TablePro remote with `flatpak remote-delete REPOSITORY`, replacing `REPOSITORY` with its listed name. Keep Flathub if other apps or runtimes use it.
   </Step>
 </Steps>

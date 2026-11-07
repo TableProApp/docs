@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "aspen",
   "name": "TablePro",
-  "description": "TablePro is a native macOS database client for MySQL, PostgreSQL, SQLite, MongoDB, Redis and more, built on AppKit and SwiftUI with a plugin-based driver system.",
+  "description": "Database guides for TablePro on macOS, iPhone and iPad, and Linux beta. Windows is in development.",
   "colors": {
     "primary": "#A85A00",
     "light": "#FFBB6B",
@@ -196,19 +196,30 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Documentation",
+        "tab": "Overview",
+        "icon": "house",
         "groups": [
           {
             "group": "Start here",
             "pages": [
               "index",
+              "faq",
+              "changelog"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "macOS",
+        "groups": [
+          {
+            "group": "Start here",
+            "pages": [
               "installation",
               "beta-updates",
               "quickstart",
               "switching",
-              "faq",
-              "troubleshooting",
-              "changelog"
+              "troubleshooting"
             ]
           },
           {
@@ -396,13 +407,6 @@
             ]
           },
           {
-            "group": "iPhone and iPad",
-            "icon": "mobile",
-            "pages": [
-              "ios/index"
-            ]
-          },
-          {
             "group": "Security and privacy",
             "icon": "shield",
             "pages": [
@@ -413,10 +417,24 @@
               "features/acknowledgements"
             ]
           }
+        ],
+        "icon": "apple"
+      },
+      {
+        "tab": "iPhone and iPad",
+        "icon": "mobile",
+        "groups": [
+          {
+            "group": "iPhone and iPad",
+            "icon": "mobile",
+            "pages": [
+              "ios/index"
+            ]
+          }
         ]
       },
       {
-        "tab": "Linux",
+        "tab": "Linux beta",
         "icon": "linux",
         "groups": [
           {

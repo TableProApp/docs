@@ -3,15 +3,19 @@ title: Contributing
 description: Build TablePro from source, contribute a change, or write a database driver plugin
 ---
 
-Building and contributing to the app is documented in the app repository, next to the code it describes:
+Choose the source guide for the platform you want to work on:
 
-- [apple/CONTRIBUTING.md](https://github.com/TableProApp/TablePro/blob/main/apple/CONTRIBUTING.md): setup, building, tests, code style, architecture, pull requests and translation.
-- [AGENTS.md](https://github.com/TableProApp/TablePro/blob/main/AGENTS.md) and [apple/AGENTS.md](https://github.com/TableProApp/TablePro/blob/main/apple/AGENTS.md): the invariants and rules every change has to meet.
-- [apple/RELEASING.md](https://github.com/TableProApp/TablePro/blob/main/apple/RELEASING.md): release builds, notarization and the release tag.
+| Platform | Start here | Covers |
+|---|---|---|
+| macOS and iOS | [Apple contributing guide](https://github.com/TableProApp/TablePro/blob/main/apple/CONTRIBUTING.md) | Setup, builds, tests, code style, and translation |
+| Linux | [Linux contributing guide](https://github.com/TableProApp/TablePro/blob/main/linux/CONTRIBUTING.md) | Development workflow, checks, and pull requests |
+| Windows, in development | [Windows source](https://github.com/TableProApp/TablePro/tree/main/windows) | App, interop library, tests, and build instructions |
+
+Read the repository's [AGENTS.md](https://github.com/TableProApp/TablePro/blob/main/AGENTS.md) and the platform's own rules before making a change. For Mac releases, follow [apple/RELEASING.md](https://github.com/TableProApp/TablePro/blob/main/apple/RELEASING.md).
 
 These pages live in [TableProApp/docs](https://github.com/TableProApp/docs). A docs change that goes with an app change is a pull request there.
 
-## Plugins
+## macOS plugins
 
 <CardGroup cols={3}>
   <Card title="Plugin Development" icon="puzzle-piece" href="/development/plugin-development">

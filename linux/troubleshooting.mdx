@@ -6,6 +6,16 @@ tag: "Beta"
 
 Paths here are for the .deb and .rpm packages. The Flatpak bundle keeps the same files under `~/.var/app/app.tablepro.TablePro/`, mapped in [Where the files are](#where-the-files-are).
 
+## First Flatpak app
+
+If choosing the app in the desktop menu does nothing after your first Flatpak installation, log out and log in again. Until then, start the beta from a terminal:
+
+```bash
+flatpak run --branch=beta app.tablepro.TablePro
+```
+
+Later Flatpak installs and updates do not need another login.
+
 ## Passwords
 
 Native packages keep saved passwords, the MCP server access token and cloud AI API keys in the Secret Service. GNOME Keyring, KWallet and KeePassXC provide this desktop service.
