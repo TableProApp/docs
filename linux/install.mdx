@@ -1,0 +1,184 @@
+---
+title: Install on Linux
+description: Ubuntu and Fedora packages from the beta and stable repositories, and the .deb, .rpm and Flatpak bundle on GitHub Releases
+tag: "Beta"
+---
+
+The Linux app is in beta: only `0.1.0-beta.N` builds exist until 0.1.0 ships. It runs on amd64 and arm64, as an app of its own beside the Mac one, with the engines on [Connect](/linux/connect).
+
+Use the repository for your distribution: apt or dnf then installs every update, and so do Software Updater and GNOME Software. Take a file from GitHub Releases for another distribution, through the Flatpak bundle, or to try one exact build.
+
+## Install the beta
+
+Enable both the stable and beta repositories, then install `tablepro`:
+
+<CodeGroup>
+
+```bash Ubuntu 26.04 and 26.10
+sudo add-apt-repository ppa:tablepro/tablepro
+sudo add-apt-repository ppa:tablepro/tablepro-beta
+sudo apt install tablepro
+```
+
+```bash Fedora 44 and later
+sudo dnf copr enable @tablepro/tablepro
+sudo dnf copr enable @tablepro/tablepro-beta
+sudo dnf install tablepro
+```
+
+</CodeGroup>
+
+apt and dnf install the highest version the two hold, so a release replaces its betas and the next beta replaces that release. Without the stable repository, the last beta stays installed until the next beta.
+
+## Install a stable release
+
+From 0.1.0 on, the stable repository alone gets releases and no betas:
+
+<CodeGroup>
+
+```bash Ubuntu 26.04 and 26.10
+sudo add-apt-repository ppa:tablepro/tablepro
+sudo apt install tablepro
+```
+
+```bash Fedora 44 and later
+sudo dnf copr enable @tablepro/tablepro
+sudo dnf install tablepro
+```
+
+</CodeGroup>
+
+To stop testing betas, remove the beta repository. The installed beta stays until the stable repository has a newer version.
+
+<CodeGroup>
+
+```bash Ubuntu
+sudo add-apt-repository --remove ppa:tablepro/tablepro-beta
+```
+
+```bash Fedora
+sudo dnf copr disable @tablepro/tablepro-beta
+```
+
+</CodeGroup>
+
+## Packages on GitHub Releases
+
+Each release and beta on [GitHub Releases](https://github.com/TableProApp/TablePro/releases) carries packages and their `SHA256SUMS`. A beta is a pre-release there. A standalone .deb, .rpm or .flatpak bundle gets no app updates unless you install the next file or enable the PPA or COPR for native packages.
+
+New Linux betas and their fixes are announced on that releases page. Subscribe to its [Atom feed](https://github.com/TableProApp/TablePro/releases.atom) and filter entries for tags starting with `linux-v`. The feed also includes other platforms. PPA and COPR installs get updates through apt or dnf.
+
+| File | For |
+|---|---|
+| `tablepro-<version>-ubuntu-<series>-<arch>.deb` | Ubuntu 26.04 or 26.10, `amd64` or `arm64` |
+| `tablepro-<version>-fedora-<release>-<arch>.rpm` | The Fedora release it names, `x86_64` or `aarch64` |
+| `tablepro-<version>-<arch>.flatpak` | Any distribution with Flatpak, `x86_64` or `aarch64` |
+
+Check the download, then install the file for your system:
+
+```bash
+sha256sum --check --ignore-missing SHA256SUMS
+sudo apt install ./tablepro-0.1.0-beta.3-ubuntu-26.04-amd64.deb
+sudo dnf install ./tablepro-0.1.0-beta.3-fedora-44-x86_64.rpm
+flatpak install --user ./tablepro-0.1.0-beta.3-x86_64.flatpak
+```
+
+The Flatpak bundle fetches the GNOME 51 runtime from Flathub, and the next bundle installs over it. Flathub does not carry TablePro itself. The bundle keeps its files under `~/.var/app/app.tablepro.TablePro/`; [Troubleshooting](/linux/troubleshooting#where-the-files-are) lists them.
+
+Other distributions build from source with the [Quickstart](https://github.com/TableProApp/TablePro/blob/main/linux/README.md#quickstart) in the app repository.
+
+## Move between native packages and Flatpak
+
+The two formats use different [data folders](/linux/troubleshooting#where-the-files-are) and [secret storage](/linux/troubleshooting#passwords). An empty connection list after switching does not mean the old data was deleted.
+
+<Steps>
+  <Step title="Back up saved work">
+    Quit the app and [back up its files](/linux/troubleshooting#back-up-saved-work), including query history, saved queries and drafts, before changing formats.
+  </Step>
+  <Step title="Export connections">
+    Reopen the current installation. Choose **Export Connections…** from the main menu and save the file outside its app data folder. Quit it before starting the other installation.
+  </Step>
+  <Step title="Import in the other installation">
+    Install the other format and choose **Import Connections…** from its main menu. Select the exported file and review the import. This transfers connection settings, not history, drafts or passwords.
+  </Step>
+  <Step title="Sign in again">
+    Re-enter database and SSH passwords and key passphrases. Set up cloud AI keys and MCP clients again if you use them. Keep the backup until you have checked your connections and saved work.
+  </Step>
+</Steps>
+
+## Uninstall
+
+Quit the app first. Package removal keeps your connections, history, drafts, preferences and saved secrets. Use the command for your installation:
+
+<CodeGroup>
+
+```bash Ubuntu
+sudo apt remove tablepro
+```
+
+```bash Fedora
+sudo dnf remove tablepro
+```
+
+```bash Flatpak
+flatpak uninstall --user app.tablepro.TablePro
+```
+
+</CodeGroup>
+
+The Flatpak commands here assume the `--user` installation in this guide. Use `--system` for a system-wide installation. For a full reset, follow the optional steps next while the app is still installed.
+
+## Optional full reset
+
+Resetting deletes saved work and credentials. [Back up saved work](/linux/troubleshooting#back-up-saved-work) first. The steps affect this desktop account, not your server databases or SQLite and DuckDB files stored elsewhere.
+
+<Steps>
+  <Step title="Reset preferences before uninstalling">
+    Quit the app. Reset GSettings while the installed package still provides its schema:
+
+    <CodeGroup>
+    ```bash Native package
+    gsettings reset-recursively app.tablepro.TablePro
+    ```
+    ```bash Flatpak
+    flatpak run --command=gsettings app.tablepro.TablePro reset-recursively app.tablepro.TablePro
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Remove saved work and secrets">
+    For native packages, remove these folders. The commands respect custom XDG locations and delete connections, history, saved queries, tabs, drafts, snippets and crash reports:
+
+    ```bash
+    rm -rf -- "${XDG_CONFIG_HOME:-$HOME/.config}/tablepro" \
+      "${XDG_STATE_HOME:-$HOME/.local/state}/tablepro" \
+      "${XDG_DATA_HOME:-$HOME/.local/share}/tablepro" \
+      "${XDG_CACHE_HOME:-$HOME/.cache}/tablepro"
+    ```
+
+    In Passwords and Keys (Seahorse) or KWallet Manager, delete only the [TablePro secret entries](/linux/troubleshooting#saved-secret-entries). Removing the folders does not remove those keyring items. Then remove the native package with the uninstall command.
+
+    For Flatpak, use this instead of the keep-data uninstall command:
+
+    ```bash
+    flatpak uninstall --user --delete-data app.tablepro.TablePro
+    ```
+
+    [The delete-data option](https://docs.flatpak.org/en/latest/flatpak-command-reference.html#flatpak-uninstall) removes the sandbox's data and permissions, including its encrypted secret file. If the desktop keyring still lists a Secret portal item for this app, remove that item too. Native-installation keyring entries remain separate.
+  </Step>
+  <Step title="Remove repository configuration if no longer needed">
+    For native packages, remove both repositories if you enabled both:
+
+    <CodeGroup>
+    ```bash Ubuntu
+    sudo add-apt-repository --remove ppa:tablepro/tablepro-beta
+    sudo add-apt-repository --remove ppa:tablepro/tablepro
+    ```
+    ```bash Fedora
+    sudo dnf copr remove @tablepro/tablepro-beta
+    sudo dnf copr remove @tablepro/tablepro
+    ```
+    </CodeGroup>
+
+    For Flatpak, run `flatpak remotes --user`. Remove an unused bundle-origin remote with `flatpak remote-delete --user REPOSITORY`, replacing `REPOSITORY` with its listed name. Keep Flathub if other apps or runtimes use it.
+  </Step>
+</Steps>

@@ -1,0 +1,68 @@
+---
+title: Data grid
+description: Page through a table, filter and sort it on the server, edit rows and save them together in TablePro for Linux
+tag: "Beta"
+---
+
+A table opened from the sidebar fills a table tab one page at a time, 1,000 rows by default. The bottom bar switches the tab between 100 and 10,000 rows per page, and **Preferences > General > Default page size** sets where new tabs start.
+
+<Frame caption="An edited cell and a new row wait in the pending changes bar until Save">
+  <img className="block dark:hidden" src="/images/linux-data-grid.png" alt="A table tab with a filter rule above the grid, one modified cell, one new row and the pending changes bar with Discard and Save" />
+  <img className="hidden dark:block" src="/images/linux-data-grid-dark.png" alt="A table tab with a filter rule above the grid, one modified cell, one new row and the pending changes bar with Discard and Save" />
+</Frame>
+
+## Pages and row counts
+
+`Alt+Page Down` and `Alt+Page Up` move between pages. A table of about 100,000 rows or fewer is counted on its own; a larger one shows an estimate and offers **Count Rows** for the exact number.
+
+A MongoDB collection opens in a table tab too: its top-level fields are the columns, `_id` first, and nested documents and arrays show as JSON.
+
+## Sort and filter
+
+Click a column header to sort by it, one column at a time. In a table tab the server sorts the whole table; in query results the grid sorts the rows it holds. A Cassandra or ScyllaDB table keeps the server's order.
+
+`Ctrl+F`, or **Filter Rows**, opens the filter bar over the grid:
+
+- Each rule is a column, an operator and a value. **Match** chooses whether any or all of them have to hold.
+- In place of rules, type a WHERE fragment such as `created_at > now() - interval '1 day'`. It is checked as one expression before it runs. On MongoDB it is a query document instead.
+- **Filter by Value** and **Exclude Value** in a cell's menu add a rule from that cell.
+- On Cassandra and ScyllaDB the filter offers only the operators the server evaluates, all of them matched, with `ALLOW FILTERING`.
+
+A table's filter is kept, and so is each tab's across a restart.
+
+## Edit rows
+
+Editing works in a table tab on a table with a primary key. Rows a query returns in the SQL editor are read-only, and so are key, generated and auto-increment columns. Check the [cell type limits](/linux/connect#limits) before editing other columns.
+
+| To | Press |
+|---|---|
+| Edit the focused cell | `F2` or `Enter` |
+| Toggle a boolean cell | `Space` |
+| Set the cell to NULL | `Ctrl+Backspace` |
+| Insert a row | `Ctrl+N` |
+| Mark the selected rows for deletion | `Delete` |
+| Edit a long value, or the whole row | `Alt+Enter` for **Row Details** |
+| Undo or redo a change | `Ctrl+Z`, `Ctrl+Shift+Z` |
+
+Dates get a calendar, and JSON is checked before it is kept. A date, time or timestamp cell also takes the engine's own `NOW()`, `CURRENT_TIMESTAMP` and the like, typed in or picked from the cell's menu.
+
+`Ctrl+V` with tab-separated rows on the clipboard adds them as new rows, filling the columns from the focused one, or by name when the first line holds the headers. More than 1,000 rows asks first, and 100,000 is the most one paste takes.
+
+## Save or discard
+
+Every change waits in the pending changes bar. **Save** (`Ctrl+S`) writes them together, in one transaction where the engine has them, and **Discard** drops them. Deleting 10 rows or more asks first, unless **Confirm Before Deleting Rows** is off under **Preferences > General**.
+
+On ClickHouse, Cassandra and ScyllaDB a save is a series of statements, each landing on its own. **Stop Saving** there takes effect between statements.
+
+## Copy and export
+
+`Ctrl+C` copies the focused cell or the selected rows. **Copy As** in the cell's menu writes them as CSV, JSON, JSON Lines, Markdown, a text table or an `IN` clause, and in a table tab as `INSERT` statements.
+
+**Export Rows…** writes CSV, JSON, Markdown, HTML, XML, Excel or SQL `INSERT` to a file, from the current page with its pending edits or from every saved row under the filter and sort.
+
+## Columns and foreign keys
+
+- `Alt+Left` and `Alt+Right` move the focused column, and `Shift+Alt+Left` and `Shift+Alt+Right` narrow and widen it. Dragging a header moves the column, and dragging its edge resizes it.
+- **Columns…** hides and shows columns. **Reset Columns** there goes back to the table's own order.
+- Order, hidden columns and widths are kept per table.
+- `Ctrl+J` on a foreign key cell opens the row it points at in a new tab. **Show Referencing Rows** on a saved row opens the rows that point at it.
