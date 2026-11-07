@@ -5,7 +5,7 @@ description: Short answers on licensing, privacy, offline use, database coverage
 
 import DriverCounts from "/snippets/driver-counts.mdx";
 
-Short answers only, each linking to the page that carries the detail. Anything not covered is worth an issue on [GitHub](https://github.com/TableProApp/TablePro/issues), where driver requests and support questions are tracked in the open.
+Start with [your platform](/). Unless a question names another platform, these answers describe macOS. For Linux setup and support, use the [Linux guides](/linux/install). Report unanswered questions on [GitHub](https://github.com/TableProApp/TablePro/issues).
 
 ## Cost and licensing
 
@@ -88,11 +88,15 @@ Through iCloud, with a Pro or Team license. Sync is off by default and each cate
 </Accordion>
 
 <Accordion title="Is there an iPhone app?">
-Yes, for iPhone and iPad on iOS 18 or later. It reads the same CloudKit data as the Mac app but carries connections, groups, and tags only. See [iPhone and iPad](/ios).
+Yes. The stable iPhone and iPad app needs no license. See [iPhone and iPad](/ios) for requirements, connections, queries, and sync.
 </Accordion>
 
 <Accordion title="Is there a Linux version?">
-Yes, in beta: packages for Ubuntu 26.04 and 26.10 and Fedora 44 and later, and a Flatpak bundle for other distributions. It is a separate app with its own [engines](/linux/connect#engines), and none of the [paid features](/features/licensing) yet. See [Install on Linux](/linux/install).
+Yes. The public beta has its own [supported engines](/linux/connect#engines). [Install on Linux](/linux/install) covers the beta PPA, COPR, Flatpak repository, and release packages. [Licensing](/features/licensing) links to Linux account details.
+</Accordion>
+
+<Accordion title="Is there a Windows version?">
+The Windows app is in development and has no release yet. Follow progress in the [Windows source directory](https://github.com/TableProApp/TablePro/tree/main/windows).
 </Accordion>
 
 <Accordion title="How often does TablePro release, and will it keep interrupting me?">

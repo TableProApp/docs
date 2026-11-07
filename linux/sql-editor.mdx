@@ -6,9 +6,8 @@ tag: "Beta"
 
 `Ctrl+T` opens an editor tab on the window's connection. In a window with no tab open, **Open SQL Editor** does the same.
 
-<Frame caption="Each result set of a run is its own entry in the results list">
-  <img className="block dark:hidden" src="/images/linux-sql-editor.png" alt="A SQL editor tab with two SELECT statements above a results pane showing rows from the first one" />
-  <img className="hidden dark:block" src="/images/linux-sql-editor-dark.png" alt="A SQL editor tab with two SELECT statements above a results pane showing rows from the first one" />
+<Frame caption="Group stock by category and inspect the query results">
+  <img src="/images/linux-sql-editor.png" alt="SQL editor joining products and categories, with Coffee, Accessories, Tea, and Brewing result rows" />
 </Frame>
 
 ## Run
@@ -30,6 +29,10 @@ The editor gives up on a query after 60 seconds. Change that under **Preferences
 Each result set, row count, notice and error of a run is its own entry in the results list. A result keeps 10,000 rows and a run 100,000; past that a banner offers **Export All…**, which runs the statement again on a separate read-only connection and writes every row to a file. After a failed statement, **Go to Error** puts the cursor where the server places the error.
 
 A statement that opens a transaction leaves **Commit** and **Roll Back** in the results pane until you pick one. Closing the window asks first while the transaction is open.
+
+## Edit query results
+
+Editing requires a single SELECT from one base table, its whole primary key in the result, and columns the driver can trace to that table. Joins and grouped results stay read-only. Open the table from the sidebar when its query result cannot be edited. Review pending edits, then click **Save** in the results pane to write them or **Discard** to drop them.
 
 ## Completion and snippets
 

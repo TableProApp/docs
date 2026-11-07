@@ -1,7 +1,9 @@
 ---
-title: Installation
+title: Install on macOS
 description: Install TablePro via Homebrew or DMG on macOS 13.0+
 ---
+
+import PlatformGuides from "/snippets/platform-guides.mdx";
 
 Homebrew is the short route: `brew install --cask tablepro`. Everyone else takes the DMG.
 
@@ -51,3 +53,5 @@ rm ~/Library/Preferences/com.TablePro.plist
 Connection passwords are in the macOS Keychain and survive both commands. Delete them in Keychain Access by searching for `com.TablePro`. Data already synced through iCloud stays in your iCloud account.
 
 Building from source is in [apple/CONTRIBUTING.md](https://github.com/TableProApp/TablePro/blob/main/apple/CONTRIBUTING.md#setup). A launch that fails or a connection that will not open is in [Troubleshooting](/troubleshooting).
+
+<PlatformGuides />

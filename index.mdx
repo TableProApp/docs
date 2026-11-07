@@ -1,41 +1,42 @@
 ---
 title: Introduction
-description: Native database apps for Mac, iPhone, iPad and Linux (beta)
+description: Database guides for macOS, iPhone and iPad, and the Linux beta
 ---
 
-import DriverCounts from "/snippets/driver-counts.mdx";
+Choose your platform to install the app, connect to a database, and run your first query. Database support and features differ by platform.
 
-Every engine, the SQL editor, the data grid, import, export, and the AI assistant cost nothing, and there is no trial countdown. Paid tiers cover iCloud sync, encrypted connection export, environment variables in connection fields, Linked Folders, Query Insights, result charts, and team sharing ([Licensing](/features/licensing)). Use the Mac app, the [iPhone and iPad app](/ios), or the [Linux beta](/linux/install). Paid features are Mac-only for now.
-
-<Frame caption="TablePro - Native macOS Database Client">
-  <img className="block dark:hidden" src="/images/app.png" alt="TablePro main interface" />
-  <img className="hidden dark:block" src="/images/app-dark.png" alt="TablePro main interface" />
-</Frame>
-
-<CardGroup cols={3}>
-  <Card title="Install it" icon="download" href="/installation">
-    Homebrew or the DMG, on macOS 13 and later.
+<CardGroup cols={2}>
+  <Card title="macOS" icon="apple" href="/installation">
+    Stable. Install with Homebrew or a DMG, then follow the Mac quickstart.
   </Card>
-  <Card title="Connect to something" icon="plug" href="/quickstart">
-    A first connection and a first query, or the bundled sample database if you have no server.
+  <Card title="iPhone and iPad" icon="mobile" href="/ios">
+    Stable. Set up connections, browse tables, and run queries. No license required.
   </Card>
-  <Card title="Coming from another client" icon="right-left" href="/switching">
-    Import connections from TablePlus, Sequel Ace, DBeaver, DataGrip and others.
+  <Card title="Linux beta" icon="linux" href="/linux/install">
+    Install from the beta PPA, COPR, or Flatpak repository.
+  </Card>
+  <Card title="Windows" icon="windows" href="https://github.com/TableProApp/TablePro/tree/main/windows">
+    In development. No release is available. Follow the source repository for progress.
   </Card>
 </CardGroup>
 
-## Supported databases
+## Start on macOS
 
-<DriverCounts />
+<Frame caption="Browse and edit a table on macOS">
+  <img className="block dark:hidden" src="/images/app.png" alt="Mac connection window with a table sidebar and data grid" />
+  <img className="hidden dark:block" src="/images/app-dark.png" alt="Mac connection window with a table sidebar and data grid" />
+</Frame>
 
-From MySQL and PostgreSQL to DynamoDB, Spanner and Redis, each engine has its own page.
-[Supported Databases](/databases) lists them all with their default ports and says which ones
-arrive as a plugin.
+[Run your first query](/quickstart), [import existing connections](/switching), or find your engine in [Supported databases](/databases). For other platforms, use the [iPhone and iPad guide](/ios) or the [Linux connection guide](/linux/connect).
+
+## Free and paid
+
+Connect, query, and edit data without a trial countdown. [Licensing](/features/licensing) covers the Mac's Pro and Team features and links to Linux account details.
 
 ## Open source
 
-The source, plugins included, is under the [GNU Affero General Public License v3.0](https://www.gnu.org/licenses/agpl-3.0.html). A TablePro license key is a separate thing: it activates the paid features, not the app.
+The source, plugins included, is under the [GNU Affero General Public License v3.0 or later](https://www.gnu.org/licenses/agpl-3.0.html). A TablePro license key activates paid features; it is separate from the source license.
 
-<Card title="GitHub Repository" icon="github" href="https://github.com/TableProApp/TablePro">
-  View source code, report issues, and contribute to TablePro.
+<Card title="GitHub repository" icon="github" href="https://github.com/TableProApp/TablePro">
+  Read the source, report an issue, or contribute a change.
 </Card>

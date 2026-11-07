@@ -8,9 +8,8 @@ A window holds several connection sessions and their tabs. The selected tab deci
 
 Opening a connection that is already open brings its window and session forward. **New Window** (`Ctrl+Shift+N`) starts another with the connection list. **Open Database…** on a connection's sidebar row opens another database as a session in the same window.
 
-<Frame caption="A PostgreSQL connection through an SSH tunnel">
-  <img className="block dark:hidden" src="/images/linux-connect-dialog.png" alt="The connect dialog with Connection, Authentication, Security, SSH Tunnel and Options groups for a PostgreSQL server" />
-  <img className="hidden dark:block" src="/images/linux-connect-dialog-dark.png" alt="The connect dialog with Connection, Authentication, Security, SSH Tunnel and Options groups for a PostgreSQL server" />
+<Frame caption="Configure a PostgreSQL SSH tunnel before testing the connection">
+  <img src="/images/linux-connect-dialog.png" alt="PostgreSQL dialog with SSH enabled for bastion.example.com, username deploy, and password authentication" />
 </Frame>
 
 ## Engines
@@ -36,7 +35,7 @@ Redshift, CockroachDB, TiDB, OceanBase and Databend are untested on Linux. Suppo
 ## Limits
 
 - Binary, array, spatial, composite and variant cells are read-only. Inspect or copy them in the grid; use a query to change them.
-- Enter time and timestamp values as text, such as `13:45:00` or `2026-11-05 13:45:00`. Include an offset for types that store one. Invalid values stay in the editor with an error; correct them before saving.
+- Duration values, such as MySQL TIME values longer than a day, need text entry. For times of day and timestamps, use the clock in Row Details or enter text. Include an offset for types that store one.
 - Redis Cluster and Sentinel are unsupported. Connect to a standalone Redis server instead.
 
 ## Add a connection
@@ -84,11 +83,22 @@ Pick **Read-Only** for a production server you only read. Moving to or from it r
 | Mode | Connection |
 |---|---|
 | **Disable** | Plain, no TLS |
+| **Prefer** | PostgreSQL, MySQL and MariaDB only. Encrypted if the server offers TLS; otherwise unencrypted. The server certificate is not checked |
 | **Require** | Encrypted. The server certificate is not checked |
-| **Verify full**, the default | Encrypted. The certificate must be valid for the server name |
+| **Verify full** | Encrypted. The certificate must be valid for the server name |
 | **Strict** | SQL Server only. TLS before the login, as TDS 8.0 needs. SQL Server 2022 or later on Windows, 2025 or later on Linux |
 
-Keep **Verify full** unless the server has no certificate this computer can check. For a server signed by your own certificate authority, choose its PEM file in **CA certificate** rather than dropping to **Require**.
+Choose **Verify full** to check the server certificate. For a server signed by your own certificate authority, choose its PEM file in **CA certificate** rather than dropping to **Require**.
+
+New connections start with these defaults:
+
+| Engine | Default encryption | Changes with connection options |
+|---|---|---|
+| PostgreSQL, MySQL, MariaDB | **Prefer** | None |
+| SQL Server | **Verify full** | None |
+| ClickHouse | **Disable** | **Verify full** on ports 443 and 8443 |
+| MongoDB | **Disable** | **Verify full** with **DNS Seed List** on |
+| Cassandra, ScyllaDB, Redis | **Disable** | None |
 
 - **Client certificate** and **Client key** log in with a certificate, on every network engine but SQL Server.
 - **TLS server name** checks the certificate against another name than the host. MySQL and MongoDB take it only through an SSH tunnel.
