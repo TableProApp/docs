@@ -45,6 +45,10 @@
   },
   "redirects": [
     {
+      "source": "/linux",
+      "destination": "/linux/install"
+    },
+    {
       "source": "/development/setup",
       "destination": "/development/overview"
     },
