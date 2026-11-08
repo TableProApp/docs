@@ -68,7 +68,7 @@ And within a major version, none of these happen:
 - A required input field is added to an existing tool.
 - An output field is removed or changes type.
 - A resource is removed.
-- `/mcp`, `/v1/integrations/exchange` or `/v1/integrations/revoke` moves.
+- `/mcp` or `/v1/integrations/exchange` moves.
 - A pairing parameter is removed, or the redirect changes how it delivers the code.
 - A scope is removed or renamed, or the exchange response drops `scope`.
 - The default port changes from `23508`.
@@ -109,8 +109,8 @@ Deprecated now:
 
 These can change in any release, without notice:
 
-- Transport framing, internal message routing, and any HTTP path other than `/mcp`,
-  `/v1/integrations/exchange` and `/v1/integrations/revoke`.
+- Transport framing, internal message routing, and any HTTP path other than `/mcp` and
+  `/v1/integrations/exchange`.
 - The [handshake file and private socket](/developers/mcp-protocol#local-socket-and-handshake). Use the bundled
   `tablepro-mcp` bridge, which finds the server on its own, or connect over HTTP to the port on the
   **Status** row in **Settings > MCP**, `23508` by default.

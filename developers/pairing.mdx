@@ -168,24 +168,11 @@ re-pairs should [revoke](#revoking-a-token) its old one, or the user revokes it 
 
 ## Revoking a token
 
-A client done with its token, such as `tablepro unpair`, revokes it with an
-[RFC 7009](https://www.rfc-editor.org/rfc/rfc7009) request: a form body holding the token itself.
-
-```ts
-await fetch(`http://127.0.0.1:${port}/v1/integrations/revoke`, {
-  method: "POST",
-  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  body: new URLSearchParams({ token }),
-});
-```
-
-| Code | Meaning |
-|------|---------|
-| `200` | The token is revoked, or it was already revoked or never existed. Delete your copy either way. |
-| `400 unsupported_token_type` | The token is the [stdio bridge token](/developers/tokens#the-stdio-bridge-token), which this route never revokes. |
-
-The route does what **Revoke** in **Settings > MCP > Authentication** does: the token's requests in
-flight are cancelled and its next call gets `-33009`. See [Revocation](/developers/tokens#revocation).
+`tablepro unpair` revokes its own token with an [RFC 7009](https://www.rfc-editor.org/rfc/rfc7009)
+request to `/v1/integrations/revoke`. The route listens on the
+[private socket](/developers/mcp-protocol#local-socket-and-handshake) only, which is not under the
+[contract](/developers/versioning#what-is-not-under-the-contract). Revoke any other client's token in
+**Settings > MCP > Authentication**.
 
 ## Security properties
 

@@ -65,7 +65,7 @@ Revoking cancels every request that token has in flight and clears the connectio
 
 **Disconnect** in the Connected Clients list revokes that client's token. It is not a soft disconnect: the client has to pair again or be given a new token.
 
-A client revokes its own token with `POST /v1/integrations/revoke`, as `tablepro unpair` does. See [Revoking a token](/developers/pairing#revoking-a-token).
+`tablepro unpair` revokes its own token. See [Revoking a token](/developers/pairing#revoking-a-token).
 
 ## The stdio bridge token
 
