@@ -17,6 +17,10 @@ Paste one absolute path into your client's MCP config and stop there. `tablepro-
 
 For an install outside `/Applications`, use your own bundle's path. **Connect a Client…** in **Settings > MCP** shows snippets with it filled in.
 
+<Note>
+TablePro for Linux has no bridge. Its clients take an address and a token instead: see [TablePro for Linux](#tablepro-for-linux).
+</Note>
+
 ## Clients that take the JSON above
 
 Only the config file differs.
@@ -115,6 +119,42 @@ Two installs share that one handshake file, so the bridge reaches whichever Tabl
 <Note>
 For a narrower scope than `readWrite`, or a connection allowlist, use the [HTTP transport](#http-transport) with a token you mint yourself.
 </Note>
+
+## TablePro for Linux
+
+TablePro for Linux has no `tablepro-mcp` bridge. A client reaches its server over HTTP on `127.0.0.1` with an access token, and the server runs only while TablePro is open.
+
+1. Turn on **Preferences > MCP > Enable MCP Server**.
+2. Under **Client Setup**, click **Copy Address**, then **Copy Access Token**.
+3. Give both to the client.
+
+Claude Code:
+
+```bash
+claude mcp add --transport http tablepro http://127.0.0.1:23508/mcp \
+  --header "Authorization: Bearer tp_your_token_here"
+```
+
+`claude mcp list` should show it as connected.
+
+Zed, in `~/.config/zed/settings.json`:
+
+```json
+{
+  "context_servers": {
+    "tablepro": {
+      "url": "http://127.0.0.1:23508/mcp",
+      "headers": {
+        "Authorization": "Bearer tp_your_token_here"
+      }
+    }
+  }
+}
+```
+
+Claude Desktop starts MCP servers only as commands, so it needs a stdio-to-HTTP bridge of its own to reach this server.
+
+The Linux server has nine tools: `list_connections`, `connect`, `list_schemas`, `list_tables`, `describe_table`, `get_table_ddl`, `browse_table`, `count_rows` and `execute_query`. Each connection's **External Clients** level decides what a client may do there: **Blocked**, **Read Only** (the default) or **Read & Write**. A write runs only after you click **Run** in the connection's window. **Regenerate Access Token…** turns the old token away at the next request, so paste the new one into every client.
 
 ## HTTP transport
 

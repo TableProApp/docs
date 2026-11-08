@@ -131,8 +131,8 @@ is the full reference. This table covers what it leaves to you.
 | `license` | The repository's SPDX license. Required for a `github` source, left out for `closed` |
 | `install` | Where the install button goes. Use the store the integration ships in: `raycast-store`, `vscode-marketplace`, `alfred-gallery`, `app-store`, or `homebrew` for a formula or cask in Homebrew's own repositories. Otherwise `github-release`, or `ships-with-host` when the other product includes it. `page`, a plain download page, needs a maintainer's approval |
 | `host` | The other product: `name`, `url`, `minVersion`, and a `note` for a paid tier it needs |
-| `platforms` | The TablePro apps it works with: `macos`, `ios`, `ipados` |
-| `minTableProVersion` | Optional. The oldest TablePro release it works with, per platform |
+| `platforms` | The TablePro apps it works with: `macos`, `linux`, `ios`, `ipados` |
+| `minTableProVersion` | Optional. The oldest TablePro release it works with, per platform. A beta is written as `0.1.0-beta.1` |
 | `categories` | One or two of `ai-clients`, `automation`, `cloud-hosting`, `command-line`, `editors`, `launchers`, `local-development`, `other` |
 | `surfaces` | The TablePro interfaces it calls: `url-scheme`, `database-url`, `applescript`, `mcp`, `pairing`, `cli`, `shortcuts` |
 | `disclosures` | What it reads, writes and sends, covered in [Disclosures](#disclosures) |
