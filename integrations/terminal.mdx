@@ -1,7 +1,11 @@
 ---
 title: Terminal
-description: Open database URLs and files in TablePro from a shell, and run queries from a script
+description: Open database URLs and files in TablePro from a shell, and query, browse and export a connection from a script
 ---
+
+import CliExitStatus from "/snippets/cli-exit-status.mdx";
+import CliOutputFormats from "/snippets/cli-output-formats.mdx";
+import CliSchemaCommands from "/snippets/cli-schema-commands.mdx";
 
 `open "mysql://…"` goes to whichever app claims the `mysql://` scheme, and with another database
 client installed that may not be TablePro. Name TablePro instead, either by bundle identifier or
@@ -16,11 +20,16 @@ Any [connection URL](/connections/urls) works, including its query parameters. T
 connection when one matches on type, host, port, database and user; otherwise the session is
 temporary and never written to disk. Running `tablepro` with no argument opens the app and nothing else.
 
+<Info>
+TablePro for Linux ships the same command with the app. See [Command line](/linux/command-line).
+</Info>
+
 ## Add the tablepro command to your PATH
 
-The command ships inside the app at `TablePro.app/Contents/SharedSupport/bin/tablepro`. It runs
-`query` and `connections` itself and hands anything else to `open -b com.TablePro`. Link it into
-`/usr/local/bin` once:
+The command ships inside the app at `TablePro.app/Contents/SharedSupport/bin/tablepro` and works
+with the copy it ships in: files and links open there, and a command that needs TablePro running
+starts that copy. A copy already running from another folder receives them instead. Link the command
+into `/usr/local/bin` once:
 
 ```bash
 sudo mkdir -p /usr/local/bin && sudo rm -f /usr/local/bin/tablepro && sudo ln -s /Applications/TablePro.app/Contents/SharedSupport/bin/tablepro /usr/local/bin/tablepro
@@ -31,6 +40,10 @@ never asks for an administrator password. **Settings > General > Command Line** 
 with the path of the copy you are running, and reads **Linked** once the link is in place. Any other
 directory on your `PATH` works too, and one you own needs no `sudo`.
 
+A copy opened from the mounted disk image, or one macOS still runs from where it was downloaded (App
+Translocation), sits on a read-only volume. Settings shows no line for it and asks you to move
+TablePro to Applications. Move it, open it from there, and the line appears.
+
 <Frame caption="The Command Line section in Settings > General">
   <img className="block dark:hidden" src="/images/command-line-link.png" alt="Command Line section in TablePro settings with the Terminal command to link tablepro" />
   <img className="hidden dark:block" src="/images/command-line-link-dark.png" alt="Command Line section in TablePro settings with the Terminal command to link tablepro" />
@@ -38,6 +51,9 @@ directory on your `PATH` works too, and one you own needs no `sudo`.
 
 To remove it, run `sudo rm /usr/local/bin/tablepro`. The link follows the app, so updating TablePro
 updates the command; move the app and the link needs making again.
+
+`tablepro --version` prints the version of the app the command ships in. `tablepro --help` lists the
+commands, and `tablepro help query` or `tablepro query --help` explains one.
 
 ## Open a file
 
@@ -55,6 +71,10 @@ tablepro app.db
   DuckDB plugin. A window already connected to that file comes to front instead of a second one
   opening.
 
+`tablepro <file>` is short for `tablepro open <file>`. A word that is neither an existing file nor a
+URL opens nothing and exits 2, so `tablepro qeury` fails instead of starting the app. A file named
+like a command, such as `tables`, opens with `./tables` or `tablepro open tables`.
+
 ## Run a query
 
 ```bash
@@ -64,8 +84,16 @@ echo "SELECT count(*) FROM orders" | tablepro query -c Staging --format json
 ```
 
 `--connection` takes a saved connection's name or its id, and `tablepro connections` lists both. The
-SQL comes from the argument, from `-f <file>`, or from standard input. Rows go to standard output,
-messages and errors to standard error.
+SQL comes from the argument, from `-f <file>`, or from standard input, and `-f -` reads standard
+input even at a terminal, until `Ctrl+D`. Rows go to standard output, messages and errors to
+standard error.
+
+SQL that starts with a dash, such as a leading `--` comment, goes after `--`, which ends the options:
+
+```bash
+tablepro query -c Staging -- "-- weekly report
+SELECT count(*) FROM orders"
+```
 
 | Option | |
 |---|---|
@@ -75,59 +103,16 @@ messages and errors to standard error.
 | `--timeout` | Seconds the statement may run, 1 to 300. Defaults to **Query timeout** under **Settings > MCP**, 30 |
 | `--read-only` | Refuse any statement that is not a read, even on a connection set to **Read & Write** |
 
-Pass `--format` in a script rather than relying on the terminal check. A result cut short by
-`--limit` says so on standard error.
-
-| Exit status | Meaning |
-|---|---|
-| 0 | The statement ran |
-| 1 | The database returned an error, or TablePro could not be reached |
-| 2 | A usage error: a missing option, an unknown connection name, several statements in one run |
-| 3 | Refused by a setting: the connection's level, Safe Mode, `--read-only`, a declined prompt, or a revoked pairing |
-| 4 | The statement ran past its timeout |
-
-### Output formats
-
-| Format | NULL | Other values |
-|---|---|---|
-| `csv` | An empty field. An empty string is `""` | Quoted when they hold a comma, a quote or a line break |
-| `tsv` | An empty field | Tab, line break, carriage return and backslash written as `\t`, `\n`, `\r`, `\\` |
-| `json` | `null` | An array of objects keyed by column name |
-| `jsonl` | `null` | One object per line |
-| `table` | `NULL` | Columns padded to line up. A control character shows as an escape, such as `\n` or `\x1B` |
-
-Every value is text, as in the grid. Binary columns come out as Base64. Two columns with the same
-name become `name` and `name_2` in JSON.
-
-### Pair the command
-
-The command reaches TablePro through its MCP server, so turn on **Enable MCP Server** under
-**Settings > MCP** first. With it off, every run exits 3. When TablePro is not running, the command
-starts it in the background, with no window.
-
-<Steps>
-  <Step title="Run any query in Terminal">
-    TablePro asks **Allow tablepro command to access TablePro?**
-  </Step>
-  <Step title="Choose what the command may do">
-    The sheet starts at **Read Only**. Pick **Read & Write** if your scripts write, and limit the
-    connections or set an expiry if you want.
-  </Step>
-  <Step title="Approve">
-    Your browser opens a page saying the command is paired. Close it. The query you ran continues.
-  </Step>
-</Steps>
-
-The token lives in your login Keychain. Revoke it under **Settings > MCP** and the next run exits 3;
-the run after that asks to pair again. A run whose standard error is not a terminal, such as a cron
-job, exits 3 instead of opening the sheet.
+A result cut short by `--limit` says so on standard error.
 
 ### What a query may do
 
-A query clears the same gates as any [MCP client](/features/mcp#connection-access):
+A query clears the same gates as any [MCP client](/features/mcp#connection-access), and so does
+every other command that names a connection:
 
 - The connection's **External Clients** level: **Blocked** hides it, **Read Only** refuses writes.
-- A connection whose AI policy is **Never** is refused.
+- A connection whose AI policy is **Never** is hidden as well. A hidden connection reads as unknown,
+  by name or by id, and the command exits 2.
 - The first query on each connection asks you, as often as **Approval** under **Settings > MCP** says.
 - [Safe Mode](/features/safe-mode) confirms or authenticates writes on your Mac.
 - `DROP` and `TRUNCATE` are refused. Run them in TablePro.
@@ -137,14 +122,115 @@ A query clears the same gates as any [MCP client](/features/mcp#connection-acces
 Every statement goes to the execution audit log, and to the [history drawer](/features/query-history#sources)
 under **Command Line**.
 
-### List connections
+## Browse a schema
 
 ```bash
 tablepro connections --format json
+tablepro databases -c Staging
+tablepro tables -c Staging --database app --schema public
+tablepro describe -c Staging --schema public orders
+tablepro describe -c Staging --ddl orders
 ```
 
-Each entry has the connection's `name`, `id` and `type`, never a host, user or password. The list
-leaves out connections the command may not reach.
+<CliSchemaCommands />
+
+## Export a table
+
+```bash
+tablepro export -c Staging --format csv orders > orders.csv
+tablepro export -c Staging --format sql --limit 5000 orders > orders.sql
+```
+
+`--format` is `csv`, `json` or `sql`, and `sql` writes `INSERT` statements in the connection's own
+quoting. Each table stops at **Default row limit** under **Settings > MCP**, 500 unless you change
+it, and `--limit` raises that as far as **Maximum row limit**. A table cut short says so on standard
+error. For every row, use [Export](/features/import-export) in the app.
+
+A table name takes letters, digits and underscores, optionally as `schema.table`. For any other
+name, run `tablepro query` with `--format csv` or `--format json`.
+
+## Pair the command
+
+The command reaches TablePro through its MCP server, so turn on **Enable MCP Server** under
+**Settings > MCP** first. With it off, every command that reads from TablePro exits 3. When TablePro
+is not running, the command starts its own copy in the background, with no window.
+
+<Steps>
+  <Step title="Run tablepro pair in Terminal">
+    Any other command that reads from TablePro starts the same pairing the first time. TablePro asks
+    **Allow tablepro command to access TablePro?**
+  </Step>
+  <Step title="Choose what the command may do">
+    The sheet starts at **Read Only**. Pick **Read & Write** if your scripts write, and limit the
+    connections or set an expiry if you want.
+  </Step>
+  <Step title="Approve">
+    Your browser opens a page saying the command is paired. Close it. A command you ran continues.
+  </Step>
+</Steps>
+
+The token lives in your login Keychain. Revoke it under **Settings > MCP** and the next run exits 3;
+the run after that asks to pair again. A run whose standard error is not a terminal, such as a cron
+job, exits 3 instead of opening the sheet. `tablepro pair` replaces the stored token with a new one;
+run `tablepro unpair` first to revoke the old one.
+
+### Check or remove the pairing
+
+`tablepro status` shows the path and version of the copy the command belongs to, whether TablePro is
+running, whether the MCP server is on, and whether the command is paired. It never starts TablePro
+and never asks to pair. It exits 0 when a command can run now, 1 when TablePro is not running or
+cannot be reached, and 3 when the server is off or the command is not paired.
+
+`tablepro unpair` revokes the token in TablePro, then deletes it from the Keychain. When TablePro
+cannot be reached, it deletes only the Keychain copy and says so. The token then stays active under
+**Settings > MCP > Authentication** until you revoke it there.
+
+## Shell completion
+
+`tablepro completion zsh`, `bash` or `fish` prints a script that completes commands, options and
+`--format` values. Connection names do not complete. Save the script where your shell loads it:
+
+<CodeGroup>
+
+```bash zsh
+mkdir -p ~/.zsh/completion
+tablepro completion zsh > ~/.zsh/completion/_tablepro
+```
+
+```bash bash
+mkdir -p ~/.bash_completions
+tablepro completion bash > ~/.bash_completions/tablepro.bash
+echo 'source ~/.bash_completions/tablepro.bash' >> ~/.bash_profile
+```
+
+```bash fish
+tablepro completion fish > ~/.config/fish/completions/tablepro.fish
+```
+
+</CodeGroup>
+
+zsh also needs the folder on its function path. Add these lines to `~/.zshrc` once, then open a new
+shell:
+
+```bash
+fpath=(~/.zsh/completion $fpath)
+autoload -U compinit && compinit
+```
+
+Run the command again after an update that adds commands.
+
+## Exit status
+
+<CliExitStatus />
+
+On the Mac, 3 also covers a command that is not paired and cannot ask, and a revoked pairing.
+
+## Output formats
+
+<CliOutputFormats />
+
+Every value is text, as in the grid. Binary columns come out as Base64. Two columns with the same
+name become `name` and `name_2` in JSON.
 
 ## Trusting a link
 

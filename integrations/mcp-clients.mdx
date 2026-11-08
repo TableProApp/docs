@@ -154,7 +154,7 @@ Zed, in `~/.config/zed/settings.json`:
 
 Claude Desktop starts MCP servers only as commands, so it needs a stdio-to-HTTP bridge of its own to reach this server.
 
-The Linux server has nine tools: `list_connections`, `connect`, `list_schemas`, `list_tables`, `describe_table`, `get_table_ddl`, `browse_table`, `count_rows` and `execute_query`. Each connection's **External Clients** level decides what a client may do there: **Blocked**, **Read Only** (the default) or **Read & Write**. A write runs only after you click **Run** in the connection's window. **Regenerate Access Token…** turns the old token away at the next request, so paste the new one into every client.
+The Linux server has eleven tools: `list_connections`, `connect`, `list_databases`, `list_schemas`, `list_tables`, `describe_table`, `get_table_ddl`, `browse_table`, `count_rows`, `execute_query` and `export_data`. The schema tools, `execute_query` and `export_data` take an optional `database`, which reaches only a database already open in the connection's window: its own, or one added with **Open Database…**. `execute_query` with `read_only: true` refuses any statement that is not a read. `export_data` returns tables as CSV, JSON or SQL `INSERT` statements, up to 1,000 rows each. Each connection's **External Clients** level decides what a client may do there: **Blocked**, **Read Only** (the default) or **Read & Write**. A write runs only after you click **Run** in the connection's window. **Regenerate Access Token…** turns the old token away at the next request, so paste the new one into every client.
 
 ## HTTP transport
 

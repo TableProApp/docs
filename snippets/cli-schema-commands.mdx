@@ -1,0 +1,11 @@
+| Command | Prints |
+|---|---|
+| `connections` | Each saved connection's `name`, `id` and `type`, never a host, user or password. Connections the command may not reach are left out |
+| `databases` | The connection's databases |
+| `schemas` | The schemas in a database |
+| `tables` | The tables and views in a schema |
+| `describe <table>` | The table's columns, indexes and foreign keys. With `--ddl`, its `CREATE` statement |
+
+Every command but `connections` takes `-c` with a saved connection's name or id. `schemas` takes
+`--database`, and `tables`, `describe` and `export` take `--database` and `--schema`. Without them,
+the connection's current database and schema apply.

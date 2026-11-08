@@ -68,7 +68,7 @@ And within a major version, none of these happen:
 - A required input field is added to an existing tool.
 - An output field is removed or changes type.
 - A resource is removed.
-- `/mcp` or `/v1/integrations/exchange` moves.
+- `/mcp`, `/v1/integrations/exchange` or `/v1/integrations/revoke` moves.
 - A pairing parameter is removed, or the redirect changes how it delivers the code.
 - A scope is removed or renamed, or the exchange response drops `scope`.
 - The default port changes from `23508`.
@@ -83,9 +83,10 @@ Treat the port as a setting that defaults to `23508`; the pane's **Status** row 
 
 ### The tablepro command and the app's identity
 
-- `tablepro`, once installed from **Settings > General**, stays at `/usr/local/bin/tablepro` and
-  hands each argument to the app the way `open -b com.TablePro` does: database URLs, `tablepro://`
-  links, `.sql` files and database files. With no argument it opens the app.
+- `tablepro`, once installed from **Settings > General**, stays at `/usr/local/bin/tablepro`, and
+  its commands and options keep their names and meanings.
+- Given database URLs, `tablepro://` links, `.sql` files or database files, `tablepro` opens them in
+  the copy of TablePro it ships in, or in the copy already running. With no argument it opens the app.
 - The bundle ID stays `com.TablePro`.
 - The MCP bridge stays at `Contents/MacOS/tablepro-mcp` inside the app bundle.
 - Where the bundle sits is up to the user. [Find the app](/developers#find-the-app) by bundle ID.
@@ -108,8 +109,8 @@ Deprecated now:
 
 These can change in any release, without notice:
 
-- Transport framing, internal message routing, and any HTTP path other than `/mcp` and
-  `/v1/integrations/exchange`.
+- Transport framing, internal message routing, and any HTTP path other than `/mcp`,
+  `/v1/integrations/exchange` and `/v1/integrations/revoke`.
 - The [handshake file and private socket](/developers/mcp-protocol#local-socket-and-handshake). Use the bundled
   `tablepro-mcp` bridge, which finds the server on its own, or connect over HTTP to the port on the
   **Status** row in **Settings > MCP**, `23508` by default.

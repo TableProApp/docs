@@ -100,7 +100,8 @@ Three constraints decide whether TablePro accepts the request at all:
   name, such as `smb://`, `ssh://` and `webcal://`.
 
 The exchange endpoint takes no bearer token: the single-use code plus the verifier is the credential.
-It and `/mcp` are the only paths the server serves, and both accept `POST` only.
+It, [the revoke route](#revoking-a-token) and `/mcp` are the only paths the server serves, and all
+three accept `POST` only.
 
 ## Response modes
 
@@ -162,8 +163,29 @@ takes a click. The sheet does not take focus from another app; TablePro's Dock i
 
 Approving mints the token, holds the plaintext against a one-time code for 5 minutes, and opens the
 redirect. Pairing again mints a second token rather than replacing the first, so an extension that
-re-pairs should stop using its old one. Revoke either under
+re-pairs should [revoke](#revoking-a-token) its old one, or the user revokes it under
 **Settings > MCP > Authentication**.
+
+## Revoking a token
+
+A client done with its token, such as `tablepro unpair`, revokes it with an
+[RFC 7009](https://www.rfc-editor.org/rfc/rfc7009) request: a form body holding the token itself.
+
+```ts
+await fetch(`http://127.0.0.1:${port}/v1/integrations/revoke`, {
+  method: "POST",
+  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  body: new URLSearchParams({ token }),
+});
+```
+
+| Code | Meaning |
+|------|---------|
+| `200` | The token is revoked, or it was already revoked or never existed. Delete your copy either way. |
+| `400 unsupported_token_type` | The token is the [stdio bridge token](/developers/tokens#the-stdio-bridge-token), which this route never revokes. |
+
+The route does what **Revoke** in **Settings > MCP > Authentication** does: the token's requests in
+flight are cancelled and its next call gets `-33009`. See [Revocation](/developers/tokens#revocation).
 
 ## Security properties
 

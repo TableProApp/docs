@@ -1,0 +1,10 @@
+| Format | NULL | Other values |
+|---|---|---|
+| `csv` | An empty field. An empty string is `""` | Quoted when they hold a comma, a quote or a line break |
+| `tsv` | An empty field | Tab, line break, carriage return and backslash written as `\t`, `\n`, `\r`, `\\` |
+| `json` | `null` | An array of objects keyed by column name |
+| `jsonl` | `null` | One object per line |
+| `table` | `NULL` | Columns padded to line up, wide characters included. A control character shows as an escape, such as `\n` or `\x1B` |
+
+`query` and every listing command take the same `--format`: `table` on a terminal, `csv` into a pipe
+or a file. Pass it in a script rather than relying on the terminal check.
