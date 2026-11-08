@@ -78,7 +78,9 @@ actual path. Use the bundled bridge instead of hard-coding a path.
 This file is [outside the stable contract](/developers/versioning#what-is-not-under-the-contract).
 
 Before sending credentials, the bridge checks the file's owner and permissions, expiry, host process,
-and socket ownership and location. It then calls `server/discover` over that socket and checks
+and socket ownership and location. Before each request, the bridge and CLI check the connected
+socket's `LOCAL_PEERPID` against the trusted handshake PID and recheck that process's executable.
+It then calls `server/discover` over that socket and checks
 `app.tablepro/instanceId` against the handshake. A mismatch refuses the connection. A restart or
 socket failure requires a fresh trusted handshake; the bridge does not fall back to TCP.
 
