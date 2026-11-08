@@ -1,10 +1,13 @@
-| Format | NULL | Other values |
-|---|---|---|
-| `csv` | An empty field. An empty string is `""` | Quoted when they hold a comma, a quote or a line break |
-| `tsv` | An empty field | Tab, line break, carriage return and backslash written as `\t`, `\n`, `\r`, `\\` |
-| `json` | `null` | An array of objects keyed by column name |
-| `jsonl` | `null` | One object per line |
-| `table` | `NULL` | Columns padded to line up, wide characters included. A control character shows as an escape, such as `\n` or `\x1B` |
+Rows go to standard output. Errors, notices and truncation messages go to standard error.
 
-`query` and every listing command take the same `--format`: `table` on a terminal, `csv` into a pipe
-or a file. Pass it in a script rather than relying on the terminal check.
+For queries, browse commands and `status`, the default is `table` when standard output is a terminal and `csv` otherwise. Set `--format` in scripts to choose it explicitly.
+
+| Format | Shape | NULL |
+|---|---|---|
+| `csv` | Header and comma-separated rows; quotes protect commas, quotes and line breaks | Empty field; an empty string is `""` |
+| `tsv` | Header and tab-separated rows; tabs, newlines, carriage returns and backslashes become `\t`, `\n`, `\r` and `\\` | Empty field |
+| `json` | An array of objects keyed by column name | `null` |
+| `jsonl` | One object per line | `null` |
+| `table` | Aligned columns; control characters shown as escapes | `NULL` |
+
+Several result sets become an array of arrays in JSON, consecutive objects in JSONL, or blocks separated by a blank line in the other formats. Repeated column names get numbered JSON keys, such as `id` and `id_2`.

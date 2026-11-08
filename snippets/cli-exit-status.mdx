@@ -1,7 +1,7 @@
-| Exit status | Meaning |
+| Status | Meaning |
 |---|---|
-| 0 | Done, `--help`, `--version` and `completion` included |
-| 1 | The database returned an error, TablePro could not be reached, or the output could not be written |
-| 2 | A usage error: an unknown command or option, a missing `--connection`, a connection name or id the command cannot see, several statements in one run, no SQL, or a target that is neither a URL nor a file |
-| 3 | Refused by a setting: the MCP server is off, the connection's **External Clients** level, Safe Mode, `--read-only`, or a declined prompt |
-| 4 | Timed out: the statement ran past its timeout, or a prompt in TablePro went unanswered |
+| 0 | Success, including help, version and completion output |
+| 1 | Database, connection or output error |
+| 2 | Invalid usage, SQL input or option value; unknown or ambiguous connection; missing file |
+| 3 | Access refused, MCP server disabled, or approval declined |
+| 4 | Query or server request timed out |

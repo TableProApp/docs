@@ -100,8 +100,8 @@ Three constraints decide whether TablePro accepts the request at all:
   name, such as `smb://`, `ssh://` and `webcal://`.
 
 The exchange endpoint takes no bearer token: the single-use code plus the verifier is the credential.
-It, [the revoke route](#revoking-a-token) and `/mcp` are the only paths the server serves, and all
-three accept `POST` only.
+The public HTTP routes are `/v1/integrations/exchange` and `/mcp`; both accept `POST` only.
+The bundled command also uses a [private revocation route](#revoking-a-token).
 
 ## Response modes
 
@@ -162,17 +162,22 @@ request, not a grant. **Deny** is the default button: Return and Escape both den
 takes a click. The sheet does not take focus from another app; TablePro's Dock icon bounces instead.
 
 Approving mints the token, holds the plaintext against a one-time code for 5 minutes, and opens the
-redirect. Pairing again mints a second token rather than replacing the first, so an extension that
-re-pairs should [revoke](#revoking-a-token) its old one, or the user revokes it under
-**Settings > MCP > Authentication**.
+redirect. Pairing again creates a separate token. Retire an old token through
+[revocation](#revoking-a-token) once the client uses its replacement.
 
 ## Revoking a token
 
-`tablepro unpair` revokes its own token with an [RFC 7009](https://www.rfc-editor.org/rfc/rfc7009)
-request to `/v1/integrations/revoke`. The route listens on the
-[private socket](/developers/mcp-protocol#local-socket-and-handshake) only, which is not under the
-[contract](/developers/versioning#what-is-not-under-the-contract). Revoke any other client's token in
-**Settings > MCP > Authentication**.
+Revoke a client's token in **Settings > MCP > Authentication**. For the bundled macOS command,
+use [`tablepro unpair`](/integrations/terminal#status-and-pairing).
+
+The command sends `POST /v1/integrations/revoke` over the private Unix socket, with a form-encoded
+`token` field. The route does not exist on the TCP listener and is outside the
+[stability contract](/developers/versioning#what-is-not-under-the-contract). Do not use it as a
+public client API.
+
+A successful response is `200 {}`, including for an unknown or already revoked token. A `503`
+means revocation was not saved: the token remains valid. The server refuses the stdio bridge
+credential with `400 unsupported_token_type`.
 
 ## Security properties
 

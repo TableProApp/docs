@@ -1,11 +1,20 @@
-| Command | Prints |
-|---|---|
-| `connections` | Each saved connection's `name`, `id` and `type`, never a host, user or password. Connections the command may not reach are left out |
-| `databases` | The connection's databases |
-| `schemas` | The schemas in a database |
-| `tables` | The tables and views in a schema |
-| `describe <table>` | The table's columns, indexes and foreign keys. With `--ddl`, its `CREATE` statement |
+```bash
+tablepro connections --format json
+tablepro databases -c Staging
+tablepro schemas -c Staging --database shop
+tablepro tables -c Staging --database shop --schema public
+tablepro describe -c Staging --schema public orders
+tablepro describe -c Staging --ddl orders
+```
 
-Every command but `connections` takes `-c` with a saved connection's name or id. `schemas` takes
-`--database`, and `tables`, `describe` and `export` take `--database` and `--schema`. Without them,
-the connection's current database and schema apply.
+| Command | Result | Scope options |
+|---|---|---|
+| `connections` | Saved connection names, ids and types; hidden connections are omitted | None |
+| `databases` | Databases on the connection | `-c` |
+| `schemas` | Schemas in a database | `-c`, `--database` |
+| `tables` | Tables and views in a schema | `-c`, `--database`, `--schema` |
+| `describe <table>` | Columns, indexes and foreign keys as separate result sets | `-c`, `--database`, `--schema` |
+
+`-c` is short for `--connection`. Pass a saved connection's name or id. If a name matches several connections, use an id from `connections`.
+
+All five commands accept `--format`. For `describe`, use `--ddl` to print the `CREATE` statement instead; it cannot be combined with `--format`.

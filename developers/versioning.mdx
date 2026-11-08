@@ -83,13 +83,16 @@ Treat the port as a setting that defaults to `23508`; the pane's **Status** row 
 
 ### The tablepro command and the app's identity
 
-- `tablepro`, once installed from **Settings > General**, stays at `/usr/local/bin/tablepro`, and
-  its commands and options keep their names and meanings.
-- Given database URLs, `tablepro://` links, `.sql` files or database files, `tablepro` opens them in
-  the copy of TablePro it ships in, or in the copy already running. With no argument it opens the app.
-- The bundle ID stays `com.TablePro`.
-- The MCP bridge stays at `Contents/MacOS/tablepro-mcp` inside the app bundle.
-- Where the bundle sits is up to the user. [Find the app](/developers#find-the-app) by bundle ID.
+The documented commands, options and [exit statuses](/integrations/terminal#exit-status) keep their
+names and meanings within a major version. New commands and options may appear. Use the reference
+for your platform: [macOS](/integrations/terminal) or [Linux](/linux/command-line).
+
+On macOS, the command ships at `Contents/SharedSupport/bin/tablepro` inside the app bundle.
+The [install command](/integrations/terminal#install) links it into `/usr/local/bin`. Opening files
+or URLs targets that app, or a copy already running. No arguments opens the app.
+
+The bundle ID stays `com.TablePro`, and the MCP bridge stays at `Contents/MacOS/tablepro-mcp`.
+The install folder is the user's choice; [find the app](/developers#find-the-app) by bundle ID.
 
 ## Breaking changes before 1.0
 
@@ -111,6 +114,8 @@ These can change in any release, without notice:
 
 - Transport framing, internal message routing, and any HTTP path other than `/mcp` and
   `/v1/integrations/exchange`.
+- `/v1/integrations/revoke`, used by the bundled macOS command over the private socket. It is not
+  available through public HTTP. See [Revoking a token](/developers/pairing#revoking-a-token).
 - The [handshake file and private socket](/developers/mcp-protocol#local-socket-and-handshake). Use the bundled
   `tablepro-mcp` bridge, which finds the server on its own, or connect over HTTP to the port on the
   **Status** row in **Settings > MCP**, `23508` by default.
