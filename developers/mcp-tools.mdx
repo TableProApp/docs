@@ -1,9 +1,9 @@
 ---
 title: MCP Tools
-description: The 47 tools TablePro's MCP server exposes, with arguments, defaults, result shapes, and scope requirements
+description: The 48 tools TablePro's MCP server exposes, with arguments, defaults, result shapes, and scope requirements
 ---
 
-If a dedicated tool covers the job, it beats hand-written SQL. It quotes identifiers for the engine in front of it, applies the user's row limits, and runs on connections where raw execution is refused. All 47 publish a JSON Schema for input and output, so a client can validate both sides without reading this page. For the wire format, headers and error codes see [MCP Protocol](/developers/mcp-protocol).
+If a dedicated tool covers the job, it beats hand-written SQL. It quotes identifiers for the engine in front of it, applies the user's row limits, and runs on connections where raw execution is refused. All 48 publish a JSON Schema for input and output, so a client can validate both sides without reading this page. For the wire format, headers and error codes see [MCP Protocol](/developers/mcp-protocol).
 
 ## How to read this page
 
@@ -28,12 +28,12 @@ Row limits default to the server's **Default row limit** setting (500) and are c
 | [Reading data](#reading-data) | `browse_table` `count_rows` `execute_query` `explain_query` `export_data` `quote_identifiers` |
 | [Writing data](#writing-data) | `insert_rows` `confirm_destructive_operation` `transaction_control` |
 | [Databases and objects](#databases-and-objects) | `describe_create_database_options` `create_database` `drop_database_object` `list_maintenance_operations` `run_maintenance` |
-| [Server administration](#server-administration) | `get_server_dashboard` `stop_server_session` `list_principals` `list_grants` `list_session_contexts` |
+| [Server administration](#server-administration) | `get_server_dashboard` `get_table_health` `stop_server_session` `list_principals` `list_grants` `list_session_contexts` |
 | [The user's workspace](#the-users-workspace) | `list_favorite_tables` `list_recent_tables` `list_recent_tabs` `focus_query_tab` `open_connection_window` `open_table_tab` `search_query_history` |
 
 ## Scopes and gates
 
-Fourteen tools need `tools:write`: `connect`, `disconnect`, `switch_database`, `switch_schema`, `insert_rows`, `confirm_destructive_operation`, `transaction_control`, `create_database`, `drop_database_object`, `run_maintenance`, `stop_server_session`, `focus_query_tab`, `open_connection_window`, `open_table_tab`. The other 33 need `tools:read`, `execute_query` among them until the statement writes.
+Fourteen tools need `tools:write`: `connect`, `disconnect`, `switch_database`, `switch_schema`, `insert_rows`, `confirm_destructive_operation`, `transaction_control`, `create_database`, `drop_database_object`, `run_maintenance`, `stop_server_session`, `focus_query_tab`, `open_connection_window`, `open_table_tab`. The other 34 need `tools:read`, `execute_query` among them until the statement writes.
 
 Past the scope, a call clears three more gates:
 
@@ -212,12 +212,15 @@ On Redis the three actions are `MULTI`, `EXEC` and `DISCARD`. Every command betw
 | Tool | Arguments | Returns |
 |------|-----------|---------|
 | `get_server_dashboard` | `connection_id` (`panels`) | The requested panels: `sessions`, `metrics`, `slow_queries`, plus `errors` for any the server could not answer |
+| `get_table_health` | `connection_id` (`database`) | `database`, `generated_at`, `notes[]`, `checks[]` (`kind`, `title`, `summary`, `outcome`, `finding_count`, plus `reason` and `note` when they apply), `findings[]` (`kind`, `detail`, `metrics[]`, `status`, plus `schema`, `table`, `object`, `size_bytes` and `fix_sql` when they apply) |
 | `stop_server_session` | `connection_id`, `process_id` (`mode`) | The result set the engine produced |
 | `list_principals` | `connection_id` | `principals[]` (`name`, `host`, `is_role`, `can_login`, `member_of[]`, `connection_limit`, `comment`, and `attributes[]` of `{ key, label, is_enabled }`), sorted by name |
 | `list_grants` | `connection_id`, `principal` (`host`) | `principal`, `grants[]` (`privilege`, `scope`, `is_grantable`). `scope` is a dotted path, `*` for a server-wide grant |
 | `list_session_contexts` | `connection_id` | `is_supported`, `contexts[]` (`id`, `label`, `value`, `options[]`) |
 
 `get_server_dashboard` reads the live panels TablePro shows, and runs on every engine with a [Server Dashboard](/features/server-dashboard#what-each-engine-reports). Name the panels in `panels[]` or omit it for all three. A session carries `id` (the process id `stop_server_session` takes), `user`, `database`, `state`, `duration_seconds`, `query`, `can_kill` and `can_cancel`; a metric carries `id`, `label`, `value`, `unit`; a slow query carries `duration`, `query`, `user`, `database`. A panel the server could not answer is left out, and `errors` names it: one fixed sentence per panel, keyed by panel name. The server's own message is not sent to the client; it goes to the app's log, where the user can read it. When every requested panel fails, the call fails.
+
+`get_table_health` runs the [Table Health](/features/table-health#what-each-engine-checks) checks on one database, in every schema, on PostgreSQL, MySQL and MariaDB. It is read-only: it runs no fix and records nothing in the tab's history. `outcome` is `completed`, `skipped` or `failed`. A skipped check's `reason` says why; a failed check's is one fixed sentence, and the server's own message goes to the app's log. `findings[]` holds every finding of each completed check, ignored ones included. A metric carries `id`, `label`, `type` (`count`, `bytes`, `percent` as a fraction, `date`, `text` or `flag`) and `value`; a count past the 64-bit signed range comes as a string. `status` comes from the history the Table Health tab records: `ignored` when the user ignored the finding, `new` when the tab has run that check and did not report the finding the last time, `none` otherwise. The checks run under the **Query timeout**, and the call fails when they take longer.
 
 `stop_server_session` takes `mode` as `cancel` (default) to stop the running query or `kill` to end the session. SQL Server, ClickHouse, MySQL before 5.0 and Oracle before 18c take only `kill`: their sessions report `can_cancel` false, and `cancel` fails with `invalid_argument`. MongoDB takes only `cancel`, and `kill` fails the same way. The user always approves this one, whatever Safe Mode says.
 
@@ -237,7 +240,7 @@ These read and drive the TablePro app itself, and none of them bypasses the conn
 | `open_table_tab` | `connection_id`, `table_name` (`database_name`, `schema_name`) | `status` (`opened`), `connection_id`, `table_name`, `tab_id`, `window_id` |
 | `search_query_history` | `query` (`connection_id`, `limit`, `since`, `until`) | `entries[]` carrying `id`, `query`, the connection and database it ran on, `source`, `statement_type`, `executed_at`, `execution_time_ms`, `row_count`, `was_successful` and `error_message`, newest first |
 
-Starred tables are a good hint at what matters in a database. `list_recent_tabs` covers every readable connection when `connection_id` is omitted, its `limit` runs 1 to 500, default 20, and `tab_type` is one of `query`, `table`, `createTable`, `erDiagram`, `serverDashboard`, `insights`, `usersRoles`, `objectSource`, `versionHistory`, `tableListing`.
+Starred tables are a good hint at what matters in a database. `list_recent_tabs` covers every readable connection when `connection_id` is omitted, its `limit` runs 1 to 500, default 20, and `tab_type` is one of `query`, `table`, `createTable`, `erDiagram`, `serverDashboard`, `insights`, `tableHealth`, `usersRoles`, `objectSource`, `versionHistory`, `tableListing`.
 
 `open_connection_window` and `open_table_tab` connect first if they have to, and return once the window has a tab or fail after 8 seconds. `open_table_tab` without `database_name` or `schema_name` means the ones the connection is on, and its `tab_id` is that table's tab, never a table of the same name elsewhere.
 
