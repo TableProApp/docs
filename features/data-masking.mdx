@@ -56,6 +56,33 @@ One rule covers every place a value leaves TablePro:
 
 A query result has no source table for most engines, so a `table.column` rule matches a query result by its column name alone. `users.ssn` then also masks an `ssn` column a query reads from another table.
 
+## Masking for AI and scripts
+
+Results for MCP clients, the AI assistant, Claude Agent, AppleScript and Shortcuts are masked by the table column each result column reads, as well as by its name. On PostgreSQL, MySQL, MariaDB and local SQLite, `SELECT email AS contact FROM users` comes back masked by a `*.email` rule.
+
+On a connection with at least one rule, a column that reads no column of a user table comes back as `••••`, whatever its name. The result's status message names the columns masked this way. That covers:
+
+- An expression or an aggregate, such as `lower(email)` or `count(*)`.
+- A system table or catalog, such as `pg_stat_activity`, in a query, a browse or an export. Schema lookups such as `describe_table` still return the structure.
+- Every column of a statement the driver does not trust: a subquery, a CTE or a `UNION` on MySQL and MariaDB, a compound `SELECT` or `VALUES` on SQLite. One of those words inside a value, such as a filter on `'union'`, counts too.
+
+These cannot trace a column: ClickHouse, Redis, CockroachDB, Redshift, TiDB, Databend, OceanBase, a SQLite [remote file](/connections/remote-database-files) opened **On the Server**, and every engine from the plugin registry. On a connection with rules, every column of a query on them comes back masked, and a browsed or exported table is matched by column name, as in the grid.
+
+### On a connection with rules
+
+The rules also withhold text that can repeat a stored value:
+
+| Where | What comes back |
+|-------|-----------------|
+| A statement that fails | The error code and SQLSTATE where the driver reports them, and a sentence saying the message is withheld |
+| **Fix with AI** | The failed statement, without the server's message |
+| A query plan | The plan masked whole, except PostgreSQL's and SQLite's. **Review with AI**, **Explain with AI** and **Optimize with AI** attach no plan on other engines |
+| History entries the app wrote from row data, under **Row Edits** and **Imports** | A sentence in place of the statement. A history search with text leaves them out |
+| The error of any history entry | A sentence in place of the message |
+| Session and slow-query text from the server dashboard | A sentence in place of the statement |
+
+A refusal, a timeout or a cancel from TablePro itself keeps its text.
+
 ## Editing and Reveal
 
 A grid that shows a masked column is read-only, since a mask cannot be written back or used to find its row. To see or edit the real values, right-click a masked column's header and choose **Reveal Masked Values…**. TablePro asks for Touch ID, or your macOS password on a Mac without it, and reloads the tab unmasked. A query tab whose statement is not a read reveals on its next run instead.
@@ -67,5 +94,17 @@ Reveal lasts until the tab closes or opens another table. Other tabs, exports fr
 Masking hides values inside TablePro. It does not replace database permissions: anyone with the connection's credentials can read the data with another client.
 
 - Filters, sorts and `WHERE` clauses run on the server against the stored values, so a filter on a masked column finds the real matches.
-- A rule matches the column name a result reports. A query that renames or computes the column, such as `SELECT email AS contact`, returns it unmasked, and that includes queries an MCP client or the AI assistant writes. A **Type** rule catches a renamed column that keeps its type.
+- In the grid, a rule matches the column name a result reports. A query that renames or computes the column, such as `SELECT email AS contact`, shows it unmasked. A **Type** rule catches a renamed column that keeps its type. Results for AI and scripts are [masked by what each column reads](#masking-for-ai-and-scripts).
 - **Copy To**, copying objects to another database and Compare move the stored values, not the masks.
+- The **Edit Document** sheet shows a stored document's fields without Reveal. Query plans, and the sessions and slow queries on the server dashboard, are not masked in the app.
+
+### Known limits for AI and scripts
+
+A client that may run SQL can still learn a masked value these ways:
+
+- A view, a generated column or a table copied with `CREATE TABLE … AS SELECT` holds the value under its own name. A rule that does not name that column leaves it unmasked, in the grid too. Making the copy is a write, which a **Read Only** token or connection refuses.
+- `WHERE` and `ORDER BY` test a value without returning it, such as `WHERE email LIKE 'a%'`. Row counts and row order answer one guess at a time.
+- How long a query takes, and whether it fails, can depend on a masked value. A client can probe both, even with the error text withheld.
+- A statement a client or a person typed comes back as written, in history and in its own results. So do literals another session sent, wherever the database shows them outside the masked system views.
+- On an engine that cannot trace columns, only the system databases and schemas the engine declares are masked whole, not system tables inside a user database. On a SQLite file opened **On the Server**, `sqlite_stat4` and a full-text table's `<name>_content` copy show their columns as your rules name them. CockroachDB's `crdb_internal`, whose lock and contention views print index keys with their values, is not masked whole either.
+- Column names are never masked. On MySQL, a client that may prepare statements can build a column name from a value with `PREPARE`.

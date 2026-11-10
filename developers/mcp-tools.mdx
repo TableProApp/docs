@@ -15,7 +15,7 @@ In the tables below, required arguments come first and optional ones follow in p
 - The result comes back twice: as JSON text in `content[0]`, and as a typed object in `structuredContent`. Read `structuredContent`.
 - Timestamps are ISO 8601, error text is redacted, and "a result set" means `columns[]`, `rows[][]`, `row_count`, `rows_affected`, `execution_time_ms`, `is_truncated`, plus `status_message`, `database` and `schema` when they apply.
 
-A column a [masking rule](/features/data-masking) matches comes back masked in every tool that returns rows, `browse_table`, `execute_query` and `export_data` included. The mask replaces the value in `rows[][]`; `columns[]` and `row_count` are unchanged. A filter or sort in the request still runs on the stored values.
+A column a [masking rule](/features/data-masking) matches comes back masked in every tool that returns rows, `browse_table`, `execute_query` and `export_data` included. The mask replaces the value in `rows[][]`; `columns[]` and `row_count` are unchanged. A filter or sort in the request still runs on the stored values. A connection with rules also changes errors, plans and some text fields: see [Masking rules](#masking-rules).
 
 Row limits default to the server's **Default row limit** setting (500) and are capped by **Maximum row limit** (10,000). Timeouts default to **Query timeout** (30 seconds) and are capped at 300. Both live in **Settings > MCP**.
 
@@ -41,11 +41,29 @@ Past the scope, a call clears three more gates:
 2. **Connection policy.** **External Clients** set to **Blocked** hides the connection: `list_connections` omits it and any tool that names it is refused. An AI policy of **Never** does the same, except that [`purpose: "display"`](#listing-for-display) still lists it. Otherwise the first call that touches a connection asks the user, as often as **Settings > MCP > Approval** says. That question is always a dialog on the user's Mac, never an elicitation: a client that could answer it could also grant itself the connection. It has no deadline, so the client owns the timeout, and a refusal stands for 60 seconds before the question can be put again.
 3. **Safe Mode.** A write goes through the connection's Safe Mode, which may ask the user to confirm it or to authenticate. See [Approvals](/developers/mcp-protocol#approvals-and-input-required).
 
+`completion/complete` clears the same connection policy without asking: on a connection this client is not approved for, it completes nothing. See [Context matters](/developers/mcp-prompts#context-matters).
+
 A call that opens a connection may also need approval on the Mac for a pre-connect script, environment variables, or [local sign-in credentials](/connections/connection-form#sign-ins-from-this-mac). A refusal returns `denied`; an unanswered prompt returns `timeout`.
 
 `confirm_destructive_operation` needs `admin` as well, so it takes a Full Access token, and **Read Only** refuses it outright whatever the token carries. No token skips the user's approval.
 
 **Read Only** refuses a statement classified as a write with `denied`. Reads also use the driver's read-only mode where supported. [What Read Only allows](/developers#what-read-only-allows) lists engine limits and the statements refused at every access level. Multiple statements return `invalid_argument`, except for SQL Server scripts sent to [`execute_query`](#execute_query) or [`confirm_destructive_operation`](#writing-data).
+
+## Masking rules
+
+On a connection with [masking rules](/features/data-masking#masking-for-ai-and-scripts), PostgreSQL, MySQL, MariaDB and local SQLite mask a cell by the table column it reads, so an alias is masked too. A column that reads no column of a user table comes back masked whole, whatever its name, and `status_message` names it. On engines that cannot trace a column, that is every column of a query. Schema tools such as `describe_table` return the structure as usual.
+
+The rules also withhold text that can repeat a stored value:
+
+| Tool | On a connection with rules |
+|------|----------------------------|
+| A failed statement, in any tool that runs one | `query_failed`, with the error code and SQLSTATE when the driver reports them and the withheld-message sentence in place of the server's text. A failure before the driver takes the statement keeps its text |
+| `explain_query` | The plan masked whole, `plan_text` and `plan` included, except on PostgreSQL and SQLite. `status_message` says why |
+| `get_server_dashboard` | The withheld-statement sentence as the `query` of every session and slow query |
+| `search_query_history`, the history resource | The withheld-message sentence as every `error_message`. An entry whose `source` is `row_edit` or `import` has the withheld-statement sentence as its `query`, and a search with text leaves it out |
+| `browse_table`, `export_data` | A system table masked whole |
+
+The withheld-message sentence reads `The statement failed with error 1146, SQLSTATE 42S02. Its message is withheld because this connection has masking rules, and the message can repeat a masked value.`, without the codes when there are none. The withheld-statement sentence reads `The statement text is withheld because this connection has masking rules, and it can repeat a masked value.`
 
 ## Connections
 
@@ -163,7 +181,7 @@ On SQL Server, send the whole script instead. A variable exists only in the batc
 
 The top-level fields describe the first result set, with `rows_affected` counting the whole script. When the script returns more than one result set, `result_sets[]` lists every one in order, each with `columns`, `rows`, `row_count` and `is_truncated`. `max_rows` caps each result set on its own. `status_message` says when the script left a transaction open.
 
-A batch that raises an error fails the call with the server's message and line number. The batches after it do not run, and the error says what stays applied.
+A batch that raises an error fails the call with the server's message and line number. The batches after it do not run, and the error says what stays applied. On a connection with [masking rules](#masking-rules), the whole message is withheld.
 
 ### `explain_query`
 

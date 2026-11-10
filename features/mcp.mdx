@@ -53,7 +53,8 @@ The first time a client reaches one of your connections, TablePro asks. **Approv
 
 Leave it at **Ask Once for Each Connection** unless a client runs unattended, in which case **Never
 Ask** stops the prompt from waiting for someone who is not there. Approvals already given are listed
-underneath, each with **Forget**.
+underneath, each with **Forget**. A row names the connection and the client it was given to: a
+token's name, **Built-in CLI** for the bundled bridge, or [**Claude Agent**](/features/ai-assistant#claude-agent).
 
 Approval decides only whether you are asked. It grants nothing: a connection **Blocked** for
 external clients stays blocked, a **Read Only** one stays read only, a connection whose AI policy is
