@@ -46,6 +46,8 @@ With no preference, start with Claude or OpenAI on an API key: both take a key, 
 
 Install Claude Code, run `claude /login` in Terminal, then pick Opus, Sonnet, or Haiku. Replies bill against your Claude subscription instead of an API key. The provider answers from your schema when the MCP server is on in **Settings > MCP**, and falls back to plain chat when it is off.
 
+Whatever the chat mode, its tools only read, and reach only the chat's connection: each reply runs on a [**Read Only**](/developers/tokens) MCP token limited to that connection. At **Ask Once for Each Connection** in **Settings > MCP**, one **Allow** covers every later reply on the connection until you click **Forget** on its **Claude Agent** row, or end its token with **Revoke**, **Delete** or **Disconnect** while a reply runs.
+
 The `claude` tool runs headless here. Claude Code is built for you to use directly rather than as a backend for other apps, so this path can break with any Claude Code release. Your subscription is governed by Anthropic's [Consumer Terms](https://www.anthropic.com/legal/consumer-terms) and [Usage Policy](https://www.anthropic.com/legal/aup), which TablePro cannot grant rights under. Replies also count against the limits you share with claude.ai and your own Claude Code sessions, so running out here stops your work there. For a metered path on commercial terms, add the **Claude** provider with an API key.
 
 ## Apple Intelligence
@@ -140,7 +142,7 @@ Start with **Review with AI** when you are unsure what to ask: it checks correct
   <img className="hidden dark:block" src="/images/ai-query-review-dark.png" alt="Query bar with the Review button, and the assistant answering a review of a JOIN" />
 </Frame>
 
-The request carries the structure of the tables the statement names, read from the tab's own database and schema: columns and types, keys, indexes with their predicates, foreign keys, and estimated row counts. Up to 12 tables go, in the order the statement names them. The chip above your message lists them; hover it to see any table that could not be read or was not found. If the tab already shows an EXPLAIN plan for the same statement, the plan goes too. Building this reads only the database's catalog: your statement never runs, and no rows are sent. Turn off **Include database schema** in **Settings > AI** to send the statement alone.
+The request carries the structure of the tables the statement names, read from the tab's own database and schema: columns and types, keys, indexes with their predicates, foreign keys, and estimated row counts. Up to 12 tables go, in the order the statement names them. The chip above your message lists them; hover it to see any table that could not be read or was not found. If the tab already shows an EXPLAIN plan for the same statement, the plan goes too, unless [masking rules](/features/data-masking#on-a-connection-with-rules) hold it back. Building this reads only the database's catalog: your statement never runs, and no rows are sent. Turn off **Include database schema** in **Settings > AI** to send the statement alone.
 
 With no provider set up and Apple Intelligence off, the actions are dimmed. With Apple Intelligence on, they are dimmed while it cannot run, and the tooltip says why. With AI turned off, or on a connection whose AI policy is **Never**, they are hidden.
 
