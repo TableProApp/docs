@@ -1,66 +1,141 @@
 ---
 title: Table Health
-description: Find bloated tables, unused and redundant indexes, tables without a primary key, and foreign keys without an index
+description: Check a PostgreSQL, MySQL or MariaDB database for bloat, wasted and invalid indexes, missing keys, counters near their limit and stale statistics, then track and export what you find
 ---
 
-Open it from **Database > Table Health**. The report reads the catalogs and statistics of the database selected in the sidebar and changes nothing. Press `Cmd+R` (**Database > Refresh**) or click the refresh button to read them again.
+Each Table Health tab checks one database, in every schema, and stays on it. Choose **Database > Table Health** and the tab opens on the database the window is on. The item is dimmed until a database is selected, and on engines other than PostgreSQL, MySQL and MariaDB. Choose it again for the same database and that tab comes forward, in whichever window holds it. Moving the sidebar to another database later leaves the tab where it was: choose the item again to open a tab for the other one.
 
-<Frame caption="Table Health listing findings by check, with the fix for the selected one below">
+The checks read catalogs and statistics and change nothing. Press `Cmd+R` (**Database > Refresh**) or click the refresh button in the tab's bar to run them again.
+
+<Frame caption="One tab per database: the checks on the left, their findings on the right, the selected finding's fix under them">
   <img
     className="block dark:hidden"
     src="/images/table-health.png"
-    alt="Table Health report with an unused index selected"
+    alt="Table Health tab with the checks list, a findings table and the SQL preview for the selected finding"
   />
   <img
     className="hidden dark:block"
     src="/images/table-health-dark.png"
-    alt="Table Health report with an unused index selected"
+    alt="Table Health tab with the checks list, a findings table and the SQL preview for the selected finding"
   />
 </Frame>
+
+## Read the report
+
+The list on the left starts with **All Findings**. Under **Checks** comes one row per check the engine runs, with its finding count when it found something, **Skipped** when the server keeps nothing the check could read, or **Failed** when its query failed. **Resolved**, under **History**, holds the findings that went away; see [Track findings](#track-findings).
+
+Select a check to read what it looks for, with its threshold, over the table. Notes there also say when the usage counters started, that the server is a standby, or what to know about one check's numbers.
+
+The table shows **Status**, **Check**, **Table**, **Object**, **Size** and **Detail**. Click a header to sort by it. **Size** is the size on disk of the index for an index check and of the table otherwise, empty where the check has none. On PostgreSQL it is the catalog's estimate as of the last `VACUUM`, `ANALYZE` or index build, so no check waits on a lock another session holds. Shift-click or Cmd-click to select several findings: every action in [Act on findings](#act-on-findings) works on a selection.
+
+Type in **Filter** to keep the rows whose check, table, object or detail contains the text. Ignored findings stay out of the table and the counts until you select **Show Ignored**.
 
 ## What each engine checks
 
 | Check | PostgreSQL | MySQL and MariaDB |
 |---|---|---|
-| Bloated tables | At least 1,000 dead rows and at least a fifth of the live rows, from `pg_stat_user_tables`, with the last vacuum | Not checked |
-| Unused indexes | Never scanned, from `pg_stat_user_indexes` | No reads recorded, from `performance_schema` |
-| Redundant indexes | Not checked | An index whose columns lead another index of the same type. Full-text indexes are not compared, since two can use different parsers |
-| Tables without a primary key | Yes | Yes |
-| Foreign keys without an index | No index starts with the key's columns | Not checked: InnoDB indexes a foreign key's columns itself |
+| Bloated Tables | At least 1,000 dead rows, and at least 20% as many dead rows as live ones, from `pg_stat_user_tables` | Not checked |
+| Unused Indexes | Never scanned since the statistics were last reset. Unique, constraint and invalid indexes are left out, as are a partition's index attached to its parent's and one that leads with a foreign key's columns | No reads recorded in `performance_schema` since the server started. `PRIMARY`, unique and full-text indexes are left out, as is an index InnoDB reads for a foreign key at either end. Needs `SELECT` on `performance_schema` |
+| Redundant Indexes | Keys that lead another valid index with the same method and predicate, a plain index under a unique one included. Only a B-tree is compared by its leading keys; other methods need an identical index. Primary key, constraint and replica identity indexes are never listed, nor is a partition's index attached to its parent's | Columns that lead another visible index of the same type on the same table. Only a B-tree is compared by its leading columns; other types need an identical index. Full-text indexes and `PRIMARY` are never listed, and a unique index only beside an identical unique one |
+| Invalid Indexes | Left invalid by a failed or cancelled `CREATE INDEX CONCURRENTLY` or `REINDEX CONCURRENTLY`. A build still running is left out | Not checked |
+| Tables Without a Primary Key | Tables and partitioned tables. A partition takes its key from its parent, so only the parent is listed | Base tables, and system-versioned tables on MariaDB |
+| Foreign Keys Without an Index | No valid, non-partial index leads with the key's columns, in any order. A partition's copy of its parent's key is left to the parent's finding | Not checked: InnoDB indexes a foreign key's columns itself |
+| Sequences Near Their Limit on PostgreSQL, AUTO_INCREMENT Near Its Limit on MySQL and MariaDB | Sequences that used at least 75% of the range their type, their own limits and the integer column they feed allow. Cycling sequences are left out. Needs PostgreSQL 10 or later | `AUTO_INCREMENT` columns whose next value reached 75% of the largest value the column's type holds, signed or unsigned |
+| Transaction ID Wraparound | Tables and materialized views whose oldest unfrozen row, in the table or its TOAST table, is more than `autovacuum_freeze_max_age` transactions old: 200,000,000 by default, or the table's own setting when lower | Not checked |
+| Stale Statistics | Tables never analyzed that hold rows, or with more rows modified since the last `ANALYZE` than 10% of their rows plus 50 | Not checked |
+| Reclaimable Space | Not checked | Tables with at least 100 MiB free and free space at least 10% of their size on disk. MyISAM and Aria tables count, and InnoDB tables only in a file of their own. Needs MySQL 8.0 or later, or MariaDB, and the `PROCESS` privilege |
 
-The report covers the database selected in the sidebar, in every schema on PostgreSQL. The toolbar names it. The menu item is dimmed for other engines.
+The thresholds are fixed. No setting changes them.
 
-A unique index, a primary key and an index behind a constraint never count as unused: they enforce something even when no query reads them. Neither does an index that starts with a foreign key's columns: the key's checks need it, and on MySQL and MariaDB they read it without counting a read. On MySQL and MariaDB a full-text index is not listed as unused either, since its searches are not counted. A partitioned table is listed once, not once per partition.
+### Standby servers
+
+On a PostgreSQL standby, **Bloated Tables**, **Unused Indexes** and **Stale Statistics** are skipped: a standby's activity counters record its own queries, not the primary's. The other checks run, and a note over the table says to run the fixes on the primary.
+
+### Objects an extension owns
+
+The PostgreSQL checks leave out every object an extension owns, and everything in a schema an extension owns, such as TimescaleDB's chunk tables. Other sessions' temporary tables are left out too.
 
 ## Read the statistics window
 
-An index looks unused when nothing scanned it since the counters started. The note at the top of the list says when that was:
+An index looks unused when nothing scanned it since the counters started. The note over the table says when that was:
 
 - **PostgreSQL**: when the database's statistics were last reset, or that they never were.
 - **MySQL and MariaDB**: when the server started, since `performance_schema` counts from there. An index on a table with no recorded reads or writes since then is not listed.
 
-When the server records nothing to read, the check says why instead of listing every index:
+When the server records nothing to read, the check is skipped and says why:
 
-- **PostgreSQL**: `track_counts` is off. The bloat check is skipped too.
-- **MySQL and MariaDB**: `performance_schema` is off, the `wait/io/table/sql/handler` instrument or the `global_instrumentation` consumer is disabled, or no table in the database has a recorded read since the server started. MariaDB ships with `performance_schema` off; set `performance_schema=ON` and restart to turn it on.
+- **PostgreSQL**: `track_counts` is off. **Bloated Tables** and **Stale Statistics** are skipped with it.
+- **MySQL and MariaDB**: `performance_schema` is off, the `wait/io/table/sql/handler` instrument or the `global_instrumentation` consumer is disabled, or no table in the database has a recorded read or write since the server started. MariaDB ships with `performance_schema` off; set `performance_schema=ON` and restart to turn it on.
+
+On MySQL 8.0 and later, **AUTO_INCREMENT Near Its Limit** and **Reclaimable Space** read values the server caches for `information_schema_stats_expiry` seconds, one day by default. `ANALYZE TABLE` refreshes a table's values.
 
 Check an index against a period of normal traffic before dropping it. One a monthly report reads looks unused for the other 29 days.
 
-## Act on a finding
+## Act on findings
 
-Select a finding to preview the SQL that fixes it:
+Select a finding and the pane under the table shows its detail, its measured values, such as dead rows or the share of a range used, and the SQL that fixes it. Select several and the pane shows one script with every fix, each under a comment naming its finding. A finding with no fix, such as a counter already on the widest integer type, says so instead.
 
-| Finding | Preview |
+Nothing runs from this tab. To act on what it shows:
+
+- **Open Table**, in the pane or the context menu, or a double-click, opens the finding's table. It applies when the selected findings name one table.
+- **Open in Editor** in the pane, or **Open Fix in Editor** and **Open Fixes in Editor** in the context menu, puts the fixes in a new query tab on the checked database, without running them.
+- **Copy** in the pane, or **Copy Fix SQL** in the context menu, puts the fixes on the clipboard.
+- **Save Fix Script…** writes the fixes to a `.sql` file. In the tab's bar it takes every finding the table shows; in the context menu, the selected ones.
+
+A script opens with comments naming the database, when the checks ran, and that each statement runs on its own. A statement two findings share, such as the drop of an index both unused and redundant, appears once, under both findings' comments.
+
+`VACUUM`, `CREATE INDEX CONCURRENTLY`, `DROP INDEX CONCURRENTLY` and `REINDEX INDEX CONCURRENTLY` cannot run inside a transaction, so run them with auto-commit on.
+
+### The fixes
+
+| Check | Fix |
 |---|---|
-| Bloated table | `VACUUM (ANALYZE)` |
-| Unused or redundant index | `DROP INDEX CONCURRENTLY` on PostgreSQL, `ALTER TABLE orders DROP INDEX orders_note_idx` on MySQL |
-| Table without a primary key | `ALTER TABLE logs ADD PRIMARY KEY (column_name)`. Replace `column_name` with the columns that identify a row |
-| Foreign key without an index | `CREATE INDEX CONCURRENTLY` on the key's columns, or `CREATE INDEX` on a partitioned table, which cannot build one concurrently |
+| Bloated Tables | `VACUUM (ANALYZE)` on the table |
+| Unused Indexes | `DROP INDEX CONCURRENTLY` on PostgreSQL, `ALTER TABLE … DROP INDEX` on MySQL and MariaDB |
+| Redundant Indexes | The same drop. On a PostgreSQL partitioned table it is `DROP INDEX` without `CONCURRENTLY`, and it removes the index from every partition |
+| Invalid Indexes | `REINDEX INDEX CONCURRENTLY` on PostgreSQL 12 and later. Before 12, `DROP INDEX CONCURRENTLY` followed by the index's own definition as `CREATE INDEX CONCURRENTLY`. A `_ccnew` or `_ccold` copy left by `REINDEX CONCURRENTLY` is dropped instead. A unique index rebuilds only while the table holds no duplicate values |
+| Tables Without a Primary Key | `ALTER TABLE … ADD PRIMARY KEY (column_name)`. Replace `column_name` with the columns that identify a row |
+| Foreign Keys Without an Index | `CREATE INDEX CONCURRENTLY` on the key's columns, or `CREATE INDEX` on a partitioned table |
+| Sequences Near Their Limit | `ALTER TABLE … ALTER COLUMN … TYPE bigint` when the column runs out first, which rewrites the table and its indexes under an exclusive lock. `ALTER SEQUENCE … AS bigint` for a narrower sequence, except an identity column's, which widens with the column. `NO MAXVALUE`, or `NO MINVALUE` for a descending sequence, when a limit set on the sequence itself is what runs out. Foreign key columns that reference the column keep their type, and the detail names them. No fix when the sequence and its column are already `bigint` |
+| AUTO_INCREMENT Near Its Limit | `ALTER TABLE … MODIFY COLUMN` to `BIGINT`, keeping the column's sign, `ZEROFILL`, nullability, `INVISIBLE` and comment. A signed `BIGINT` becomes `BIGINT UNSIGNED`: run that only if the column holds no negative values. `BIGINT UNSIGNED` has no fix. A foreign key on the column has to be dropped, given the same type at its other end, and added again; the detail names it |
+| Transaction ID Wraparound | `VACUUM (FREEZE)` on the table. A freeze cannot pass the oldest open transaction, prepared transaction or replication slot |
+| Stale Statistics | `ANALYZE` on the table. Autovacuum never analyzes a partitioned table, so only a manual `ANALYZE` gives one statistics |
+| Reclaimable Space | `OPTIMIZE TABLE` |
 
-TablePro never runs the preview. **Open in Editor** puts it in a new query tab for you to review and run. **Copy** puts it on the clipboard. **Open Table**, or a double-click on the finding, opens the table. The same actions are in the finding's context menu.
+## Track findings
 
-`VACUUM`, `CREATE INDEX CONCURRENTLY` and `DROP INDEX CONCURRENTLY` cannot run inside a transaction, so run them with auto-commit on.
+### New
 
-## When a check fails
+After a check has run once, a finding it reports for the first time reads **New** in **Status** until the next refresh. A check's first run marks nothing new.
 
-A check the account cannot read shows the server's error in its own section, and the other checks still run. On MySQL and MariaDB, the unused index check needs `SELECT` on `performance_schema`. A connection with no database selected asks for one.
+### Ignore a finding
+
+Right-click the findings you accept as they are and choose **Ignore**. They leave the table and the counts. Select **Show Ignored** to see them marked **Ignored**, and choose **Stop Ignoring** to bring them back. An ignore holds across refreshes, and through the finding going away and coming back, so an index dropped and created again under the same name stays ignored.
+
+### Resolved
+
+When a check completes without a finding it reported before, that finding moves to **Resolved** under **History**, with when it was last seen. It stays there until it comes back, as **New**, or until you right-click **Resolved** or a row in it and choose **Clear Resolved**. A check that is skipped or fails moves nothing. The list keeps the 1,000 most recently resolved.
+
+A finding is known by its check, schema, table and object, so a renamed index reads as one finding resolved and a new one. Renaming a table, schema or database from TablePro carries its history over, and dropping one removes it.
+
+The history is kept on this Mac, per connection and database. It is not part of [iCloud sync](/features/icloud-sync), and removing the connection removes it. [MCP clients](/developers/mcp-tools#server-administration) read the same statuses through `get_table_health`.
+
+## Export and copy
+
+Choose **File > Export > Export Results…** (`Cmd+Option+Shift+E`), **Export Results…** under **Actions** in the toolbar, or **Export…** in the tab's bar. The export dialog offers the formats a [data file](/features/data-files#save-and-export) exports to, and asks which rows to write:
+
+- **All Findings**: every current finding, ignored ones included.
+- **Shown Findings**: what the table shows, after the check, **Filter** and **Show Ignored**, or the **Resolved** list. Offered, and selected first, when the table shows fewer than all findings.
+- **Selected Findings**: the selected rows the table shows. Offered when rows are selected.
+
+The rows are taken when the dialog opens, so a refresh behind it leaves the file as it was. The columns are `database`, `check`, `schema`, `table`, `object`, `status` (`new`, `ignored`, `resolved` or empty), `size_bytes`, `detail`, `first_seen`, `last_seen` and `fix_sql`, then one column per measured value the rows carry, such as `dead_rows` or `used_percent`. Times are UTC, written `yyyy-MM-dd HH:mm:ss`, and a percentage is a fraction: `0.25` is 25%.
+
+Press `Cmd+C`, or right-click and choose **Copy**, to copy the selected rows as tab-separated text with a header row, in the table's columns. A tab or line break inside a value becomes a space.
+
+## When a check is skipped or fails
+
+Select a check marked **Skipped** to read why. The reasons are the version and privilege needs in [What each engine checks](#what-each-engine-checks), a [standby server](#standby-servers), and the counters in [Read the statistics window](#read-the-statistics-window).
+
+Select a check marked **Failed** to read the server's error. The other checks still run, and the next refresh tries it again. A check that fails on a later refresh keeps the findings it had, shown under the error.
+
+On PostgreSQL, a sequence the account has neither `SELECT` nor `USAGE` on is not checked, and a note on **Sequences Near Their Limit** counts them.
