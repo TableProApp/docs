@@ -115,7 +115,7 @@ Started from the desktop, the app writes its log to the journal:
 journalctl --user --boot | grep -i tablepro
 ```
 
-For a detailed log, quit the app first, since a second launch hands over to the running one and exits. Then start it from a terminal:
+For a detailed log, quit the app first, since a second launch hands over to the running one and exits. Then start it with the [command for your installation](/linux/command-line#set-up):
 
 ```bash
 RUST_LOG=debug tablepro 2> tablepro.log

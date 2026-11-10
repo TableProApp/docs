@@ -448,6 +448,7 @@
               "linux/connect",
               "linux/sql-editor",
               "linux/data-grid",
+              "linux/command-line",
               "linux/keyboard-shortcuts",
               "linux/troubleshooting"
             ]

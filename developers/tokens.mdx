@@ -65,6 +65,9 @@ Revoking cancels every request that token has in flight and clears the connectio
 
 **Disconnect** in the Connected Clients list revokes that client's token. It is not a soft disconnect: the client has to pair again or be given a new token.
 
+For the bundled macOS command, follow [Status and pairing](/integrations/terminal#status-and-pairing)
+to replace or remove its token. Its [revocation route](/developers/pairing#revoking-a-token) is private.
+
 ## The stdio bridge token
 
 Every server start mints a token named `__stdio_bridge__` and writes it into the [handshake file](/developers/mcp-protocol#local-socket-and-handshake) for the bundled bridge. The bridge sends it over the private socket after checking the socket and host process. It is **Read & Write**, so an agent going through the bridge can read and write but cannot call `confirm_destructive_operation`.

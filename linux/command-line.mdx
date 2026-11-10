@@ -1,0 +1,159 @@
+---
+title: Command line
+description: Query, browse and export saved connections from a Linux shell
+tag: "Beta"
+---
+
+import CliExitStatus from "/snippets/cli-exit-status.mdx";
+import CliOutputFormats from "/snippets/cli-output-formats.mdx";
+import CliSchemaCommands from "/snippets/cli-schema-commands.mdx";
+
+Use the same executable to launch the app or print database results in a terminal. Files and links open windows; commands such as `query` and `export` write to standard output.
+
+## Set up
+
+The command ships with the app. Choose the form for your installation:
+
+<CodeGroup>
+```bash .deb or .rpm
+tablepro --help
+tablepro help query
+```
+
+```bash Flatpak
+flatpak run app.tablepro.TablePro --help
+flatpak run app.tablepro.TablePro help query
+```
+</CodeGroup>
+
+Examples on this page use `tablepro`. For Flatpak, replace it with `flatpak run app.tablepro.TablePro`. `--version` prints the app version.
+
+Before querying, open the app and turn on **Preferences > MCP > Enable MCP Server**. Commands never start the app. Each run reads the access token from the app's keyring, so there is no `pair` or `unpair` command. Use the command from the same installation as the running app; native and Flatpak installations have separate token storage.
+
+## Open files and links
+
+```bash
+tablepro
+tablepro app.sqlite3 sales.duckdb
+tablepro --new-window schema.sql
+tablepro "postgresql://ada@db.example.com:5432/shop"
+```
+
+With no arguments, launch the app. Database files open as [SQLite or DuckDB sessions](/linux/connect#sqlite-and-duckdb-files). A SQL file opens an editor tab without running. `-n` (`--new-window`) requests a new window.
+
+`tablepro open <target>` also opens a file or URL. Use `tablepro open tables` or `tablepro ./tables` for an existing file named like a command. A word that is neither an existing file nor a URL exits 2.
+
+Links always need consent. See [Connection links](#connection-links) for schemes and prompts.
+
+## Run a query
+
+```bash
+tablepro query -c Staging "SELECT id, email FROM users LIMIT 5"
+tablepro query -c Staging -f report.sql --format csv > report.csv
+printf '%s\n' 'SELECT count(*) FROM orders' | tablepro query -c Staging --format json
+```
+
+Pass SQL as an argument, with `-f` (`--file`), or on standard input. `-f -` reads from a terminal until `Ctrl+D`. For a file outside the Flatpak sandbox's access, redirect standard input from your host shell.
+
+Put SQL beginning with a dash after `--`:
+
+```bash
+tablepro query -c Staging -- "-- weekly report
+SELECT count(*) FROM orders"
+```
+
+| Option | Use |
+|---|---|
+| `-c`, `--connection` | Saved connection name or id; find it with the [browse commands](#browse-a-connection) |
+| `--database` | Choose a database already open beside the connection through **Open Database…**; defaults to the connection's own database |
+| `--format` | Choose an [output format](#output-formats) |
+| `--limit` | Rows per result set, 100 by default; accepts 1 to 1,000 |
+| `--timeout` | Seconds per statement, 30 by default; accepts 1 to 300 |
+| `--read-only` | Refuse any statement that is not a read |
+
+There is no `--schema` option on `query`. Qualify names in SQL, such as `public.orders`. A result cut short prints a message on standard error. The limit bounds returned rows, not how many rows a write changes.
+
+### Open the connection
+
+Commands use connections open in the app. With standard error attached to a terminal, a command opens a closed connection and waits up to five minutes. Answer any password prompt in the app.
+
+Without that terminal, a closed connection exits 1. Open it before starting an unattended script. Waiting for a connection that never opens also exits 1.
+
+## Browse a connection
+
+<CliSchemaCommands />
+
+As with `query`, `--database` selects only a database already open beside the connection. Omit `--schema` to use the connection's default schema.
+
+## Export
+
+```bash
+tablepro export -c Staging --format csv orders > orders.csv
+tablepro export -c Staging --schema public --format sql --limit 1000 orders users > shop.sql
+```
+
+`--format` is required: choose `csv`, `json` or `sql`. SQL produces `INSERT` statements in the engine's dialect. Pass table names without SQL quotes; use shell quotes for spaces and `--schema` for the schema. `--database` follows the same rule as `query`.
+
+The [query row limit](#run-a-query) also applies to each exported table. Set `--limit` to change it. A call accepts up to 20 tables, and standard error names any table cut short. For more rows, use [Export Rows…](/linux/data-grid#copy-and-export) in the app.
+
+## Check status
+
+```bash
+tablepro status --format json
+```
+
+The report includes the app version, whether it is running, the MCP setting and port, whether a token was found, the server version and readiness. It does not start the app or open a connection.
+
+A ready server exits 0. A stopped or unreachable app exits 1. A disabled server or rejected token exits 3. After **Regenerate Access Token…** in Preferences, the next command reads the replacement automatically.
+
+## Shell completion
+
+The .deb and .rpm packages install bash, zsh and fish completions. Open a new shell after installing. For zsh, enable completion in `~/.zshrc` if it is not already enabled:
+
+```bash
+autoload -U compinit && compinit
+```
+
+Flatpak installs no shell completions. `tablepro completion bash`, `tablepro completion zsh` and `tablepro completion fish` print scripts for a command named `tablepro`. These complete commands, options and format names, without looking up connection names.
+
+## Output formats
+
+<CliOutputFormats />
+
+JSON preserves the value types returned by the server, including numbers and booleans.
+
+## Exit status
+
+<CliExitStatus />
+
+A pipe closed by its reader, such as `| head`, exits 0.
+
+## What a query may do
+
+A connection's **External Clients** setting applies to every command that uses it. **Blocked** hides the connection; naming it exits 2. **Read Only** is the default and refuses writes.
+
+With **Read & Write**, each write still needs **Run** in the connection's window. Safe Mode also applies; **Read-Only** refuses writes. `--read-only` refuses a write before it asks for approval.
+
+Send one statement, or one SQL Server batch, per query. The SQL text is limited to 100 KiB. A transaction left open by a write is rolled back when that call ends.
+
+## Connection links
+
+The desktop registers these schemes for links from browsers and other apps. They also work as command arguments.
+
+| Engine | Schemes |
+|---|---|
+| PostgreSQL | `postgresql`, `postgres` |
+| MySQL and MariaDB | `mysql`, `mariadb`, `mysqlx` |
+| SQL Server | `sqlserver`, `mssql` |
+| ClickHouse | `clickhouse`, `ch` |
+| Cassandra and ScyllaDB | `cassandra`, `cql`, `scylla`, `scylladb` |
+| Redis | `redis`, `rediss`, `valkey`, `valkeys` |
+| MongoDB | `mongodb`, `mongodb+srv` |
+| SQLite | `sqlite`, `sqlite3` |
+| DuckDB | `duckdb` |
+
+A `jdbc:` wrapper around a supported connection URL works from the command line, but has no desktop scheme registration.
+
+A link matching a saved connection asks before opening it. Click **Open** to continue; `Enter` and `Escape` cancel. Other links fill the connect dialog. Review the fields and click **Connect**; a successful connection is saved.
+
+A URL password fills the **Password** row. The full link is never logged or shown. There is no saved trust choice: local links need consent too.

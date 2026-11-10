@@ -100,7 +100,8 @@ Three constraints decide whether TablePro accepts the request at all:
   name, such as `smb://`, `ssh://` and `webcal://`.
 
 The exchange endpoint takes no bearer token: the single-use code plus the verifier is the credential.
-It and `/mcp` are the only paths the server serves, and both accept `POST` only.
+The public HTTP routes are `/v1/integrations/exchange` and `/mcp`; both accept `POST` only.
+The bundled command also uses a [private revocation route](#revoking-a-token).
 
 ## Response modes
 
@@ -161,9 +162,22 @@ request, not a grant. **Deny** is the default button: Return and Escape both den
 takes a click. The sheet does not take focus from another app; TablePro's Dock icon bounces instead.
 
 Approving mints the token, holds the plaintext against a one-time code for 5 minutes, and opens the
-redirect. Pairing again mints a second token rather than replacing the first, so an extension that
-re-pairs should stop using its old one. Revoke either under
-**Settings > MCP > Authentication**.
+redirect. Pairing again creates a separate token. Retire an old token through
+[revocation](#revoking-a-token) once the client uses its replacement.
+
+## Revoking a token
+
+Revoke a client's token in **Settings > MCP > Authentication**. For the bundled macOS command,
+use [`tablepro unpair`](/integrations/terminal#status-and-pairing).
+
+The command sends `POST /v1/integrations/revoke` over the private Unix socket, with a form-encoded
+`token` field. The route does not exist on the TCP listener and is outside the
+[stability contract](/developers/versioning#what-is-not-under-the-contract). Do not use it as a
+public client API.
+
+A successful response is `200 {}`, including for an unknown or already revoked token. A `503`
+means revocation was not saved: the token remains valid. The server refuses the stdio bridge
+credential with `400 unsupported_token_type`.
 
 ## Security properties
 

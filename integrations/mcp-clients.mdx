@@ -154,7 +154,47 @@ Zed, in `~/.config/zed/settings.json`:
 
 Claude Desktop starts MCP servers only as commands, so it needs a stdio-to-HTTP bridge of its own to reach this server.
 
-The Linux server has nine tools: `list_connections`, `connect`, `list_schemas`, `list_tables`, `describe_table`, `get_table_ddl`, `browse_table`, `count_rows` and `execute_query`. Each connection's **External Clients** level decides what a client may do there: **Blocked**, **Read Only** (the default) or **Read & Write**. A write runs only after you click **Run** in the connection's window. **Regenerate Access Token…** turns the old token away at the next request, so paste the new one into every client.
+### Linux tools
+
+Start with `list_connections` and pass an id from its result as `connection_id`. Call `connect` for
+a closed connection; a `connecting` result means the user may need to answer a prompt in the app.
+Call it again to check for `open`.
+
+Arguments marked `?` are optional. Unknown arguments are rejected.
+
+| Tool | Arguments | Result |
+|---|---|---|
+| `list_connections` | None | Saved connections visible to clients, their open state, external access and Safe Mode |
+| `connect` | `connection_id` | Opens the connection in a window; returns `connecting` or `open` |
+| `list_databases` | `connection_id` | Databases and which one is current; unsupported on engines with no database listing |
+| `list_schemas` | `connection_id`, `database?` | Schemas, with default and system flags |
+| `list_tables` | `connection_id`, `database?`, `schema?` | Tables and views |
+| `describe_table` | `connection_id`, `table`, `database?`, `schema?` | Columns, indexes, foreign keys and a row count where available |
+| `get_table_ddl` | `connection_id`, `table`, `database?`, `schema?` | Statements that create the table |
+| `browse_table` | `connection_id`, `table`, `schema?`, `filters?`, `logic?`, `sort?`, `limit?` | Filtered and sorted rows |
+| `count_rows` | `connection_id`, `table`, `schema?`, `filters?`, `logic?` | Exact count of matching rows |
+| `execute_query` | `connection_id`, `query`, `database?`, `read_only?`, `max_rows?`, `timeout_seconds?` | One statement's results, or one SQL Server batch's results |
+| `export_data` | `connection_id`, `format`, `tables`, `database?`, `schema?`, `max_rows?` | CSV, JSON or SQL `INSERT` text for each table, with row counts and truncation flags |
+
+`database` defaults to the connection's own database. An override must already be open beside it
+through **Open Database…**. `schema` defaults to the connection's default schema. Pass table and
+column names without SQL quotes. `execute_query` takes no `schema`; qualify names in the SQL.
+
+`read_only` defaults to `false`. Set it to `true` to refuse anything but a read before asking for
+write approval. Query size, row and timeout limits are the same as the
+[Linux command](/linux/command-line#run-a-query); its [query rules](/linux/command-line#what-a-query-may-do)
+also apply. `browse_table.limit` and `export_data.max_rows` use the query row limits.
+`export_data` takes the [export formats and table limit](/linux/command-line#export) and returns text
+in the response, without writing a file.
+
+A filter has `column`, `operator`, and either `value` or `values`. Operators are `eq`, `not_eq`, `lt`,
+`lt_eq`, `gt`, `gt_eq`, `contains`, `starts_with`, `ends_with`, `like`, `not_like`, `ilike`, `is_null`,
+`is_not_null`, `in`, `not_in` and `between`. Use `values` for lists and the two bounds of `between`;
+null checks need neither. `logic` is `and` by default, or `or`. Each sort entry has `column` and an
+optional `direction`: `ascending` by default, or `descending`.
+
+After **Regenerate Access Token…**, update the token in each MCP client. The
+[Linux command](/linux/command-line#check-status) reads the replacement itself.
 
 ## HTTP transport
 
