@@ -74,6 +74,8 @@ Every server start mints a token named `__stdio_bridge__` and writes it into the
 
 It expires after an hour and is rotated 15 minutes before that, deleted when the server stops, and any stale copy is removed the next time the store loads. It is hidden from the Settings token list, though its name can appear in the activity log. For a narrower scope, skip the bridge and connect over [HTTP with a token you mint](/integrations/mcp-clients#http-transport).
 
+Renewing the token does not cancel work. The old token stops authenticating at once and the bridge picks up the new one, but a request the old token already started, such as a long query or one waiting on a Safe Mode prompt, keeps running until the old token's own expiry, 15 minutes after the renewal. **Disconnect** on a bridge row in Connected Clients revokes the current token and cancels the requests in flight on it and on every earlier one at once; the bridge keeps its connection approvals.
+
 ## Stored fields
 
 | Field | Purpose |
