@@ -137,7 +137,7 @@ A saved script is written for the target engine's own client, so each statement 
 | SQL Server | `;` and a `GO` line | `;` and a `GO` line |
 | PostgreSQL, SQLite and every other engine | `;` | `;` |
 
-Run the Oracle script in SQL*Plus or SQLcl, the Dameng script in DISQL, the MySQL script in the `mysql` client, and the SQL Server script in `sqlcmd` or SQL Server Management Studio. The query editor reads the Oracle, PostgreSQL and SQLite forms as saved, but sends a `DELIMITER` or `GO` line to the server as a statement: remove those lines before running a MySQL or SQL Server script there.
+Run the Oracle script in SQL*Plus or SQLcl, the Dameng script in DISQL, the MySQL script in the `mysql` client, and the SQL Server script in `sqlcmd` or SQL Server Management Studio. The query editor runs each of these forms as saved, its `DELIMITER` and `GO` lines included.
 
 SQL*Plus ends a plain statement at a blank line and reports `SP2-0734: unknown command` for the rest of it. When a view's definition holds a blank line, run `SET SQLBLANKLINES ON` before the script.
 
