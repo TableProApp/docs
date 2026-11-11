@@ -186,7 +186,7 @@ A `json` or `jsonb` field opens indented on the row screen. Tap **View as JSON**
 
 To change a JSON field, tap **Edit**, then **Edit JSON**. Smart quotes, dashes and autocorrect stay off, and the value saves exactly as typed; **Format** reindents it only when tapped. While the text is not valid JSON, the line under it names the spot, as in `Line 18, column 1: Unexpected character.`, and **Done** stays dimmed. Tap that line to move the cursor there.
 
-A value over 4 KB arrives cut. Tap **Load full value** first; until then it is plain text with no **View as JSON**. Rows opened from **Query** results have no **Load full value**.
+A table value over 4 KB arrives cut. Tap **Load full value** first; until then it is plain text with no **View as JSON**. A **Query** result keeps long values whole while they fit in the memory the device has free; past that they arrive cut, the result says so, and the row marks them **Shown in part**. A value too long to show on the row opens in full with **View Full Value**.
 
 ### Querying
 
@@ -216,7 +216,7 @@ On MongoDB the editor takes the shell JavaScript the Mac takes. A statement ends
 
 On Redis a command ends at a semicolon or at a line break outside quotes, so each line is its own command and a quoted value may run across lines. A command with an unclosed quote fails without running. Quotes and escapes read as they do on the Mac: see [Redis CLI](/databases/redis#redis-cli).
 
-**Stop** cancels the running statement and starts no other. On MySQL and Redis the statement keeps running on the server until it finishes. Results copy or export as JSON, CSV, or SQL `INSERT`, which Redis and MongoDB leave out. A value over 4 KB, or a binary value, stops the copy or export with **Cannot Export**: leave that column out of the `SELECT`. Copying rows from a table reads values over 4 KB in full first.
+**Stop** cancels the running statement and starts no other. On MySQL and Redis the statement keeps running on the server until it finishes. Results copy or export as JSON, CSV, or SQL `INSERT`, which Redis and MongoDB leave out. A value shown in part, or a binary value, stops the copy or export with **Cannot Export**: leave that column out of the `SELECT`. A result too large for the memory left stops it with a message to return fewer rows. Copying rows from a table reads values over 4 KB in full first.
 
 A running query appears in a Live Activity on the lock screen and Dynamic Island, with the elapsed time and the row count so far. **Settings > Live Activities > Hide Query** replaces the SQL text there with "Running query". The card clears when the query ends. Quitting the app mid-query leaves it behind, marked interrupted, until the next launch clears it.
 
