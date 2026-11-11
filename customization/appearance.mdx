@@ -40,7 +40,7 @@ Dracula and Nord are dark only.
 
 Default Light and Default Dark set no colors of their own. The editor and the grid draw in the macOS colors, so selection, the cursor, the current line and the focus ring follow your Accent and Highlight colors in System Settings > Appearance, and Increase Contrast. Their syntax colors are Xcode's defaults, and switch to Xcode's high-contrast palette when Increase Contrast is on. Keep them unless you want a palette. To use one, set both themes of a row as your **Light theme** and **Dark theme**, so the palette holds when the Mac switches between light and dark.
 
-The other themes keep their projects' own colors, and set a **Values** color for each type from the same palette. Where a palette color falls under 4.5:1 on the grid background, the grid uses a lighter or darker shade of it. Solarized Light's text sits at 4.1:1 on its background, under the 4.5:1 the Theme Editor asks for.
+The other themes keep their projects' own colors and set a **Values** color for each type from the same palette. Where a palette color falls under 4.5:1 on a row, alternate and edited rows included, the theme uses a lighter or darker shade of it, for booleans too. Solarized Light's text sits at 4.1:1 on its background, under the 4.5:1 the Theme Editor asks for.
 
 ## Managing themes
 
@@ -98,7 +98,7 @@ Under it, **General** holds the theme's name, its appearance (Light or Dark) and
 | UUID | `uuid` and `uniqueidentifier` |
 | Enum | Enums, sets and columns limited to a list of values |
 
-A cell shown through a display format takes the color of what it shows: an integer shown as a date takes **Date & Time**, and a blob shown as a UUID takes **UUID**. Other types, such as `inet`, `interval`, spatial and array columns, a column with no type, and the grids in the Structure tab, data files and Agent results keep the grid text color. A selected row draws its text in the selection color.
+A cell shown through a display format takes the color of what it shows: an integer shown as a date takes **Date & Time**, and a blob shown as a UUID takes **UUID**. Other types, such as `inet`, `interval`, spatial and array columns, a column with no type, and the grids in the Structure tab, data files and Agent results keep the grid text color. A selected row in the focused grid draws its text in the selection color.
 
 The line under each color's name says where the color comes from:
 
