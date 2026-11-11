@@ -54,6 +54,8 @@ Older servers have neither: MySQL before 5.7.8, MariaDB before 10.1.1. A stateme
 
 **No limit** still caps an HTTP request at one hour, because the transport needs a ceiling.
 
+An export, **Copy To**, a table transfer and a data comparison read with the timeout off and put it back when they finish. Their reads wait for the side that writes, so a long copy would otherwise be cancelled part way. MySQL and MariaDB give up on a read left waiting for 10 minutes, and TablePro raises the session's `net_write_timeout` to that when a read starts.
+
 ## Command line tool
 
 **Command Line** shows whether the shell command links to this copy of the app. Copy its Terminal line to install or remove the link. See [Terminal](/integrations/terminal#install) for installation and commands.
