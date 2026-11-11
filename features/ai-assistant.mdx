@@ -157,7 +157,7 @@ Pin plain-text context to a connection so the AI sees it every turn: open the co
 
 Turn on **Enable inline suggestions while typing** in the AI tab; it is off by default. Pause typing and the active provider, or Apple Intelligence when it is on, suggests a completion as ghost text at the cursor. `Tab` accepts, `Escape` dismisses, and typing anything else dismisses it too.
 
-The pause is the **Debounce** setting beside the toggle: 500 ms by default, adjustable from 100 to 3,000 ms in 50 ms steps. With Copilot active the suggestions come from Copilot's inline-completion model; every other provider serves them through chat completions.
+The pause is the **Debounce** setting beside the toggle: 500 ms by default, adjustable from 100 to 3,000 ms in 50 ms steps. With Copilot active the suggestions come from Copilot's inline-completion model; every other provider serves them through chat completions. Copilot gets the query edit by edit as you type, under a header with the database name, its dialect, and the columns of up to **Max schema tables** tables, the ones the statement you are writing names first.
 
 Suggestions follow the connection's AI policy, read again at every pause, so a policy you change in the connection form applies from the next one. **Always Allow** suggests right away. On **Ask Each Time**, suggestions start once you click **Allow** in the chat's **Allow AI Access** prompt for that connection, and stop when the connection disconnects. A **Never** connection gets no suggestions, and with Copilot active its editor text is not sent to Copilot either.
 
