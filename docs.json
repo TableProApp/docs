@@ -456,6 +456,18 @@
         ]
       },
       {
+        "tab": "Windows preview",
+        "icon": "windows",
+        "groups": [
+          {
+            "group": "TablePro for Windows",
+            "pages": [
+              "windows/data-grid"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Developers",
         "icon": "code",
         "groups": [
