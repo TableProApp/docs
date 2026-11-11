@@ -32,6 +32,18 @@ Every parameter needs a value or NULL. Running with one empty stops with "Missin
 
 Where the driver has a parameter API the value is bound, never pasted into the text; everywhere else it is escaped. Either way you never quote a value yourself, and a `'` in a value is not an injection.
 
+On Trino, Cloudflare R2 SQL and InfluxDB the value is written into the statement, and the type popup decides how:
+
+| Type | Written as |
+|------|-----------|
+| String | A plain number such as `42` or `-3.5` as a number, so `LIMIT :n` works. Anything else as quoted text, `00123` and `1E5` included |
+| Integer | A whole number, `00123` included |
+| Decimal | A number, `1E5` and `-3.5` included |
+| Boolean | `TRUE` or `FALSE`, from `true`, `false`, `1`, `0`, `yes`, `no`, `on` or `off`. Flux reads only lower case, so write `true` in a Flux script instead |
+| Date | Quoted text |
+
+A value that does not read as its type is sent as quoted text, and the server reports the mismatch. Teradata writes every value as quoted text, whatever its type.
+
 ## What counts as a parameter
 
 `:name` is detected when `name` starts with a letter or underscore. These are not:
