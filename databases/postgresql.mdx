@@ -189,7 +189,7 @@ Sessions run in `UTF8` whatever encoding the database was created with, and the 
 
 ## SSL/TLS
 
-New connections default to **Preferred** (libpq `sslmode=prefer`): TLS first, plain text if the server refuses it. Pick **Verify CA** to validate the server certificate. See [SSL/TLS](/connections/ssl).
+New connections default to **Preferred** (libpq `sslmode=prefer`): TLS first, plain text if the server refuses it. Pick **Verify Identity** to validate the server certificate and its hostname; with no CA certificate chosen it checks the roots this Mac trusts. **Verify CA** checks only the chain and needs the server's CA certificate. See [SSL/TLS](/connections/ssl#certificate-fields).
 
 ## Limitations
 

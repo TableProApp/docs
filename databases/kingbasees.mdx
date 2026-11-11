@@ -71,7 +71,7 @@ Copy tables between KingbaseES in PostgreSQL mode and PostgreSQL, or generate a 
 
 ## SSL/TLS
 
-The default **Preferred** mode falls back to plain text when the server refuses TLS. Select **Verify CA** to validate the server certificate. See [SSL/TLS](/connections/ssl) for the certificate settings.
+The default **Preferred** mode falls back to plain text when the server refuses TLS. Select **Verify Identity** to validate the server certificate and its hostname against the roots this Mac trusts, or a CA certificate you choose. See [SSL/TLS](/connections/ssl#certificate-fields) for the certificate settings.
 
 ## Limitations
 
