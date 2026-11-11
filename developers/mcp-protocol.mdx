@@ -5,7 +5,7 @@ description: "Wire contract for TablePro MCP server: protocol versions, required
 
 `2026-07-28` is the revision to write against, and two older ones still answer for clients that have not moved. This page is the wire contract; for the tools themselves see [MCP Tools](/developers/mcp-tools).
 
-Most people never read it. The bundled `tablepro-mcp` stdio bridge speaks this for you, and every client in [MCP Clients](/integrations/mcp-clients) goes through the bridge. Read on if you are writing a client against the HTTP endpoint directly.
+Most people never read it. The bundled `tablepro-mcp` stdio bridge speaks this for you, and every macOS client in [MCP Clients](/integrations/mcp-clients) goes through the bridge. Read on if you are writing a client against the HTTP endpoint directly.
 
 ## One round trip
 
@@ -84,6 +84,18 @@ It then calls `server/discover` over that socket and checks
 `app.tablepro/instanceId` against the handshake. A mismatch refuses the connection. A restart or
 socket failure requires a fresh trusted handshake; the bridge does not fall back to TCP.
 
+Every stdio client shares the bridge's token, so the bridge adds `app.tablepro/bridgeInstance` to the
+`_meta` of each request it forwards: a random id, one per bridge process. Two sessions of the same
+client send the same `clientInfo` and number their requests alike, and this id keeps a cancellation
+from one session off the other's request. The server reads it only from requests on the bridge token.
+
+A TablePro the bridge launched that does not start the server writes `mcp-start-refused.json` beside
+the handshake, with `pid`, `refusedAt` and `reason`: `turnedOff` when **Enable MCP Server** is off,
+`failedToStart` when the server tried and failed. The bridge reads only a refusal written after its own
+launch request, stops polling, and exits with the matching message. A refusal with no `reason` reads as
+`turnedOff`, and one with a reason the bridge does not know reads as `failedToStart`. This file is
+outside the stable contract too.
+
 ## Protocol versions
 
 | Version | Era | Notes |
@@ -102,7 +114,7 @@ There is no handshake in the modern era: no `initialize`, no `Mcp-Session-Id`, n
 
 - `io.modelcontextprotocol/protocolVersion` (**required**): a supported version string. Missing or empty is `-32602`; unsupported is `-32022`.
 - `io.modelcontextprotocol/clientCapabilities` (**required**): a JSON object. `{}` is valid and means you support nothing extra. A non-object is `-32602`.
-- `io.modelcontextprotocol/clientInfo` (optional): `name`, `title`, `version`. It names your client in the activity log and in **Connected Clients**.
+- `io.modelcontextprotocol/clientInfo` (optional): `name`, `title`, `version`. It names your client in the activity log, which keeps `title`, else `name`, and in **Connected Clients**, which shows the app's own name and logo when `name` matches a client TablePro knows.
 - `progressToken` (optional): string or integer. See [Progress](#progress).
 - `traceparent`, `tracestate`, `baggage` (optional): W3C trace context, carried through untouched.
 
@@ -158,7 +170,7 @@ An unknown method answers HTTP `404` with JSON-RPC `-32601`. A method that exist
 
 ### `server/discover`
 
-Replaces `initialize` for stateless clients. It takes no parameters beyond `_meta` and needs no scope, so it is the first call a client should make.
+Replaces `initialize` for stateless clients. It takes no parameters beyond `_meta` and needs no scope, so it is the first call a client should make. It does not list the caller in **Connected Clients**; the first other request does.
 
 ```json
 {

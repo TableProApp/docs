@@ -102,7 +102,7 @@ Table names accept letters, digits and underscores, with dots between parts such
 
 `tablepro status` checks the app, MCP server and pairing without starting the app or asking for approval. Add `--format json` for scripts. It exits 0 when ready, 1 when the app cannot be reached, and 3 when the server is off or the command is not paired.
 
-Other commands that need the server start the app if needed. The MCP server must already be enabled in Settings.
+Other commands that need the server start the app if needed. The MCP server must already be enabled in Settings; when it is enabled but fails to start, the command says so and exits 1.
 
 <Steps>
   <Step title="Start pairing">
@@ -117,6 +117,8 @@ Other commands that need the server start the app if needed. The MCP server must
 </Steps>
 
 An unattended command with no token exits 3. A rejected or expired token is removed and that run exits 3; run `tablepro pair` again. Pairing again stores a replacement and asks the server to revoke the previous token. If that fails, the command prints a warning; revoke the old token in Settings.
+
+When TablePro cannot issue the token after you approve, the browser tab says it could not finish pairing, TablePro shows why, and the command exits 1. Run `tablepro pair` again once the cause is fixed.
 
 `tablepro unpair` revokes the token and removes its Keychain copy. If the server cannot be reached, only the local copy is removed; revoke the remaining token in **Settings > MCP > Authentication**. If the server reports that it could not save the revocation, the local token stays for another attempt. These failures exit 1.
 
