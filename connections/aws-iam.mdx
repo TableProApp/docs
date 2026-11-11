@@ -70,7 +70,7 @@ In the connection form, set **Authentication** to one of the AWS IAM options. Th
 
 Pick **AWS IAM (Profile)** if you already use the AWS CLI here: it reads the same files the same way.
 
-**AWS Region** is read from the endpoint when the hostname looks like `mydb.abc123.us-east-1.rds.amazonaws.com`. Fill it in for a CNAME or any other custom endpoint, or to override what was detected.
+**AWS Region** is read from the RDS endpoint, including one a CNAME leads to, since a token scoped to any other region is refused. The field applies only to an endpoint that names no region, such as a global database endpoint.
 
 ## Token lifetime
 
@@ -91,6 +91,14 @@ IAM also requires encryption in transit, so an [SSL mode](/connections/ssl) of *
 
 A token from IAM Identity Center renews itself with its refresh token in its last 15 minutes, as the AWS CLI does, and the renewed token goes back into `~/.aws/sso/cache`. A connect that fails because the session itself ended offers the browser sign-in; `aws sso login --profile <name>` does the same from the shell.
 
+## Custom hostnames
+
+RDS accepts a token only for the endpoint AWS issued. When **Host** is a name of your own, such as `reader.db.example.com`, set up as a CNAME, each connect and reconnect follows the CNAME to the first RDS endpoint it reaches: an instance, a cluster or reader endpoint, or an RDS Proxy. The connection signs in as that endpoint and dials it directly, so the token never goes to a host it was not signed for, and SSL **Verify Identity** checks the endpoint's own certificate.
+
+Point the CNAME at another replica and the next connect or reconnect follows it. **Host** stays as you saved it.
+
+This covers a direct connection. Behind a tunnel the SSH server or proxy resolves the name, so set **RDS Endpoint** as described below.
+
 ## Tunnels and port forwards
 
 RDS checks the token against its own hostname and port, so the endpoint it was signed for is what matters, not the address dialed.
@@ -103,7 +111,7 @@ A forward you run yourself leaves `127.0.0.1` in the form, which names no databa
 mydb.abc123.us-east-1.rds.amazonaws.com:5432
 ```
 
-The port is optional, falling back to 5432 for PostgreSQL and 3306 for MySQL and MariaDB. The field also covers a CNAME or any alias AWS did not issue, and is honored only when **Host** is loopback or already the same hostname.
+The port is optional, falling back to 5432 for PostgreSQL and 3306 for MySQL and MariaDB. The field also covers a tunnel to a CNAME. On a direct connection it is honored only when it names the endpoint the connection reaches.
 
 ## Redshift
 
@@ -117,15 +125,23 @@ Synced connections keep their AWS IAM option. **AWS IAM (Profile)** needs an acc
 
 ### Could not determine an AWS region for "…"
 
-The hostname is not a standard RDS endpoint. Fill in **AWS Region**.
+**Host** is neither an RDS endpoint nor, as far as this Mac's DNS can tell, a CNAME for one. Set **Host** to the endpoint from the AWS console, or fill in **AWS Region** for a global database endpoint.
 
 ### TablePro cannot sign an RDS token for "…"
 
 The connection points at a port forward the app did not open. Fill in **RDS Endpoint** with the endpoint from the AWS console.
 
+### TablePro could not look up "…" in DNS
+
+The CNAME lookup failed or ran out of time, so the connect stops rather than sign a token RDS would refuse. Check the network and connect again.
+
+### The RDS Endpoint "…" is not the database at "…"
+
+**RDS Endpoint** names another database than the one the connection reaches. Clear it on a direct connection: it is for a port forward or a tunnel.
+
 ### PAM authentication failed
 
-PostgreSQL reports this and MySQL reports `Access denied` when the token was signed for the wrong endpoint. Check **RDS Endpoint** against the console, including the port.
+PostgreSQL reports this and MySQL reports `Access denied` when the token was signed for the wrong endpoint. Check **RDS Endpoint** against the console, including the port, and that a custom **Host** is a CNAME for the endpoint rather than an address record.
 
 ### Profile "…" was not found
 
