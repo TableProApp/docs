@@ -44,24 +44,17 @@ A SQL Server script runs a batch at a time instead, cut at its `GO` lines, so a 
 | The batch | Runs in | A failure or Stop |
 |---|---|---|
 | Ordinary statements | A transaction TablePro opens and commits | Everything rolls back |
+| Ordinary statements, with [Manual Commit](#manual-commit) on | A transaction TablePro opens and leaves open for you to commit | Everything rolls back |
 | One that manages its own: `BEGIN`, `START TRANSACTION`, `XA START`, `SET autocommit`, `SAVEPOINT` on SQLite, `SET TRANSACTION` on Oracle | The script's own transaction | The transaction it left open is rolled back |
 | One holding a [statement a transaction cannot hold](#statements-a-transaction-cannot-hold) | No transaction | Each statement that ran stays applied, and the banner counts them |
 | A script on SQL Server | No transaction, unless the script opens one with `BEGIN TRAN` | What ran stays applied, and a transaction the script left open is reported |
 | Anything, on a connection that already has a transaction open | That transaction | The transaction stays open and the message says so |
 
-The last row wins over the rest. The open transaction comes from a `BEGIN` you ran with `Cmd+Enter`, a `SET autocommit = 0`, `LOCK TABLES` on MySQL or MariaDB, a `SET TRANSACTION`, `SAVEPOINT` or `LOCK TABLE` on Oracle, or an [MCP client's](/developers/mcp-tools) `begin`, and a batch that joins it sends no `BEGIN`, `COMMIT` or `ROLLBACK` at all: the script's own text decides, so a script ending in `COMMIT` commits. Where a failed statement has left the transaction unable to commit, the message says to roll it back rather than offering the choice. A `BEGIN` left running here reaches the rest of the window too, so a grid save and a **Users & Roles** apply land inside it.
+The last row wins over the rest. The open transaction comes from a `BEGIN` you ran with `Cmd+Enter`, a write under Manual Commit, a `SET autocommit = 0`, `LOCK TABLES` on MySQL or MariaDB, a `SET TRANSACTION`, `SAVEPOINT` or `LOCK TABLE` on Oracle, or an [MCP client's](/developers/mcp-tools) `begin`, and a batch that joins it sends no `BEGIN`, `COMMIT` or `ROLLBACK` at all: the script's own text decides, so a script ending in `COMMIT` commits. Where a failed statement has left the transaction unable to commit, the message says to roll it back rather than offering the choice. A `BEGIN` left running here reaches the rest of the window too, so a grid save and a **Users & Roles** apply land inside it.
 
 PostgreSQL, Redshift, CockroachDB, MySQL, MariaDB, TiDB, SQLite, DuckDB, SQL Server and Oracle report what their session holds. Anywhere else there is no answer to be had, so a plain batch is wrapped as it always was and a self-managed script is left alone after a failure, since the transaction its text opened may well predate the run.
 
-Two things survive a rollback in any of those four cases. MySQL, MariaDB and Oracle commit a `CREATE`, `ALTER` or `DROP` the moment it runs, along with everything before it, and CockroachDB commits the open transaction before it processes any DDL at all.
-
-### The open transaction bar
-
-While a session holds a transaction, a bar above every tab of the connection says **Transaction Open**, names the database, and offers **Roll Back** and **Commit**. It shows whoever opened the transaction, a `BEGIN` you ran, a grid save inside one, or an [MCP client's](/developers/mcp-tools) `transaction_control`, and goes once it ends, by its buttons, by a typed `COMMIT` or `ROLLBACK`, or with the session. On PostgreSQL, Redshift and CockroachDB each database keeps its own connection, so two databases with open transactions show a row each. The [connections strip](/features/workspace-rail) marks the entry with an hourglass, so you see it from another connection.
-
-**Transaction Failed** means a statement inside it failed and it can no longer commit, so only **Roll Back** is offered. **Roll Back** asks first at every [Safe Mode](/features/safe-mode) level. **Commit** asks what a typed `COMMIT` asks: nothing at **Silent**, a confirmation at the Alert levels, a confirmation and Touch ID at the Safe Mode levels. At **Read-Only** it is hidden.
-
-Both act on the connection the bar names. When other work ran there after you clicked, they do nothing and say so: check the transaction and try again.
+Two things survive a rollback in any of those cases. MySQL, MariaDB and Oracle commit a `CREATE`, `ALTER` or `DROP` the moment it runs, along with everything before it, and CockroachDB commits the open transaction before it processes any DDL at all.
 
 ### Statements a transaction cannot hold
 
@@ -92,6 +85,43 @@ If the connection dies while the commit is in flight, the result says the statem
 ### Each tab runs its own queries
 
 Stop and `Cmd+.` act on the tab you are looking at. A query started in another tab, or on the same connection in another window, waits for the running one rather than stopping it: the waiting tab shows the ordinary **Executing…** spinner and a live Stop for as long as the other one runs, and a table opened in a new tab shows an empty grid with a spinner. Stopping the waiting tab leaves the running batch alone.
+
+## Transactions
+
+### The open transaction bar
+
+While a session holds a transaction, a bar above every tab of the connection says **Transaction Open**, names the database, and offers **Roll Back** and **Commit**. It shows whoever opened the transaction: a `BEGIN` you ran, a write under [Manual Commit](#manual-commit), a grid save inside one, or an [MCP client's](/developers/mcp-tools) `transaction_control`. It goes once the transaction ends, by its buttons, by a typed `COMMIT` or `ROLLBACK`, or with the session. On PostgreSQL, Redshift and CockroachDB each database keeps its own connection, so two databases with open transactions show a row each. The [connections strip](/features/workspace-rail) marks the entry with an hourglass, so you see it from another connection.
+
+**Database > Commit Transaction** and **Database > Roll Back Transaction** do what the buttons do, for the database of the tab in front. Neither has a shortcut until you record one in **Settings > Keyboard**.
+
+**Transaction Failed** means a statement inside it failed and it can no longer commit, so only **Roll Back** is offered. On PostgreSQL any failed statement does this, reads included: a typo in a filter leaves nothing to commit. **Roll Back** asks first at every [Safe Mode](/features/safe-mode) level. **Commit** asks what a typed `COMMIT` asks: nothing at **Silent**, a confirmation at the Alert levels, a confirmation and Touch ID at the Safe Mode levels. At **Read-Only** it is hidden, and **Commit Transaction** is dimmed.
+
+Commit and Roll Back act on the connection the bar names. When other work ran there after you clicked, they do nothing and say so: check the transaction and try again.
+
+The server rolls back what a session leaves open, so quitting or relaunching to update asks first while a transaction is open. See [Work still running](/features/connection-window#work-still-running).
+
+### Manual Commit
+
+With **Manual Commit** on, nothing you change is saved until you commit it. A new connection starts with it off. Turn it on under **Access** on the [connection form's](/connections/connection-form#options) **Options** tab, or choose **Database > Manual Commit** while connected: both change the one setting saved with the connection.
+
+MySQL, MariaDB, TiDB, OceanBase, Oracle, ClickHouse, Redshift and CockroachDB commit schema and maintenance statements on their own, so Manual Commit is not offered there. The toggle and the menu item are dimmed, with "This database commits schema and maintenance statements on its own, so changes can't wait for Commit." under them, and a connection saved with Manual Commit on runs as if it were off.
+
+The first write opens a transaction and the bar appears. Writes after it join that transaction until you commit or roll back, and reads open nothing. That covers statements you run in a query tab, grid saves, [Data Rewind](/features/change-tracking#restoring-a-save) restores, imports, and what an MCP client writes through [`execute_query`](/developers/mcp-tools#execute_query) or `insert_rows`. Structure changes, **Users & Roles**, **Copy To…** and [Generate Rows](/features/table-operations#generate-test-rows) still save at once. A statement that manages its own transaction, such as `BEGIN` or `SET autocommit`, runs as typed, and so does a [statement a transaction cannot hold](#statements-a-transaction-cannot-hold) on its own.
+
+If that first write fails, the transaction it opened is rolled back. Turning Manual Commit off leaves an open transaction open, bar and all, until you commit or roll it back.
+
+A change Manual Commit cannot hold is refused before anything runs, with a message that says how to run it:
+
+- a write on a connection with no transactions, one that cannot report whether a transaction is open, or one holding locks with no transaction open
+- a run that mixes a change with a statement a transaction cannot hold, such as `VACUUM`
+- a save that sets session options around its statements, as putting back rows with their identity values does on SQL Server
+- an import that turns off foreign key checks, as **Disable foreign key checks** does by default, or runs with **Wrap in transaction** off or **On error** set to **Skip and Continue**
+
+Of the other engines, the ones that report what their session holds are named under [Which transaction the batch runs in](#which-transaction-the-batch-runs-in). Once a connection has shown it cannot report, **Database > Manual Commit** is dimmed while it is off, with "This database can't report an open transaction, so it commits each change." under it. While it is on, the item stays available to turn it off.
+
+### Schema changes while a transaction is open
+
+A Structure save, a new table and a trigger change each run on a connection of their own. While a transaction is open on the connection, whether Manual Commit or a `BEGIN` you typed opened it, they ask **A Transaction Is Open** first: the change can wait on that transaction's locks until you commit or roll back. **Continue** runs it, and **Cancel** runs nothing.
 
 ## Statement markers
 
@@ -185,6 +215,22 @@ Press `Cmd+F` to open the find panel, `Cmd+G` and `Cmd+Shift+G` to walk the matc
 Replace moves on to the next match. All replaces every match in one step, and one `Cmd+Z` undoes it. With a regular expression, `$1` in the replacement inserts the first capture group. A read-only editor offers find only.
 
 The editor also carries multiple cursors, for editing several places at once.
+
+## Earlier versions
+
+A query tab keeps earlier versions of its text on this Mac. **File > Revert To** lists the last ten, each named by its time and, where one applies, what kept it: Run, Before Replace or Before Restore. Choose one to put it back in the tab. **Browse All Versions…** at the foot of that menu opens a History tab, the same view [saved queries](/features/favorites#saved-query-versions) use: **Changes** compares a version with the tab's current text, and **Restore This Version** puts it back. A restore from either place first keeps the text it replaces, as a Before Restore version.
+
+A version is kept:
+
+- when the query runs
+- after a pause in typing. Pauses within 5 minutes of the first one fold into one version, so steady typing leaves about one every 5 minutes
+- before **Clear Query**, before a query loads into the tab from [Query History](/features/query-history) or Open Quickly, before **Apply to Editor** from the [AI assistant](/features/ai-assistant), and before a saved query is inserted
+
+Each tab keeps up to 50 versions, for 30 days or for Query History's **Keep entries for** when that is shorter. Blank text and a copy of the newest version are skipped, and nothing is kept while [Query History is paused](/features/query-history#pausing). Table tabs keep none.
+
+Versions stay when a tab closes, and **File > Reopen Closed Tab** brings them back with it. Deleting the connection, or **Clear History…** in [Settings > Data](/customization/data-settings#query-history), removes them. They never sync.
+
+While the tab is on screen, `Cmd+Z` undoes **Clear Query**, a loaded query, **Apply to Editor** and an inserted saved query.
 
 ## Formatting
 

@@ -73,7 +73,7 @@ A dot on the tab marks unsaved text or unsaved edits. It is deliberately wider t
 
 ## Reopening closed tabs
 
-`Cmd+Shift+T`, or **File > Reopen Closed Tab**, brings back the last query or table tab you closed, with its SQL, cursor position, and database context. The last 20 are kept for 30 days, and deleting a connection deletes its closed tabs with it. Server Dashboard, Users & Roles, and structure tabs are not candidates.
+`Cmd+Shift+T`, or **File > Reopen Closed Tab**, brings back the last query or table tab you closed, with its SQL, cursor position, database context, and a query tab's [earlier versions](/features/sql-editor#earlier-versions). The last 20 are kept for 30 days, and deleting a connection deletes its closed tabs with it. Server Dashboard, Users & Roles, and structure tabs are not candidates.
 
 Pending cell edits are the one thing that does not come back: they are never written to disk, so **Don't Save** on the close prompt is final.
 
