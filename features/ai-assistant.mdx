@@ -1,6 +1,6 @@
 ---
 title: AI Assistant
-description: "Built-in AI for SQL: chat with tool calling, inline suggestions, and review, explain, optimize, and fix-error across 15 providers"
+description: "Built-in AI for SQL: chat with tool calling, inline suggestions, and review, explain, optimize, and fix-error across 16 providers"
 ---
 
 One provider is active at a time and answers every AI request in the app, from the chat panel to the ghost text in the editor. Switch it and all of them switch with it. The one exception is [Apple Intelligence](#apple-intelligence), which takes over the editor's requests when you turn it on. Keys are yours and live in the macOS Keychain, so every request bills to your own account with that provider.
@@ -38,6 +38,7 @@ With no preference, start with Claude or OpenAI on an API key: both take a key, 
 | GitHub Copilot | GitHub device flow | Runs its own tool loop, so the tool call limit never applies. Its language server starts on first use or when **Settings > AI** lists the provider, and stops when AI is turned off or the provider is removed |
 | ChatGPT | Your ChatGPT account, on the Codex quota from Plus, Pro, Business, and Enterprise plans. **Import from Codex CLI** reuses an existing login | Unofficial interface, may change |
 | xAI | API key from the xAI Console | Presets: Grok 4.5, Grok 4.3 |
+| Meta | API key from the Meta Model API dashboard | Presets: Muse Spark 1.3, Muse Wonder, Muse Ember. The model list shows chat models only. Reasoning has no **Off**: without an effort, Meta runs its default, which is the highest level on Muse Wonder and Muse Ember |
 | Requesty | API key | An OpenAI-compatible router. The Base URL is filled in; set it to `https://router.eu.requesty.ai` for EU routing |
 | Ollama, llama.cpp, MLX | None. Start the server first | Presets fill in `http://localhost:11434` for Ollama and `http://localhost:8080` for `llama-server` and `mlx_lm.server`. Start `llama-server` with `--jinja` for tool calling |
 | Claude Agent | Claude Code's `claude` command, no key | Bills against a Claude subscription, with tradeoffs |
@@ -75,7 +76,7 @@ Type a question and press Return. Code blocks carry **Copy** and **Insert**, and
 
 Conversations save themselves and take their title from your first message. The ellipsis menu at the trailing end of the pane's header holds **New Conversation**, **Conversation History** with the current conversation ticked, and **Clear Recents**, which asks before it deletes every one of them. **File > Session** carries the same three, so they work with the pane closed and in [Agent mode](/features/agent-mode). Editing a message you already sent puts its text and attachments back in the composer and drops that turn and everything after it.
 
-Paste or drag images into the composer on any provider that takes them, which is all of them except GitHub Copilot, ChatGPT, and Claude Agent. On OpenRouter and Requesty the model decides: one the router lists as text-only takes no images. A drop that carries files the composer cannot read attaches the rest and says how many it kept.
+Paste or drag images into the composer on any provider that takes them, which is all of them except GitHub Copilot, ChatGPT, and Claude Agent. On OpenRouter, Requesty and xAI the model decides: one the provider lists as text-only takes no images. A drop that carries files the composer cannot read attaches the rest and says how many it kept.
 
 The focused composer carries a colored highlight. Right-click it and turn **Highlight When Focused** off for the standard macOS focus ring instead. The choice is app-wide and survives restarts. Reduce Transparency and Increase Contrast, both under **System Settings > Accessibility > Display**, also replace the highlight with the focus ring.
 

@@ -46,7 +46,7 @@ The text protocol has no command that lists keys, so the list comes from one of 
 | 1.4.31 and later, with the LRU crawler on (the default) | `lru_crawler metadump all`. Every key |
 | Older, or started with `-o no_lru_crawler` | `stats cachedump` per slab class. A sample: the server caps each slab's reply, so keys can be missing |
 
-The table's comment says which one the connection uses. Neither is a snapshot: the server walks its LRU lists while it keeps moving items between them, so a key changed during the walk can be missing until the next refresh. A listing stops at 1,000,000 keys. Sorting is by key, and filters apply to **Key** only: `=`, `!=`, contains, starts with, ends with, `IN`, `NOT IN` and regex. Values are read with `get` for the rows on the current page.
+The table's comment says which one the connection uses. Neither is a snapshot: the server walks its LRU lists while it keeps moving items between them, so a key changed during the walk can be missing until the next refresh. A listing stops at 1,000,000 keys, and an export that reaches it says it was cut there, unless keys expire or are evicted while it runs. Sorting is by key, and filters apply to **Key** only: `=`, `!=`, contains, starts with, ends with, `IN`, `NOT IN` and regex. Values are read with `get` for the rows on the current page.
 
 ## Editing
 

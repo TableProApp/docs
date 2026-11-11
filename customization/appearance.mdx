@@ -40,7 +40,7 @@ Dracula and Nord are dark only.
 
 Default Light and Default Dark set no colors of their own. The editor and the grid draw in the macOS colors, so selection, the cursor, the current line and the focus ring follow your Accent and Highlight colors in System Settings > Appearance, and Increase Contrast. Their syntax colors are Xcode's defaults, and switch to Xcode's high-contrast palette when Increase Contrast is on. Keep them unless you want a palette. To use one, set both themes of a row as your **Light theme** and **Dark theme**, so the palette holds when the Mac switches between light and dark.
 
-The other themes keep their projects' own colors. Solarized Light's text sits at 4.1:1 on its background, under the 4.5:1 the Theme Editor asks for.
+The other themes keep their projects' own colors, and set a **Values** color for each type from the same palette. Where a palette color falls under 4.5:1 on the grid background, the grid uses a lighter or darker shade of it. Solarized Light's text sits at 4.1:1 on its background, under the 4.5:1 the Theme Editor asks for.
 
 ## Managing themes
 
@@ -82,9 +82,23 @@ Each theme opens in a Theme Editor window of its own, titled with the theme's na
   </Step>
 </Steps>
 
-The preview is the real SQL editor and data grid over sample content, drawn in the theme's own appearance, so a dark theme previews dark on a light Mac. It shows the current line and statement, a selection, invisibles, alternate rows, NULL, booleans, and a modified, an inserted and a deleted row.
+The preview is the real SQL editor and data grid over sample content, drawn in the theme's own appearance, so a dark theme previews dark on a light Mac. It shows the current line and statement, a selection, invisibles, alternate rows, NULL, booleans, a value of every type **Values** colors, and a modified, an inserted and a deleted row.
 
-Under it, **General** holds the theme's name, its appearance (Light or Dark) and its author. The colors follow in **Window**, **Editor**, **Syntax**, **Data Grid**, **Selection** and **Changes**.
+Under it, **General** holds the theme's name, its appearance (Light or Dark) and its author. The colors follow in **Window**, **Editor**, **Syntax**, **Data Grid**, **Values**, **Selection** and **Changes**.
+
+**Values** colors a grid cell by the type of its column: **NULL Value**, **Bool True** and **Bool False**, then **String**, **Number**, **Date & Time**, **Binary**, **JSON**, **UUID** and **Enum**. The type colors show in the grid only while **Color values by type** is on in [Data settings](/customization/data-settings); it is off until you turn it on. The preview always shows them.
+
+| Color | Columns |
+|-------|---------|
+| String | Character types, such as `varchar`, `char`, `text` and `nvarchar` |
+| Number | Integers and decimals |
+| Date & Time | Dates, times and timestamps |
+| Binary | Binary and blob columns |
+| JSON | `json` and `jsonb` |
+| UUID | `uuid` and `uniqueidentifier` |
+| Enum | Enums, sets and columns limited to a list of values |
+
+A cell shown through a display format takes the color of what it shows: an integer shown as a date takes **Date & Time**, and a blob shown as a UUID takes **UUID**. Other types, such as `inet`, `interval`, spatial and array columns, a column with no type, and the grids in the Structure tab, data files and Agent results keep the grid text color. A selected row draws its text in the selection color.
 
 The line under each color's name says where the color comes from:
 
@@ -99,7 +113,7 @@ The arrow beside a color the theme sets clears it, under the name **Use System C
 
 `Cmd+Z` and `Cmd+Shift+Z` undo and redo, one step per color you drag through the picker. **Revert Changes** at the bottom puts the theme back the way it was when the window opened, and undoes like any other step.
 
-A note under **Editor** or **Data Grid** appears when text on its background falls below 4.5:1 contrast.
+A note under **Editor**, **Data Grid** or **Values** appears when text on its background falls below 4.5:1 contrast. **Values** checks the boolean and type colors the theme sets, not NULL.
 
 If the file changes outside TablePro while its window is open, the window takes the newer file and says so. If the file is deleted, by hand or through sync from another Mac, choose **Keep Theme** to save your edits as a new theme, or **Close**.
 
@@ -114,7 +128,7 @@ A VS Code color theme imports like any other theme file, from **Import…** or b
 | Window background | `editorPane.background`, else `editor.background` |
 | Editor | `editor.background`, `editor.foreground`, `editorCursor.foreground`, `editor.selectionBackground`, `editor.lineHighlightBackground` (else `editor.lineHighlightBorder`), `editor.rangeHighlightBackground` for the current statement, `editorLineNumber.foreground`, `editorWhitespace.foreground` |
 | Syntax | `tokenColors` rules, matched the way VS Code matches them against the scopes of its SQL grammar. A token no rule colors takes `editor.foreground`, and NULL, when no rule colors it, takes the keyword color |
-| Data grid | The editor background and text; `foreground` for header text; `keybindingTable.headerBackground`, else `tree.tableOddRowsBackground`, for the header; `list.activeSelectionBackground`, `list.activeSelectionForeground` and `list.inactiveSelectionBackground`; `list.focusOutline` or `focusBorder`; `input.placeholderForeground`, else `foreground` at half opacity, for NULL; `editorLineNumber.foreground` for row numbers; `tree.tableColumnsBorder` for grid lines; `keybindingTable.rowsBackground`, else `tree.tableOddRowsBackground`, for alternate rows; booleans from the token rules for SQL `TRUE` and `FALSE` |
+| Data grid | The editor background and text; `foreground` for header text; `keybindingTable.headerBackground`, else `tree.tableOddRowsBackground`, for the header; `list.activeSelectionBackground`, `list.activeSelectionForeground` and `list.inactiveSelectionBackground`; `list.focusOutline` or `focusBorder`; `input.placeholderForeground`, else `foreground` at half opacity, for NULL; `editorLineNumber.foreground` for row numbers; `tree.tableColumnsBorder` for grid lines; `keybindingTable.rowsBackground`, else `tree.tableOddRowsBackground`, for alternate rows; booleans from the token rules for SQL `TRUE` and `FALSE`; strings and numbers from the token rules for SQL strings and numbers |
 | Row changes | `diffEditor.insertedLineBackground` and `diffEditor.removedLineBackground`, and the `gitDecoration` modified and deleted colors, made translucent, for modified rows and deleted text |
 
 A color the file does not set stays unset and draws as [Colors a theme leaves out](#colors-a-theme-leaves-out) describes. A translucent window, editor, grid or header background is flattened over the editor background.
@@ -142,14 +156,14 @@ A custom theme is one JSON file in `~/Library/Application Support/TablePro/Theme
 
 | Key | Holds |
 |-----|-------|
-| `schema` | Format version. `3` is the only version this release reads |
+| `schema` | Format version, `3` or `4`. A theme that sets a **Values** type color is written as `4`; any other theme is written as `3`, which earlier releases also read. A Mac on an earlier release skips a synced format `4` theme and shows its default theme instead until it updates |
 | `id` | ASCII letters, digits, `.`, `_` and `-`, at most 128 characters. It cannot start with `tablepro.` or contain `..` |
 | `name` | One line of at most 100 characters |
 | `author` | Optional. One line of at most 100 characters |
 | `appearance` | `light` or `dark`. Decides which popup lists the theme |
 | `window` | Window background, under `background` |
 | `editor` | Editor colors, with syntax colors nested under `syntax` |
-| `dataGrid` | Data grid colors, the Selection and Changes sections of the Theme Editor included |
+| `dataGrid` | Data grid colors, the Values, Selection and Changes sections of the Theme Editor included |
 
 ```json
 {
@@ -176,7 +190,7 @@ A color is sRGB hex, `#RRGGBB`, or `#RRGGBBAA` for a translucent wash such as a 
 |----------|-------|
 | Keyword, string, number, comment, NULL, function, type | The Default Light or Default Dark value |
 | Operator | The theme's editor text, else the macOS color |
-| Bool true, bool false | The theme's data grid text, else the macOS color |
+| Bool true, bool false, and the Values type colors | The theme's data grid text, else the macOS color |
 | Alternate row | The theme's data grid background moved 4% toward its grid text, or toward black in a light theme and white in a dark one. Without a grid background, the macOS stripe |
 | Anything else | The macOS color for that spot |
 
@@ -185,9 +199,9 @@ A color is sRGB hex, `#RRGGBB`, or `#RRGGBBAA` for a translucent wash such as a 
 A file in the themes folder that breaks one of these is listed under **Not Loaded** with the reason, and a JSON error names the line and column:
 
 - It is not plain JSON. Comments are refused here; a VS Code theme goes through **Import…** instead.
-- It has no `schema`, or a `schema` other than `3`. A theme file from TablePro 0.80 or earlier needs to be made again.
+- It has no `schema`, or a `schema` other than `3` or `4`. A theme file from TablePro 0.80 or earlier needs to be made again.
 - It lacks `id`, `name` or `appearance`, or a field breaks the rules in the table.
-- It holds a key TablePro does not use, or a value that is not a `#RRGGBB` or `#RRGGBBAA` string.
+- It holds a key TablePro does not use, a **Values** type color in a schema `3` file, or a value that is not a `#RRGGBB` or `#RRGGBBAA` string.
 - Its `id` is one another file in the folder already uses. The first file by name loads.
 
 ## Connection colors

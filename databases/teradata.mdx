@@ -46,6 +46,10 @@ A database and a user are both namespaces in Teradata, and both appear as top-le
 
 Identifiers are quoted with double quotes. Teradata has no `LIMIT`, so a table's first page comes back with `TOP` and later pages with `QUALIFY ROW_NUMBER()`.
 
+## Stopping a query
+
+**Stop** keeps the session. A statement still running is aborted, and Teradata rolls back the transaction it ran in. With **Transaction Mode** set to `ANSI`, that is every change since the last `COMMIT`, and the tab says so. In `TERA` mode it is the statement alone, or every change since `BT` when one is open. On `DEFAULT` and `TERA` the tab shows no notice, even on a system that runs ANSI by default. A result already coming back is cut where it is, and nothing is rolled back.
+
 ## SSL/TLS
 
 | Mode | What happens |

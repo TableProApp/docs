@@ -115,7 +115,7 @@ Keep **Verify Identity** for HANA Cloud, whose certificates chain to DigiCert ro
 - Procedures, functions and triggers are not in the sidebar. Read one with `SELECT DEFINITION FROM SYS.PROCEDURES WHERE SCHEMA_NAME = 'APP' AND PROCEDURE_NAME = 'P'`, or from `SYS.FUNCTIONS` and `SYS.TRIGGERS` by their own name columns.
 - Every statement commits as it runs. A batch or a grid save that fails partway keeps the statements before the failure, so check what landed before running it again. A statement that binds a `BLOB`, `CLOB` or `NCLOB` value runs in a transaction of its own, which resets the session's `SET TRANSACTION` isolation level and access mode.
 - **matches regex** in the filter bar runs as a plain contains match. For a pattern, write `WHERE col LIKE_REGEXPR 'pattern'` in the SQL editor.
-- A single result larger than 2 GiB fails with "The SAP HANA driver failed unexpectedly." Export and [Copy and duplicate](/features/copy-objects) read a whole table or result into memory before writing, and stop at 5,000,000 rows. Export a larger table in slices, with a `WHERE` on a key range or `LIMIT` and `OFFSET`.
+- Export and [Copy and duplicate](/features/copy-objects) fetch rows from the server 1,000 at a time rather than the whole result first, with no row cap. A query that runs in the editor with no row limit reads its whole result first, stops at 5,000,000 rows, and fails with "The SAP HANA driver failed unexpectedly." past 2 GiB; export such a result instead.
 - [Compare & Sync](/features/compare-sync) is not available.
 - A `CALL` with query parameters runs, but its result sets are not shown, and a procedure with `OUT` parameters is refused. Write the arguments into the statement to see the result sets.
 

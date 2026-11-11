@@ -134,7 +134,7 @@ NCHAR, NVARCHAR2 and NCLOB read the same under either national character set Ora
 | BINARY_FLOAT, BINARY_DOUBLE | Native Swift Float/Double |
 | DATE | `YYYY-MM-DD HH:MM:SS` |
 | TIMESTAMP(p) | `YYYY-MM-DD HH:MM:SS` plus exactly p fractional digits |
-| TIMESTAMP WITH TIME ZONE | As TIMESTAMP, followed by the value's own offset, such as `+02:00` |
+| TIMESTAMP WITH TIME ZONE | As TIMESTAMP, followed by the value's own offset, such as `+02:00`, or by its region name, such as `Europe/Paris` |
 | TIMESTAMP WITH LOCAL TIME ZONE | As TIMESTAMP, in the session time zone, followed by that zone's offset |
 | INTERVAL DAY TO SECOND | `D HH:MM:SS` plus fractional seconds when non-zero (up to 9 digits, trailing zeros trimmed) |
 | INTERVAL YEAR TO MONTH | `Y-MM` |
@@ -145,7 +145,9 @@ NCHAR, NVARCHAR2 and NCLOB read the same under either national character set Ora
 | REF | `<unsupported: ref>` placeholder |
 | Object types, such as XMLTYPE and SDO_GEOMETRY | `<unsupported: object>` placeholder; a NULL object shows as NULL |
 
-To read a geometry as text, select `SDO_UTIL.TO_WKTGEOMETRY(column)` instead of the column. A `TIMESTAMP WITH TIME ZONE` stored with a region name such as `Europe/Paris` shows `<unsupported: time zone region>`; select `TO_CHAR(column, 'YYYY-MM-DD HH24:MI:SS.FF TZR')` to read it.
+To read a geometry as text, select `SDO_UTIL.TO_WKTGEOMETRY(column)` instead of the column.
+
+A `TIMESTAMP WITH TIME ZONE` stored with a region name shows the wall clock in that region, then the name: `2026-01-01 00:00:00.000000 Europe/Paris`. The names come from the server's `V$TIMEZONE_NAMES`, read once per connection. When the account cannot read that view, or macOS does not know the region's name, the value shows in UTC with `+00:00`, the same instant without its region. Grant `SELECT` on `V_$TIMEZONE_NAMES` to see the names.
 
 Grid edits, deletes and filters spell dates and timestamps in a form that does not depend on the session's `NLS_DATE_FORMAT`, so they work whatever it is set to. A table without a primary key matches the row by every column, and an edit is refused when that match would need a LOB, LONG, BFILE, XMLTYPE, JSON, VECTOR or object value, since Oracle cannot compare those.
 

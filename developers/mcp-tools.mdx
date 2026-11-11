@@ -47,7 +47,7 @@ A call that opens a connection may also need approval on the Mac for a pre-conne
 
 `confirm_destructive_operation` needs `admin` as well, so it takes a Full Access token, and **Read Only** refuses it outright whatever the token carries. No token skips the user's approval.
 
-**Read Only** refuses a statement classified as a write with `denied`. Reads also use the driver's read-only mode where supported. [What Read Only allows](/developers#what-read-only-allows) lists engine limits and the statements refused at every access level. Multiple statements return `invalid_argument`, except for SQL Server scripts sent to [`execute_query`](#execute_query) or [`confirm_destructive_operation`](#writing-data).
+**Read Only** refuses a statement classified as a write with `denied`. Reads also use the driver's read-only mode where supported. [What Read Only allows](/developers#what-read-only-allows) lists engine limits and the statements refused at every access level. Multiple statements return `invalid_argument`, except for SQL Server scripts sent to [`execute_query`](#execute_query) or [`confirm_destructive_operation`](#writing-data). On SQL Server, an `IF`, `WHILE` or `BEGIN ... END` block holding one statement counts as one statement; a block holding more is multiple statements.
 
 ## Masking rules
 
