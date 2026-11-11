@@ -354,7 +354,7 @@ A server that rejects the statement stops the import with that error, so clear t
 
 ### Import JSON
 
-The sheet accepts an array of objects `[{…}, {…}]`, newline-delimited JSON streamed a line at a time, and TablePro's own export shape `{ "table": [ {…} ] }`, so an export round-trips. Then choose a destination:
+The sheet accepts an array of objects `[{…}, {…}]`, newline-delimited JSON streamed a line at a time, a single object as one row, and TablePro's own export shape `{ "table": [ {…} ] }`, so an export round-trips. A `.json` file is read one value at a time whatever its size, in UTF-8, UTF-16 or UTF-32, with or without a byte order mark. Then choose a destination:
 
 - **Existing table**: map each JSON field to a column, as [Map fields to columns](#map-fields-to-columns) describes. A column with no field mapped to it keeps its default or NULL. The list holds tables and partitioned tables, and the server routes each row to the right partition.
 - **New table**: the name field opens on a name derived from the file, already selected, so one keystroke replaces it. Review the inferred columns underneath. Name, type, primary key, nullable flag, and default are all editable before the table is created.

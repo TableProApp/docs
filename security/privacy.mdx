@@ -118,7 +118,7 @@ Passwords are not one of those record types. The **Passwords** toggle nested und
 That flag is set on every keychain item the app writes, not only connection passwords: AI provider keys and an older license key go through the same helper. Current account tokens never sync. MCP tokens and Google sign-in refresh tokens do not; their stores always write device-only items.
 </Warning>
 
-With password sync off, secrets are written `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, which keeps them on that one Mac. Query history, the activity log, the execution log, tab state, MCP settings, and the sync settings themselves are never synced. Individual connections can be marked **Local only**. Full detail in [iCloud Sync](/features/icloud-sync).
+With password sync off, secrets are written `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, which keeps them on that one Mac. Query history, the activity log, the execution log, tab state, MCP settings, and the sync settings themselves are never synced. Individual connections can be marked **Local only**, which also moves their secrets out of iCloud Keychain onto that one Mac. Full detail in [iCloud Sync](/features/icloud-sync#keeping-a-connection-off-icloud).
 
 ## The MCP server
 
