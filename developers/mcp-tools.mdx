@@ -188,6 +188,7 @@ A statement runs on the user's own session, inside any transaction it holds. `ex
 - With [Manual Commit](/features/sql-editor#manual-commit) on, a write stays pending until the user commits it in TablePro. It opens a transaction, or joins the one already open, and `status_message` says the change is pending. A write the connection cannot hold is refused.
 - With Manual Commit on, a statement that starts, ends or could hide transaction control is refused: `BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`, `RELEASE`, a procedure call, dynamic SQL, and on SQL Server a transaction keyword anywhere in the batch.
 - When the open transaction ended while the statement ran, `status_message` says so.
+- An `insert_rows` call of several rows that joins an open transaction on PostgreSQL, CockroachDB, MySQL, MariaDB, SQLite, SQL Server or Oracle runs inside a savepoint, so a row that fails takes back the rows before it.
 
 A batch that raises an error fails the call with the server's message and line number. The batches after it do not run, and the error says what stays applied. On a connection with [masking rules](#masking-rules), the whole message is withheld.
 
