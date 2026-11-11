@@ -27,7 +27,9 @@ Set **Authentication** to **AWS IAM (Profile)**, **AWS IAM (SSO)** or **AWS IAM 
 | Provisioned cluster, **Username** set | `redshift:GetClusterCredentials` for that user | `IAM:` and the user name |
 | Serverless workgroup | `redshift-serverless:GetCredentials` | The user mapped to your IAM identity |
 
-The cluster or workgroup and its region come from **Host**, so keep it the endpoint AWS issued. A tunnel TablePro opens needs nothing more. A port forward you run yourself leaves `127.0.0.1` in **Host**: set **Redshift Endpoint** to the real one, such as `my-cluster.abc123xyz.us-east-1.redshift.amazonaws.com`. It is honored only when **Host** is a loopback address or that same endpoint. **AWS Region** overrides the region.
+The cluster or workgroup and its region come from **Host**. A tunnel TablePro opens needs nothing more. A port forward you run yourself leaves `127.0.0.1` in **Host**: set **Redshift Endpoint** to the real one, such as `my-cluster.abc123xyz.us-east-1.redshift.amazonaws.com`. It is honored only when **Host** is a loopback address, a custom domain name, or that same endpoint. **AWS Region** overrides the region.
+
+A [custom domain name](https://docs.aws.amazon.com/redshift/latest/mgmt/connecting-connection-CNAME.html) set up for the cluster or workgroup works as **Host**. The connect follows its CNAME to tell a cluster from a workgroup and to find the region, then asks AWS for credentials by the custom domain name, which AWS answers only for a domain associated in your account. When this Mac's DNS cannot follow the CNAME, **Redshift Endpoint** gives the cluster or workgroup endpoint instead. For a provisioned cluster, AWS also asks for `redshift:DescribeCustomDomainAssociations`.
 
 The policy needs the call above on the cluster or workgroup, and access to the `dbname` when it limits databases. The password lasts 15 minutes and is fetched again for each connect, and SSL mode **Disabled** or **Preferred** is raised to **Required**. IAM sign-in to Redshift works on the Mac only.
 
