@@ -22,6 +22,11 @@ Click **Filter** in a table tab, or press `Ctrl+Shift+F`, to show the filter bar
   </Step>
 </Steps>
 
+<Frame caption="GenreId equals 5 picks 12 of the Track table's rows">
+  <img className="block dark:hidden" src="/images/windows-table-filter.png" alt="Track table filtered to 12 rows, with the filter bar showing GenreId, equals and 5" />
+  <img className="hidden dark:block" src="/images/windows-table-filter-dark.png" alt="Track table filtered to 12 rows, with the filter bar showing GenreId, equals and 5" />
+</Frame>
+
 Add a rule with **+**. With two or more rules, choose **Match all** or **Match any**. **Raw SQL** takes one condition as you would write it after `WHERE`, such as `length(name) > 6`. **Clear** reads the whole table again.
 
 - A rule missing its value is pointed out before anything runs.
@@ -32,6 +37,11 @@ Add a rule with **+**. With two or more rules, choose **Match all** or **Match a
 ## Read a table's structure
 
 Switch a table tab from **Data** to **Structure**.
+
+<Frame caption="Indexes of the Track table">
+  <img className="block dark:hidden" src="/images/windows-table-structure.png" alt="Structure of the Track table on Indexes, listing three foreign key indexes and the primary key" />
+  <img className="hidden dark:block" src="/images/windows-table-structure-dark.png" alt="Structure of the Track table on Indexes, listing three foreign key indexes and the primary key" />
+</Frame>
 
 | Section | Shows |
 |---|---|
@@ -45,6 +55,11 @@ The DDL section is empty for a view, whose columns come from its query. Right-cl
 ## Open functions, procedures, triggers and sequences
 
 Click one in the tree to open its source in a read-only tab. **Reload** reads it again from the database, and **Copy** copies it.
+
+<Frame caption="A trigger's source opens read only">
+  <img className="block dark:hidden" src="/images/windows-definition.png" alt="Trigger track_renamed shown read only with Open in editor, Copy and Reload" />
+  <img className="hidden dark:block" src="/images/windows-definition-dark.png" alt="Trigger track_renamed shown read only with Open in editor, Copy and Reload" />
+</Frame>
 
 **Open in editor** puts the text in a new query tab, where you change it and run it. On MySQL, that tab runs in the database the object belongs to. When running the text would not recreate the object as it is, the button is replaced by a note saying so.
 
