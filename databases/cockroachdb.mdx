@@ -37,7 +37,7 @@ A Cloud connection string carries a cluster routing parameter that the form has 
 --cluster=my-cluster-1234
 ```
 
-Set SSL Mode to **Verify Identity** for Cloud. **Connection Options** goes straight to libpq, so it takes any other libpq option a self-hosted cluster needs.
+Set SSL Mode to **Verify Identity** for Cloud. With no CA certificate chosen, the server is checked against the roots this Mac trusts. **Connection Options** goes straight to libpq, so it takes any other libpq option a self-hosted cluster needs.
 
 ## What is different
 

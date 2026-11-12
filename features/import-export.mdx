@@ -215,7 +215,7 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
     | Compression (Snappy, Zstd, Gzip, None) | Snappy |
     | Rows per group | 122,880 |
 
-    Column types come from the source engine's own declarations, so numbers, dates and booleans arrive as those rather than as strings. A value that will not convert is written as null rather than failing the export.
+    Column types come from the source engine's own declarations, so numbers, dates and booleans arrive as those rather than as strings. A timestamp or time with time zone is written adjusted to UTC, so it keeps the instant it names. A column holding a value that will not convert is written as text, and the export says which column.
 
     <Warning>
     Parquet holds one table per file. Selecting several writes `dump.users.parquet`, `dump.orders.parquet` and so on beside the name you chose.
@@ -320,6 +320,8 @@ The import runs on the connection's own session, and afterwards puts back the se
 
 On SQL Server a file that holds a `GO` line runs a batch at a time, cut at its `GO` lines the way `sqlcmd` cuts it, so every count and failure here is a batch rather than a statement. A file with no `GO` line runs a statement at a time. See [Scripts and batches](/databases/mssql#scripts-and-batches).
 
+On PostgreSQL a file stops at a `COPY ... FROM STDIN`, the form `pg_dump` writes table rows in by default, before sending it, and the error names its line: TablePro cannot send the rows that follow it, and never runs them as SQL. Restore such a file with `psql`, or dump it again with `pg_dump --inserts`. The `\restrict` and `\unrestrict` lines a current `pg_dump` writes run nothing. On MySQL and MariaDB a `DELIMITER` line is read as the `mysql` client reads it: only as the first thing on its line, before any statement text.
+
 SQL Server SQL imports do not automatically commit or roll back after a file batch runs, even with **Wrap in transaction** selected and even without a `GO` line. A batch can change which transaction is open. Read the completion message: if a transaction remains open, commit or roll it back on this connection. This also applies after a successful import. Imports into a selected table from CSV, JSON, or XLSX use the row-import transaction options instead.
 
 Skip and Continue collects up to 1,000 failures with their line numbers and messages, and the summary counts successes against failures behind a **Copy Details** button. **Save Report…** writes them all to a CSV with a line, a statement and the database's own error per row, so a large import's failures can be sorted and searched rather than scrolled. An error that stops the import shows the line, the database's own message, and the failing statement, with the dialog still open behind it, ready for a changed setting and another run. The alert shows the first 10,000 characters of a longer statement and the first five errors of a batch that raised more, and **Copy Details** copies all of them.
@@ -354,7 +356,7 @@ A server that rejects the statement stops the import with that error, so clear t
 
 ### Import JSON
 
-The sheet accepts an array of objects `[{…}, {…}]`, newline-delimited JSON streamed a line at a time, and TablePro's own export shape `{ "table": [ {…} ] }`, so an export round-trips. Then choose a destination:
+The sheet accepts an array of objects `[{…}, {…}]`, newline-delimited JSON streamed a line at a time, a single object as one row, and TablePro's own export shape `{ "table": [ {…} ] }`, so an export round-trips. A `.json` file is read one value at a time whatever its size, in UTF-8, UTF-16 or UTF-32, with or without a byte order mark. Then choose a destination:
 
 - **Existing table**: map each JSON field to a column, as [Map fields to columns](#map-fields-to-columns) describes. A column with no field mapped to it keeps its default or NULL. The list holds tables and partitioned tables, and the server routes each row to the right partition.
 - **New table**: the name field opens on a name derived from the file, already selected, so one keystroke replaces it. Review the inferred columns underneath. Name, type, primary key, nullable flag, and default are all editable before the table is created.
@@ -417,6 +419,10 @@ Saved mappings stay on this Mac. They follow a renamed table and are forgotten w
 ### Row imports
 
 CSV and JSON insert in batches, and the on-error and transaction options behave as they do for SQL. They add **Delete existing rows before import**, which clears the target table before writing rows. The deletion rolls back only if it belongs to a transaction the import rolls back and the table supports rollback. A row where no field matches a mapped column writes nothing and is reported rather than counted.
+
+A binary column reads a value the way the export wrote it: `0x` and hex digits from CSV and XLSX, `0x` alone for zero bytes, and Base64 from JSON. A CSV or XLSX value without `0x`, or a JSON value that is not Base64, is written as its text. A value that starts with `0x` but is not hex fails its row. On MySQL, MariaDB, SQL Server and SQLite, a boolean column takes `true`, `false`, `yes`, `no`, `on`, `off`, `t`, `f`, `y` and `n` as `1` and `0`.
+
+A CSV line of empty fields, such as `,,`, is a row, the way CSV export writes a row of NULLs. An empty line is skipped, except in a file of one column, where it is that column's NULL. Empty lines and lines of empty fields after the last value are not rows: a spreadsheet saves its empty rows that way. A JSON row `{}` is a row of column defaults.
 
 ### Update existing rows
 

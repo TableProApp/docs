@@ -13,11 +13,11 @@ In the tables below, required arguments come first and optional ones follow in p
 - `database` and `schema` default to whatever the connection is currently browsing, except that `search_schema` without `schema` looks in every schema. Passing them targets somewhere else **without moving the app's selection**.
 - An unknown argument is rejected with `-32602`. There is no silent ignoring.
 - The result comes back twice: as JSON text in `content[0]`, and as a typed object in `structuredContent`. Read `structuredContent`.
-- Timestamps are ISO 8601, error text is redacted, and "a result set" means `columns[]`, `rows[][]`, `row_count`, `rows_affected`, `execution_time_ms`, `is_truncated`, plus `status_message`, `database` and `schema` when they apply.
+- Timestamps are ISO 8601, error text is redacted, and "a result set" means `columns[]`, `rows[][]`, `row_count`, `rows_affected`, `execution_time_ms`, `is_truncated`, plus `status_message`, `notes`, `database` and `schema` when they apply.
 
 A column a [masking rule](/features/data-masking) matches comes back masked in every tool that returns rows, `browse_table`, `execute_query` and `export_data` included. The mask replaces the value in `rows[][]`; `columns[]` and `row_count` are unchanged. A filter or sort in the request still runs on the stored values. A connection with rules also changes errors, plans and some text fields: see [Masking rules](#masking-rules).
 
-Row limits default to the server's **Default row limit** setting (500) and are capped by **Maximum row limit** (10,000). Timeouts default to **Query timeout** (30 seconds) and are capped at 300. Both live in **Settings > MCP**.
+Row limits default to the server's **Default row limit** setting (500) and are capped by **Maximum row limit** (10,000). Timeouts default to **Query timeout** (30 seconds) and are capped at 300. Both live in **Settings > MCP**. Whatever the row limit, rows also stop at the [answer size limit](#answer-size).
 
 ## Tool index
 
@@ -64,6 +64,17 @@ The rules also withhold text that can repeat a stored value:
 | `browse_table`, `export_data` | A system table masked whole |
 
 The withheld-message sentence reads `The statement failed with error 1146, SQLSTATE 42S02. Its message is withheld because this connection has masking rules, and the message can repeat a masked value.`, without the codes when there are none. The withheld-statement sentence reads `The statement text is withheld because this connection has masking rules, and it can repeat a masked value.`
+
+## Answer size
+
+One answer holds at most 4 MB, measured after masking. The limit covers `browse_table`, `execute_query`, `confirm_destructive_operation`, `explain_query`, `export_data`, `stop_server_session`, `search_query_history` and the [history resource](/developers/mcp-resources#tablepro%3A%2F%2Fconnections%2F%7Bid%7D%2Fhistory%7B%3Flimit%2Csearch%2Cdate_filter%7D). `run_maintenance` applies it to each statement's result on its own.
+
+- A value longer than 64 KB keeps its first 64 KB and ends in ` [TablePro cut this value: N bytes in all]`, where N is its full size in bytes. A binary value counts its base64 length and keeps the base64 of its first 48 KB. `export_data` never cuts a value.
+- Rows keep their order. The first row that does not fit is left out, and so is every row after it.
+- `is_truncated` is true when the row limit or the size limit left rows out.
+- A result set, `explain_query` and `export_data` carry `notes`, an array of sentences saying why rows were left out or values cut. It is absent when neither happened.
+
+To read a value that was cut, select part of it with a narrower query. To get more rows, ask for fewer columns.
 
 ## Connections
 
@@ -155,8 +166,8 @@ A lost connection, or a database where no schema could be read, fails the call i
 | `browse_table` | `connection_id`, `table` (`columns`, `filters`, `logic`, `sort`, `limit`, `offset`, `timeout_seconds`, `database`, `schema`) | A result set |
 | `count_rows` | `connection_id`, `table` (`exact`, `filters`, `logic`, `database`, `schema`) | `table`, `row_count`, `is_approximate`, `filter_count` |
 | `execute_query` | `connection_id`, `query` (`max_rows`, `timeout_seconds`, `database`, `schema`, `read_only`) | A result set, plus `result_sets[]` when a SQL Server script returns more than one |
-| `explain_query` | `connection_id`, `query` (`analyze`, `variant`, `timeout_seconds`, `database`, `schema`) | `statement` as actually sent, `execution_time_ms`, `columns[]`, `rows[][]`, and where available `plan_text`, `plan` and `available_variants[]` (`id`, `label`, `sql_prefix`, `runs_statement`). On Oracle and SQL Server the driver builds the plan from several statements, so `statement` is the query alone and `sql_prefix` is empty |
-| `export_data` | `connection_id`, `format` (`query` **or** `tables`, `sql_table`, `output_path`, `max_rows`, `database`, `schema`) | `format`, `rows_exported`, `is_truncated`, `path` when a file was written, and `exports[]` (`label`, `row_count`, `is_truncated`, `data`) |
+| `explain_query` | `connection_id`, `query` (`analyze`, `variant`, `timeout_seconds`, `database`, `schema`) | `statement` as actually sent, `execution_time_ms`, `columns[]`, `rows[][]`, and where available `plan_text`, `plan` and `available_variants[]` (`id`, `label`, `sql_prefix`, `runs_statement`), plus `is_truncated` and `notes` when the [size limit](#answer-size) applied. On Oracle and SQL Server the driver builds the plan from several statements, so `statement` is the query alone and `sql_prefix` is empty |
+| `export_data` | `connection_id`, `format` (`query` **or** `tables`, `sql_table`, `output_path`, `max_rows`, `database`, `schema`) | `format`, `rows_exported`, `is_truncated`, `path` when a file was written, `exports[]` (`label`, `row_count`, `is_truncated`, `data`), and `notes` when the size limit left rows out |
 | `quote_identifiers` | `connection_id` and at least one of `identifiers`, `literals` (`database`, `schema`) | `identifiers[]` as `{ input, quoted }` and `literals[]` as `{ input, escaped }`, in the order supplied |
 
 ### `browse_table`
@@ -179,17 +190,30 @@ One statement, 100 KB at most. Destructive statements are refused here; use [`co
 
 On SQL Server, send the whole script instead. A variable exists only in the batch that declares it, so a `DECLARE` and the `SELECT`s that read it belong in one call. The script is cut into batches at its `GO` lines, as the query editor cuts it, and `GO 5` runs a batch five times. The gates judge the script by its worst statement: one write anywhere needs `tools:write` and Safe Mode, and any destructive statement refuses the call. `DECLARE` and `EXEC` of a procedure count as writes, `sp_help` included. `EXEC` of a string and `sp_executesql` run server-side code and are refused.
 
-The top-level fields describe the first result set, with `rows_affected` counting the whole script. When the script returns more than one result set, `result_sets[]` lists every one in order, each with `columns`, `rows`, `row_count` and `is_truncated`. `max_rows` caps each result set on its own. `status_message` says when the script left a transaction open.
+The top-level fields describe the first result set, with `rows_affected` counting the whole script. When the script returns more than one result set, `result_sets[]` lists every one in order, each with `columns`, `rows`, `row_count` and `is_truncated`. `max_rows` caps each result set on its own, while the [size limit](#answer-size) covers them all together. Once it is spent, the later batches still run, and their result sets come back with no rows and `is_truncated` set. `status_message` says when the script left a transaction open.
+
+A statement runs on the user's own session, inside any transaction it holds. `execute_query`, `confirm_destructive_operation` and [`insert_rows`](#writing-data) follow these rules about it:
+
+- A statement that starts a transaction while one is open is refused, with or without Manual Commit.
+- While a transaction is open on PostgreSQL or CockroachDB, the statement runs inside `SAVEPOINT tablepro_agent`. A failure rolls back to the savepoint and leaves the user's transaction usable. On Redshift and DuckDB, where a failure would abort it, the statement is refused.
+- With [Manual Commit](/features/sql-editor#manual-commit) on, a write stays pending until the user commits it in TablePro. It opens a transaction, or joins the one already open, and `status_message` says the change is pending. A write the connection cannot hold is refused.
+- With Manual Commit on, a statement that starts, ends or could hide transaction control is refused: `BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`, `RELEASE`, a procedure call, dynamic SQL, and on SQL Server a transaction keyword anywhere in the batch.
+- When the open transaction ended while the statement ran, `status_message` says so.
+- An `insert_rows` call of several rows that joins an open transaction on PostgreSQL, CockroachDB, MySQL, MariaDB, SQLite, SQL Server or Oracle runs inside a savepoint, so a row that fails takes back the rows before it.
 
 A batch that raises an error fails the call with the server's message and line number. The batches after it do not run, and the error says what stays applied. On a connection with [masking rules](#masking-rules), the whole message is withheld.
 
 ### `explain_query`
 
-Pass the query with no `EXPLAIN` prefix. Without `variant` the engine's first variant runs, and every result lists them in `available_variants[]`. `analyze: true` picks the variant that runs the statement, so an analyzed write needs `tools:write` and Safe Mode approval, and it is refused when the engine has no such variant or the `variant` you pass only estimates. An engine missing from the [support table](/features/explain-visualization#database-support) is refused.
+Pass the query with no `EXPLAIN` prefix. Without `variant` the engine's first variant runs, and every result lists them in `available_variants[]`. `analyze: true` picks the variant that runs the statement, so an analyzed write needs `tools:write` and Safe Mode approval, and it is refused when the engine has no such variant or the `variant` you pass only estimates. An analyzed write goes into query history the way an `execute_query` write does. An engine missing from the [support table](/features/explain-visualization#database-support) is refused.
+
+`plan_text` and the plan rows share one answer, `plan_text` first. `is_truncated` appears, set to true, only when the [size limit](#answer-size) left plan rows out.
 
 ### `export_data`
 
 Formats are `csv`, `json` and `sql`; pass exactly one of `query` or `tables[]`. Without `output_path` the text comes back inline in each export entry. With it, the file lands in the user's Downloads folder and never overwrites, so a name that is taken gets `-1`, `-2` and so on; the path must stay inside Downloads, end in the format's extension, and not name a hidden file. SQL output uses the connection's own quoting and literal rules, so exporting a query needs `sql_table` to name the target table.
+
+Every table in one call shares one 4 MB [answer](#answer-size), with or without `output_path`, and each table gets what the ones before it left. Values stay whole: a row that does not fit is left out with every row after it, so a later table can come back with no rows. Export fewer tables, columns or rows per call when `is_truncated` is set.
 
 ## Writing data
 
@@ -199,11 +223,13 @@ Formats are `csv`, `json` and `sql`; pass exactly one of `query` or `tables[]`. 
 | `confirm_destructive_operation` | `connection_id`, `query` (`timeout_seconds`, `database`, `schema`) | A result set, plus `result_sets[]` for a SQL Server script |
 | `transaction_control` | `connection_id`, `action` (`database`, `schema`) | `status`, the action that completed, and `connection_id` |
 
-`insert_rows` binds parameters. Its confirmation shows the values that will be written, and the approved values run in the named database and schema. Each row is an array with one value per column, and a call carries at most 1,000 rows.
+`insert_rows` binds parameters. Its confirmation shows the values that will be written, and the approved values run in the named database and schema. Each row is an array with one value per column, and a call carries at most 1,000 rows. The [transaction rules](#execute_query) of `execute_query` apply: under Manual Commit the rows stay pending until the user commits them in TablePro. The reply has no `status_message` to say so.
 
 `confirm_destructive_operation` runs one destructive statement, or a SQL Server script containing a destructive statement. This includes `DROP`, `TRUNCATE`, `ALTER … DROP`, and `DELETE` without `WHERE`. Other statements are rejected; use `execute_query` for those. The user approves it first, through your elicitation prompt if your client supports elicitation, otherwise through TablePro's own dialog on their Mac.
 
 `transaction_control` takes `action` as `begin`, `commit` or `rollback`. The transaction stays open across calls until it is committed or rolled back, and it runs on the same session as the user's own tabs, so their editor runs and their grid saves land inside it while it is open. TablePro shows it above the connection's tabs and on its connections strip entry, with **Roll Back** and **Commit**, until it ends. Leave nothing open.
+
+`begin` is refused while a transaction is already open on the session, or while the session cannot say whether one is: commit or roll that one back first. On a connection with [Manual Commit](/features/sql-editor#manual-commit) on, all three actions are refused, because the user commits there.
 
 On Redis the three actions are `MULTI`, `EXEC` and `DISCARD`. Every command between `begin` and `commit` answers `QUEUED` and does nothing until `commit` runs them, and `commit` fails naming each command the server then refused. `rollback` drops the block whole.
 
@@ -256,13 +282,15 @@ These read and drive the TablePro app itself, and none of them bypasses the conn
 | `focus_query_tab` | `tab_id` | `status` (`focused`), `tab_id`, `connection_id`, `window_id` |
 | `open_connection_window` | `connection_id` | `status` (`opened`), `connection_id`, `tab_id`, `window_id`, `is_connected` |
 | `open_table_tab` | `connection_id`, `table_name` (`database_name`, `schema_name`) | `status` (`opened`), `connection_id`, `table_name`, `tab_id`, `window_id` |
-| `search_query_history` | `query` (`connection_id`, `limit`, `since`, `until`) | `entries[]` carrying `id`, `query`, the connection and database it ran on, `source`, `statement_type`, `executed_at`, `execution_time_ms`, `row_count`, `was_successful` and `error_message`, newest first |
+| `search_query_history` | `query` (`connection_id`, `limit`, `since`, `until`) | `entries[]` carrying `id`, `query`, the connection and database it ran on, `source`, `statement_type`, `executed_at`, `execution_time_ms`, `row_count`, `was_successful` and `error_message`, newest first, and `is_truncated` |
 
-Starred tables are a good hint at what matters in a database. `list_recent_tabs` covers every readable connection when `connection_id` is omitted, its `limit` runs 1 to 500, default 20, and `tab_type` is one of `query`, `table`, `createTable`, `erDiagram`, `serverDashboard`, `insights`, `tableHealth`, `usersRoles`, `objectSource`, `versionHistory`, `tableListing`.
+`list_recent_tabs` and `search_query_history` without `connection_id` never ask the user. They cover only the connections this client reaches without a question, which depends on the [Approval](/features/mcp#connection-access) setting. With `connection_id`, the user is asked about that connection once, as for any call that names one. `focus_query_tab` asks about the tab's connection before it raises the tab.
+
+Starred tables are a good hint at what matters in a database. `list_recent_tabs` takes `limit` from 1 to 500, default 20, and its `tab_type` is one of `query`, `table`, `createTable`, `erDiagram`, `serverDashboard`, `insights`, `tableHealth`, `usersRoles`, `objectSource`, `versionHistory`, `tableListing`.
 
 `open_connection_window` and `open_table_tab` connect first if they have to, and return once the window has a tab or fail after 8 seconds. `open_table_tab` without `database_name` or `schema_name` means the ones the connection is on, and its `tab_id` is that table's tab, never a table of the same name elsewhere.
 
-`search_query_history` searches the history TablePro keeps on this Mac. Pass `""` to match everything and filter by date alone; `since` and `until` are Unix epoch seconds, and `limit` runs 1 to 500, default 50. Results cover only connections this client may reach, with or without `connection_id`.
+`search_query_history` searches the history TablePro keeps on this Mac. Pass `""` to match everything and filter by date alone; `since` and `until` are Unix epoch seconds, and `limit` runs 1 to 500, default 50. `is_truncated` is true when the [size limit](#answer-size) left out matching entries.
 
 ## Annotations
 

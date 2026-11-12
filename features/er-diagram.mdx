@@ -69,7 +69,11 @@ Right-click a table, a column, a relationship or the empty canvas for what appli
 | Relationship | **Show Structure of** the table that holds the key, **Delete Foreign Key** |
 | Empty canvas | **New Table…**, **Refresh** |
 
-To add a foreign key, hover over the column that will hold it, drag from the dot on the table's right edge, and drop on the column it references. A sheet confirms the columns, the constraint name and the `ON DELETE` and `ON UPDATE` actions. **Add Foreign Key…** in a column's menu opens the same sheet without the drag.
+To add a foreign key, hover over the column that will hold it, drag from the dot on the table's right edge, and drop on the column it references. A sheet confirms the column pairs, the constraint name and the `ON DELETE` and `ON UPDATE` actions. **Add Foreign Key…** in a column's menu opens the same sheet without the drag.
+
+Each row of the sheet's list pairs a **Column** of this table with a **Referenced Column**, and the rows are the key's order on both sides. The sheet fills in the referenced table's whole primary key, one row per key column, so a key on `(order_id, line_no)` arrives as two rows. Your column takes the key column you dropped on, or the one the sheet picks when you came from the menu, and each other key column gets a column of this table with the same name, or **None** where there is none. A drop on a column outside the primary key gives that one pair, and a referenced table without a primary key starts on its first column. Choosing another referenced table fills the rows again from its key.
+
+Click **+** under the list to add a pair and **−** or `Delete` to remove the selected ones; the last pair stays. Drag a row to reorder the pairs, or use **Move Up** and **Move Down** in VoiceOver. **Add Foreign Key** stays dimmed until every row names both columns and no column repeats, and the line under the list names the problem.
 
 To drop a foreign key, click its relationship line and press `Delete`.
 
@@ -105,7 +109,7 @@ A table whose primary key is made of two foreign keys, `user_roles` and its like
 
 | Format | File | Contents |
 |--------|------|----------|
-| PNG | `er-diagram.png` | A bitmap at twice screen resolution, with 40 points of padding |
+| PNG | `er-diagram.png` | A bitmap at twice screen resolution, with 40 points of padding. A diagram too large for 16,384 pixels on a side or about 33 million pixels is scaled down to fit |
 | SVG | `er-diagram.svg` | Shapes and text as vectors; the key, link and table icons are small embedded bitmaps |
 | PDF | `er-diagram.pdf` | One page sized to the diagram, with text that Preview can search and select |
 | Mermaid | `er-diagram.mmd` | An `erDiagram` block: each table with its columns, types and `PK` and `FK` markers, and each foreign key with the cardinality the diagram draws |
@@ -113,7 +117,7 @@ A table whose primary key is made of two foreign keys, `user_roles` and its like
 
 PNG, SVG and PDF keep the window's colors and the table positions on screen. Mermaid and DOT list tables by name and columns in table order, so exporting an unchanged schema twice writes the same file and a diff shows only real changes.
 
-**Copy as Mermaid** puts the block on the clipboard inside a `mermaid` code fence, ready to paste into a GitHub comment or any Markdown that renders Mermaid. `Cmd+C` copies the PNG image.
+**Copy as Mermaid** puts the block on the clipboard inside a `mermaid` code fence, ready to paste into a GitHub comment or any Markdown that renders Mermaid. `Cmd+C` copies the PNG image, scaled down the same way. For a very large diagram at full size, export SVG or PDF.
 
 Mermaid accepts fewer characters in a type or column name than SQL does. A space, comma or quote becomes an underscore, so `character varying(255)` reads `character_varying(255)`, and a column named `pk`, `fk` or `uk` gets a leading underscore.
 

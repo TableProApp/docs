@@ -112,6 +112,8 @@ The first try comes 2 seconds after the drop, then 4 and 8, doubling to 2 minute
 
 Waking the Mac from sleep checks the tunnel of every open connection, and each one that died reconnects alongside the others rather than in turn.
 
+A new session starts empty. When the old one held an open transaction, or something your statements set up there, such as a temporary table, a `SET` value, a user variable, a prepared statement, a cursor, a session lock or a `LISTEN`, the next thing you run on that database is refused once with a message naming what is gone, so a statement written for a temporary table cannot reach the real table it hid. Set it up again, then run your statements. The message names the kinds only, never your statements or their values. Startup commands run again on every reconnect, so they never count, and neither does a routine you call. A **Reconnect** you choose yourself reports only a lost transaction. The refusal goes to whatever runs first on that database, a grid save, Explain or an assistant statement included.
+
 The connections strip, the welcome window and the connection switcher mark a reconnecting connection with a spinner and a lost one with a crossed-out bolt. [Connection state](/features/workspace-rail#connection-state) lists every mark. Hover one to read the cause.
 
 On the strip's right-click menu and in the **Database** menu, the connection command follows the state: **Connect**, **Reconnect**, **Stop Connecting** or **Stop Reconnecting**. The welcome window's right-click menu offers **Reconnect** for a lost connection and **Connect** for the rest. **Disconnect** stays on all three menus while a connection reconnects or is lost, and ends it without waiting for the next try.

@@ -253,7 +253,7 @@ Send `notifications/cancelled` with the `requestId` of a request that is still r
 { "jsonrpc": "2.0", "method": "notifications/cancelled", "params": { "requestId": 7, "reason": "user aborted" } }
 ```
 
-The notification is answered with `202` whether or not anything matched. The cancelled request finishes with `-33002`.
+The notification is answered with `202` whether or not anything matched. The cancelled request finishes with `-33002`. A write the database had already started is not stopped: it runs to the end, and the `-33002` carries `data: { "outcome": "unknown" }`. It may have been applied, so check before sending it again.
 
 Cancellation is per principal: a token can only cancel its own requests. Revoking a token cancels everything it has in flight.
 
@@ -371,7 +371,7 @@ Per-caller request rates, auth lockouts and pairing lockouts are counted separat
 A request with no `io.modelcontextprotocol/protocolVersion` in `_meta` is treated as legacy, and legacy still works the old way:
 
 1. `POST /mcp` with `initialize` and a `protocolVersion` of `2025-11-25` or `2025-06-18`. Any other value is `-32022`.
-2. The response carries `protocolVersion`, `capabilities`, `serverInfo` and `instructions`.
+2. The response carries `protocolVersion`, `capabilities`, `serverInfo` and `instructions`. `capabilities` follows the token: `tools` needs `tools:read`, and `resources`, `prompts` and `completions` need `resources:read`.
 3. Every later request carries `Mcp-Session-Id`. A session belongs to the token that created it; presenting it under another token is `-33001`.
 4. A session lives until the server stops. The store holds at most 16 and evicts the least recently used past that. A session the server does not recognize is `-33001`, and the client has to `initialize` again.
 

@@ -47,7 +47,7 @@ With no preference, start with Claude or OpenAI on an API key: both take a key, 
 
 Install Claude Code, run `claude /login` in Terminal, then pick Opus, Sonnet, or Haiku. Replies bill against your Claude subscription instead of an API key. The provider answers from your schema when the MCP server is on in **Settings > MCP**, and falls back to plain chat when it is off.
 
-Whatever the chat mode, its tools only read, and reach only the chat's connection: each reply runs on a [**Read Only**](/developers/tokens) MCP token limited to that connection. At **Ask Once for Each Connection** in **Settings > MCP**, one **Allow** covers every later reply on the connection until you click **Forget** on its **Claude Agent** row, or end its token with **Revoke**, **Delete** or **Disconnect** while a reply runs.
+Its tools never write and reach only the chat's connection: each reply runs on a [**Read Only**](/developers/tokens) MCP token limited to that connection. The token follows the [chat mode](#chat-modes). In **Ask** it reaches only the seven schema tools that mode lists. In **Edit** and **Agent** it reaches the MCP server's [read tools](/developers/mcp-tools#scopes-and-gates), so it reads rows but never changes them. At **Ask Once for Each Connection** in **Settings > MCP**, one **Allow** covers every later reply on the connection until you click **Forget** on its **Claude Agent** row, or end its token with **Revoke**, **Delete** or **Disconnect** while a reply runs.
 
 The `claude` tool runs headless here. Claude Code is built for you to use directly rather than as a backend for other apps, so this path can break with any Claude Code release. Your subscription is governed by Anthropic's [Consumer Terms](https://www.anthropic.com/legal/consumer-terms) and [Usage Policy](https://www.anthropic.com/legal/aup), which TablePro cannot grant rights under. Replies also count against the limits you share with claude.ai and your own Claude Code sessions, so running out here stops your work there. For a metered path on commercial terms, add the **Claude** provider with an API key.
 
@@ -86,28 +86,34 @@ The mode picker in the composer footer controls which tools the AI can call. It 
 
 | Mode | Tools available | When to use |
 |------|----------------|-------------|
-| **Ask** | Read-only schema lookups: `list_connections`, `get_connection_status`, `list_databases`, `list_schemas`, `list_tables`, `describe_table`, `get_table_ddl`. | Questions, exploration, drafting queries you run yourself. |
-| **Edit** | All Ask tools, plus `execute_query` for `SELECT`, `INSERT`, `UPDATE`, `DELETE`. Destructive statements stay blocked. See [external query rules](/developers#what-read-only-allows). | Letting the AI run the queries it proposes. |
+| **Ask** | Read-only schema lookups: `list_connections` (this conversation's connection only), `get_connection_status`, `list_databases`, `list_schemas`, `list_tables`, `describe_table`, `get_table_ddl`. | Questions, exploration, drafting queries you run yourself. |
+| **Edit** | All Ask tools, plus `execute_query` for any statement that is not destructive. The model is told to keep to `SELECT`, `INSERT`, `UPDATE` and `DELETE` and leave schema, privilege and session changes to Agent mode, but Edit refuses only destructive statements. See [external query rules](/developers#what-read-only-allows). | Letting the AI run the queries it proposes. |
 | **Agent** | All tools, plus `confirm_destructive_operation` for destructive statements. Runs tools in a loop. | Multi-step migrations and schema changes. |
 
 Mode and [Safe Mode](/features/safe-mode) are independent gates. Agent mode does not bypass Safe Mode.
 
 ### Tool calling
 
-In Edit and Agent modes each tool call appears as a card in the reply. Read-only tools run immediately. Write tools wait for **Run**, for **Always for this connection** (which whitelists that one tool on that one connection and syncs with it over iCloud), or for **Cancel**, which hands the model an error result and lets it carry on.
+In Edit and Agent modes each tool call appears as a card in the reply. Read-only tools run immediately. Write tools wait for **Run**, for **Always Allow** (which lets that one tool run on that one connection without asking from then on, and syncs with the connection over iCloud), or for **Reject**, which hands the model an error result and lets it carry on. To take an **Always Allow** back, click **Forget** beside the tool under **AI Policy** in the [connection form](/connections/connection-form#options), then **Save**.
 
 <Frame caption="Per-card tool approval">
   <img className="block dark:hidden" src="/images/ai-chat-tool-approval.png" alt="Per-card tool approval" />
   <img className="hidden dark:block" src="/images/ai-chat-tool-approval-dark.png" alt="Per-card tool approval" />
 </Frame>
 
-Safe Mode **Silent** auto-approves write tools and **Read-Only** auto-denies them. Destructive operations are the exception: `confirm_destructive_operation` always needs a click, Silent does not auto-approve it, **Always for this connection** is refused for it, and the model must pass the verbatim phrase `I understand this is irreversible`.
+Safe Mode **Silent** auto-approves write tools and **Read-Only** auto-denies them. Destructive operations are the exception: `confirm_destructive_operation` always needs a click, Silent does not auto-approve it, its card has no **Always Allow**, and the model must pass the verbatim phrase `I understand this is irreversible`.
+
+**Stop Generating** does not stop a write the database is already running. The write runs to the end, and the tool result in the reply says it may have been applied: check before you run it again.
+
+Rows from `execute_query` and `confirm_destructive_operation` reach the model held to 256 KB per call, cut the way an [MCP answer](/developers/mcp-tools#answer-size) is cut.
 
 `execute_query` follows the [external query rules](/developers#what-read-only-allows), including their SQL Server script exception. Text stored in the database can steer the model, so on a connection where an unwanted write matters, connect with a login that can only read: the database holds that limit whatever the model sends.
 
-Every provider can call tools. Claude Agent reaches them through the MCP server, so that has to be on, and local models depend on the model.
+Every provider can call tools. Claude Agent reaches them through the MCP server, so that has to be on, and it never writes in any mode: see [Claude Agent](#claude-agent). Local models depend on the model.
 
 A reply pauses after 25 tool calls, keeps everything it has done, and offers **Continue** for a fresh budget or **Adjust Limit** to change the number, 5 to 200, under **Agent** in **Settings > AI**. Every call is another request with the schema attached, so a higher limit costs tokens.
+
+A reply the provider cut off at the model's output token limit, or because the conversation filled its context window, ends with a note saying so. A tool call cut off with it never runs: its card shows it denied, and the model gets an error asking for the call again with complete arguments.
 
 ### Attach context with `@`
 
@@ -115,7 +121,7 @@ Type `@` in the composer to open a picker at the caret: **Schema**, a specific *
 
 ### Slash commands
 
-Type `/` for **`/review`**, **`/explain`**, **`/optimize`**, and **`/fix`**, or **`/help`** for the list. The first three act on the text typed after the command, or on the whole query tab when there is none, and attach the same table structure as the menu actions. **`/fix`** sends the tab's last failed statement with its error. Add your own under **Settings > AI > Custom Slash Commands**: a template substitutes `{{query}}`, `{{schema}}`, `{{database}}`, and `{{body}}`, the text typed after the command, at send time. A custom command with a built-in's name runs only from the command menu.
+Type `/` for **`/review`**, **`/explain`**, **`/optimize`**, and **`/fix`**, or **`/help`** for the list. The first three act on the text typed after the command, or on the whole query tab when there is none, and attach the same table structure as the menu actions. **`/fix`** sends the tab's last failed statement with its error. Add your own under **Settings > AI > Custom Slash Commands**: a template substitutes `{{query}}`, `{{schema}}`, `{{database}}`, and `{{body}}`, the text typed after the command, at send time. A custom command with a built-in's name runs only from the command menu. Deleting one asks first, since the deletion reaches every Mac that syncs settings.
 
 ### Model picker
 
@@ -157,7 +163,7 @@ Pin plain-text context to a connection so the AI sees it every turn: open the co
 
 Turn on **Enable inline suggestions while typing** in the AI tab; it is off by default. Pause typing and the active provider, or Apple Intelligence when it is on, suggests a completion as ghost text at the cursor. `Tab` accepts, `Escape` dismisses, and typing anything else dismisses it too.
 
-The pause is the **Debounce** setting beside the toggle: 500 ms by default, adjustable from 100 to 3,000 ms in 50 ms steps. With Copilot active the suggestions come from Copilot's inline-completion model; every other provider serves them through chat completions.
+The pause is the **Debounce** setting beside the toggle: 500 ms by default, adjustable from 100 to 3,000 ms in 50 ms steps. With Copilot active the suggestions come from Copilot's inline-completion model; every other provider serves them through chat completions. Copilot gets the query edit by edit as you type, under a header with the database name, its dialect, and the columns of up to **Max schema tables** tables, the ones the statement you are writing names first.
 
 Suggestions follow the connection's AI policy, read again at every pause, so a policy you change in the connection form applies from the next one. **Always Allow** suggests right away. On **Ask Each Time**, suggestions start once you click **Allow** in the chat's **Allow AI Access** prompt for that connection, and stop when the connection disconnects. A **Never** connection gets no suggestions, and with Copilot active its editor text is not sent to Copilot either.
 
