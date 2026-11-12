@@ -105,6 +105,10 @@ Reconnecting costs a TCP connect, the TLS handshake and authentication: measured
 
 A release is refused, with the reason, while the session holds anything a reconnect would destroy: an open transaction, a temporary table, a prepared statement, a `GET_LOCK`, `LOCK TABLES`, `FLUSH TABLES WITH READ LOCK`, an open `HANDLER`, a user variable, a changed session setting, a database selected with `USE`, or a stored routine call, whose body is opaque. The statements a dump runs inside `/*!40101 ... */` count, since the server executes them. The transaction comes from the server itself, so one opened by `SET autocommit = 0` or by an `XA START` counts as well.
 
+## Rows affected
+
+An `UPDATE` counts every row it matched, a row that already held the new value included: `UPDATE t SET a = 1` over two rows that both hold `1` reports 2 rows affected, and `ROW_COUNT()` returns 2. `INSERT ... ON DUPLICATE KEY UPDATE` onto a row that already holds the values reports 1, and 2 when it changes the row. The session is opened with `CLIENT_FOUND_ROWS`, which is how a [save](/features/change-tracking#saving) tells a row that held the value from a row that is gone. MariaDB, TiDB and OceanBase count the same way.
+
 ## When the server drops the connection
 
 A read that fails because the server closed the connection is run once more on a new one, and only from a session holding nothing: the same list as above. Every other statement reports the error, because the second session answers from different state. Measured on MySQL 8.4.11, replaying regardless: `SELECT @total` came back `NULL` where it had come back 42, and `SELECT DATABASE()` came back as the connection's own database rather than the one `USE` had selected, neither of them raising anything. `LAST_INSERT_ID()`, `ROW_COUNT()`, `FOUND_ROWS()` and `CONNECTION_ID()` are never replayed either, whatever the session holds: their answer belongs to the connection that is gone.

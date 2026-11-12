@@ -178,7 +178,7 @@ Send one statement per query. SQL Server also accepts a script split at `GO` lin
 
 A database link asks **Open External Database Connection?** before connecting. Check the host, user and database before approving.
 
-For a local connection without SSH or a filter, **Always Allow** remembers the database type, host, database, user and URL `name`. Local hosts include `localhost`, `::1` and `127.x.x.x`. A local socket grant also includes its path. The port is excluded, so a development server may change ports without asking again. Remote hosts and SSH links ask every time.
+For a local connection without a filter, an SSH tunnel, an SSH profile, a SOCKS proxy, a tunnel command, Cloudflare or the Cloud SQL Auth Proxy, **Always Allow** remembers the database type, host, database, user and URL `name`. Local hosts include `localhost`, `::1` and `127.x.x.x`. A local socket grant also includes its path. The port is excluded, so a development server may change ports without asking again. A link that opens a saved connection is remembered for that saved connection only. Remote hosts and links through a tunnel or proxy ask every time.
 
 <Frame caption="Only local database links offer Always Allow">
   <img className="block dark:hidden" src="/images/link-trust-alert.png" alt="External connection alert showing the target database and approval buttons" />

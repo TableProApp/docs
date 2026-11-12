@@ -3,9 +3,9 @@ title: Data Grid
 description: Sort, size, hide, highlight, chart, map and copy the rows a table or a query puts in the grid
 ---
 
-Most of the grid's controls sit in the status bar beneath it. The view switcher is at the leading edge, followed by the row count and, while cells are selected, their [sum](#selection-summary). The columns, highlight, filter and page buttons sit at the trailing edge.
+Most of the grid's controls sit in the status bar beneath it. The view switcher is at the leading edge, followed by the row count and, while cells are selected, their [sum](#selection-summary). The columns, highlight, [auto refresh](#auto-refresh), filter and page buttons sit at the trailing edge.
 
-A narrow window trims that bar rather than cutting it off. The Columns and Filters buttons drop their titles first, and **First** and **Last** leave with them; the Query menu still carries all four page commands. Narrower still, the view switcher becomes a pull-down naming the current mode and rows-per-page moves into the page indicator's menu. Everything else keeps its place.
+A narrow window trims that bar rather than cutting it off. The Columns, Auto Refresh and Filters buttons drop their titles first, and **First** and **Last** leave with them; the Query menu still carries all four page commands. Narrower still, the view switcher becomes a pull-down naming the current mode and rows-per-page moves into the page indicator's menu. Everything else keeps its place.
 
 <Frame caption="Data grid with query results">
   <img className="block dark:hidden" src="/images/data-grid.png" alt="Data grid" />
@@ -174,6 +174,24 @@ On a table tab, sorting, filtering, and changing page or page size start at the 
 
 Saving edits, importing rows, **Insert Document…**, a structure change and **Refresh Materialized View…** reload every tab showing the table they changed, in every window of the connection. The tab in front reloads at once and keeps its place. A tab behind it reloads when you switch to it. A tab with a cell open or unsaved edits is not interrupted. It reloads as soon as the cell is closed and its edits are saved, undone or discarded. Tabs on other tables stay as they are. A SQL file import reaches every table tab of the connection the same way. A statement run from the SQL editor reloads nothing, so press `Cmd+R` on the tabs it touched.
 
+### Auto Refresh
+
+To watch a table change, click the clock button in the status bar, or open **Database > Auto Refresh**, and pick **Every 5 Seconds**, **Every 10 Seconds**, **Every 30 Seconds**, **Every Minute** or **Every 5 Minutes**. **Off** stops it. Each refresh reads the rows the way `Cmd+R` does and keeps your place, but leaves the row count as it was and adds nothing to [query history](/features/query-history). `Cmd+R` recounts and starts the wait over.
+
+Each table tab keeps its own interval, and only the tab in front refreshes. The interval is not saved: opening another table in the tab, closing the tab or quitting turns it off. Query tabs have no Auto Refresh, and the button shows only in **Data** view.
+
+A refresh never asks or interrupts. It waits for the next interval while:
+
+- the table has unsaved changes, or a cell is being edited
+- rows are loading
+- the connection is down
+- a transaction is open on the tab's database
+- rows are selected in a table without a primary key
+- the tab is not the one in front, or its window is not on screen
+- the tab is in another view mode, you are scrolling or dragging a selection, or a value viewer or value filter is open
+
+For the first five, the clock button's tooltip names the reason. Another app in front does not stop it while the window stays on screen. A refresh that fails turns Auto Refresh off and leaves the error in the tab.
+
 ## Copying
 
 Click a cell to select its row and put the cell cursor on that cell. Drag or `Shift`-click for a range of cells, and `Cmd`-click to add or remove a cell. Click a row number to select a whole row; drag down the row numbers, or `Shift`-click or `Cmd`-click them, for several. `Cmd+A` selects every row and leaves no cell cursor. `Escape` shrinks a range of cells to the cursor's row, and a second `Escape` clears the selection.
@@ -192,7 +210,9 @@ After a plain click on a cell, `Cmd+C` copies the value of the cell under the cu
 
 **Copy rows as** offers TSV, TSV with Headers, JSON, CSV, CSV with Headers and Markdown. Whatever the format, `Cmd+V` in a table pastes the copied rows, not the text. To copy one value out of a selection, choose **Edit > Copy Special > Copy Cell Value** for the cell the cursor is on, or **Copy Cell Value** in the right-click menu for the cell under the pointer.
 
-Right-click and open **Copy as** for CSV, CSV with Headers, Markdown, and **IN Clause**, which writes `('a', 'b', 'c')` for a `WHERE col IN (…)`. **INSERT Statement(s)** and **UPDATE Statement(s)** appear when the result comes from a single table whose structure has loaded, and never on MongoDB or Redis. UPDATE is also missing on a table without a primary key that has a column no match can compare, such as a SQL Server `sql_variant`. **Copy Column Values** on the header menu copies one column, one value per line. Every format is also in **Edit > Copy Special**, where IN Clause takes the one column a cell selection covers, or the cursor's column. Those items have no shortcut until you record one in **Settings > Keyboard**.
+A binary value copies whole as `0x` and its hex digits, however much the cell shows, and pasting that into a binary column writes the bytes back. A pasted value that starts with `0x` but is not hex, such as one cut short with `…`, leaves the cell as it was, and pasted rows holding one are not added.
+
+Right-click and open **Copy as** for CSV, CSV with Headers, Markdown, and **IN Clause**, which writes `('a', 'b', 'c')` for a `WHERE col IN (…)`, booleans as `1` and `0` on an engine without `TRUE` and `FALSE` such as SQL Server, and binary values as the engine's binary literal. **INSERT Statement(s)** and **UPDATE Statement(s)** appear when the result comes from a single table whose structure has loaded, and never on MongoDB or Redis. UPDATE is also missing on a table without a primary key that has a column no match can compare, such as a SQL Server `sql_variant`. **Copy Column Values** on the header menu copies one column, one value per line. Every format is also in **Edit > Copy Special**, where IN Clause takes the one column a cell selection covers, or the cursor's column. Those items have no shortcut until you record one in **Settings > Keyboard**.
 
 Every copy follows the grid as shown: hidden columns are left out, columns keep their current order, and over a cell selection only those columns go out. INSERT and UPDATE write what a save of the same row would. They leave out the columns the server fills in, such as identity and computed columns. INSERT leaves a cell set to `DEFAULT` to the server, and UPDATE assigns it `DEFAULT`. The table name carries its schema. UPDATE finds the row as it is stored, not as you have edited it: by every column of the primary key, whether or not those cells are selected, or on a table without one by every column, hidden ones included, which also changes any identical copy of the row. A row you added and have not saved gets no UPDATE.
 

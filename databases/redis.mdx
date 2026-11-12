@@ -97,22 +97,22 @@ The grid columns are **Key**, **Type**, **TTL**, **Length**, and **Value**. Valu
 
 | Type | Value column | Length column |
 |---|---|---|
-| String | The entire value, however long | `STRLEN`, in bytes |
+| String | The first 64 KB; a longer value ends in `...` | `STRLEN`, in bytes |
 | Hash | First 100 fields, as a JSON object | `HLEN` |
 | List | First 100 elements, as a JSON array | `LLEN` |
 | Set | First 100 members, as a JSON array | `SCARD` |
 | Sorted set | First 100 `[member, score]` pairs | `ZCARD` |
 | Stream | Newest 5 entries, as `[id, fields]` | `XLEN` |
 
-A value that is not valid UTF-8, such as a gzip or MessagePack payload, opens in the hex editor instead of as text.
+A value that is not valid UTF-8, such as a gzip or MessagePack payload, opens in the hex editor instead of as text. Exporting the keys writes every string whole.
 
 A **Type**, **TTL**, **Length** or **Value** cell is NULL when the server will not say for your user. ACL key patterns do not filter `SCAN`, so a user limited to `~app:*` still sees every key name, and a **Value** edit on a key whose **Type** is NULL stops the save.
 
 ### Editing
 
-Editing a **Key** cell runs `RENAME`. Editing a **TTL** cell runs `EXPIRE`, or `PERSIST` when you clear it or set it to `-1` or NULL; in that column `-1` means no expiry and `-2` means the key is gone. Editing a **Value** cell runs `SET`, and only on a string, since a preview of a hash or list is not the whole structure.
+Editing a **Key** cell runs `RENAME`. Editing a **TTL** cell runs `EXPIRE`, or `PERSIST` when you clear it or set it to `-1` or NULL; in that column `-1` means no expiry and `-2` means the key is gone. Editing a **Value** cell runs `SET`, and only on a string the grid shows whole, since a preview of a hash or list, or the start of a long string, is not the whole value.
 
-Save sends nothing, names the reason and keeps your edits when a row holds an edit these commands cannot make: a **Value** edit on any type but a string, a NULL **Value**, a **Type** edit, or a **TTL** that is not a whole number of seconds above 0.
+Save sends nothing, names the reason and keeps your edits when a row holds an edit these commands cannot make: a **Value** edit on any type but a string or on a string longer than 64 KB, a NULL **Value**, a **Type** edit, a **TTL** that is not a whole number of seconds above 0, or a new row copied from a key the grid shows only in part.
 
 Change the other types with a command: `HSET myhash field1 "value1"` rewrites one field and leaves the rest alone. Adding a row does follow the type you pick, generating `HSET`, `RPUSH`, `SADD`, `ZADD`, or `SET`; any other type stops the save.
 
