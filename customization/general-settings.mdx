@@ -56,7 +56,7 @@ Older servers have neither: MySQL before 5.7.8, MariaDB before 10.1.1. A stateme
 
 An export, **Copy To**, a table transfer and a data comparison read with the timeout off and put it back when they finish. Their reads wait for the side that writes, so a long copy would otherwise be cancelled part way.
 
-On ClickHouse, InfluxDB, Spanner and Typesense such a read is one HTTP response that lasts as long as the copy, so the one-hour cap does not apply to it.
+On InfluxDB and Typesense such a read is one HTTP response that lasts as long as the copy, so the one-hour cap does not apply to it.
 
 ## Command line tool
 
