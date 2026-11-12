@@ -47,7 +47,7 @@ See [Connection URL Reference](/connections/urls) for all parameters.
 
 The sidebar lists tables and views and hides the internal `sqlite_*` tables. Each table carries its columns, constraints, indexes, foreign keys, and DDL; triggers can be read and edited.
 
-Change the file outside TablePro and the object list reloads on its own. Rows already loaded in a tab stay until you refresh that tab.
+Change the schema outside TablePro, such as a migration that adds a table, and the object list reloads on its own. A write that changes only rows leaves the list as it is. Rows already loaded in a tab stay until you refresh that tab.
 
 ## Attached databases
 
