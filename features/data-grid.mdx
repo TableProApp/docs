@@ -3,9 +3,9 @@ title: Data Grid
 description: Sort, size, hide, highlight, chart, map and copy the rows a table or a query puts in the grid
 ---
 
-Most of the grid's controls sit in the status bar beneath it. The view switcher is at the leading edge, followed by the row count and, while cells are selected, their [sum](#selection-summary). The columns, highlight, filter and page buttons sit at the trailing edge.
+Most of the grid's controls sit in the status bar beneath it. The view switcher is at the leading edge, followed by the row count and, while cells are selected, their [sum](#selection-summary). The columns, highlight, [auto refresh](#auto-refresh), filter and page buttons sit at the trailing edge.
 
-A narrow window trims that bar rather than cutting it off. The Columns and Filters buttons drop their titles first, and **First** and **Last** leave with them; the Query menu still carries all four page commands. Narrower still, the view switcher becomes a pull-down naming the current mode and rows-per-page moves into the page indicator's menu. Everything else keeps its place.
+A narrow window trims that bar rather than cutting it off. The Columns, Auto Refresh and Filters buttons drop their titles first, and **First** and **Last** leave with them; the Query menu still carries all four page commands. Narrower still, the view switcher becomes a pull-down naming the current mode and rows-per-page moves into the page indicator's menu. Everything else keeps its place.
 
 <Frame caption="Data grid with query results">
   <img className="block dark:hidden" src="/images/data-grid.png" alt="Data grid" />
@@ -173,6 +173,24 @@ Some engines cannot skip rows and return a fixed maximum from one query. On thos
 On a table tab, sorting, filtering, and changing page or page size start at the first row. The horizontal scroll position stays.
 
 Saving edits, importing rows, **Insert Document…**, a structure change and **Refresh Materialized View…** reload every tab showing the table they changed, in every window of the connection. The tab in front reloads at once and keeps its place. A tab behind it reloads when you switch to it. A tab with a cell open or unsaved edits is not interrupted. It reloads as soon as the cell is closed and its edits are saved, undone or discarded. Tabs on other tables stay as they are. A SQL file import reaches every table tab of the connection the same way. A statement run from the SQL editor reloads nothing, so press `Cmd+R` on the tabs it touched.
+
+### Auto Refresh
+
+To watch a table change, click the clock button in the status bar, or open **Database > Auto Refresh**, and pick **Every 5 Seconds**, **Every 10 Seconds**, **Every 30 Seconds**, **Every Minute** or **Every 5 Minutes**. **Off** stops it. Each refresh reads the rows the way `Cmd+R` does and keeps your place, but leaves the row count as it was and adds nothing to [query history](/features/query-history). `Cmd+R` recounts and starts the wait over.
+
+Each table tab keeps its own interval, and only the tab in front refreshes. The interval is not saved: opening another table in the tab, closing the tab or quitting turns it off. Query tabs have no Auto Refresh, and the button shows only in **Data** view.
+
+A refresh never asks or interrupts. It waits for the next interval while:
+
+- the table has unsaved changes, or a cell is being edited
+- rows are loading
+- the connection is down
+- a transaction is open on the tab's database
+- rows are selected in a table without a primary key
+- the tab is not the one in front, or its window is not on screen
+- the tab is in another view mode, you are scrolling or dragging a selection, or a value viewer or value filter is open
+
+For the first five, the clock button's tooltip names the reason. Another app in front does not stop it while the window stays on screen. A refresh that fails turns Auto Refresh off and leaves the error in the tab.
 
 ## Copying
 
