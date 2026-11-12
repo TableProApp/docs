@@ -49,6 +49,8 @@ A call that opens a connection may also need approval on the Mac for a pre-conne
 
 **Read Only** refuses a statement classified as a write with `denied`. Reads also use the driver's read-only mode where supported. [What Read Only allows](/developers#what-read-only-allows) lists engine limits and the statements refused at every access level. Multiple statements return `invalid_argument`, except for SQL Server scripts sent to [`execute_query`](#execute_query) or [`confirm_destructive_operation`](#writing-data). On SQL Server, an `IF`, `WHILE` or `BEGIN ... END` block holding one statement counts as one statement; a block holding more is multiple statements.
 
+At Safe Mode **Read-Only**, a read that calls a function TablePro cannot tell from a write is refused with `denied` on the engines [Safe Mode](/features/safe-mode#what-counts-as-a-read) names, whatever the token carries and whoever approved the call.
+
 ## Masking rules
 
 On a connection with [masking rules](/features/data-masking#masking-for-ai-and-scripts), PostgreSQL, MySQL, MariaDB and local SQLite mask a cell by the table column it reads, so an alias is masked too. A column that reads no column of a user table comes back masked whole, whatever its name, and `status_message` names it. On engines that cannot trace a column, that is every column of a query. Schema tools such as `describe_table` return the structure as usual.

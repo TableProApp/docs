@@ -87,7 +87,7 @@ The mode picker in the composer footer controls which tools the AI can call. It 
 | Mode | Tools available | When to use |
 |------|----------------|-------------|
 | **Ask** | Read-only schema lookups: `list_connections` (this conversation's connection only), `get_connection_status`, `list_databases`, `list_schemas`, `list_tables`, `describe_table`, `get_table_ddl`. | Questions, exploration, drafting queries you run yourself. |
-| **Edit** | All Ask tools, plus `execute_query` for any statement that is not destructive. The model is told to keep to `SELECT`, `INSERT`, `UPDATE` and `DELETE` and leave schema, privilege and session changes to Agent mode, but Edit refuses only destructive statements. See [external query rules](/developers#what-read-only-allows). | Letting the AI run the queries it proposes. |
+| **Edit** | All Ask tools, plus `execute_query` for queries and data changes: `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `MERGE`. On a SQL database and on DynamoDB it refuses schema, privilege, session and transaction statements, such as `CREATE`, `ALTER`, `GRANT`, `SET` and `BEGIN`, and changes to the database's own tables, such as `pg_settings` or `mysql.user`; run those in Agent mode or a query tab. A function a query calls is not read, so it runs whatever it does. Destructive statements stay blocked. On an engine with a query language of its own, such as MongoDB, Redis, Neo4j, SurrealDB or Kafka, Edit refuses only destructive statements. See [external query rules](/developers#what-read-only-allows). | Letting the AI run the queries it proposes. |
 | **Agent** | All tools, plus `confirm_destructive_operation` for destructive statements. Runs tools in a loop. | Multi-step migrations and schema changes. |
 
 Mode and [Safe Mode](/features/safe-mode) are independent gates. Agent mode does not bypass Safe Mode.
@@ -101,7 +101,7 @@ In Edit and Agent modes each tool call appears as a card in the reply. Read-only
   <img className="hidden dark:block" src="/images/ai-chat-tool-approval-dark.png" alt="Per-card tool approval" />
 </Frame>
 
-Safe Mode **Silent** auto-approves write tools and **Read-Only** auto-denies them. Destructive operations are the exception: `confirm_destructive_operation` always needs a click, Silent does not auto-approve it, its card has no **Always Allow**, and the model must pass the verbatim phrase `I understand this is irreversible`.
+Safe Mode **Silent** auto-approves write tools and **Read-Only** auto-denies them, an **Always Allow** one too. Destructive operations are the exception: `confirm_destructive_operation` always needs a click, Silent does not auto-approve it, its card has no **Always Allow**, and the model must pass the verbatim phrase `I understand this is irreversible`.
 
 **Stop Generating** does not stop a write the database is already running. The write runs to the end, and the tool result in the reply says it may have been applied: check before you run it again.
 
