@@ -109,6 +109,8 @@ Every provider can call tools. Claude Agent reaches them through the MCP server,
 
 A reply pauses after 25 tool calls, keeps everything it has done, and offers **Continue** for a fresh budget or **Adjust Limit** to change the number, 5 to 200, under **Agent** in **Settings > AI**. Every call is another request with the schema attached, so a higher limit costs tokens.
 
+A reply the provider cut off at the model's output token limit, or because the conversation filled its context window, ends with a note saying so. A tool call cut off with it never runs: its card shows it denied, and the model gets an error asking for the call again with complete arguments.
+
 ### Attach context with `@`
 
 Type `@` in the composer to open a picker at the caret: **Schema**, a specific **Table**, **Current Query**, **Query Results**, or a **Saved Query** ([favorites](/features/favorites)). Return or Tab inserts, Escape dismisses. The `@` button in the footer offers the same list minus saved queries; its **Tables** menu shows the first 100 tables, and typing `@` in the composer finds any other. A saved query chip resolves at send time, so the AI sees its current SQL.

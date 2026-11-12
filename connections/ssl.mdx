@@ -3,7 +3,7 @@ title: SSL/TLS
 description: Configure encrypted database connections, per-driver defaults, and certificate verification
 ---
 
-Managed databases require TLS, every one of them, from RDS and Cloud SQL to Supabase, Neon, Atlas, and ClickHouse Cloud. Use **Verify Identity** when your provider hands you a CA certificate, or when the driver checks the system trust store on its own: ClickHouse, Trino, Presto, and SQL Server. Otherwise set **Required (skip verify)**.
+Managed databases require TLS, every one of them, from RDS and Cloud SQL to Supabase, Neon, Atlas, and ClickHouse Cloud. Use **Verify Identity** when your provider hands you a CA certificate, or when the server's certificate chains to a root this Mac trusts: PostgreSQL and the engines built on it, ClickHouse, Trino, Presto, and SQL Server check the system trust store when no CA certificate is chosen. Otherwise set **Required (skip verify)**.
 
 ## Modes
 
@@ -26,12 +26,14 @@ The certificate rows appear only once **SSL Mode** is anything but Disabled. Eac
 
 | Field | When it appears | What it takes |
 |---|---|---|
-| **Certificate**, under **CA Certificate** | Verify CA and Verify Identity only | The PEM or DER certificate the server's certificate chains to, for example `/path/to/ca-cert.pem`. Saving without it is blocked, except under Verify Identity on ClickHouse, Kafka, Presto, Qdrant, SAP HANA and Trino, which check the system trust store when it is empty |
+| **Certificate**, under **CA Certificate** | Verify CA and Verify Identity only | The PEM or DER certificate the server's certificate chains to, for example `/path/to/ca-cert.pem`. Saving without it is blocked, except under Verify Identity on ClickHouse, CockroachDB, Kafka, KingbaseES, PostgreSQL, Presto, Qdrant, Redshift, SAP HANA and Trino, which check the system trust store when it is empty |
 | **Client Certificate** | Any mode but Disabled | Your certificate, for a server that enforces mutual TLS. Optional otherwise |
 | **Client Key** | Any mode but Disabled | The matching private key. Required once a client certificate is set |
 | **Key Passphrase** | Once **Client Key** has a path, on drivers that support it (Cassandra, ScyllaDB and MongoDB) | The passphrase of an encrypted key. Stored in the Keychain |
 
 SQL Server shows no certificate fields at all and verifies against the system trust store. See [SQL Server](/databases/mssql#limitations). Under Verify Identity, SAP HANA and Kafka verify against the system trust store when **Certificate** is left empty. See [SAP HANA](/databases/sap-hana#ssl%2Ftls).
+
+PostgreSQL, Redshift, CockroachDB and KingbaseES under Verify Identity with **Certificate** empty check the server against the roots this Mac trusts, as **Keychain Access** shows them, your own and your organization's trust settings included. A `~/.postgresql/root.crt` file, which libpq reads by default, is used instead when it exists. Backups and restores with `pg_dump` and `pg_restore` check the same way. Verify CA still needs the server's CA certificate: libpq refuses it against the system roots, since anyone can get a public certificate for a host they control. A provider with its own CA, such as Amazon RDS or Supabase, still needs its CA bundle in **Certificate**.
 
 ## Per-driver defaults
 
