@@ -16,9 +16,9 @@ This page covers the **Settings > MCP** pane. The protocol itself, the tool cata
 
 Open **Settings > MCP** and turn on **Enable MCP Server**. The **Status** row underneath is how you check it before touching a client config: it reads **Running on port 23508**, or **Stopped**, or **Couldn't start** with the reason below it. **Try Again** beside a failure starts the server again.
 
-With the toggle off, nothing starts the server. A client that launches the bundled `tablepro-mcp` bridge gets "The TablePro MCP server is turned off" within a second instead of a timeout, and pairing an extension stops at the same message with **Open MCP Settings**.
+With the toggle off, nothing starts the server. A client that launches the bundled `tablepro-mcp` bridge gets "The TablePro MCP server is turned off" within a second instead of a timeout, and pairing an extension stops at the same message with **Open MCP Settings**. With the toggle on and a server that fails to start, the bridge reports that failure instead of a timeout.
 
-While it is only answering a client, TablePro stays out of the Dock and the app switcher. It appears in both, with its menu bar, once it has a window on screen, including one a client asked it to open. A TablePro the bridge launched while the toggle is off quits again.
+While it is only answering a client, TablePro stays out of the Dock and the app switcher. It appears in both, with its menu bar, once it has a window on screen, including one a client asked it to open. A TablePro the bridge launched quits again when the toggle is off or the server fails to start.
 
 The default HTTP port is **23508**. If it is taken, the server binds a free port, shown in **Status**. The bridge uses the socket recorded in the [handshake file](/developers/mcp-protocol#local-socket-and-handshake), so its config needs no port.
 
@@ -26,19 +26,21 @@ The default HTTP port is **23508**. If it is taken, the server binds a free port
 
 | Setting | Default | Range |
 |---------|---------|-------|
-| Port | 23508 | |
+| Port | 23508 | 1,024 to 65,535 |
 | Default row limit | 500 | 1 to 500,000 |
 | Maximum row limit | 10,000 | 1 to 500,000 |
 | Query timeout | 30 seconds | 1 to 300 seconds |
 | Log MCP queries in history | on | |
 
-A tool can ask for fewer rows or a shorter timeout, never for more than the maximum. Rows also stop at the [answer size limit](/developers/mcp-tools#answer-size), whatever the row limit.
+A tool can ask for fewer rows or a shorter timeout, never for more than the maximum. Rows also stop at the [answer size limit](/developers/mcp-tools#answer-size), whatever the row limit. A port outside its range is not saved, and the section names the range.
 
 ## Connecting a client
 
-Click **Connect a Client…** and pick **Claude Code**, **Claude Desktop**, **Cursor**, or **Zed**. Each shows numbered steps and a copyable snippet pointing at the bundled bridge. Paste it into the client's own config; TablePro does not write to other apps' files.
+Click **Connect a Client…**, then **Install** on the client's row. Depending on the client, TablePro opens it to confirm, runs its own command, such as `claude mcp add`, or adds an entry to its settings file. Every entry starts the bundled bridge, so no token is written anywhere. The row reads **Connected** once the client calls in.
 
-For VS Code, Cline, Continue, Windsurf, Antigravity, Goose, the HTTP transport, and a client that connects but lists no tools, see [MCP Clients](/integrations/mcp-clients).
+Install edits other apps' settings files, and only TablePro's entry in them. The file as it was stays beside it as `<file>.tablepro-backup` until the next write replaces it. **Remove…** takes the entry out the same way, and **Copy** gives you the command or the configuration to add by hand instead.
+
+[MCP Clients](/integrations/mcp-clients) lists every client with the file it uses and what each status means, plus the HTTP transport and what to do when a client lists no tools.
 
 ## Connection access
 
@@ -95,8 +97,15 @@ Every request needs a token, including one from your own Mac. The server supplie
 
 **View Activity…** opens the **MCP Activity** window, also on **TablePro > MCP Activity…**. It has two sections:
 
-- **Activity Log**: every authentication, tool call, resource read and query, with the token behind it, the category, the connection, and the outcome. Filter by time, category or token, search, and export the filtered view to CSV. Retained for 90 days. Statements are recorded as a SHA-256 digest, not as text.
-- **Connected Clients**: clients that have called in the last five minutes, with the client name, the token, and when they were first and last seen. **Disconnect** revokes that client's token, so the client has to pair again.
+- **Activity Log**: every authentication, tool call, resource read and query, with the client and token behind it, the category, the connection, and the outcome. **Client** is the name the client reports for itself; authentication and server rows have none. Filter by time, category, client or token, search, and export the filtered view to CSV. Retained for 90 days. Statements are recorded as a SHA-256 digest, not as text.
+- **Connected Clients**: clients that have called in the last five minutes, by their app's name and logo where TablePro knows the client, with the token and when they were first and last seen. **Connect a Client…** on its toolbar opens the setup sheet.
+
+**Disconnect** in Connected Clients depends on how the client reaches the server:
+
+| Client | Disconnect |
+|---|---|
+| Holds its own token, from **Generate Token** or pairing | Revokes the token and cancels the requests it has in flight. The client has to pair again or be given a new token |
+| Runs the bundled bridge | Cancels the requests it has in flight and revokes nothing, so it can send new ones at once. To stop it, remove TablePro from it in **Connect a Client…**, or turn off the server |
 
 ## Security model
 
