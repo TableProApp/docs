@@ -78,7 +78,7 @@ Redis has no transaction TablePro can open, so every command runs and answers as
 
 ### Stopping a batch
 
-Stop (`Cmd+.`) acts between statements. The run halts before the next one goes out, and a transaction TablePro or the script opened is rolled back. A batch running outside a transaction keeps what it already wrote and shows no result for it, so refresh the table to see where it stands.
+Stop (`Cmd+.`) acts between statements. The run halts before the next one goes out, and a transaction TablePro or the script opened is rolled back. A batch running outside a transaction keeps what it already wrote, and the statements that ran keep their results and their query history entries.
 
 The commit is the point of no return. While it is on the wire Stop is dimmed and says why, and nothing else reaches it either: closing the tab releases the tab and nothing more, and disconnecting queues behind the commit, so the server finishes it either way. A script's own `COMMIT` counts the same, and the statements after it become stoppable again.
 
@@ -212,6 +212,10 @@ On MongoDB connections the query parser runs as well, so an unknown collection m
 The editor toolbar carries a database picker, or a schema picker depending on the engine. Each tab binds to its own database, and switching the active database elsewhere leaves existing tabs on theirs. The picker lists the databases the sidebar's database filter keeps, then the system databases after a divider.
 
 PostgreSQL, Redshift and CockroachDB reconnect the session to change database, so their picker shows a lock instead of a menu. The tab keeps the database it opened with, and a tab bound to anything other than the connection's active database runs on a separate connection. See [Cross-Database Tabs](/databases/postgresql#cross-database-tabs).
+
+## Undo
+
+Each query tab keeps its own undo history, so switching to another tab and back leaves `Cmd+Z` where it was. **Clear Query**, loading a query from history, and **Apply to Editor** each count as one edit that `Cmd+Z` takes back.
 
 ## Find and replace
 
