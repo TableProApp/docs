@@ -84,7 +84,7 @@ Each changed row is one request, and its cells change together. A save has no tr
 | Cell set to NULL, or **Remove Field** | The cell set to `null` in the `PUT`, which deletes every version of it |
 | Deleted row | `DELETE` on the key |
 
-A new row needs a `_key` and at least one cell. **Duplicate** and pasted rows copy every cell but `_key`, which shows DEFAULT until you type a key. The grid offers only the columns the rows on the page hold, so an empty table shows `_key` alone: write a table's first row, or a cell under a column the page does not show, with `INSERT` or `PUT` in the request editor. The column family must already exist, and the **DDL** tab of the Structure tab lists them under `columnFamilies`.
+A new row needs a `_key` and at least one cell. **Duplicate** copies every cell but `_key`, which shows DEFAULT until you type a key. A pasted row keeps the `_key` it carries. The grid offers only the columns the rows on the page hold, so an empty table shows `_key` alone: write a table's first row, or a cell under a column the page does not show, with `INSERT` or `PUT` in the request editor. The column family must already exist, and the **DDL** tab of the Structure tab lists them under `columnFamilies`.
 
 An existing row's key cannot change. The save is refused, so duplicate the row, give the copy the new key, and delete the old one. **Set DEFAULT** in the row inspector is refused on an existing row too; set the cell to NULL to delete it, or enter a value. Text typed into a cell or into `_key` that starts with `b64:` is written as the bytes its base64 decodes to. Cells are written with the server's clock.
 

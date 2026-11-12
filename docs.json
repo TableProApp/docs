@@ -462,7 +462,8 @@
           {
             "group": "TablePro for Windows",
             "pages": [
-              "windows/data-grid"
+              "windows/data-grid",
+              "windows/browsing"
             ]
           }
         ]

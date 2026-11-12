@@ -90,6 +90,8 @@ The sidebar nests tables under their schema, hides the built-in role schemas (`d
 
 INSERTs from the data grid leave IDENTITY columns out, so the server assigns them, and `TEXTSIZE` is raised at connect, so `nvarchar(max)` and `text` values arrive whole rather than cut to FreeTDS's 2048-byte default.
 
+A table's DDL, and a SQL export of it, keeps its primary key and unique constraints under their own names, every foreign key with all its columns, its referenced schema and its `ON DELETE` and `ON UPDATE` actions, check constraints, computed columns, each identity's seed and increment, and a column collation that differs from the database's. A disabled check stays disabled, and one the source turned on `WITH NOCHECK` is turned on that way again after the rows. Changing a column's type or nullability in the structure editor keeps its collation.
+
 A `datetimeoffset` keeps its offset, `2024-01-15T10:30:45.1234567+07:00`, so edit it in that form. A `geography`, `geometry` or `hierarchyid` value shows as its bytes in hex; select `col.ToString()` to read it as text.
 
 ## Session options

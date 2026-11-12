@@ -101,6 +101,8 @@ The filter bar offers **Match all** only, because CQL has no `OR`, and **Search 
 
 An edited value is sent as its column's type, so it has to read as one: a number for `int` or `decimal`, a UUID for `uuid`, `0x…` for `blob`. A `timestamp` takes the form the grid shows, the form cqlsh prints, a date alone, or milliseconds since 1970, and one with no zone is read as UTC. A value that does not parse is refused and nothing in the save is written. `list`, `set`, `map`, `tuple`, user-defined types and `duration` cannot be edited in the grid: write an `UPDATE` in the CQL editor.
 
+An edited cell keeps the time to live it had left. Browsing reads each cell's `TTL`, and the save writes `USING TTL` with what remains, or `USING TTL 0` for a cell that never expires in a table with a default TTL. Cells with different TTLs in one row are written in one conditional `BATCH`, and undoing a delete puts each cell back with the TTL it had left.
+
 Each row in a save is written by its own statement, named by its whole primary key, so deleting several rows sends one `DELETE` each. **Add Row** writes `INSERT … IF NOT EXISTS`: a new row whose key is already taken is refused rather than written over the row that holds it. A primary key column cannot be edited in place. Delete the row and add it again with the new key.
 
 Results in the CQL editor are read-only. Open the table from the sidebar to edit its rows.
