@@ -185,11 +185,21 @@ Quit, **Relaunch to Update**, closing a window, a connection or a tab, and Disco
 - an agent reply, including one waiting for your answer
 - a comparison or a sync script in Compare & Sync
 
-**Quit Anyway**, **Relaunch Anyway**, **Close Anyway** or **Disconnect Anyway** stops each item on the list. **Cancel**, or Escape, keeps everything running. Quitting lists unsaved tabs and open transactions on the same alert, and closing or disconnecting lists an open transaction there. When you close a window or a connection, unsaved edits still get **Do you want to save changes?** after it.
-
-With nothing running, a quit or a relaunch still asks while a transaction is open: **Quit with an Open Transaction?** names each connection whose uncommitted changes the server rolls back, and adds unsaved tabs when there are any.
+**Quit Anyway**, **Relaunch Anyway**, **Close Anyway** or **Disconnect Anyway** stops each item on the list once every question is answered. **Cancel**, or Escape, keeps everything running. Quitting lists unsaved tabs on the same alert. When you close a window or a connection, unsaved edits still get **Do you want to save changes?** after it.
 
 A stopped restore can leave the database partly restored, and a stopped sync script keeps the statements it already ran.
+
+## Open transactions
+
+Closing a window, a connection or a database entry, Disconnect, Quit and **Relaunch to Update** end the session that holds a transaction, so they ask about it last, after running work and unsaved edits, for example **Do you want to commit the open transaction before disconnecting from “name”?**
+
+| Button | Result |
+| --- | --- |
+| **Commit**, the default | Commits each open transaction, then goes on |
+| **Cancel**, or Escape | Keeps everything open |
+| **Roll Back** | Goes on, and the server rolls the transaction back |
+
+**Commit** asks what the transaction bar's **Commit** asks at your [Safe Mode](/features/safe-mode) level. If it fails, the window, connection or app stays open and shows the error. Under Manual Commit, edits saved from **Do you want to save changes?** are part of the transaction. When the transaction can only be rolled back, because a statement in it failed, the connection is **Read-Only**, or a statement is still running in it, the alert offers only **Close**, **Disconnect**, **Quit Anyway** or **Relaunch Anyway**, and **Cancel**.
 
 ## Related
 
