@@ -32,7 +32,7 @@ The default HTTP port is **23508**. If it is taken, the server binds a free port
 | Query timeout | 30 seconds | 1 to 300 seconds |
 | Log MCP queries in history | on | |
 
-A tool can ask for fewer rows or a shorter timeout, never for more than the maximum.
+A tool can ask for fewer rows or a shorter timeout, never for more than the maximum. Rows also stop at the [answer size limit](/developers/mcp-tools#answer-size), whatever the row limit.
 
 ## Connecting a client
 
@@ -55,6 +55,12 @@ Leave it at **Ask Once for Each Connection** unless a client runs unattended, in
 Ask** stops the prompt from waiting for someone who is not there. Approvals already given are listed
 underneath, each with **Forget**. A row names the connection and the client it was given to: a
 token's name, **Built-in CLI** for the bundled bridge, or [**Claude Agent**](/features/ai-assistant#claude-agent).
+
+A call that spans connections never asks. Searching query history or listing open tabs without
+naming a connection covers only the connections the client reaches without a question: every one at
+**Never Ask**, and otherwise those whose AI policy is **Always Allow**, plus, at **Ask Once for Each
+Connection**, the ones you already allowed for that client. A call that names the connection asks as
+usual.
 
 Approval decides only whether you are asked. It grants nothing: a connection **Blocked** for
 external clients stays blocked, a **Read Only** one stays read only, a connection whose AI policy is

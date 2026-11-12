@@ -136,11 +136,12 @@ This is the only subscribable resource. See [Subscriptions](/developers/mcp-subs
       "row_count": 142,
       "was_successful": true
     }
-  ]
+  ],
+  "is_truncated": false
 }
 ```
 
-`executed_at` is ISO 8601. `schema_name` appears when the entry has one, and `error_message` when `was_successful` is false, redacted. On a connection with masking rules, `query` and `error_message` can hold a fixed sentence and `search` skips some entries: see [Masking rules](/developers/mcp-tools#masking-rules).
+`is_truncated` is true when the [size limit](/developers/mcp-tools#answer-size) left out matching entries. `executed_at` is ISO 8601. `schema_name` appears when the entry has one, and `error_message` when `was_successful` is false, redacted. On a connection with masking rules, `query` and `error_message` can hold a fixed sentence and `search` skips some entries: see [Masking rules](/developers/mcp-tools#masking-rules).
 
 ## Errors
 
