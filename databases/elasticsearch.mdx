@@ -59,7 +59,7 @@ Grid edits become REST calls keyed by `_id`: `POST /index/_update/{id}`, `PUT /i
 
 Deleting an index from the sidebar sends `DELETE /<index>`, the request the confirmation shows.
 
-Export reads the whole index with a point-in-time and `search_after`, so it is not capped at the 10,000-document result window.
+Export reads the whole index with a point-in-time and `search_after`, so it is not capped at the 10,000-document result window. If a shard cannot answer partway through, the export stops with the server's error instead of writing a file without that shard's documents.
 
 ## Query DSL console
 
