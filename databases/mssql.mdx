@@ -119,7 +119,7 @@ SELECT * FROM serialnew WHERE [S/N] = @sn;
 SELECT * FROM serial_existed WHERE sn_code = @sn;
 ```
 
-Every result set a batch returns opens in its own result tab. In a batch of plain queries each tab is named after its query; a procedure call, a loop or an `IF` numbers them **Result 1**, **Result 2** instead. `PRINT` output and messages up to severity 10 appear in the **Output** view.
+Every result set a batch returns opens in its own result tab, up to the batch's last 100. In a batch of plain queries each tab is named after its query; a procedure call, a loop or an `IF` numbers them **Result 1**, **Result 2** instead. `PRINT` output and messages up to severity 10 appear in the **Output** view.
 
 - Give `CREATE PROCEDURE`, `CREATE VIEW`, `CREATE FUNCTION`, `CREATE TRIGGER` and `CREATE SCHEMA` a batch of their own. The server refuses each of them after another statement in the same batch.
 - `GO 5` runs the batch before it five times.
