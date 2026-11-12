@@ -109,7 +109,7 @@ A table whose primary key is made of two foreign keys, `user_roles` and its like
 
 | Format | File | Contents |
 |--------|------|----------|
-| PNG | `er-diagram.png` | A bitmap at twice screen resolution, with 40 points of padding |
+| PNG | `er-diagram.png` | A bitmap at twice screen resolution, with 40 points of padding. A diagram too large for 16,384 pixels on a side or about 33 million pixels is scaled down to fit |
 | SVG | `er-diagram.svg` | Shapes and text as vectors; the key, link and table icons are small embedded bitmaps |
 | PDF | `er-diagram.pdf` | One page sized to the diagram, with text that Preview can search and select |
 | Mermaid | `er-diagram.mmd` | An `erDiagram` block: each table with its columns, types and `PK` and `FK` markers, and each foreign key with the cardinality the diagram draws |
@@ -117,7 +117,7 @@ A table whose primary key is made of two foreign keys, `user_roles` and its like
 
 PNG, SVG and PDF keep the window's colors and the table positions on screen. Mermaid and DOT list tables by name and columns in table order, so exporting an unchanged schema twice writes the same file and a diff shows only real changes.
 
-**Copy as Mermaid** puts the block on the clipboard inside a `mermaid` code fence, ready to paste into a GitHub comment or any Markdown that renders Mermaid. `Cmd+C` copies the PNG image.
+**Copy as Mermaid** puts the block on the clipboard inside a `mermaid` code fence, ready to paste into a GitHub comment or any Markdown that renders Mermaid. `Cmd+C` copies the PNG image, scaled down the same way. For a very large diagram at full size, export SVG or PDF.
 
 Mermaid accepts fewer characters in a type or column name than SQL does. A space, comma or quote becomes an underscore, so `character varying(255)` reads `character_varying(255)`, and a column named `pk`, `fk` or `uk` gets a leading underscore.
 

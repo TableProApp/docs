@@ -32,7 +32,7 @@ One bastion, many connections. A profile holds the server (host, port, username)
 
 ## Edit and delete
 
-**Edit Profile…** opens the selected profile, and **Delete Profile** is at the bottom of that editor. An edit reaches every connection using the profile, on this Mac and on any Mac it syncs to: the server, the authentication method, the jump hosts, the password, the key passphrase and the TOTP secret all come from the profile on the next connect.
+**Edit Profile…** opens the selected profile, and **Delete Profile** is at the bottom of that editor. An edit reaches every connection using the profile, on this Mac and on any Mac it syncs to: the server, the authentication method, the jump hosts, the password, the key passphrase and the TOTP secret all come from the profile on the next connect. A connection already open keeps the server and jump hosts it connected through. Once the profile points elsewhere, a reconnect TablePro starts on its own, a database switch that reconnects, and a connect asked for by an MCP client or a link stop with a message; **Reconnect** in the connection's window uses the new server. Approvals to sign in with this Mac's own credentials or environment variables are asked for again after a profile moves to another server.
 
 Deleting a profile hands its configuration and its secrets to each connection that used it, as that connection's own inline tunnel. Nothing stops connecting, and the tunnel is now editable per connection under **SSH Tunnel**.
 
