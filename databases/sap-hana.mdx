@@ -86,7 +86,7 @@ The [query timeout](/customization/general-settings#query-timeout) sends the sam
 
 Dates and times are the stored wall-clock value, with no time zone added. HANA's empty date is a value rather than `NULL` and shows as `0000-00-00`, with `00:00:00` and the fraction after it on the longer types.
 
-A value longer than 64 MiB is cut at 64 MiB, and the result's message counts the cut cells.
+A value longer than 64 MiB is cut at 64 MiB in the grid, and the result's message counts the cut cells. An export, Copy To or Compare that reaches such a value stops with an error instead of writing it cut.
 
 Query parameters and values typed into the grid go to the server as bound parameters, never pasted into the SQL. Dates and times take the forms in the table, the empty date included, with a `T` between date and time also accepted and the fraction optional. `BOOLEAN` takes `TRUE`, `FALSE`, `1` or `0`. A `DECIMAL` value with more fraction digits than the column's scale is refused rather than rounded.
 

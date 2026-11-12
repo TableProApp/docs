@@ -62,6 +62,7 @@ Right-click a namespace for **Drop Namespace…** (`REMOVE NAMESPACE`) or a data
 Changing a cell runs an `UPDATE` that sets only the fields you touched, leaving computed `FUTURE` fields and another writer's changes alone. Values go out as typed parameters, so an `int` stays an `int` and a filter value is never parsed as SurrealQL.
 
 - `id` is the primary key and read-only. Leave it empty on a new row for a generated one, or type `table:id` to choose it.
+- A record whose id is a UUID, an array or an object is saved by that id. In a query result, such a record cannot be edited or deleted, since its id reads the same as a string id; open the table to change it.
 - A record link shows as `table:id`. Objects and arrays show as compact JSON and are edited as JSON.
 - On a `RELATION` table, `in` and `out` sit next to `id`.
 - A `SCHEMALESS` table has no declared fields, so its columns come from the rows fetched: a field only some records carry still gets a column, and the rest show an empty cell.

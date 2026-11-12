@@ -71,7 +71,7 @@ The database has to accept TLS without mutual TLS: set **Mutual TLS (mTLS) authe
 
 ## Editing and queries
 
-Table info carries columns, types, nullability, primary keys, indexes, foreign keys, and CREATE TABLE DDL. The structure editor writes `ALTER TABLE` with double-quoted identifiers for case-sensitive names: ADD, RENAME COLUMN, MODIFY, DROP, and CREATE INDEX.
+Table info carries columns, types, nullability, primary keys, indexes, foreign keys, and CREATE TABLE DDL. The DDL, and a SQL export, declare the table's primary key, unique and check constraints, so the foreign keys an export adds after the tables find the keys they reference. The structure editor writes `ALTER TABLE` with double-quoted identifiers for case-sensitive names: ADD, RENAME COLUMN, MODIFY, DROP, and CREATE INDEX.
 
 The editor runs SQL and PL/SQL, and grid paging is written as `OFFSET … ROWS FETCH NEXT … ROWS ONLY`. Import and export work as they do elsewhere, and a remote server reaches through an [SSH tunnel](/connections/ssh-tunneling).
 
@@ -150,6 +150,8 @@ To read a geometry as text, select `SDO_UTIL.TO_WKTGEOMETRY(column)` instead of 
 A `TIMESTAMP WITH TIME ZONE` stored with a region name shows the wall clock in that region, then the name: `2026-01-01 00:00:00.000000 Europe/Paris`. The names come from the server's `V$TIMEZONE_NAMES`, read once per connection. When the account cannot read that view, or macOS does not know the region's name, the value shows in UTC with `+00:00`, the same instant without its region. Grant `SELECT` on `V_$TIMEZONE_NAMES` to see the names.
 
 Grid edits, deletes and filters spell dates and timestamps in a form that does not depend on the session's `NLS_DATE_FORMAT`, so they work whatever it is set to. A table without a primary key matches the row by every column, and an edit is refused when that match would need a LOB, LONG, BFILE, XMLTYPE, JSON, VECTOR or object value, since Oracle cannot compare those.
+
+Import and **Copy To** write each value the way a grid edit writes it for the target column's type, so `00123` stays `00123` in a `VARCHAR2`, a date goes through a fixed format, and text for an `NVARCHAR2` keeps characters the database character set lacks. A query parameter follows the type picked for it, as in [Query parameters](/features/query-parameters).
 
 Anything else renders as `<unsupported: type>`. Report those through [GitHub Issues](https://github.com/TableProApp/TablePro/issues).
 
