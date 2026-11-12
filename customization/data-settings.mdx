@@ -68,7 +68,7 @@ The cap limits the rows read back, not the statement: your SQL reaches the serve
 |---------|---------|---------|
 | Results kept per run | No limit | No limit; 10; 20; 50; 100; 200; 500; 1,000 |
 
-A run that returns more results with rows keeps only the newest ones, and each of them reads, for example, "150 earlier results were dropped." under the grid. The statements that return no rows share one result and never count, and pinned results always stay. A change leaves the results on screen as they are. On SQL Server one batch, with its `GO 5` repeats, keeps at most its last 100 result sets whatever the setting.
+A run that returns more results with rows keeps only the newest ones, and each of them reads, for example, "150 earlier results were dropped." under the grid. The statements that return no rows share one result and never count, and pinned results always stay. A change leaves the results on screen as they are. On SQL Server one batch keeps at most 100 result sets whatever the setting: the first 100 when it returns more, the last 100 across its `GO 5` repeats.
 
 ## JSON Viewer
 
