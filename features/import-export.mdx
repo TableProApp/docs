@@ -215,7 +215,7 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
     | Compression (Snappy, Zstd, Gzip, None) | Snappy |
     | Rows per group | 122,880 |
 
-    Column types come from the source engine's own declarations, so numbers, dates and booleans arrive as those rather than as strings. A value that will not convert is written as null rather than failing the export.
+    Column types come from the source engine's own declarations, so numbers, dates and booleans arrive as those rather than as strings. A timestamp or time with time zone is written adjusted to UTC, so it keeps the instant it names. A column holding a value that will not convert is written as text, and the export says which column.
 
     <Warning>
     Parquet holds one table per file. Selecting several writes `dump.users.parquet`, `dump.orders.parquet` and so on beside the name you chose.
@@ -419,6 +419,10 @@ Saved mappings stay on this Mac. They follow a renamed table and are forgotten w
 ### Row imports
 
 CSV and JSON insert in batches, and the on-error and transaction options behave as they do for SQL. They add **Delete existing rows before import**, which clears the target table before writing rows. The deletion rolls back only if it belongs to a transaction the import rolls back and the table supports rollback. A row where no field matches a mapped column writes nothing and is reported rather than counted.
+
+A binary column reads a value the way the export wrote it: `0x` and hex digits from CSV and XLSX, `0x` alone for zero bytes, and Base64 from JSON. A CSV or XLSX value without `0x`, or a JSON value that is not Base64, is written as its text. A value that starts with `0x` but is not hex fails its row. On MySQL, MariaDB, SQL Server and SQLite, a boolean column takes `true`, `false`, `yes`, `no`, `on`, `off`, `t`, `f`, `y` and `n` as `1` and `0`.
+
+A CSV line of empty fields, such as `,,`, is a row, the way CSV export writes a row of NULLs. An empty line is skipped, except in a file of one column, where it is that column's NULL. Empty lines and lines of empty fields after the last value are not rows: a spreadsheet saves its empty rows that way. A JSON row `{}` is a row of column defaults.
 
 ### Update existing rows
 
