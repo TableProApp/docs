@@ -1,6 +1,6 @@
 ---
 title: Browsing a connection
-description: Filter a table, read its structure and DDL, open routines and triggers, export results, and find past queries in TablePro for Windows
+description: Filter a table, read its structure and DDL, open routines and triggers, export or share results, and find past queries in TablePro for Windows
 tag: "Preview"
 ---
 
@@ -104,6 +104,22 @@ Choose **File > Export results** or press `Ctrl+Shift+E`.
 </Steps>
 
 From a query tab, export writes the result shown. Export waits until the run has finished. CSV is the default; pick Excel for a spreadsheet, which holds up to 1,048,575 rows.
+
+## Share a result or query
+
+Sharing needs a signed-in [TablePro account](/windows/account); signed out, the share dialog offers **Sign in...**.
+
+| To share | Do this |
+|---|---|
+| The result a query tab shows | Right-click the results grid and choose **Share result...**, or choose **Share result...** in the **File** menu |
+| A table's rows, with its filter and sort | Right-click the table's grid and choose **Share...**, or choose **Share result...** in the **File** menu |
+| The selection, or the whole query when nothing is selected | Right-click in the editor and choose **Share query...**, or choose **Share query...** in the **File** menu |
+
+A result can be shared once its run has finished. A table shares from its first row, whichever page is on screen, and **Share...** is dimmed while edits are pending. When TablePro cannot write the table's query for its database, the link holds the rows without SQL and opens nothing in TablePro.
+
+In the dialog, **Share** creates the link and copies it, with **Open in browser** beside it. **Manage shared links...** in the **File** menu opens your links in the browser. The dialog's fields, the Free and Pro limits, and what a link sends are in [Shared Links](/features/shared-links#the-share-sheet).
+
+Opening a `tablepro://share` link puts its SQL in a new query tab without running it. With no connection open, a dialog shows the SQL with **Copy SQL** instead.
 
 ## Find a past query
 

@@ -1,0 +1,46 @@
+---
+title: TablePro account
+description: Sign in to your TablePro account on Windows, check your plan, and remove a device from the license
+tag: "Preview"
+---
+
+Connections, queries and every other part of the app work signed out. [Shared links](/features/shared-links) need an account, and signing in puts your Free or Pro plan on this computer. The account is the one the Mac and Linux apps use.
+
+## Sign in
+
+<Steps>
+  <Step title="Open Settings">
+    Choose **Settings** in the **File** menu. **Account** is the first section.
+  </Step>
+  <Step title="Click Sign in">
+    Click **Sign in...**. The sign-in page opens in your web browser, and the button turns into **Cancel** until you finish there.
+  </Step>
+  <Step title="Approve in the browser">
+    Sign in, or create an account, at account.tablepro.app. When the page says so, close the tab and go back to TablePro.
+  </Step>
+</Steps>
+
+<Check>
+The card names the account and shows its email and plan, Free or Pro, with **Sign out**.
+</Check>
+
+<Frame caption="Signed in on a Pro plan, with Devices expanded">
+  <img className="block dark:hidden" src="/images/windows-account.png" alt="Account section of Settings with the account card, Plan with Refresh, and Devices listing this computer and a Mac" />
+  <img className="hidden dark:block" src="/images/windows-account-dark.png" alt="Account section of Settings with the account card, Plan with Refresh, and Devices listing this computer and a Mac" />
+</Frame>
+
+The sign-in is kept in Windows Credential Manager for your Windows user. When Credential Manager does not take it, a notice says **Sign-in not saved**, and the next start asks you to sign in again.
+
+## Your plan
+
+Your plan is checked once a day. **Refresh** under **Plan** checks it now; a plan changed on the web shows after the next check. Expand **Plan** for **Manage account** and **Manage shared links**, which open account.tablepro.app in the browser.
+
+A plan that has not been checked lately says **Plan not verified lately** with **Refresh**, and a check that failed says **Could not verify your plan** with **Try again**.
+
+Billing, license keys and offline files are not in the Windows app yet. Use [account.tablepro.app](https://account.tablepro.app) for them.
+
+## Devices
+
+Expand **Devices** to list the computers signed in to your account, this computer first, each with its platform and the day it was last seen. **Remove** takes a device off the account, and that device is signed out at its next check. This computer, and a device whose offline file has not expired, have no **Remove**.
+
+A Free account has no device limit. A license covers 3 devices at a time, counting Macs, Linux and Windows computers together. On a fourth, the Account section says **Device limit reached** and the computer keeps working on Free. Click **Remove a device...**, remove one of the 3, and the license moves to this computer.
