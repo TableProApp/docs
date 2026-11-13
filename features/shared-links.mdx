@@ -110,11 +110,11 @@ Each column starts from what is known about it:
 
 | Column | Starts as | Can be set to |
 |---|---|---|
-| Masked by the connection's [masking rules](/features/data-masking) | **Mask**, with the rule's mask | The rule's mask, **Full**, **NULL** or **Remove**. Never **Keep** |
+| On the Mac, masked by the connection's [masking rules](/features/data-masking) | **Mask**, with the rule's mask | The rule's mask, **Full**, **NULL** or **Remove**. Never **Keep** |
 | Looks sensitive, by its name or its values | **Mask**, with the suggested mask | Anything, **Keep** included |
 | Anything else | **Keep** | Anything |
 
-The line under a masked column's name says why. "Masked by this connection's rules" marks a rule, "Looks like: email address" a detection. Linux words them "A masking rule hides this column", "The name looks like personal data" and "Values look like email addresses". On a connection with rules, a column that reads no table column, such as `count(*)`, says "Masked because TablePro cannot tell which table column this comes from." and cannot be set to **Keep**. [Masking for AI and scripts](/features/data-masking#masking-for-ai-and-scripts) lists what counts.
+The line under a masked column's name says why: "Looks like: email address", or on Linux "The name looks like personal data" or "Values look like email addresses". On the Mac, "Masked by this connection's rules" marks a rule. On a Mac connection with rules, a column that reads no table column, such as `count(*)`, says "Masked because TablePro cannot tell which table column this comes from." and cannot be set to **Keep**. [Masking for AI and scripts](/features/data-masking#masking-for-ai-and-scripts) lists what counts.
 
 Under the list, a line counts the result, such as "2 columns masked, 1 removed." After a detection, it adds "TablePro masked columns that look sensitive. Check them before sharing."
 
@@ -134,7 +134,7 @@ A column's name is split into words at `_`, `-`, `.`, spaces, capitals and digit
 | IP address | `ip`, `ip_address`, `ipv4`, `ipv6` | Half or more are IP addresses | Stable Hash |
 | Person's name | `first_name`, `last_name`, `full_name`, `surname`, `given_name` | | Full |
 
-Values are read from the rows the link holds, and only in text columns: a number, date, boolean or UUID column is judged by its name alone. A column matched by both its name and its values takes the name's mask. A column a rule already masks is not checked.
+Values are read from the rows the link holds, and only in text columns: a number, date, boolean or UUID column is judged by its name alone. A column matched by both its name and its values takes the name's mask. On the Mac, a column a rule already masks is not checked.
 
 ### Personal data in the SQL
 

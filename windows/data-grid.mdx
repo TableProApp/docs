@@ -39,12 +39,6 @@ A value with a line break edits on several lines, and `Ctrl+Enter` keeps it. Rig
 
 An edited cell is underlined on a yellow fill, a new row on green, and a row marked for deletion is struck through on red. Typing a cell back to its stored value drops the edit.
 
-## Masked columns
-
-A column a masking rule matches shows an eye-slash icon in its header, with the tooltip "Masked by a masking rule". Its saved cells cannot be edited, and a masked key column locks the whole page. Copy and export write the masked values. Rules are set under **Options** in the connection form: see [Data Masking](/features/data-masking#add-a-rule).
-
-To see the stored values, right-click the column's header, or a cell in that column, and choose **Reveal masked values...**. Windows Hello asks you to confirm where it is set up; elsewhere, click **Reveal** in the dialog. Pending edits are discarded first, after asking. The tab reads its rows again unmasked until it closes, and a query tab whose statement does not only read shows them on its next run. Exports and shared links stay masked, from that tab too.
-
 ## Save or discard
 
 **Save changes** (`Ctrl+S`) writes every change in one batch and reloads the page. **Preview SQL** (`Ctrl+Shift+P`) shows the statements first, each with the values it sends. **Discard changes** drops them all after asking.

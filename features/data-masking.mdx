@@ -1,27 +1,19 @@
 ---
 title: Data Masking
-description: Hide column values such as emails and card numbers in the grid, exports, shared links, the AI assistant and MCP, on Mac, Linux and Windows
+description: Hide column values such as emails and card numbers in the grid, copies, exports, the AI assistant and MCP
 ---
 
-Turn on masking before a screen share, a pairing session or a recorded demo on production data. A masked column still shows a value in every row, so you see that a column holds an email, or that two rows share one, without seeing the address. Masking is free on every plan and needs no account.
+Turn on masking before a screen share, a pairing session or a recorded demo on production data. A masked column still shows a value in every row, so you see that a column holds an email, or that two rows share one, without seeing the address.
 
 ## Add a rule
 
-Rules belong to a connection and live in its settings:
+In the [connection form](/connections/connection-form#options), open the **Options** tab and find **Masking**. Click **Add Rule**, then set three things:
 
-| App | Where the rules are |
-|-----|---------------------|
-| Mac | The [connection form](/connections/connection-form#options), **Options** tab, **Masking** |
-| Linux | The [connect dialog](/linux/connect#options), **Data Masking** group |
-| Windows | **Edit connection...** in the **Database** menu, or **New connection...** in the **File** menu, then **Options**, **Data masking** |
-
-Click **Add Rule**, or **Add rule** on Windows, then set three things:
-
-| Part | What it takes |
-|------|---------------|
-| Column or type | **Column** matches a column by name, **Type** matches its declared type. The Mac labels this **Match**, Linux **Applies To** |
-| Pattern | `table.column` or `column`. `*` stands for any run of characters and `?` for one. Case does not matter |
-| Mask | How the value shows, from the table in [Masks](#masks). Linux labels this **Style** |
+| Field | What it takes |
+|-------|---------------|
+| **Match** | **Column** matches a column by name, **Type** matches its declared type |
+| **Pattern** | `table.column` or `column`. `*` stands for any run of characters and `?` for one. Case does not matter |
+| **Mask** | How the value shows, from the table that follows |
 
 Some patterns:
 
@@ -30,14 +22,14 @@ Some patterns:
 | `*.email` | Every column named `email`, in any table |
 | `users.ssn` | `ssn` in the `users` table |
 | `*password*` | Any column whose name contains `password` |
-| `inet` in a **Type** rule | Every column declared as `inet` |
+| `inet` with **Match** set to **Type** | Every column declared as `inet` |
 
 <Frame caption="Two rules in the Masking section of the Options tab">
   <img className="block dark:hidden" src="/images/data-masking.png" alt="Masking section of the connection form with a Column rule on *.email set to Email and a Column rule on users.ssn set to Last 4 Characters" />
   <img className="hidden dark:block" src="/images/data-masking-dark.png" alt="Masking section of the connection form with a Column rule on *.email set to Email and a Column rule on users.ssn set to Last 4 Characters" />
 </Frame>
 
-When two rules match one column, the first in the list wins. Saving the connection masks the rows already on screen, without reconnecting. On the Mac, rules sync through [iCloud](/features/icloud-sync) and travel with a connection published to the [Team Catalog](/features/team). Linux and Windows keep them with the connection on that computer.
+When two rules match one column, the first in the list wins. Rules save with the connection, sync through [iCloud](/features/icloud-sync) and travel with a connection published to the [Team Catalog](/features/team).
 
 ## Masks
 
@@ -49,45 +41,37 @@ When two rules match one column, the first in the list wins. Saving the connecti
 | **Stable Hash** | 12 hex characters, the same for equal values |
 | **NULL** | `NULL` |
 
-Windows writes two of them in sentence case: **Last 4 characters** and **Stable hash**. All three apps give the same output for the same value.
-
-A value that is already NULL stays NULL. **Last 4 Characters** shows `••••` for a value of four characters or fewer, and **Email** shows `••••` for a value with no `@`. A **Stable Hash** stays the same until TablePro quits, so it matches equal values across the grid, an export and an MCP result from one session. Another launch, or another computer, gives other hashes.
+A value that is already NULL stays NULL. **Last 4 Characters** shows `••••` for a value of four characters or fewer, and **Email** shows `••••` for a value with no `@`. A **Stable Hash** stays the same until TablePro quits, so it matches equal values across the grid, an export and an MCP result from one session.
 
 ## Where values are masked
 
-One rule covers the grid and every path a value takes out of the app:
+One rule covers every place a value leaves TablePro:
 
-| Where | Mac | Linux | Windows |
-|-------|-----|-------|---------|
-| Data grid and query results | Yes | Yes | Yes |
-| Copy | Yes | Yes | Yes |
-| Export, every format | Yes | Yes | Yes |
-| [Shared links](/features/shared-links#sensitive-data) | Yes | Yes | Yes |
-| AI assistant | The results it reads and the queries it runs | Reads no rows. **Fix with AI** sends the error code without the server's message | No assistant |
-| MCP clients | Every tool that returns rows | Query results, browses and exports | No MCP server |
-| Database dumps and [backups](/features/backup-restore) | No. **File > Backup Dump…** writes the stored values | No. A database dump with data writes the stored values | No dumps |
+- The data grid and a query tab's results, with an eye-slash icon in the header of each masked column.
+- The row inspector, charts, **Copy**, **Copy As** and **Export Results**.
+- **File > Export**, for every format.
+- The AI assistant, both the results summary it reads and the queries it runs.
+- Every [MCP](/features/mcp) tool that returns rows, and AppleScript and Shortcuts results.
+- [Shared links](/features/shared-links#sensitive-data), where a column a rule masks cannot be set to **Keep**.
+- The referenced-row preview of a foreign key, Server Dashboard tiles and the [Routine Debugger](/features/routine-debugger) result grid.
 
-A masked column's header says so: an eye-slash icon on the Mac and on Windows, where its tooltip reads "Masked by a masking rule", and `(masked)` after the name on Linux.
-
-On the Mac, masking also covers the row inspector, charts, **Copy As**, **Export Results**, AppleScript and Shortcuts results, the referenced-row preview of a foreign key, Server Dashboard tiles and the [Routine Debugger](/features/routine-debugger) result grid.
-
-A query result has no source table for most engines, so in the grid a `table.column` rule matches a query result by its column name alone. `users.ssn` then also masks an `ssn` column a query reads from another table.
+A query result has no source table for most engines, so a `table.column` rule matches a query result by its column name alone. `users.ssn` then also masks an `ssn` column a query reads from another table.
 
 ## Masking for AI and scripts
 
-Results for MCP clients, the AI assistant, Claude Agent, AppleScript and Shortcuts are masked by the table column each result column reads, as well as by its name. So are shared links from all three apps, and MCP results on Linux. With the Mac's PostgreSQL, MySQL, MariaDB and local SQLite drivers, `SELECT email AS contact FROM users` comes back masked by a `*.email` rule.
+Results for MCP clients, the AI assistant, Claude Agent, AppleScript and Shortcuts are masked by the table column each result column reads, as well as by its name. On PostgreSQL, MySQL, MariaDB and local SQLite, `SELECT email AS contact FROM users` comes back masked by a `*.email` rule.
 
-On a connection with at least one rule, a column that reads no column of a user table comes back as `••••`, whatever its name. The result's status message names the columns masked this way, and the share sheet marks them "Masked because TablePro cannot tell which table column this comes from." That covers:
+On a connection with at least one rule, a column that reads no column of a user table comes back as `••••`, whatever its name. The result's status message names the columns masked this way. That covers:
 
 - An expression or an aggregate, such as `lower(email)` or `count(*)`.
 - A system table or catalog, such as `pg_stat_activity`, in a query, a browse or an export. Schema lookups such as `describe_table` still return the structure.
 - Every column of a statement the driver does not trust: a subquery, a CTE or a `UNION` on MySQL and MariaDB, a compound `SELECT` or `VALUES` on SQLite. One of those words inside a value, such as a filter on `'union'`, counts too.
 
-On the Mac, these cannot trace a column: ClickHouse, Redis, CockroachDB, Redshift, TiDB, Databend, OceanBase, a SQLite [remote file](/connections/remote-database-files) opened **On the Server**, and every engine from the plugin registry. On a connection with rules, every column of a query on them comes back masked, and a browsed or exported table is matched by column name, as in the grid.
+These cannot trace a column: ClickHouse, Redis, CockroachDB, Redshift, TiDB, Databend, OceanBase, a SQLite [remote file](/connections/remote-database-files) opened **On the Server**, and every engine from the plugin registry. On a connection with rules, every column of a query on them comes back masked, and a browsed or exported table is matched by column name, as in the grid.
 
 ### On a connection with rules
 
-On the Mac, the rules also withhold text that can repeat a stored value:
+The rules also withhold text that can repeat a stored value:
 
 | Where | What comes back |
 |-------|-----------------|
@@ -98,27 +82,17 @@ On the Mac, the rules also withhold text that can repeat a stored value:
 | The error of any history entry | A sentence in place of the message |
 | Session and slow-query text from the server dashboard | A sentence in place of the statement |
 
-A refusal, a timeout or a cancel from TablePro itself keeps its text. On Linux, a failed MCP query and **Fix with AI** keep the server's error code and withhold its message.
+A refusal, a timeout or a cancel from TablePro itself keeps its text.
 
 ## Editing and Reveal
 
-A mask cannot be written back or used to find its row. On the Mac, a grid that shows a masked column is read-only. On Linux and Windows, a masked cell refuses an edit, and a masked key column locks the whole page.
+A grid that shows a masked column is read-only, since a mask cannot be written back or used to find its row. To see or edit the real values, right-click a masked column's header and choose **Reveal Masked Values…**. TablePro asks for Touch ID, or your macOS password on a Mac without it, and reloads the tab unmasked. A query tab whose statement is not a read reveals on its next run instead.
 
-To see or edit the real values, reveal them in that tab:
-
-| App | Choose | Then confirm with |
-|-----|--------|-------------------|
-| Mac | **Reveal Masked Values…** on a masked column's header menu | Touch ID, or your macOS password on a Mac without it |
-| Linux | **Reveal Masked Values…** on a masked column's header menu, or under **Column** in a cell's menu | **Reveal** in a dialog |
-| Windows | **Reveal masked values...** on a masked column's header menu, or on the menu of a cell in that column | Windows Hello where it is set up, else **Reveal** in a dialog |
-
-The tab reads its rows again unmasked. A query tab whose statement is not a read reveals on its next run instead.
-
-Reveal lasts until the tab closes, or on the Mac until it opens another table. Other tabs stay masked, and so do shared links, the AI assistant and MCP, even from the revealed tab. On the Mac, exports from other tabs stay masked. On Linux and Windows, every export stays masked, the revealed tab's included.
+Reveal lasts until the tab closes or opens another table. Other tabs, exports from other tabs, the AI assistant and MCP stay masked.
 
 ## Limits
 
-Masking hides values on screen and in what TablePro sends out. It does not replace database permissions: anyone with the connection's credentials can read the data with another client. Dumps and backups are not masked either: the files hold the stored values, so keep them as private as the database.
+Masking hides values inside TablePro. It does not replace database permissions: anyone with the connection's credentials can read the data with another client.
 
 - Filters, sorts and `WHERE` clauses run on the server against the stored values, so a filter on a masked column finds the real matches.
 - In the grid, a rule matches the column name a result reports. A query that renames or computes the column, such as `SELECT email AS contact`, shows it unmasked. A **Type** rule catches a renamed column that keeps its type. Results for AI and scripts are [masked by what each column reads](#masking-for-ai-and-scripts).
