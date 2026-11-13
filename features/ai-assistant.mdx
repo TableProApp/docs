@@ -87,7 +87,7 @@ The mode picker in the composer footer controls which tools the AI can call. It 
 | Mode | Tools available | When to use |
 |------|----------------|-------------|
 | **Ask** | Read-only schema lookups: `list_connections` (this conversation's connection only), `get_connection_status`, `list_databases`, `list_schemas`, `list_tables`, `describe_table`, `get_table_ddl`. | Questions, exploration, drafting queries you run yourself. |
-| **Edit** | All Ask tools, plus `execute_query` for queries and data changes, such as `SELECT`, `INSERT`, `UPDATE`, `DELETE` and `MERGE`. It refuses schema, privilege, session and transaction commands, and changes to the database's own tables; run those in Agent mode or a query tab. [What Edit runs](#what-edit-runs) lists each engine. A function a query calls is not read, so it runs whatever it does. Destructive statements stay blocked. See [external query rules](/developers#what-read-only-allows). | Letting the AI run the queries it proposes. |
+| **Edit** | All Ask tools, plus `execute_query` for queries and data changes, such as `SELECT`, `INSERT`, `UPDATE`, `DELETE` and `MERGE`. It refuses schema, privilege, session and transaction commands, and changes to the database's own tables; run those in Agent mode or a query tab. [What Edit runs](#what-edit-runs) lists each engine. A function a query calls is not read, so it runs whatever it does. Destructive statements stay blocked; deleting one document, row, key or record by its ID is a data change and runs. See [external query rules](/developers#what-read-only-allows). | Letting the AI run the queries it proposes. |
 | **Agent** | All tools, plus `confirm_destructive_operation` for destructive statements. Runs tools in a loop. | Multi-step migrations and schema changes. |
 
 Mode and [Safe Mode](/features/safe-mode) are independent gates. Agent mode does not bypass Safe Mode.
@@ -99,7 +99,7 @@ Every engine follows one rule: reads, plus the commands that change data. Anythi
 | Database | Runs besides reads | Refused, for example |
 |------|------|------|
 | SQL databases, DynamoDB | `INSERT`, `UPDATE`, `DELETE`, `MERGE`, `UPSERT`, `REPLACE INTO`, DynamoDB item requests | `CREATE`, `ALTER`, `GRANT`, `SET`, `BEGIN`, `CALL`, rows of `pg_settings`, `mysql.user` or `msdb` |
-| Cassandra, ScyllaDB | `INSERT`, `UPDATE`, `DELETE` and a `BATCH` of them | `CREATE ROLE`, `GRANT`, `USE`, rows of `system_auth`, `system_views` or ScyllaDB's `system` |
+| Cassandra, ScyllaDB | `INSERT`, `UPDATE`, `DELETE` and a `BATCH` of them | `CREATE ROLE`, `GRANT`, `USE`, rows of `system_auth`, `system_views`, or ScyllaDB's `system` and `audit` |
 | SurrealDB | `CREATE`, `INSERT`, `UPDATE`, `UPSERT`, `DELETE`, `RELATE` | `DEFINE`, `ALTER`, `REMOVE`, `USE`, `LET`, `BEGIN`, a `fn::` or `api::` call |
 | MongoDB | `insertOne`, `insertMany`, `updateOne`, `updateMany`, `replaceOne`, `findOneAndUpdate`, `bulkWrite`, and the `insert`, `update` and `findAndModify` commands | `createIndex`, `createCollection`, `use`, `killOp`, writes into `admin`, `config`, `local` or a `system.` collection |
 | Redis | Writes to strings, hashes, lists, sets, sorted sets, streams, bitmaps, geo, HyperLogLog, JSON, time series, probabilistic types and vector sets | `ACL`, `CLIENT`, `SELECT`, `MULTI`, `PUBLISH`, `FT.CREATE`, `TS.CREATERULE`, `SLOWLOG RESET` |
@@ -108,7 +108,7 @@ Every engine follows one rule: reads, plus the commands that change data. Anythi
 | Typesense, Qdrant, Weaviate | Document, point and object writes | Collection and schema changes, API keys, users, aliases, snapshots |
 | etcd | `put`, `create`, `lease grant`, `lease keep-alive` | `user add`, `role add`, `user grant-role`, `auth enable` |
 | Memcached | Storage commands, `touch`, `incr`, `decr`, `gat` | `stats reset`, `stats detail on` |
-| Kafka | `PRODUCE` | `DROP TOPIC`, which counts as destructive |
+| Kafka | `PRODUCE` | `DROP TOPIC`, which counts as destructive, and `PRODUCE` into a topic another service keeps its state in: a name starting with `_` or `.`, such as `_schemas`, Kafka Connect's `connect-configs`, `connect-offsets` and `connect-status`, MirrorMaker 2's `.internal` topics, and Kafka Streams topics ending in `-changelog` or `-repartition` |
 | Firestore, Realtime Database, Bigtable | Document, path and row writes | A Realtime Database path through a key that starts with `.`, such as `.settings` |
 
 ### Tool calling

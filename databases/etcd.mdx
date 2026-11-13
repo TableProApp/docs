@@ -77,7 +77,7 @@ The whole vocabulary is `get`, `put`, `del` (or `delete`), `watch`, `lease grant
 |---------|-------|
 | `get` | `--prefix`, `--limit=N`, `--keys-only`, `--order=ASCEND` or `DESCEND`, `--sort-by=KEY`, `VERSION`, `CREATE`, `MOD` or `VALUE`. Leave the last two out and the server's own ordering applies |
 | `put` | `--lease=ID` |
-| `del` | `--prefix` |
+| `del` | `--prefix`. Without it, `del` removes one key and counts as a write; with it, every key under the prefix, which counts as destructive. A range end or `--from-key` is refused |
 | `watch` | `--prefix`, `--timeout=SECONDS`, 30 by default. Events collect for that long, then arrive as a grid |
 | `lease timetolive` | `--keys` |
 
