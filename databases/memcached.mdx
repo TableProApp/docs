@@ -79,7 +79,7 @@ lru_crawler metadump all
 
 The whole vocabulary is `get`, `gets`, `gat`, `gats`, `set`, `add`, `replace`, `append`, `prepend`, `cas`, `touch`, `delete`, `incr`, `decr`, `flush_all`, `stats`, `version` and `lru_crawler metadump`. Anything else comes back as "Unsupported Memcached command" without reaching the server. Storage commands take `<key> <flags> <exptime> <value>`, the order of the text protocol.
 
-Safe Mode reads `get`, `gets`, `version`, `stats` and `lru_crawler metadump` as reads, `delete` and `flush_all` as destructive, and everything else, `stats reset` included, as a write.
+Safe Mode reads `get`, `gets`, `version`, `stats` and `lru_crawler metadump` as reads, `flush_all` as destructive, and everything else, `delete` and `stats reset` included, as a write.
 
 ## Server Dashboard
 

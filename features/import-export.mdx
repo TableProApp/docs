@@ -284,7 +284,7 @@ The extension picks the format, so one command covers all of them. A file no for
     Encoding, transaction wrapping, and error handling for SQL; parsing and column mapping for CSV and JSON. TablePro remembers the options from your last successful import, and **Reset to Defaults** restores the stock ones.
   </Step>
   <Step title="Review and import">
-    Check the preview, statement count, and file size, then click **Import**. The connection's [Safe Mode](/features/safe-mode) asks once for the whole file where its level calls for a confirmation or Touch ID.
+    Check the preview, statement count, and file size, then click **Import**. The progress bar of a SQL file follows how much of the file has been read, and the count beside it counts statements. The connection's [Safe Mode](/features/safe-mode) asks once for the whole file where its level calls for a confirmation or Touch ID.
   </Step>
 </Steps>
 
@@ -320,7 +320,7 @@ The import runs on the connection's own session, and afterwards puts back the se
 
 On SQL Server a file that holds a `GO` line runs a batch at a time, cut at its `GO` lines the way `sqlcmd` cuts it, so every count and failure here is a batch rather than a statement. A file with no `GO` line runs a statement at a time. See [Scripts and batches](/databases/mssql#scripts-and-batches).
 
-On PostgreSQL, CockroachDB and KingbaseES the rows after a `COPY ... FROM STDIN`, the form `pg_dump` writes table rows in by default, load through the server's copy protocol inside the import's transaction, read from the file as they are sent. They run up to the line holding only `\.`, which is not sent, and never run as SQL. Text and CSV rows load. Binary rows cannot come from a file, so that `COPY` fails with no rows sent. The progress line counts the rows sent, and **Stop** asks its question once the `COPY` has finished. On Redshift and PGlite, which cannot take rows this way, the file stops at the `COPY` before sending it, and the error names its line: dump it again with `pg_dump --inserts`. The `\restrict` and `\unrestrict` lines a current `pg_dump` writes run nothing. On MySQL and MariaDB a `DELIMITER` line is read as the `mysql` client reads it: only as the first thing on its line, before any statement text.
+On PostgreSQL, CockroachDB and KingbaseES the rows after a `COPY ... FROM STDIN`, the form `pg_dump` writes table rows in by default, load through the server's copy protocol inside the import's transaction, read from the file as they are sent. They run up to the line holding only `\.`, which is not sent, and never run as SQL. Text and CSV rows load. Binary rows cannot come from a file, so that `COPY` fails with no rows sent. The line under the progress bar counts the rows sent. **Stop** ends the `COPY` at once, with none of its rows loaded, and stops the import as a failed statement would: no **Stop Import?** question, and the import's own transaction rolls back. A transaction you opened yourself is left failed, so roll it back. On Redshift and PGlite, which cannot take rows this way, the file stops at the `COPY` before sending it, and the error names its line: dump it again with `pg_dump --inserts`. The `\restrict` and `\unrestrict` lines a current `pg_dump` writes run nothing. On MySQL and MariaDB a `DELIMITER` line is read as the `mysql` client reads it: only as the first thing on its line, before any statement text.
 
 SQL Server SQL imports do not automatically commit or roll back after a file batch runs, even with **Wrap in transaction** selected and even without a `GO` line. A batch can change which transaction is open. Read the completion message: if a transaction remains open, commit or roll it back on this connection. This also applies after a successful import. Imports into a selected table from CSV, JSON, or XLSX use the row-import transaction options instead.
 
@@ -333,7 +333,7 @@ Skip and Continue collects up to 1,000 failures with their line numbers and mess
   <img className="hidden dark:block" src="/images/import-stop-dark.png" alt="Stop Import dialog offering rollback, commit, and Continue for genre rows" />
 </Frame>
 
-Click **Stop** during a SQL or row import. **Pausing…** means a database operation already in progress is finishing. The **Stop Import?** question appears after that operation finishes; no further import work starts while you decide.
+Click **Stop** during a SQL or row import. **Pausing…** means a database operation already in progress is finishing. The **Stop Import?** question appears after that operation finishes; no further import work starts while you decide. A PostgreSQL `COPY` block is the exception: **Stop** ends it at once and stops the import with no question.
 
 Choose **Continue** to resume. When the import still controls a healthy open transaction and can identify its changes, the question offers **Stop and Rollback** and **Stop and Commit**. It names transactional tables separately from tables whose changes stay either way. In other cases, **Stop Import** ends the run with the limits described in the question. A message that changes may stay is not a promise of rollback.
 
