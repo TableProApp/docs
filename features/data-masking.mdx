@@ -65,6 +65,7 @@ One rule covers the grid and every path a value takes out of the app:
 | [Shared links](/features/shared-links#sensitive-data) | Yes | Yes | Yes |
 | AI assistant | The results it reads and the queries it runs | Reads no rows. **Fix with AI** sends the error code without the server's message | No assistant |
 | MCP clients | Every tool that returns rows | Query results, browses and exports | No MCP server |
+| Database dumps and [backups](/features/backup-restore) | No. **File > Backup Dump…** writes the stored values | No. A database dump with data writes the stored values | No dumps |
 
 A masked column's header says so: an eye-slash icon on the Mac and on Windows, where its tooltip reads "Masked by a masking rule", and `(masked)` after the name on Linux.
 
@@ -117,7 +118,7 @@ Reveal lasts until the tab closes, or on the Mac until it opens another table. O
 
 ## Limits
 
-Masking hides values on screen and in what TablePro sends out. It does not replace database permissions: anyone with the connection's credentials can read the data with another client.
+Masking hides values on screen and in what TablePro sends out. It does not replace database permissions: anyone with the connection's credentials can read the data with another client. Dumps and backups are not masked either: the files hold the stored values, so keep them as private as the database.
 
 - Filters, sorts and `WHERE` clauses run on the server against the stored values, so a filter on a masked column finds the real matches.
 - In the grid, a rule matches the column name a result reports. A query that renames or computes the column, such as `SELECT email AS contact`, shows it unmasked. A **Type** rule catches a renamed column that keeps its type. Results for AI and scripts are [masked by what each column reads](#masking-for-ai-and-scripts).
