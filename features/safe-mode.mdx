@@ -104,7 +104,7 @@ SHOW SESSION VARIABLES WHERE Variable_name IN
 
 `innodb_read_only` set to `ON` means you are on a replica. Connect to the primary to write.
 
-Running in the engine's read-only mode changes a few things at **Read-Only**. PostgreSQL and MySQL refuse `SELECT ... FOR UPDATE` and `FOR SHARE`, and add a begin and a rollback round trip to each statement. On PostgreSQL, a `SET` or `set_config` that a function runs is undone after the statement. While the session holds an open transaction or a table lock, as a MySQL or MariaDB session with autocommit off always does, a read on PostgreSQL, MySQL or MariaDB runs inside it without the read-only mode, and a query that calls a function outside the built-ins is blocked there as on Oracle. SQLite reads inside the transaction too.
+Running in the engine's read-only mode changes a few things at **Read-Only**. PostgreSQL and MySQL refuse `SELECT ... FOR UPDATE` and `FOR SHARE`, and add a begin and a rollback round trip to each statement. On PostgreSQL, a `SET` or `set_config` that a function runs is undone after the statement. While the session holds an open transaction or a table lock, as a MySQL or MariaDB session with autocommit off does after its first statement, a read on PostgreSQL, MySQL or MariaDB runs inside it without the read-only mode, and a query that calls a function outside the built-ins is blocked there as on Oracle. SQLite reads inside the transaction too.
 
 ## Execution log
 
