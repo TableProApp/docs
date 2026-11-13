@@ -74,7 +74,7 @@ What the tile draws depends on what comes back:
 
 A tile fetches at most 2,000 rows, the most a chart draws, so a query that returns a whole table costs one page of it per refresh.
 
-A tile runs one statement, and only a read. A saved query that writes, holds more than one statement, or reads files on the server is refused on the tile with the reason and never runs. So is every tile on a connection whose [Safe Mode level](/features/safe-mode#levels) asks before reads, **Alert (Full)** and **Safe Mode (Full)**, since nobody is there to confirm a refresh.
+A tile runs one statement, and only a read, on the connection's own session: it waits for a statement a query tab is running there, and runs in the database and schema the session was on when the tile was checked. A saved query that writes, holds more than one statement, or reads files on the server is refused on the tile with the reason and never runs. So is every tile on a connection whose [Safe Mode level](/features/safe-mode#levels) asks before reads, **Alert (Full)** and **Safe Mode (Full)**, since nobody is there to confirm a refresh.
 
 Each tile refreshes with the dashboard unless you slow it down: open its **Tile Options** menu, the circled ellipsis, and pick **Every Minute**, **Every 5 Minutes**, **Every 15 Minutes**, or **Every Hour** under **Refresh**. An expensive count then runs once a minute instead of every second. A failed run keeps the last result on the tile and shows the error beneath it.
 
