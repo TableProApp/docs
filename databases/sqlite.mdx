@@ -141,6 +141,8 @@ A virtual table, such as an FTS5 table, cannot be recreated from what SQLite sto
 
 Another process holds a write lock. Quit the app that owns the file, or look for `-wal` and `-shm` files a crashed process left behind. The wait runs until the [query timeout](/customization/general-settings#query-timeout); **Query > Cancel Query** ends it sooner.
 
+A copy, compare or export holds the file only while it reads the table, not while the destination catches up. Rows the destination has not taken yet wait in a temporary file on this Mac that only your user can open, deleted when the run ends or TablePro quits. Runs going at once share at most half the free space on the startup disk; past that, the read waits for the destination and holds the file until it catches up.
+
 ### unable to open database file
 
 The path is wrong, or the folder is one you cannot read. For anything under `~/Library`, grant Full Disk Access and relaunch.
