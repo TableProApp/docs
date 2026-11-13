@@ -136,6 +136,7 @@ The editor marks which statement it is about to send.
 - A `BEGIN … END` body counts as one statement, so a trigger or stored procedure gets one button rather than one per line inside it. `BEGIN;` and `BEGIN TRANSACTION;` are statements of their own. On Oracle, a whole [PL/SQL block or unit](/databases/oracle#pl%2Fsql) is one statement.
 - On SQL Server an `IF` stays one statement through its `ELSE`, even when a `;` ends the `IF`'s branch: `IF @a = 1 SELECT 1; ELSE SELECT 2;`.
 - On MySQL and MariaDB a `DELIMITER //` line runs nothing, and `//` then ends a statement, as the `mysql` client reads a script. The line counts only as the first thing on its line, before any statement text. A `;` still ends a statement outside a routine body.
+- On MySQL and MariaDB a routine whose body is an `IF … END IF`, `WHILE … END WHILE`, `LOOP … END LOOP` or `REPEAT … END REPEAT` is one statement too, with or without a `DELIMITER` line.
 - On PostgreSQL the rows after `COPY ... FROM STDIN`, up to the line holding only `\.`, belong to the `COPY` and never run as SQL. Running the `COPY` sends them to the server as its data, as `psql` does, without the `\.` line. On Redshift and PGlite, which cannot take rows this way, the `COPY` stops before anything is sent. The `\restrict` and `\unrestrict` lines `pg_dump` writes run nothing.
 
 Turn either marker off in **Settings > Editor** with **Highlight current statement** and **Run button beside each statement**.
