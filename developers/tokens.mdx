@@ -63,7 +63,7 @@ The token list in **Settings > MCP > Authentication** shows prefix, name, permis
 
 Revoking cancels every request that token has in flight and clears the connection approvals the user had granted it, so a re-issued token has to ask again. The next call gets `-33009` with HTTP `401`.
 
-**Disconnect** in the Connected Clients list revokes that client's token. It is not a soft disconnect: the client has to pair again or be given a new token.
+**Disconnect** in the Connected Clients list revokes the token of a client that holds its own. It is not a soft disconnect: the client has to pair again or be given a new token. A client on the stdio bridge is the exception, under [The stdio bridge token](#the-stdio-bridge-token).
 
 For the bundled macOS command, follow [Status and pairing](/integrations/terminal#status-and-pairing)
 to replace or remove its token. Its [revocation route](/developers/pairing#revoking-a-token) is private.
@@ -74,7 +74,7 @@ Every server start mints a token named `__stdio_bridge__` and writes it into the
 
 It expires after an hour and is rotated 15 minutes before that, deleted when the server stops, and any stale copy is removed the next time the store loads. It is hidden from the Settings token list, though its name can appear in the activity log. For a narrower scope, skip the bridge and connect over [HTTP with a token you mint](/integrations/mcp-clients#http-transport).
 
-Renewing the token does not cancel work. The old token stops authenticating at once and the bridge picks up the new one, but a request the old token already started, such as a long query or one waiting on a Safe Mode prompt, keeps running until the old token's own expiry, 15 minutes after the renewal. **Disconnect** on a bridge row in Connected Clients revokes the current token and cancels the requests in flight on it and on every earlier one at once; the bridge keeps its connection approvals.
+Renewing the token does not cancel work. The old token stops authenticating at once and the bridge picks up the new one, but a request the old token already started, such as a long query or one waiting on a Safe Mode prompt, keeps running until the old token's own expiry, 15 minutes after the renewal. Every stdio client shares this token, and Connected Clients lists each one by the name it sends, across renewals. **Disconnect** on one of them cancels that client's requests in flight and revokes nothing: the others keep working, and the disconnected one can send new requests at once. Remove TablePro from it in **Connect a Client…**, or turn off the server, to stop it.
 
 ## Stored fields
 
@@ -98,6 +98,7 @@ Every authentication, tool call, resource read, and query is recorded in `~/Libr
 | Field | Values |
 |-------|--------|
 | Timestamp | when the call happened |
+| Client | the name the client sent in `clientInfo`, its `title` when it has one; empty for rows no client caused |
 | Token | the token behind the call, by name and id |
 | Category | `auth`, `access`, `admin`, `query`, `tool`, `resource` |
 | Action | `auth.success`, `auth.failure`, `auth.rateLimited`, `pairing.exchange`, `pairing.redirectRejected`, `token.created`, `token.revoked`, `server.started`, `server.stopped`, `query.executed`, `tool.<name>`, `resource.read` |

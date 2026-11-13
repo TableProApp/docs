@@ -47,7 +47,7 @@ A SQL Server script runs a batch at a time instead, cut at its `GO` lines, so a 
 |---|---|---|
 | Ordinary statements | A transaction TablePro opens and commits | Everything rolls back |
 | Ordinary statements, with [Manual Commit](#manual-commit) on | A transaction TablePro opens and leaves open for you to commit | Everything rolls back |
-| One that manages its own: `BEGIN`, `START TRANSACTION`, `XA START`, `SET autocommit`, `SAVEPOINT` on SQLite, `SET TRANSACTION` on Oracle | The script's own transaction | The transaction it left open is rolled back |
+| One that manages its own: `BEGIN`, `START TRANSACTION`, `XA START`, `SET autocommit`, `SAVEPOINT` on SQLite, `SET TRANSACTION` on Oracle, `BT` on Teradata | The script's own transaction | The transaction it left open is rolled back |
 | One holding a [statement a transaction cannot hold](#statements-a-transaction-cannot-hold) | No transaction | Each statement that ran stays applied, and the banner counts them |
 | A script on SQL Server | No transaction, unless the script opens one with `BEGIN TRAN` | What ran stays applied, and a transaction the script left open is reported |
 | Anything, on a connection that already has a transaction open | That transaction | The transaction stays open and the message says so |
@@ -100,7 +100,7 @@ While a session holds a transaction, a bar above every tab of the connection say
 
 Commit and Roll Back act on the connection the bar names. When other work ran there after you clicked, they do nothing and say so: check the transaction and try again.
 
-The server rolls back what a session leaves open, so quitting or relaunching to update asks first while a transaction is open. See [Work still running](/features/connection-window#work-still-running).
+The server rolls back what a session leaves open, so closing, disconnecting, quitting and relaunching to update ask first while a transaction is open, with **Commit** as the default. See [Open transactions](/features/connection-window#open-transactions).
 
 ### Manual Commit
 
@@ -137,7 +137,7 @@ The editor marks which statement it is about to send.
 - On SQL Server an `IF` stays one statement through its `ELSE`, even when a `;` ends the `IF`'s branch: `IF @a = 1 SELECT 1; ELSE SELECT 2;`.
 - On MySQL and MariaDB a `DELIMITER //` line runs nothing, and `//` then ends a statement, as the `mysql` client reads a script. The line counts only as the first thing on its line, before any statement text. A `;` still ends a statement outside a routine body.
 - On MySQL and MariaDB a routine whose body is an `IF … END IF`, `WHILE … END WHILE`, `LOOP … END LOOP` or `REPEAT … END REPEAT` is one statement too, with or without a `DELIMITER` line.
-- On PostgreSQL the rows after `COPY ... FROM STDIN`, up to the line holding only `\.`, belong to the `COPY` and never run as SQL. The editor cannot send them, so the `COPY` stops with a message that no rows were sent. Load them with `psql`, or write the rows as `INSERT` statements. The `\restrict` and `\unrestrict` lines `pg_dump` writes run nothing.
+- On PostgreSQL the rows after `COPY ... FROM STDIN`, up to the line holding only `\.`, belong to the `COPY` and never run as SQL. Running the `COPY` sends them to the server as its data, as `psql` does, without the `\.` line. On Redshift and PGlite, which cannot take rows this way, the `COPY` stops before anything is sent. The `\restrict` and `\unrestrict` lines `pg_dump` writes run nothing.
 
 Turn either marker off in **Settings > Editor** with **Highlight current statement** and **Run button beside each statement**.
 

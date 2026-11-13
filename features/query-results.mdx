@@ -5,7 +5,7 @@ description: Choosing between results, pinning, the row cap, and what a failed o
 
 import RowCap from "/snippets/row-cap.mdx";
 
-Every statement you run gets its own result. The next run reuses an unpinned one rather than adding to the pile, so a result survives only as long as you leave it unpinned.
+Every statement you run gets its own result. The next run reuses an unpinned one rather than adding to the pile, so a result survives only as long as you leave it unpinned. A run keeps every result that returns rows unless **Results kept per run** in [Data Settings](/customization/data-settings#multiple-results) sets a limit.
 
 <Frame caption="Three results as tabs above the grid, the first one pinned">
   <img className="block dark:hidden" src="/images/query-results.png" alt="Three SELECT statements in the editor over genre, artist and album result tabs, with the genre rows in the grid" />
@@ -94,7 +94,7 @@ When the cap trims a result the status bar reads **Showing N rows** and offers *
 
 ## Statements that return no rows
 
-INSERT, UPDATE, DELETE and DDL show a success view with the affected row count and the execution time.
+INSERT, UPDATE, DELETE and DDL show a success view with the affected row count and the execution time. Two or more of them in one run share one result, named after how many there were, with the row counts and times added up.
 
 ## Server output
 

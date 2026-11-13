@@ -66,7 +66,8 @@ const params = new URLSearchParams({
 });
 await openUrl(`tablepro://integrations/pair?${params}`); // however your host opens a URL
 
-// Step 3. Your callback receives ?code=<uuid>&state=<state>, or ?error=access_denied when the user says no.
+// Step 3. Your callback receives ?code=<uuid>&state=<state>, ?error=access_denied when the user says no,
+// or ?error=server_error when TablePro could not issue the token after the user approved.
 // 23508 is the default port. Make it a setting: if the port is taken, the server binds another one,
 // and the Status row in Settings > MCP shows the port in use.
 export async function exchange(callback: URL, port = 23508): Promise<string> {
@@ -113,6 +114,10 @@ passes an extension a single launch parameter named `context`, as Raycast does.
 | `query` | `?code=<uuid>&state=<state>` | `?error=access_denied&error_description=user_denied&state=<state>` |
 | `context` | `?context={"code":"<uuid>","state":"<state>"}` | `?context={"error":"access_denied","error_description":"user_denied","state":"<state>"}` |
 | absent (deprecated) | `?context={"code":"<uuid>"}` for `raycast://`, `?code=<uuid>` for any other scheme | `error=denied` and `error_description=user_denied`, wrapped the same way |
+
+When the user approves and TablePro then cannot issue the token, the redirect carries
+`error=server_error` and `error_description=token_not_issued`, with `state`, in the same shape as a
+deny for the request's mode. Treat it as a failure to retry, not as a refusal.
 
 The `context` value is JSON with sorted keys, percent-encoded like any other query value. Any other
 `response_mode` drops the link: no sheet opens and nothing reaches `redirect`. Query items already on
@@ -192,6 +197,12 @@ credential with `400 unsupported_token_type`.
 
 With **Enable MCP Server** off, the pair link stops before the approval sheet with an alert that
 names **Settings > MCP**. No redirect is opened, so the extension sees no answer.
+
+Approving can still fail before the client gets a code, such as when the token cannot be saved to the
+Keychain. TablePro shows **Pairing Failed** with the reason and opens the redirect with the
+[`server_error` answer](#response-modes). Start a new pair request once the cause is fixed. The bundled
+`tablepro pair` reports this as a failure and exits 1; see
+[Status and pairing](/integrations/terminal#status-and-pairing).
 
 A failed verification burns the code, so retrying with a guessed verifier is not an option: start a
 new pair request.

@@ -42,13 +42,23 @@ teradata://user:password@host:1025/database
 
 ## Databases and objects
 
-A database and a user are both namespaces in Teradata, and both appear as top-level databases in the sidebar with their tables and views inside. A tab bound to a second database keeps the same session: `DATABASE "name"` runs ahead of its statements instead of a reconnect. The switch is refused while a transaction is open, because Teradata takes nothing but `COMMIT` or `ET` after `DATABASE` inside one.
+A database and a user are both namespaces in Teradata, and both appear as top-level databases in the sidebar with their tables and views inside. A tab bound to a second database keeps the same session: `DATABASE "name"` runs ahead of its statements instead of a reconnect. A switch to another database is refused while a transaction is open, because Teradata takes nothing but `COMMIT` or `ET` after `DATABASE` inside one. **Truncate** runs `DELETE FROM name ALL`.
 
 Identifiers are quoted with double quotes. Teradata has no `LIMIT`, so a table's first page comes back with `TOP` and later pages with `QUALIFY ROW_NUMBER()`.
 
 ## Stopping a query
 
 **Stop** keeps the session. A statement still running is aborted, and Teradata rolls back the transaction it ran in. With **Transaction Mode** set to `ANSI`, that is every change since the last `COMMIT`, and the tab says so. In `TERA` mode it is the statement alone, or every change since `BT` when one is open. On `DEFAULT` and `TERA` the tab shows no notice, even on a system that runs ANSI by default. A result already coming back is cut where it is, and nothing is rolled back.
+
+## Transactions
+
+In an `ANSI` session every statement joins one transaction, which only `COMMIT` or `ROLLBACK` ends, and a DDL statement has to be the last in it. While it holds changes, the transaction bar above the tabs offers **Commit** and **Roll Back**.
+
+- A structure save, **Create Table**, a comment, a rename, a sidebar drop and the new table of an import commit each statement as it runs. On the session that runs your queries they are refused while a transaction is open there: commit or roll it back first.
+- **Run All** stops after a DDL statement while a transaction is open, unless the next statement is `COMMIT`, `ROLLBACK`, `ABORT` or `ET`. What ran stays in the transaction. Click **Commit** in the transaction bar, then run the rest.
+- A `DATABASE` statement in **Run All** is committed as it runs when nothing else is pending, so the rest of the script runs there. While a transaction is open, the run stops before it: commit or roll back, then run the script again from that statement. A new run starts in the tab's database.
+- Startup commands are committed once they have run.
+- In `TERA` mode a statement outside `BT` commits on its own. Inside `BT`, **Run All** stops after DDL the same way, because any statement but `ET` there rolls back the whole block: commit, then begin the rest with `BT`. A script that holds `BT` runs as written, with no transaction of the app's own around it.
 
 ## SSL/TLS
 
@@ -71,7 +81,8 @@ Test TLS on **Required (skip verify)** rather than **Preferred**, or a failed ha
 - LDAP, Kerberos, and JWT logon fail before the connect is attempted. Use `TD2` or `TDNEGO`.
 - The TLS port is fixed at `443`.
 - A `NUMBER`, `BLOB`, `CLOB`, `JSON`, `XML` or `PERIOD` column cannot be read yet. `CAST` it to `DECIMAL` or `VARCHAR` in the query.
-- **Run All** runs a script that holds a `CREATE`, `ALTER`, `DROP` or other DDL statement one statement at a time, with no transaction around it, because Teradata accepts nothing after DDL inside a transaction. In an `ANSI` session the script still needs a `COMMIT` after each DDL statement, and DDL the structure editor runs stays uncommitted until you commit.
+- A structure save with several changes commits them one at a time, so a change that fails leaves the ones before it in place. Check the Structure tab and save the rest again.
+- With **Transaction Mode** on `DEFAULT` and a session whose mode `HELP SESSION` and `DBC.SessionInfoV` could not report, nothing is committed for you after DDL and **Run All** does not stop. Set the mode to `ANSI` or `TERA` to match the system.
 
 ## Troubleshooting
 

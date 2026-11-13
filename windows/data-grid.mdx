@@ -11,6 +11,16 @@ A table opened from the object tree shows one page of rows, 1,000 by default. Ed
   <img className="hidden dark:block" src="/images/windows-data-grid-dark.png" alt="Artist table with the first name underlined on a yellow fill and row 25 struck through on red" />
 </Frame>
 
+## Count a large table
+
+A table counts its rows when it opens, so **Last page** and **Go to page** know where the end is. A table the database estimates at more rows than **Settings > Pagination > Count rows if estimate less than** skips that count: the status reads `1-1,000 of about 2,000,000 rows`, and **Count rows** in the toolbar counts it on request.
+
+| Setting | Default | Choices |
+|---|---|---|
+| Count rows if estimate less than | 100,000 | 1,000; 10,000; 100,000; 1,000,000; Always count |
+
+A table whose database keeps no estimate is always counted.
+
 ## Edit rows
 
 Editing works in a table tab on a table with a primary key, on a connection whose Safe Mode is not Read only. A saved row's key, and every column the server fills, stay as they are.
