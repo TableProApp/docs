@@ -1,35 +1,31 @@
 ---
 title: Licensing
-description: Activate and deactivate a license key, what each tier includes, and how offline validation works
+description: Sign in to your TablePro account on the Mac, what each plan includes, the 3-device limit, and how the plan works offline
 ---
 
-You never have to buy TablePro to keep using it, and nothing counts down. A license adds the features in the table, and purchase, renewal, and billing all happen on [tablepro.app](https://tablepro.app/#pricing) rather than in the app.
+You never have to buy TablePro to keep using it, and nothing counts down. A plan adds the features in the table. You buy one on [tablepro.app](https://tablepro.app/#pricing), and billing lives in your account at [account.tablepro.app](https://account.tablepro.app), not in the app.
 
 ## Tiers
 
-There are two tiers, Pro and Team. Team includes everything in Pro. Starter was the earlier name of Pro, so a Starter license is a Pro license.
+There are two paid plans, Pro and Team. Team includes everything in Pro. Starter was the earlier name of Pro, so a Starter license is a Pro license. A seat on a team gives you the team's plan.
 
-| Feature | Required tier | Without a license |
+| Feature | Required tier | Without the plan |
 |---------|---------------|-------------------|
-| [iCloud Sync](/features/icloud-sync) | Pro | Dimmed, with a row naming the plan and **Activate License…** |
-| [Encrypted connection export](/features/connection-sharing) | Pro | Dimmed, with a row naming the plan and **Activate License…** |
+| [iCloud Sync](/features/icloud-sync) | Pro | Dimmed, with a row saying it needs a paid plan |
+| [Encrypted connection export](/features/connection-sharing) | Pro | Dimmed, with a row saying it needs a paid plan |
 | [Environment variables in connection fields](/features/connection-sharing) | Pro | References stay unresolved |
-| [Linked Folders](/features/connection-sharing) | Pro | Dimmed, with a row naming the plan and **Activate License…** |
-| [Query Insights](/features/query-insights) | Pro | Overlay with **Activate License…** |
-| [Result charts](/features/data-grid#chart-mode) | Pro | Overlay with **Activate License…** |
+| [Linked Folders](/features/connection-sharing) | Pro | Dimmed, with a row saying it needs a paid plan |
+| [Query Insights](/features/query-insights) | Pro | Overlay saying it needs a paid plan |
+| [Result charts](/features/data-grid#chart-mode) | Pro | Overlay saying it needs a paid plan |
 | [Compare & Sync](/features/compare-sync) | Pro | Dialog naming the requirement |
 | [Data Rewind](/features/change-tracking#restoring-a-save) | Pro | Dialog naming the requirement |
 | [Shared links](/features/shared-links#who-can-share) past the Free limits | Pro | Free limits; Pro options carry a **Pro** tag |
 | [Team Catalog](/features/connection-sharing) | Team | Menu item hidden |
 | [Team Library](/features/team) | Team | Menu item hidden |
 
-The table describes macOS features. The [Linux beta](/linux/install) uses the same plans and accounts; its [account guide](https://github.com/TableProApp/TablePro/blob/main/linux/README.md#tablepro-account) covers device limits and sign-in. The Windows preview signs in to the same accounts: see [TablePro account](/windows/account). The [iPhone and iPad app](/ios) needs no license.
+The table describes macOS features. The [Linux beta](/linux/install) uses the same plans and accounts; its [account guide](https://github.com/TableProApp/TablePro/blob/main/linux/README.md#tablepro-account) covers device limits and sign-in. The Windows preview signs in to the same accounts: see [TablePro account](/windows/account). The [iPhone and iPad app](/ios) needs no plan.
 
-The activation instructions on this page apply to the Mac.
-
-**Settings > License** lists these features under **Pro Plan** and **Team Plan** and marks each plan your license includes. On a Pro license, **Upgrade Plan** sits beside **Team Plan**. Everything else in the app works.
-
-The **Activate License…** dialog also links to the pricing page. A license you already hold never gets that offer: every gate says what the top of **Settings > License** says for its state, so an expired license offers **Renew License**, a suspended one says so, and one that has not reached the server in 30 days offers **Try Again**.
+Signed out, a row, overlay or dialog offers **Sign In** and **Purchase License**. Signed in to an account without the feature, it offers **Upgrade Plan**, which opens the pricing page. A plan you already hold is never offered for sale: when it could not be checked, the gate says what **Settings > Account** says and offers **Try Again**, and past the [device limit](#devices) it offers **Open Account Settings…**. Everything else in the app works without a plan.
 
 ## Buy a license
 
@@ -40,7 +36,7 @@ Choose **Help > Support TablePro**, or click **Support TablePro** under the app 
   <img className="hidden dark:block" src="/images/support-window-dark.png" alt="A window stating the funding model above a Buy a License button and a Sponsor on GitHub button" />
 </Frame>
 
-Use at work is free too. If TablePro is part of your work, a license is asked for, never required: the AGPL puts no condition on use. Prices, renewals, and invoices live on tablepro.app. Once a license is active, the window keeps only the sponsorship action and the **Support TablePro** links disappear.
+Use at work is free too. If TablePro is part of your work, a license is asked for, never required: the AGPL puts no condition on use. Prices live on tablepro.app, and renewals and invoices in your account. Once your plan is active, the window keeps only the sponsorship action and the **Support TablePro** links disappear.
 
 ### The ask on the 30th day
 
@@ -54,42 +50,60 @@ On the 30th day you use TablePro without a license, a sheet on the window in use
 
 It waits out the first five minutes after launch and any running query, and appears only on a connection, data file, or welcome window. A day counts once TablePro is in use on it, and the count stays on your Mac.
 
-## Activate
+## Sign in
 
-Open **Settings > License** (`Cmd+,`), paste your license key (`XXXXX-XXXXX-XXXXX-XXXXX-XXXXX`), and click **Activate**.
+The first launch opens **Sign in to TablePro**, with **Sign In** and **Continue Without Account**. To sign in later:
 
-Without a license, the welcome window has an **Activate License** link to the same dialog. With one, the link names the license's state whenever the pane would: **License Expiring Soon** and **License Expired** open the renewal page, **Could Not Check This License** opens **Settings > License** and checks again, and **License Suspended** or **License Removed** opens the pane. The field also takes a team invite code, which TablePro tells apart from a key on its own. See [Team Plan](/features/team).
+<Steps>
+  <Step title="Open Settings > Account">
+    Press `Cmd+,` and choose **Account**. Signed out, the welcome window also shows a **Sign In** link, and every gate carries **Sign In**.
+  </Step>
+  <Step title="Click Sign In">
+    A sign-in sheet opens. Sign in, or create an account, there. Signing in by email, type the 6-digit code from the email into the sheet: the link in the email opens your browser instead.
+  </Step>
+</Steps>
 
-<Frame caption="Settings > License with a license active">
-  <img className="block dark:hidden" src="/images/license-settings.png" alt="A license pane listing email, a masked key, plan and expiry above a list of activated Macs" />
-  <img className="hidden dark:block" src="/images/license-settings-dark.png" alt="A license pane listing email, a masked key, plan and expiry above a list of activated Macs" />
+<Check>
+**Account** shows your name and email, with **Manage Account…**, which opens your account in the browser, and **Sign Out**.
+</Check>
+
+<Frame caption="Settings > Account on a Pro plan">
+  <img className="block dark:hidden" src="/images/account-settings.png" alt="Account pane with name and email, a Pro plan row, the Features list, Devices with this Mac marked, and Offline with the machine ID" />
+  <img className="hidden dark:block" src="/images/account-settings-dark.png" alt="Account pane with name and email, a Pro plan row, the Features list, Devices with this Mac marked, and Offline with the machine ID" />
 </Frame>
 
-Once active, the pane shows your email, a masked license key, plan, and expiry date or One-time. **Copy Key** puts the full key on the clipboard and marks it so clipboard-history apps skip it; the key itself stays masked on screen.
+The rest of the pane:
 
-A license that has expired, been suspended, or gone 30 days without reaching the server says so at the top of the pane, with the one action that state needs. The key field stays available throughout, so a renewal key goes in without deactivating first.
+| Section | Shows |
+|---|---|
+| **Plan** | One row per license: the plan and its cycle, whose it is (Personal, or the team's name), and its status, such as **Renews on**, **Ends on**, **Lifetime** or **Payment problem**. On a plan you pay for, **Billing…** opens its billing in your account. On Free: **You're on Free** with **Upgrade…** |
+| **Features** | Every paid feature, marked **Included** or locked |
+| **Devices** | The devices signed in to your account. See [Devices](#devices) |
+| **Teams** | Each team you belong to, your role, **Seat** or **No seat**, and **Manage…**, which opens the team in your account |
+| **Offline** | When the plan was last verified and until when it holds, **Refresh**, the **Machine ID**, **Import Offline File…** and **Use License Key…** |
+
+Notices at the top of **Plan** name what needs doing: a failed payment offers **Update Payment Method…**, and a plan that is canceling says when it ends. Seats, invitations and roles are managed in your account; see [Team Plan](/features/team).
+
+### A license key from an older version
+
+A key saved by an older version of TablePro signs the Mac in on its own, to the account the key belongs to, the first time the new version reaches the server. To use a key by hand, click **Use License Key…** under **Offline**, paste it (`XXXXX-XXXXX-XXXXX-XXXXX-XXXXX`) and click **Use Key**. On a Mac already signed in, the sheet says which account the key replaces. A key is deleted from the Mac once it is used.
 
 ## Devices
 
-A license binds to each Mac it is activated on through a hashed hardware ID. The **Devices** section lists every activated Mac with its app and macOS version, marks the one you are sitting at, and counts them against the limit your plan sets on tablepro.app.
+A plan works on up to 3 devices at a time: Macs, Linux and Windows computers counted together. A Free account has no device limit. **Devices** lists every device signed in to your account, this Mac first and marked **This Mac**, with its system and when it was last seen.
 
-Activating one Mac too many fails with "This license has reached its activation limit. Remove a Mac from your account, then activate again." Click **Manage Macs** under the message to open [tablepro.app/account/machines](https://tablepro.app/account/machines), sign in with the email on your license if asked, click **Remove…** beside a Mac, then click **Activate** again. On a Mac that already holds the license, **Release…** on a row in **Devices** frees a seat too, including a Mac you no longer have. A Mac you remove or release keeps working until its next check, within 7 days, and paid features pause there.
+**Remove** beside a device signs TablePro out there at its next check, and its paid features run until its last check expires. This Mac has no **Remove**, and neither does a device whose offline file has not expired; it shows until when instead.
 
-On a Team license only your own Mac carries **Release…**, because releasing a teammate's seat belongs to whoever manages the team. Seats there are handled at [tablepro.app/account](https://tablepro.app/account); see [Team Plan](/features/team).
-
-Deactivating with the license server unreachable still removes the license from that Mac, but the slot may stay occupied until it expires on the server.
+Signing in on a fourth device keeps it on Free and says "Your plan is in use on 3 other devices." Click **Choose a Device…** to list the 3, then **Remove** one, and this Mac takes its place. **Manage Devices…** in the same sheet opens the list in your account. Until you remove one, **Plan** shows **Device limit reached**.
 
 ## Validation and offline use
 
-Activation stores a signed license on your Mac, and the license key goes to the macOS Keychain.
+Your plan reaches the Mac as a signed file, valid for up to 14 days and never past the end of the license. The signature is checked on your Mac, with no network, so editing the file changes nothing.
 
-- Every launch re-verifies the signature offline, with no network. Tier, status, and expiry all come from the signed license, so editing the copy on disk changes nothing.
-- Every 7 days the app re-validates with the license server in the background.
-- If the server is unreachable, the license keeps working for 30 days after the last successful validation. After that the pane says **Could Not Check This License** and offers **Try Again**, and paid features pause until a validation succeeds. Nothing in that state asks for a license key: the way out is a working connection.
-- If the server answers that the license is suspended, expired, or no longer activated on this Mac, paid features pause at that check. The 30-day grace period only covers a server TablePro could not reach.
-
-**Refresh** in **Settings > License** re-validates with the server and reloads the device list, and a gated screen or row offers **Try Again**. When a check cannot reach the server, the reason shows under the button and stays until a check succeeds. Inside the last week before expiry, the pane carries a renewal notice linking to tablepro.app.
+- The plan is refreshed at launch, then 24 hours after a check that worked, or 1 hour after one that failed. **Refresh** under **Offline** checks now. A plan changed in your account shows at the next check.
+- Without a network, paid features keep working until the file expires. With 3 days left, **Plan** says **Verify your plan soon**. Once it expires, it says **Your plan could not be verified** and paid features pause until a check succeeds. Both offer **Try Again**.
+- A Mac that never reaches the internet uses an offline file. Copy the **Machine ID** under **Offline**, create an offline file for it in your account, then click **Import Offline File…**. A file is valid until the end of the paid period, or for one year on a lifetime license, and its device keeps its slot until it expires.
 
 ## What syncs
 
-Devices never sync. Each Mac takes its own seat, and a license restored from another Mac's backup is cleared on launch. Team seats, invites, and member roles are managed on tablepro.app; see [Team Plan](/features/team).
+Nothing about the account syncs. Account tokens stay on the Mac that signed in and are never in iCloud Keychain, so each Mac signs in on its own and counts as its own device.

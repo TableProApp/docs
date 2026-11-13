@@ -49,6 +49,7 @@ Signed out, the sheet offers **Sign In…** and nothing else. With an email addr
 
 | Field | What it sets |
 |---|---|
+| **Share as** | Whose link it is: **Personal**, or a team where you hold a seat. Shown only when you hold one |
 | **Title** | The page heading. Starts as the tab, saved query or result name |
 | **Note** | Optional text under the title |
 | **Expires** | When the link stops opening. **Never** needs Pro |
@@ -58,17 +59,19 @@ Signed out, the sheet offers **Sign In…** and nothing else. With an email addr
 
 On Free, **Never**, **Password** and **Allow viewers to download** are dimmed and carry a **Pro** tag. Click the tag to see the plans in your browser.
 
+Under **Share as**, a team whose public links are off is listed but dimmed, with "Public links are off for this team." Choosing a team makes a [team link](#team-links): the footer and the at-limit list then count that team's links instead of yours.
+
 For a result, **Rows that will be shared** previews the first 5 rows, with the columns the grid shows in the order it shows them. A result longer than your plan allows is cut, and the sheet says so: "Shares the first 1,000 of 48,210 rows." The page tells viewers the same.
 
 A query that looks like it holds a secret, such as an AWS access key, a private key, a JSON Web Token, an API token or a password in a URL, gets a warning naming it. So does a column named like `password`, `token`, `secret`, `api_key` or `ssn`. Warnings never stop the share. With **Hide SQL** on, the query's warnings go away, since the query is not shared.
 
 The footer counts your links: `Free · 3 of 5 links · first 1,000 rows`, or `Pro · 12 links`.
 
-Click **Create Link**. The link goes to the clipboard, and the sheet shows it under **Link copied** with **Copy** and **Open in Browser**. A link made in the sheet is a personal link.
+Click **Create Link**. The link goes to the clipboard, and the sheet shows it under **Link copied** with **Copy** and **Open in Browser**.
 
 ### At the link limit
 
-With every slot taken, the sheet lists your live links, oldest first, each with **Revoke**. Revoke one and the form comes back.
+With every slot taken, the sheet lists the live links holding them, oldest first, each with **Revoke**. Revoke one and the form comes back.
 
 ### If the link is not created
 
@@ -104,7 +107,7 @@ Editing the title or note of an expired link leaves it expired. Setting a new ex
 
 ### Team links
 
-A team's **Shared links** page, under the team in your account, lists its team links. Owners and admins see every team link, edit or revoke any of them, and hold the **Allow public links** switch. Turning it off stops new team links, and the team's existing links stop opening, shown as suspended, until it is on again. Nothing is revoked. A member with a seat sees the team links they shared.
+A team link is made by choosing the team under **Share as** in the share sheet. A team's **Shared links** page, under the team in your account, lists its team links. Owners and admins see every team link, edit or revoke any of them, and hold the **Allow public links** switch. Turning it off stops new team links, and the team's existing links stop opening, shown as suspended, until it is on again. Nothing is revoked. A member with a seat sees the team links they shared.
 
 ## Open a link
 
