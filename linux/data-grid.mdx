@@ -59,6 +59,12 @@ On ClickHouse, Cassandra and ScyllaDB a save is a series of statements, each lan
 
 **Export Rows…** writes CSV, JSON, Markdown, HTML, XML, Excel or SQL `INSERT` to a file, from the current page with its pending edits or from every saved row under the filter and sort.
 
+## Masked columns
+
+A column a [masking rule](/linux/connect#options) matches shows `(masked)` after its name, and its cells cannot be edited. A masked key column locks the whole page. Copy, **Copy As** and **Export Rows…** write the masked values.
+
+To see the stored values, right-click the column's header and choose **Reveal Masked Values…**, or choose it under **Column** in a cell's menu, then click **Reveal**. The tab reads its rows again unmasked until it closes. A query whose statement does not only read shows them on its next run. Exports and shared links stay masked, from that tab too. The masks are in [Data Masking](/features/data-masking#masks).
+
 ## Columns and foreign keys
 
 - `Alt+Left` and `Alt+Right` move the focused column, and `Shift+Alt+Left` and `Shift+Alt+Right` narrow and widen it. Dragging a header moves the column, and dragging its edge resizes it.

@@ -1,6 +1,6 @@
 ---
 title: Shared Links
-description: Share a query or a result as a web link from the Mac, Linux and Windows apps, what Free and Pro allow, and how to manage, open and report links
+description: Share a query or a result as a web link from the Mac, Linux and Windows apps, mask its sensitive columns, and manage, open and report links
 ---
 
 A shared link is a copy taken when you share: the SQL, and for a result the rows as the grid showed them at that moment. Anyone who has the link reads it in a web browser, with no account and no TablePro.
@@ -36,7 +36,9 @@ Your links keep working. Once, every live personal link that never expires, or e
 | A query | Right-click in the editor and choose **Share Query…**, or choose **File > Share Query…**. The selection is shared, or the whole editor when nothing is selected |
 | A saved query | Right-click it in the [Favorites](/features/favorites#working-with-saved-queries) sidebar and choose **Share…** |
 
-A result works from a query result and from a table tab, and takes the rows the grid has loaded. On Linux and Windows the commands sit elsewhere: see [Linux](/linux/sql-editor#share-a-query-or-result) and [Windows](/windows/browsing#share-a-result-or-query).
+From a table tab, the link holds the table from its first row, with the tab's filter and sort, up to your plan's row limit, whichever page is on screen. With a [value filter](/features/data-grid#filtering) on, it holds the rows the filter shows. From a query tab whose result stopped before its end, the rows past those loaded are read from the server, up to the limit. A table view that cannot be written as SQL shares its rows only, and the sheet says so.
+
+On Linux and Windows the commands sit elsewhere: see [Linux](/linux/sql-editor#share-a-query-or-result) and [Windows](/windows/browsing#share-a-result-or-query).
 
 ## The share sheet
 
@@ -57,17 +59,27 @@ Signed out, the sheet offers **Sign In…** and nothing else. With an email addr
 | **Password** | Pro. Viewers type it before anything shows |
 | **Allow viewers to download** | On by default. Pro can turn it off, which removes the page's export buttons |
 
+The field labels read the same in all three apps, except **Share As** on Linux. Windows words its buttons in sentence case, such as **Sign in...** and **Open in browser**.
+
 On Free, **Never**, **Password** and **Allow viewers to download** are dimmed and carry a **Pro** tag. Click the tag to see the plans in your browser.
 
 Under **Share as**, a team whose public links are off is listed but dimmed, with "Public links are off for this team." Choosing a team makes a [team link](#team-links): the footer and the at-limit list then count that team's links instead of yours.
 
-For a result, **Rows that will be shared** previews the first 5 rows, with the columns the grid shows in the order it shows them. A result longer than your plan allows is cut, and the sheet says so: "Shares the first 1,000 of 48,210 rows." The page tells viewers the same.
+For a result, **Rows that will be shared** previews the first 5 rows as they will be sent: the columns the grid shows, in its order, with masks applied and removed columns left out. Under it, **Columns** sets what each column sends, as [Sensitive data](#sensitive-data) explains. A result longer than your plan allows is cut, and the sheet says so: "Shares the first 1,000 of 48,210 rows." The page tells viewers the same.
 
-A query that looks like it holds a secret, such as an AWS access key, a private key, a JSON Web Token, an API token or a password in a URL, gets a warning naming it. So does a column named like `password`, `token`, `secret`, `api_key` or `ssn`. Warnings never stop the share. With **Hide SQL** on, the query's warnings go away, since the query is not shared.
+A query that looks like it holds a secret, such as an AWS access key, a private key, a JSON Web Token, an API token or a password in a URL, gets a warning naming it. So does a column set to **Keep** whose name looks like `password`, `token`, `secret`, `api_key` or `ssn`. Warnings never stop the share. With **Hide SQL** on, the query's warnings go away, since the page does not show the query.
 
 The footer counts your links: `Free · 3 of 5 links · first 1,000 rows`, or `Pro · 12 links`.
 
-Click **Create Link**. The link goes to the clipboard, and the sheet shows it under **Link copied** with **Copy** and **Open in Browser**.
+Click **Create Link**, or **Share** on Windows. The link goes to the clipboard, and the sheet shows it under **Link copied** with **Copy** and **Open in Browser**.
+
+### Large results
+
+A link holds up to 100 columns and about 4.5 MB of values, weighed after masking.
+
+- With more than 100 columns kept or masked, the first 100 go, and the sheet says "Shares the first 100 columns." Remove columns under **Columns** to choose which go.
+- Rows that would take the link past 4.5 MB are cut, and the sheet shows the same "Shares the first … of … rows." note as for your plan's limit.
+- A single value over 256 KiB, or a first row over 4.5 MB, stops the share with "This result is too large to share." Mask or remove that column. Windows names the column.
 
 ### At the link limit
 
@@ -77,10 +89,60 @@ With every slot taken, the sheet lists the live links holding them, oldest first
 
 | Message | What to do |
 |---|---|
-| This result is too large to share. | The result has more than 100 columns or a value over 256 KiB. Hide columns, or select fewer in the query, and share again |
+| This result is too large to share. | A value is over 256 KiB, or the first row over 4.5 MB. Mask or remove that column under **Columns**, or select less in the query, and share again |
 | Too many links just now. Try again in a moment. | An account makes up to 60 links an hour and 300 a day. Wait, then click **Create Link** again |
 | Sharing is turned off for this account. | TablePro turned sharing off for the account. Contact support |
 | You appear to be offline. Try again once you're connected. | Check the network, then click **Create Link** again |
+
+## Sensitive data
+
+Check **Columns** before every result share. Each shared column is set to one of three choices, applied on your computer: masked values are masked before they leave it, and a removed column is never sent.
+
+| Choice | The link holds |
+|---|---|
+| **Keep** | The values as the grid shows them |
+| **Mask** | The values under a mask you pick from [Masks](/features/data-masking#masks): Full, Last 4 Characters, Email, Stable Hash or NULL |
+| **Remove** | Nothing from that column |
+
+On the Mac and Windows, **Mask** shows a second menu for the mask. Linux gives each column one menu: **Keep**, **Mask as Full** and each other mask, then **Remove**.
+
+Each column starts from what is known about it:
+
+| Column | Starts as | Can be set to |
+|---|---|---|
+| Masked by the connection's [masking rules](/features/data-masking) | **Mask**, with the rule's mask | The rule's mask, **Full**, **NULL** or **Remove**. Never **Keep** |
+| Looks sensitive, by its name or its values | **Mask**, with the suggested mask | Anything, **Keep** included |
+| Anything else | **Keep** | Anything |
+
+The line under a masked column's name says why. "Masked by this connection's rules" marks a rule, "Looks like: email address" a detection. Linux words them "A masking rule hides this column", "The name looks like personal data" and "Values look like email addresses". On a connection with rules, a column that reads no table column, such as `count(*)`, says "Masked because TablePro cannot tell which table column this comes from." and cannot be set to **Keep**. [Masking for AI and scripts](/features/data-masking#masking-for-ai-and-scripts) lists what counts.
+
+Under the list, a line counts the result, such as "2 columns masked, 1 removed." After a detection, it adds "TablePro masked columns that look sensitive. Check them before sharing."
+
+### What looks sensitive
+
+A column's name is split into words at `_`, `-`, `.`, spaces, capitals and digits, and a term matches one whole word or several joined: `stripe_api_key` and `apiKey` match `api_key`, and `company` does not match `pan`. When a name matches two terms, the one covering more words wins.
+
+| Looks like | Name terms | Values | Suggested mask |
+|---|---|---|---|
+| Email address | `email`, `mail` | Half or more are email addresses | Email |
+| Phone number | `phone`, `mobile`, `tel`, `telephone`, `fax`, `msisdn` | Half or more are phone numbers | Last 4 Characters |
+| Password or secret | `password`, `passwd`, `pwd`, `secret`, `token`, `api_key`, `access_key`, `private_key`, `credential` | One JSON Web Token or API key | Full |
+| ID number | `ssn`, `social_security`, `national_id`, `passport`, `tax_id`, `tin` | | Last 4 Characters |
+| Card or account number | `credit_card`, `card_number`, `cc_number`, `pan`, `iban`, `account_number`, `routing_number` | One card number that passes the Luhn check, or one valid IBAN | Last 4 Characters |
+| Postal address | `address`, `street`, `zip`, `zipcode`, `postcode`, `postal` | | Full |
+| Date of birth | `dob`, `birthdate`, `date_of_birth`, `birthday` | | Full |
+| IP address | `ip`, `ip_address`, `ipv4`, `ipv6` | Half or more are IP addresses | Stable Hash |
+| Person's name | `first_name`, `last_name`, `full_name`, `surname`, `given_name` | | Full |
+
+Values are read from the rows the link holds, and only in text columns: a number, date, boolean or UUID column is judged by its name alone. A column matched by both its name and its values takes the name's mask. A column a rule already masks is not checked.
+
+### Personal data in the SQL
+
+A result whose SQL holds a string literal that looks like an email address, phone number, card number, IBAN, JSON Web Token or API key shows "This query contains what looks like personal data (email address). Turn on Hide SQL to keep the query private." Click its **Hide SQL** button, or turn on **Hide SQL** in the form. The page then shows the rows without the query, though the service still stores it.
+
+### What viewers see
+
+A masked column's header on the page carries a **Masked** badge. Hover over it, or tap or click it, to read "Values in this column were masked before sharing." with the mask's name. A removed column does not appear at all.
 
 ## Manage your links
 
@@ -113,8 +175,10 @@ A team link is made by choosing the team under **Share as** in the share sheet. 
 
 The page shows the title, note, database type, the day the link was shared and the day it expires. Under them:
 
-- The query, with **Copy SQL** and **Open in TablePro**. A result shared with **Hide SQL** has neither.
-- The result, with "First 1,000 of 48,210 rows" when the plan cut it, and **Export CSV** and **Export JSON** unless the owner turned downloads off. The rows stay readable on the page either way.
+- The query, with **Copy SQL** and **Open in TablePro**. A result shared with **Hide SQL**, or from a table view with no SQL, has neither.
+- The result, with a [**Masked** badge](#what-viewers-see) on each masked column, and **Export CSV** and **Export JSON** unless the owner turned downloads off. The rows stay readable on the page either way.
+
+A result that was cut says "First 1,000 of 48,210 rows", or "First 1,000 rows of a larger result" when its total is not known.
 
 A link with a password asks for it first. After 10 tries in 15 minutes, the page makes you wait before the next. A link that expired, was revoked or removed, or is suspended shows "This shared link is no longer available".
 
@@ -133,6 +197,6 @@ A link with a password asks for it first. After 10 tries in 15 minutes, the page
 Nothing leaves your computer until you click **Create Link**. Then the service at `api.tablepro.app` stores:
 
 - The title, note, database type, and the SQL. A result shared with **Hide SQL** still stores the SQL, and only the page leaves it out.
-- For a result, the columns the grid shows and the rows up to your plan's limit. Hidden columns stay behind. Binary values are sent as their size, such as `(binary, 120 bytes)`. On the Mac, columns under [Data Masking](/features/data-masking) are sent masked.
+- For a result, the columns the grid shows and the rows up to your plan's limit. Hidden and removed columns stay behind. Masked columns are sent masked, with the name of their mask, so the original values never reach the service. Binary values are sent as their size, such as `(binary, 120 bytes)`.
 
 Connections, hosts, user names and passwords are never part of a link. The link itself is the only key: anyone who has it can read the page, so treat it like the data it shows. The page asks search engines not to index it, and its browser title never names the link. Network details are in [Privacy](/security/privacy#shared-links).
