@@ -197,10 +197,11 @@ The top-level fields describe the first result set, with `rows_affected` countin
 A statement runs on the user's own session, inside any transaction it holds. `execute_query`, `confirm_destructive_operation` and [`insert_rows`](#writing-data) follow these rules about it:
 
 - A statement that starts a transaction while one is open is refused, with or without Manual Commit.
-- While a transaction is open on PostgreSQL or CockroachDB, the statement runs inside `SAVEPOINT tablepro_agent`. A failure rolls back to the savepoint and leaves the user's transaction usable. On Redshift and DuckDB, where a failure would abort it, the statement is refused.
+- While a transaction is open on PostgreSQL or CockroachDB, the statement runs inside `SAVEPOINT tablepro_agent`. A failure rolls back to the savepoint and leaves the user's transaction usable. On Redshift, DuckDB and Teradata, where a failure would abort it, the statement is refused.
 - With [Manual Commit](/features/sql-editor#manual-commit) on, a write stays pending until the user commits it in TablePro. It opens a transaction, or joins the one already open, and `status_message` says the change is pending. A write the connection cannot hold is refused.
-- With Manual Commit on, a statement that starts, ends or could hide transaction control is refused: `BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`, `RELEASE`, a procedure call, dynamic SQL, and on SQL Server a transaction keyword anywhere in the batch.
+- With Manual Commit on, a statement that starts, ends or could hide transaction control is refused: `BEGIN`, `COMMIT`, `ROLLBACK`, `SAVEPOINT`, `RELEASE`, a procedure call, dynamic SQL, `BT` and `ET` on Teradata, and on SQL Server a transaction keyword anywhere in the batch.
 - When the open transaction ended while the statement ran, `status_message` says so.
+- On Teradata, a write that leaves a transaction open, as every change in an ANSI session does, gets a `status_message` saying so. The statements after it are refused until it is committed or rolled back.
 - An `insert_rows` call of several rows that joins an open transaction on PostgreSQL, CockroachDB, MySQL, MariaDB, SQLite, SQL Server or Oracle runs inside a savepoint, so a row that fails takes back the rows before it.
 
 A batch that raises an error fails the call with the server's message and line number. The batches after it do not run, and the error says what stays applied. On a connection with [masking rules](#masking-rules), the whole message is withheld.
@@ -221,11 +222,11 @@ Every table in one call shares one 4 MB [answer](#answer-size), with or without 
 
 | Tool | Arguments | Returns |
 |------|-----------|---------|
-| `insert_rows` | `connection_id`, `table`, `columns`, `rows` (`database`, `schema`) | `table`, `rows_submitted`, `rows_affected` |
+| `insert_rows` | `connection_id`, `table`, `columns`, `rows` (`database`, `schema`) | `table`, `rows_submitted`, `rows_affected` (`status_message`) |
 | `confirm_destructive_operation` | `connection_id`, `query` (`timeout_seconds`, `database`, `schema`) | A result set, plus `result_sets[]` for a SQL Server script |
 | `transaction_control` | `connection_id`, `action` (`database`, `schema`) | `status`, the action that completed, and `connection_id` |
 
-`insert_rows` binds parameters. Its confirmation shows the values that will be written, and the approved values run in the named database and schema. Each row is an array with one value per column, and a call carries at most 1,000 rows. The [transaction rules](#execute_query) of `execute_query` apply: under Manual Commit the rows stay pending until the user commits them in TablePro. The reply has no `status_message` to say so.
+`insert_rows` binds parameters. Its confirmation shows the values that will be written, and the approved values run in the named database and schema. Each row is an array with one value per column, and a call carries at most 1,000 rows. The [transaction rules](#execute_query) of `execute_query` apply: under Manual Commit the rows stay pending until the user commits them in TablePro, and `status_message` says so.
 
 `confirm_destructive_operation` runs one destructive statement, or a SQL Server script containing a destructive statement. This includes `DROP`, `TRUNCATE`, `ALTER … DROP`, and `DELETE` without `WHERE`. Other statements are rejected; use `execute_query` for those. The user approves it first, through your elicitation prompt if your client supports elicitation, otherwise through TablePro's own dialog on their Mac.
 

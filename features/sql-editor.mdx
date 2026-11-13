@@ -47,7 +47,7 @@ A SQL Server script runs a batch at a time instead, cut at its `GO` lines, so a 
 |---|---|---|
 | Ordinary statements | A transaction TablePro opens and commits | Everything rolls back |
 | Ordinary statements, with [Manual Commit](#manual-commit) on | A transaction TablePro opens and leaves open for you to commit | Everything rolls back |
-| One that manages its own: `BEGIN`, `START TRANSACTION`, `XA START`, `SET autocommit`, `SAVEPOINT` on SQLite, `SET TRANSACTION` on Oracle | The script's own transaction | The transaction it left open is rolled back |
+| One that manages its own: `BEGIN`, `START TRANSACTION`, `XA START`, `SET autocommit`, `SAVEPOINT` on SQLite, `SET TRANSACTION` on Oracle, `BT` on Teradata | The script's own transaction | The transaction it left open is rolled back |
 | One holding a [statement a transaction cannot hold](#statements-a-transaction-cannot-hold) | No transaction | Each statement that ran stays applied, and the banner counts them |
 | A script on SQL Server | No transaction, unless the script opens one with `BEGIN TRAN` | What ran stays applied, and a transaction the script left open is reported |
 | Anything, on a connection that already has a transaction open | That transaction | The transaction stays open and the message says so |
