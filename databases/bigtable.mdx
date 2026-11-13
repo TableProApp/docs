@@ -104,7 +104,7 @@ The table goes before the first slash, and the key is everything after it up to 
 
 A request does not get the row cap in [Settings > Data](/customization/data-settings): a `READ` without `rowsLimit` returns up to 5,000,000 rows, so give it one.
 
-For [Safe Mode](/features/safe-mode), `GET`, `SCAN` and `READ` are reads and every other request is a write. A `DELETE`, or a `PUT` that sets a cell to `null`, also raises the dangerous query warning on **Silent**.
+For [Safe Mode](/features/safe-mode), `GET`, `SCAN` and `READ` are reads and every other request is a write. Each request names one row, so a `DELETE` or a `PUT` that sets a cell to `null` is a write like any other.
 
 ## SSL/TLS
 

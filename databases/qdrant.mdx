@@ -87,7 +87,7 @@ POST /collections/docs/points/query
 
 A response that lists points, from `query`, `scroll`, `search` or a retrieve by id, renders as a grid with `id`, then `score` when there is one, the payload fields, and any vectors returned. Anything else is shown as formatted JSON.
 
-Read-only mode allows `GET`, `POST /collections/{name}/facet`, and the read endpoints under `/points`: `query`, `scroll`, `search`, `count`, `recommend`, `discover`, their batch and group forms, and a retrieve by id. A `DELETE`, a path ending in `delete` or `clear`, and `points/batch` count as destructive. A snapshot request is flagged as reaching the server's disk.
+Read-only mode allows `GET`, `POST /collections/{name}/facet`, and the read endpoints under `/points`: `query`, `scroll`, `search`, `count`, `recommend`, `discover`, their batch and group forms, and a retrieve by id. Deleting one point by its ID, `POST /collections/{name}/points/delete` with `{"points": [7]}`, is a write. Any other `DELETE`, path ending in `delete` or `clear`, and `points/batch` count as destructive. A snapshot request is flagged as reaching the server's disk.
 
 ## SSL/TLS
 
