@@ -1,6 +1,6 @@
 ---
 title: SQL editor
-description: Run statements and scripts, read several result sets, and write with completion, snippets, multiple cursors and Vim mode in TablePro for Linux
+description: Run statements and scripts, read several result sets, write with completion, snippets, multiple cursors and Vim mode, and share queries as links in TablePro for Linux
 tag: "Beta"
 ---
 
@@ -88,3 +88,18 @@ On a Redis connection the editor takes Redis commands, one per line, and shows e
 `Ctrl+Shift+H` opens **Query History**: every run from the editor, with full-text search, filters by connection, time and status, and export as SQL or CSV. A run that can carry a password is left out.
 
 **Save Query…** in the editor's menu keeps the text against the connection. **Saved Queries** in the main menu lists them, the window's connection first.
+
+## Share a query or result
+
+Sign in to your TablePro account first, under **Preferences > Account > Sign In** or with **Sign In…** in the share dialog.
+
+| To share | Do this |
+|---|---|
+| The selection, or the whole text when nothing is selected | **Share Query…** in the editor's menu |
+| The result shown | **Share Result…** in the editor's menu, or right-click a result grid and choose **Share Result…**, under **Export…** |
+| A table's rows, with its filter and sort | Right-click the table tab's grid and choose **Share Result…** |
+| A saved query | Click **Favorites** at the top of the sidebar, right-click the query and choose **Share…** |
+
+A table shares from its first row, whichever page is on screen. With a seat on a team, **Share As** in the dialog picks **Personal** or the team. For a result, **Columns** offers **Keep**, **Mask as** each mask, or **Remove** for every column, and columns that look sensitive start masked. **Manage Shared Links…** in the main menu opens your links in the browser.
+
+The dialog, the Free and Pro limits, and what a link sends are in [Shared Links](/features/shared-links#the-share-sheet). The column choices are in [Sensitive data](/features/shared-links#sensitive-data). Opening a `tablepro://share` link puts its SQL in a new editor tab without running it, and asks for a connection when the window has none.

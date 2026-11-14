@@ -52,6 +52,7 @@ One rule covers every place a value leaves TablePro:
 - **File > Export**, for every format.
 - The AI assistant, both the results summary it reads and the queries it runs.
 - Every [MCP](/features/mcp) tool that returns rows, and AppleScript and Shortcuts results.
+- [Shared links](/features/shared-links#sensitive-data), where a column a rule masks cannot be set to **Keep**.
 - The referenced-row preview of a foreign key, Server Dashboard tiles and the [Routine Debugger](/features/routine-debugger) result grid.
 
 A query result has no source table for most engines, so a `table.column` rule matches a query result by its column name alone. `users.ssn` then also masks an `ssn` column a query reads from another table.

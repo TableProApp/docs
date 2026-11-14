@@ -18,6 +18,7 @@ Turn off app usage data in the privacy settings if you do not want to send it. M
 | [iCloud sync](#icloud-sync) | Your iCloud account | Off; **Settings > Sync** |
 | [MCP clients](#the-mcp-server) | Local HTTP and a private Unix socket | Off; **Settings > MCP** |
 | [Accounts and Team Library](#license-checks-and-the-team-library) | `api.tablepro.app` | Account requests after sign-in; content uploads when published |
+| [Shared links](#shared-links) | `api.tablepro.app`; link pages on `s.tablepro.app` | Only when you open a share sheet, create or revoke a link, or open one |
 | [Database connections](#your-database-connections) | Your configured servers | When you connect |
 
 The remaining sections describe Mac features unless a platform is named.
@@ -157,11 +158,17 @@ There is no setting that turns the catalog fetch off.
 
 ## License checks and the team library
 
-From Mac 0.86.0 (including 0.86.0-beta.1) and Linux 0.1.0-beta.1, sign-in uses the account service at `https://api.tablepro.app`. `POST /v2/devices` registers the machine ID, name, platform and app/OS versions. Account access tokens and signed plan files replace routine license-key checks. On Mac, the machine ID is the SHA-256 hardware identifier; on Linux it is HMAC-SHA256 of `/etc/machine-id` with `app.tablepro.TablePro`, with a stored random fallback. Refresh tokens use the Mac Keychain or Linux keyring; Mac account tokens never sync.
+From Mac 0.86.0 (including 0.86.0-beta.1), Linux 0.1.0-beta.1 and the Windows preview, sign-in uses the account service at `https://api.tablepro.app`. `POST /v2/devices` registers the machine ID, name, platform and app/OS versions. Account access tokens and signed plan files replace routine license-key checks. On Mac, the machine ID is the SHA-256 hardware identifier; on Linux it is HMAC-SHA256 of `/etc/machine-id` with `app.tablepro.TablePro`, with a stored random fallback; on Windows it is HMAC-SHA256 of the `MachineGuid` registry value with the same key. Refresh tokens use the Mac Keychain, the Linux keyring or Windows Credential Manager; Mac account tokens never sync.
 
 Mac builds before 0.86.0 use `https://api.tablepro.app/v1/license` after a key is entered. Activation and seven-day revalidation send the license key, machine ID, Mac name and app/OS versions. Deactivation sends the key and machine ID. Device records and audit changes are covered by the [account policy](https://tablepro.app/privacy#account).
 
 On Mac, publishing Team Library sends connection definitions and saved SQL to the service. Structured credentials are excluded; free text is not scrubbed. Current account builds use `/v2/teams/{id}/library`, pull changes at launch, every 15 minutes and after publishing, and publish changes rather than replacing the whole library. Older builds use `/v1/license/library` and pull at most weekly. [Team Library](https://tablepro.app/privacy#library) describes access, and [retention](https://tablepro.app/privacy#retention) distinguishes normal team deletion from deleting its sole owner's account.
+
+## Shared links
+
+The Mac, Linux and Windows apps send nothing for sharing until you open a share sheet, which reads your limits from `GET /v2/share-limits` on `https://api.tablepro.app`. **Create Link** sends `POST /v2/shares` with the title, note, database type and SQL, and for a result the columns the grid shows and its rows up to your plan's limit. Masked columns are masked on your computer and sent with the name of their mask. Removed columns are not sent. The at-limit list and **Revoke** use `GET /v2/shares` and `DELETE /v2/shares/{id}`. **Open in TablePro** reads `GET /v2/shared/{token}` without the account, sending a password in `X-Share-Password` when the link has one.
+
+A link's page is served from `https://s.tablepro.app`. Its responses carry `X-Robots-Tag: noindex, nofollow, noarchive`, `Cache-Control: no-store` and `Referrer-Policy: no-referrer`. Views are counted per request, leaving out link previews and crawlers. A report sends its reason, details and optional email, checked with Cloudflare Turnstile, and the service keeps an HMAC of the reporter's IP address, never the address. [Shared Links](/features/shared-links#what-a-link-sends) lists what a link holds.
 
 ## Crash reports
 

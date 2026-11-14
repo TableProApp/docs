@@ -396,7 +396,8 @@
               "features/icloud-sync",
               "features/handoff",
               "features/licensing",
-              "features/team"
+              "features/team",
+              "features/shared-links"
             ]
           },
           {
@@ -463,7 +464,8 @@
             "group": "TablePro for Windows",
             "pages": [
               "windows/data-grid",
-              "windows/browsing"
+              "windows/browsing",
+              "windows/account"
             ]
           }
         ]

@@ -19,6 +19,7 @@ Raycast extension with `open()` from `@raycast/api`.
 | [`integrations/pair?…`](#start-pairing) | The pairing approval sheet |
 | [`integrations/start-mcp`](#start-the-mcp-server) | Nothing. Starts the MCP server and returns |
 | [`settings/<pane>`](#open-a-settings-pane) | Settings on that pane, or on the last-used pane |
+| [`share?token=…`](#open-a-shared-link) | A new query tab with a shared link's SQL, never run |
 
 ## Connection IDs are UUIDs
 
@@ -192,6 +193,14 @@ Settings on an older one. Path segments and query items after the id are ignored
 ```bash
 open "tablepro://settings/mcp"
 ```
+
+## Open a shared link
+
+```
+tablepro://share?token=<token>
+```
+
+**Open in TablePro** on a [shared link](/features/shared-links#open-in-tablepro) page sends this URL. The token is the 43 letters and digits at the end of the link. TablePro reads the link, asks for its password if it has one, and opens the SQL in a new query tab without running it. A link that hides its SQL opens nothing. The Linux and Windows apps answer this path too.
 
 ## On iPhone and iPad
 
