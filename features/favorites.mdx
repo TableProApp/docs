@@ -108,9 +108,15 @@ The cursor lands right after `orders.`, ready for a column name. `;;` means the 
 
 ## Working with saved queries
 
-Double-click a favorite, or press `Return`, to insert it into the editor. The right-click menu has **Insert in Editor**, **Run in New Tab**, **Copy Query**, **Edit…**, **Show History**, **Move to**, and **Delete**. Arrow keys move between rows, typing jumps to a name, and `Delete` asks first.
+Double-click a favorite, or press `Return`, to insert it into the editor. The right-click menu has **Insert in Editor**, **Run in New Tab**, **Copy Query**, **Edit…**, **Show History**, **Share Link…**, **Move to**, and **Delete**. Arrow keys move between rows, typing jumps to a name, and `Delete` asks first.
 
 Folders come from the same background menu. A folder's own menu has **New Favorite…**, **New Subfolder**, **Rename**, **Global**, and **Delete Folder**; deleting one moves what was inside up to the parent level. A global folder carries a globe, and **Global** changes that folder alone: the queries inside keep the scope they had, so mark them global too if you want them everywhere. Anything kept in a folder a connection cannot see is listed at that connection's top level, whether it is a global query or a global subfolder. Drag a query or a linked file out of the sidebar to drop its SQL into the editor or another app.
+
+### Sharing a public link
+
+On a Pro license, right-click a saved query and choose **Share Link…**. TablePro creates a public link and copies it to the clipboard. Anyone with the link opens it in a browser, with no TablePro account, and sees the query's name, note, and SQL; **Open in TablePro** on that page loads it straight into the app.
+
+Only the SQL text is shared, never the connection or its credentials.
 
 ## Saved query versions
 
