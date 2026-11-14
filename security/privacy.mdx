@@ -198,6 +198,9 @@ Every path here is under `~/Library/Application Support/TablePro/` unless it say
 | --- | --- |
 | `connections.json` | Connection definitions: host, port, username, database, SSH and SSL settings. No passwords. |
 | `connections.json.hmac` | The integrity tag for `connections.json`. |
+| `connections.json.backup`, `connections.json.backup.hmac` | The previous `connections.json` and its tag, kept by each save. |
+| `connections.json.unreadable` | A damaged `connections.json` set aside when the backup replaced it. |
+| `connections.json.unreadable-records` | Connections this version cannot read from a `connections.json` changed outside TablePro, kept out of the file so a save never signs them. |
 | `known_hosts` | SSH host keys you accepted. |
 | `query_history.db` | The statements you ran, as text, with a full-text index. Parameter values are never recorded. |
 | `sql_favorites.db` | Saved queries and their folders. |
