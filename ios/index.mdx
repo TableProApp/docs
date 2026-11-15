@@ -79,7 +79,7 @@ A connection, group or tag form with unsaved changes stays open when swiped down
 
 ## The sample database
 
-**Open Sample Database** sits on the empty list and in the **More** menu. It opens Chinook, a SQLite database of a music store, at its **Track** table, with no server to set up. The sample stays on this device: it never syncs, exports or hands off to another device. To throw away your edits, touch and hold **Chinook (Sample)** and choose **Reset Database**.
+**Open Sample Database** sits on the empty list and in the **More** menu. It opens Chinook, a SQLite database of a music store, at its **Track** table, with no server to set up. The sample stays on this device: it never syncs, goes into a `.tablepro` file or hands off to another device. To throw away your edits, touch and hold **Chinook (Sample)** and choose **Reset Database**.
 
 ## What syncs over
 
@@ -147,6 +147,8 @@ Rows show as cards or as a grid. Pick **Cards** or **Grid** in a table's **More*
   <img className="block dark:hidden" src="/images/ios-row-grid.png" alt="Track table as a grid on iPhone, scrolled sideways with TrackId held at the left, beside the More menu with Grid checked under Cards" />
   <img className="hidden dark:block" src="/images/ios-row-grid-dark.png" alt="Track table as a grid on iPhone, scrolled sideways with TrackId held at the left, beside the More menu with Grid checked under Cards" />
 </Frame>
+
+To work on several rows, choose **Select Rows** in a table's **More** menu and tap the rows; the title counts them. **Select All** takes every row on the page. The bar at the bottom holds **Export**, **Copy** as JSON, CSV or, on a SQL engine, SQL `INSERT`, and **Delete**, which asks first and appears where a row can be deleted. **Done** leaves Select mode. Loading another page, or changing the sort, search or filters, clears the picks. The **More** menu of **Query** has **Select Rows** for a result too, with **Export** and **Copy**, and a new run ends it.
 
 Search the table list by name. A PostgreSQL materialized view sits under **Views** and opens read only. Page a table at 50, 100, 200, or 500 rows, jump to a page number, sort by a column, search text columns, and stack filters with AND or OR. On PostgreSQL, ClickHouse, SQL Server and Oracle, pages follow the primary key, after your sort when you pick one, so paging never repeats or skips a row. The search field types quotes and dashes as you key them, so `O'Brien` finds `O'Brien` with Smart Punctuation on.
 
@@ -218,7 +220,7 @@ On MongoDB the editor takes the shell JavaScript the Mac takes. A statement ends
 
 On Redis a command ends at a semicolon or at a line break outside quotes, so each line is its own command and a quoted value may run across lines. A command with an unclosed quote fails without running. Quotes and escapes read as they do on the Mac: see [Redis CLI](/databases/redis#redis-cli).
 
-**Stop** cancels the running statement and starts no other. On MySQL and Redis the statement keeps running on the server until it finishes. Results copy or export as JSON, CSV, or SQL `INSERT`, which Redis and MongoDB leave out. In JSON, a numeric column gives numbers and a boolean column `true` or `false`; every other typed column gives strings, so a `VARCHAR` holding `1e10` or `true` stays text. A column with no type, such as `count(*)` on SQLite, gives a number or a boolean when its value reads as one. A value shown in part, or a binary value, stops the copy or export with **Cannot Export**: leave that column out of the `SELECT`. A result too large for the memory left stops it with a message to return fewer rows. Copying rows from a table reads values over 4 KB in full first.
+**Stop** cancels the running statement and starts no other. On MySQL and Redis the statement keeps running on the server until it finishes. **Share Results** and **Copy Results** in the **More** menu give the result as JSON, CSV, or SQL `INSERT` text; Redis and MongoDB leave out SQL `INSERT`. In JSON, a numeric column gives numbers and a boolean column `true` or `false`; every other typed column gives strings, so a `VARCHAR` holding `1e10` or `true` stays text. A column with no type, such as `count(*)` on SQLite, gives a number or a boolean when its value reads as one. A value shown in part, or a binary value, stops that text with **Cannot Export**: leave that column out of the `SELECT`, or write a file with **Export Results…**, which runs a single read statement again and takes every value whole, bytes included. A result too large for the memory left stops the text with a message to return fewer rows. Copying rows from a table reads values over 4 KB in full first.
 
 A running query appears in a Live Activity on the lock screen and Dynamic Island, with the elapsed time and the row count so far. **Settings > Live Activities > Hide Query** replaces the SQL text there with "Running query". The card clears when the query ends. Quitting the app mid-query leaves it behind, marked interrupted, until the next launch clears it.
 
@@ -273,12 +275,72 @@ When the redial fails, **Connection lost** takes the screen with the error and *
 
 The **Status** row in **Info** uses the same words: **Connected**, **Not Connected**, **Connecting**, **Reconnecting**, **Connection lost** or **Couldn't connect**.
 
+## Export and import
+
+The formats and their options are the Mac's, and [Import & Export](/features/import-export) explains each one. Export works on every engine and at every [safe mode](/features/safe-mode) level. Import writes: **Read-Only** hides it, **Confirm Writes** asks once before each file, and MongoDB and Redis import nothing.
+
+### Export to a file
+
+| Start from | What the file holds |
+| --- | --- |
+| A table in **Tables**: touch and hold it, then **Export…** | That table |
+| An open table's **More > Export…** | **Whole Table**, or while a search, filter or sort is on, **Filtered and Sorted**: every row they match, not only the page |
+| **More > Export Database…** on the table list | **Database Objects**: everything in the database, or the schema, that the toolbar menu names |
+| **More > Export Results…** in **Query** | The result. A single statement that reads runs again and every row it returns goes in; anything else writes the rows shown |
+| **Export** in Select mode | The selected rows |
+
+Pick a **Format**. Every engine offers CSV, JSON, XLSX and Markdown, the SQL engines add SQL, and MongoDB adds MQL. CSV comes first; pick SQL for a file to restore and XLSX for a spreadsheet. The footer under **File Name** shows the extension the format adds.
+
+**Database Objects** lists the objects in a section per kind, in the order a restore needs them, all selected. **Select All** in a section's header selects or clears that kind. SQL writes every kind the Mac writes, routines, triggers, types, sequences, events and privileges included; the other formats take tables and views. With SQL or MQL, a selected row carries a menu of its options, **Structure**, **Drop** and **Data** or **Drop**, **Indexes** and **Data**, all on to start. With **Drop** on, the file drops each object before creating it, so turn it off for a file you might run against a database that holds data.
+
+Tap **Export**. **Cancel** stops the run and keeps no file. Once the file is written, the share sheet opens: save it to Files, AirDrop it, or hand it to another app. **Split every** gives several files, and the share sheet gets them all. After the share sheet closes, the export sheet shows how many rows went out, the file names and any warnings, with **Share Again**. **Done** deletes the app's copy, so keep the file through the share sheet first.
+
+A file export reads every value whole, bytes included. Selected rows are read again from their table when it has a primary key, on every engine but ClickHouse, MongoDB and Redis. Other selected rows, and a query result that is not run again, are written as shown: a value shown in part, or a binary value, stops the export with **Cannot Export**. At **Read-Only** the export opens no transaction, so **Read every table at one snapshot** does nothing.
+
+An open MongoDB collection exports whole: a search or filter does not narrow the file, and there is no **Filtered and Sorted**. On Redis, **Export Database…** lists each numbered database as one object, written as a row per key with its type, TTL, length and value. A string's value goes in whole; a hash, list, set, sorted set or stream gets the preview the Mac writes.
+
+### Import rows
+
+Rows from a CSV, TSV, JSON or XLSX file go into an existing table or a new one. An open table's **More > Import Rows…** starts on that table; **More > Import…** on the table list starts on none.
+
+<Steps>
+  <Step title="Pick the file">
+    Choose it in the file picker. The parsing options are the Mac's [CSV](/features/import-export#import-csv) and [XLSX](/features/import-export#import-xlsx) ones, and changing one reads the file again.
+  </Step>
+  <Step title="Choose the destination">
+    **Existing table** imports into the table under **Import into**, which lists tables and leaves views out. **New table** proposes a name from the file and a column per field.
+  </Step>
+  <Step title="Map the fields">
+    For an existing table, point each field at a column or at **Do not import**. **Match Columns** offers **Match by Name**, **Match by Position** and **Use Saved Mapping**. For a new table, tap a column to set **Import this field**, **Name**, **Type**, **Allows NULL**, **Primary Key** and **Default**, which is SQL written as it is: quote a text value.
+  </Step>
+  <Step title="Import">
+    Tap **Import**. The summary counts the rows inserted, updated, skipped and failed.
+  </Step>
+</Steps>
+
+**Import as** decides what happens to a row whose key the table already holds: **Insert**, the default, **Update**, **Insert or Update**, or **Insert, Skip Existing**, as [Update existing rows](/features/import-export#update-existing-rows) lays out. The last three match on the key picked under **Match on** and leave columns you did not map as they were. **Delete existing rows first** comes with **Insert** only, and always asks before it empties the table. Starting an import saves the mapping for that table on this device, and the next file into it starts from it.
+
+**On error** and **Wrap in transaction** behave as the Mac's [options](/features/import-export#options). **Stop** asks what to keep: **Stop and Rollback** or **Stop and Commit** while the import holds its own transaction, otherwise **Stop Import**, and the rows written so far stay. With a transaction already open on the connection, the rows go into it; commit or roll it back when the import ends.
+
+### Run a SQL file
+
+**More > Run SQL File…** on the table list runs a `.sql` or `.sql.gz` file on the connection, and a SQL file picked under **Import…** opens the same sheet. It counts the statements and reads the file as UTF-8, falling back to the encoding the file declares or matches; when the sheet says part of the file does not read, choose its **Encoding**. **On error**, **Wrap in transaction (BEGIN/COMMIT)** and **Disable foreign key checks** are the Mac's [options](/features/import-export#options), and on PostgreSQL the rows of a `COPY … FROM STDIN` block load through the copy protocol. Tap **Run**.
+
+### Files from other apps
+
+Share a `.csv`, `.tsv`, `.json`, `.xlsx` or `.sql` file from Files, Mail or another app and choose TablePro. With a connection open, the file goes to it, into **Import Rows** or **Run SQL File**. With none open, **Import Into** lists your connections, leaving out the ones marked **Opens on Mac only**, and the one you pick opens with the file. The **Connection** menu in the sheet moves the file to another connection and closes this one. A connection that cannot take the file says why in the sheet, such as "Import is not supported for MongoDB connections.", and keeps **Import** or **Run** dimmed.
+
+### Leaving the app
+
+An export or import keeps running when you switch away. From iOS 26 the system shows its progress, titled **Exporting** or **Importing** and the file name. Where iOS does not start that, and on iOS 18 to 25, the run has the background time iOS allows. When you stop it from the system's progress, iOS ends it, or that time runs out, an export stops and keeps no file. An import stops as **Stop and Rollback** would and says it stopped when TablePro moved to the background: rows in its own transaction roll back, and under **Skip and Continue**, or with **Wrap in transaction** off, the rows already written stay.
+
 ## What is missing
 
 - **Schema changes.** Truncating and dropping a table is the whole list; creating or altering tables, columns, indexes, triggers, and views is Mac only, and so is creating or dropping a Cloudflare D1 database.
 - **Changing Redis data.** Keys open read only; change them in **Query**.
 - **Whole MongoDB documents.** **Edit Document…**, **Insert Document…** and renaming or removing a field are Mac only; edit field by field here, or use **Query**.
 - **Socket connections.** A MySQL or MariaDB connection that uses a socket on the Mac opens there only. The connection list shows **Mac socket** and the path, marked **Opens on Mac only**, and a tap says why. Importing a `.tablepro` file marks such a row the same way. Its socket path syncs here and back intact.
+- **Some of export and import.** Parquet and Data Dictionary, a row filter on one table of an export, several files in one import, and **Transfer To…** are Mac only.
 - **AI.** No chat, no inline suggestions, no MCP server.
 
 ## Security

@@ -98,7 +98,7 @@ The Structure tab lists a collection's indexes, and [renames or removes a field]
 
 ### Views
 
-Views sit in their own **Views** group in the sidebar and open read-only, with no cell edits, **Add Row** or **Delete**, and no **Rename** or **Truncate** on the context menu. **Show DDL** writes the `db.createView(…)` that makes the view again, pipeline and collation included. **Edit View Definition** opens a `collMod` holding the view's source and pipeline: run it to change the view in place, collation kept. Both write each value in its own BSON type, so the text runs the same in a query tab and in mongosh: `NumberLong("…")` for an Int64, `Double(1.0)` for a whole Double, `ISODate("…")` for a date, `BSONRegExp("…", "…")` for a regular expression. A date before year 1 or after 9999 is written as `new Date(…)`. Export writes a view's documents; import and table transfer skip views.
+Views sit in their own **Views** group in the sidebar and open read-only, with no cell edits, **Add Row** or **Delete**, and no **Rename** or **Truncate** on the context menu. **Show DDL** writes the `db.createView(…)` that makes the view again, pipeline and collation included. **Edit View Definition** opens a `collMod` holding the view's source and pipeline: run it to change the view in place, collation kept. Both write each value in its own BSON type, so the text runs the same in a query tab and in mongosh: `NumberLong("…")` for an Int64, `Double(1.0)` for a whole Double, `ISODate("…")` for a date, `BSONRegExp("…", "…")` for a regular expression. A date before year 1 or after 9999 is written as `new Date(…)`. Export writes a view's documents; table transfer skips views.
 
 A time-series collection is listed with the other collections, and its DDL starts with a `// Time series:` line naming its time and meta fields. `system.views`, `system.profile` and the `system.buckets.*` collections behind time series are marked as system collections, with no **Rename** or **Truncate**.
 
@@ -400,6 +400,7 @@ The MongoDB driver is compiled into TablePro Mobile, with the same C driver and 
 - **Edit Document…** needs MongoDB 4.0 or later, and refuses a view and a time-series collection. Edit the collection a view reads, and change time-series documents with `updateMany` in a query tab.
 - In a collection whose default collation is not simple, saving a document with a string `_id` reads the whole collection to find it. On a large collection, change the document with `updateOne` in a query tab instead.
 - Transactions are not exposed. Statements always run standalone, on any topology.
+- CSV, JSON, XLSX and SQL files do not import into MongoDB. Load documents with `insertMany` in a query tab, or with `mongoimport`.
 - A collection takes one text index. A second **FULLTEXT** row fails after the collection and the indexes before it are created: list every text field in one index instead.
 - **New Table…** writes the validator with the server's own level and action. To log bad documents instead of refusing them, run `db.runCommand({collMod: "articles", validationAction: "warn"})` after creating the collection.
 - Nested paths filter but do not sort. Sorting works on the grid's own columns.
