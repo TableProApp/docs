@@ -188,8 +188,13 @@ Verify Identity, and Automatic with any **Host** but `localhost`, `127.0.0.1` or
 - A remote connection's editor sees no persistent secret, an S3 one included, so a read that needs it fails. Run `CREATE SECRET` in the session instead; it lasts until the connection closes. Local File connections read persistent secrets.
 - **Required (skip verify)** turns the certificate check off for every HTTPS read the connection makes, `read_parquet('https://…')` in the editor included. Pin the server with **Verify Fingerprint** to keep those reads checked.
 - No creating or dropping a database. `ATTACH` is the way to reach a second file.
+- An expression, subquery or view chain nested more than 250 levels deep fails, where the `duckdb` CLI allows 1,000. A file whose constraints nest deeper opens and lists its tables, but reading their structure fails. Flatten the expression, or run `SET max_expression_depth` in the editor for that session.
 
 ## Troubleshooting
+
+### Max expression depth limit of 250 exceeded
+
+The statement, or a constraint, default, view or macro it reads, nests deeper than 250 levels. Check the expression the message points at, and the constraints of the tables the query reads. Flatten it, or raise the limit for the session with `SET max_expression_depth`; past about 500 levels DuckDB can then crash TablePro.
 
 ### No file at …
 
