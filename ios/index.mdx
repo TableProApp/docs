@@ -277,7 +277,7 @@ The **Status** row in **Info** uses the same words: **Connected**, **Not Connect
 
 ## Export and import
 
-The formats and their options are the Mac's, and [Import & Export](/features/import-export) explains each one. Export works on every engine and at every [safe mode](/features/safe-mode) level. Import writes: **Read-Only** hides it, **Confirm Writes** asks once before each file, and MongoDB and Redis import nothing.
+The formats and their options are the Mac's, and [Import & Export](/features/import-export) explains each one. Export works on every engine and at every [safe mode](/features/safe-mode) level. Import writes: **Read-Only** hides it, **Confirm Writes** asks once before each file, and MongoDB and Redis import nothing. An import, rows or a SQL file, has its connection to itself: it starts only when nothing else runs there, and until it ends, a query, an edit, a page load or a database switch on that connection stops with "An import is running on this connection."
 
 ### Export to a file
 
@@ -286,7 +286,7 @@ The formats and their options are the Mac's, and [Import & Export](/features/imp
 | A table in **Tables**: touch and hold it, then **Export…** | That table |
 | An open table's **More > Export…** | **Whole Table**, or while a search, filter or sort is on, **Filtered and Sorted**: every row they match, not only the page |
 | **More > Export Database…** on the table list | **Database Objects**: everything in the database, or the schema, that the toolbar menu names |
-| **More > Export Results…** in **Query** | The result. A single statement that reads runs again and every row it returns goes in; anything else writes the rows shown |
+| **More > Export Results…** in **Query** | The result. A single statement that reads runs again and every row it returns goes in, unless the connection has run a write, `SET`, `USE`, temporary table or transaction statement; then, and for anything else, the rows shown go in |
 | **Export** in Select mode | The selected rows |
 
 Pick a **Format**. Every engine offers CSV, JSON, XLSX and Markdown, the SQL engines add SQL, and MongoDB adds MQL. CSV comes first; pick SQL for a file to restore and XLSX for a spreadsheet. The footer under **File Name** shows the extension the format adds.
