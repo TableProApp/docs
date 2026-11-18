@@ -62,7 +62,7 @@ Paste an access token issued for the account. Nothing refreshes it for you.
 
 ## Browsing and sessions
 
-The sidebar groups objects by database and schema. Object lists come from `SHOW` commands, which the metadata service answers with no warehouse running; column details come from `INFORMATION_SCHEMA`, which needs one.
+The sidebar groups objects by database and schema. Object lists and a table's columns, row count, size and comment come from `SHOW` commands, which the metadata service answers with no warehouse running. Reads across a whole schema, such as autocomplete, take their columns from `INFORMATION_SCHEMA`, which needs one.
 
 **Database > Session Context** moves the session to another **Warehouse** or **Role** with `USE WAREHOUSE` and `USE ROLE`, no reconnect. A tab bound to a second database stays on that session too: `USE DATABASE` runs ahead of its statements. One TablePro connection is one Snowflake session, held open while idle by a heartbeat.
 
@@ -105,7 +105,7 @@ Key-pair auth. The JWT issuer carries your account locator and a timestamp, so c
 
 ### No databases in the sidebar
 
-The connecting role needs `USAGE` on the databases. Set **Warehouse** too: column metadata runs on `INFORMATION_SCHEMA`, which needs one.
+The connecting role needs `USAGE` on the databases. Set **Warehouse** too: reads across a whole schema, such as autocomplete, run on `INFORMATION_SCHEMA`, which needs one.
 
 ### The browser never came back
 
