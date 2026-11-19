@@ -36,7 +36,7 @@ Both stage cell edits as pending changes. A query tab does it only when its quer
 | Tab used before this one | `Ctrl+Tab` |
 | Tab used longest ago | `Ctrl+Shift+Tab` |
 
-**Close Other Tabs**, **Close All Tabs**, **Close Tabs for Other Databases**, and **Pin Tab** ship unbound. Bind them in **Settings > Keyboard** under Navigation.
+**Close Other Tabs**, **Close All Tabs**, **Close Tabs for Other Databases**, **Pin Tab**, and **Rename Tab** ship unbound. Bind them in **Settings > Keyboard** under Navigation.
 
 ## Preview tabs
 
@@ -92,6 +92,14 @@ Right-click a tab and choose **Pin Tab**, or choose **Window > Pin Tab**, to kee
 Pinning a preview tab keeps it, and a sidebar click never takes over a pinned tab: the table opens in a tab of its own. Drag a pinned tab to reorder it among the other pinned tabs; it never moves past them. Choose **Unpin Tab** to put it back at the start of the unpinned tabs.
 
 The pin is saved with the tab, comes back after a restart, and moves with the tab to a new window or another connection. Pinning results inside a query tab is a separate command, **View > Pin Result** (`Cmd+Option+P`).
+
+## Naming tabs
+
+Double-click a query tab, or choose **Rename Tab** from its contextual menu or **Window > Rename Tab**, and type a name in the tab. `Return` or a click elsewhere keeps it, and `Esc` leaves the tab as it was. Clear the name to give the tab back its number.
+
+A name is one line of up to 100 characters. It is saved with the tab, comes back after a restart and with **Reopen Closed Tab**, and moves with the tab to a new window or another connection. A named tab keeps its name even when it reads like `Query 3`, and a sidebar click never takes it over.
+
+Only a query tab that is not saved to a file takes a name. A tab opened from a `.sql` file is named after the file, and saving a named tab to a file gives it the file's name. Like the strip, **Rename Tab** needs two or more tabs.
 
 ## Moving a tab to its own window
 
