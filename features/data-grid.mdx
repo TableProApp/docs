@@ -174,6 +174,13 @@ On a table tab, sorting, filtering, and changing page or page size start at the 
 
 Saving edits, importing rows, **Insert Document…**, a structure change and **Refresh Materialized View…** reload every tab showing the table they changed, in every window of the connection. The tab in front reloads at once and keeps its place. A tab behind it reloads when you switch to it. A tab with a cell open or unsaved edits is not interrupted. It reloads as soon as the cell is closed and its edits are saved, undone or discarded. Tabs on other tables stay as they are. A SQL file import reaches every table tab of the connection the same way. A statement run from the SQL editor reloads nothing, so press `Cmd+R` on the tabs it touched.
 
+When another session changes a table's columns or primary key after the schema loaded, the first page of that table can open with the old structure: a new column missing while some columns are hidden, or rows sorted by the old key. A bar over the grid then names the table. Click **Reload** to read the page again with the current columns and the sort they give, or close the bar to keep the rows as they are. Nothing reloads by itself. When the old structure makes the page fail, the bar shows under the error.
+
+<Frame caption="The primary key moved from id to code after the schema loaded">
+  <img className="block dark:hidden" src="/images/outdated-page-notice.png" alt="A bar above the shot_orders grid says its structure changed and offers Reload" />
+  <img className="hidden dark:block" src="/images/outdated-page-notice-dark.png" alt="A bar above the shot_orders grid says its structure changed and offers Reload" />
+</Frame>
+
 ### Auto Refresh
 
 To watch a table change, click the clock button in the status bar, or open **Database > Auto Refresh**, and pick **Every 5 Seconds**, **Every 10 Seconds**, **Every 30 Seconds**, **Every Minute** or **Every 5 Minutes**. **Off** stops it. Each refresh reads the rows the way `Cmd+R` does and keeps your place, but leaves the row count as it was and adds nothing to [query history](/features/query-history). `Cmd+R` recounts and starts the wait over.
