@@ -22,7 +22,7 @@ Click **New Connection…**, select **BigQuery**, pick an auth method, enter you
 | **Service Account Key** | Service account only | A `.json` key file path, or the raw JSON |
 | **OAuth Client ID**, **OAuth Client Secret** | OAuth only | From GCP Console > APIs & Services > Credentials |
 | **OAuth Refresh Token** | No | OAuth only. Tried before the token saved by sign-in |
-| **Location** | No | Processing location (`US`, `EU`, `us-central1`), sent with every job |
+| **Location** | No | Processing location (`US`, `EU`, `us-central1`), sent with every query |
 | **Max Bytes Billed** | No | Options tab. A query over the cap fails instead of billing |
 
 There is no Database field and no URL scheme. Datasets stand in for databases: the sidebar lists them as expandable nodes, `Cmd+K` and **Database > Open Database…** move between them, and **Database > New Database…** runs `CREATE SCHEMA`. Switching does not move tabs you already have open; each stays on its own dataset. See [Tabs](/features/tabs#where-a-tab-points).
@@ -65,7 +65,7 @@ Every query is billed on bytes scanned, so there are three places to control it.
 
 - Before running, pick **Dry Run (Cost)** from the Explain dropdown. It asks BigQuery what the query would scan without executing it.
 - After running, the status bar shows bytes processed, bytes billed, and an estimate at the on-demand rate of $6.25 per TB: `Processed: 1.5 MB | Billed: 10 MB | ~$0.0001`. A cache hit is marked `(cached)`.
-- As a hard ceiling, set **Max Bytes Billed**: BigQuery rejects a job that would exceed it.
+- As a hard ceiling, set **Max Bytes Billed**: BigQuery rejects a query that would exceed it.
 
 <Frame caption="Query cost in the status bar after execution">
   <img className="block dark:hidden" src="/images/bigquery-query-cost.png" alt="Status bar showing bytes processed, bytes billed, and estimated query cost" />
@@ -84,7 +84,8 @@ Minimum IAM roles: `roles/bigquery.user` to run queries, `roles/bigquery.dataVie
 - A partitioned table needs a partition filter for UPDATE and DELETE, or the statement is rejected. Write it in the editor.
 - No transactions, no streaming inserts, no SSH tunnel.
 - Deep pagination rescans from the start of the table. Filter rather than paging far in.
-- A job is polled until the [query timeout](/customization/general-settings#query-timeout), then cancelled. With **No limit**, it is polled until it finishes.
+- A statement that finishes within two seconds returns in one request, and BigQuery may run it without a job. A longer one runs as a job, polled until the [query timeout](/customization/general-settings#query-timeout), then cancelled. With **No limit**, it is polled until it finishes.
+- **Stop** cancels a statement BigQuery has not received yet. Once BigQuery has it, Stop cancels its job if it is still running. A statement that already finished, an `UPDATE` included, stays applied.
 
 ## Troubleshooting
 
