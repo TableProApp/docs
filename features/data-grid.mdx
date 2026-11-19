@@ -22,10 +22,10 @@ A Cassandra, ScyllaDB or Bigtable table has no header sort, and a query result t
 
 **Sort direction** in [Settings > Data](/customization/data-settings) decides which way that first click goes. It is Ascending out of the box; set it to Descending to open on the newest rows and reach them in one click.
 
-To sort on open, set **Default row sort** to **Primary key** or **First column**; out of the box the order is the server's. A sort the setting applies carries the same arrow as one you clicked, and clicking that header reverses it.
+A table opens sorted by its primary key, so each page continues where the last one ended. A table with no primary key opens in the server's order. Set **Default row sort** to **First column**, or to **No sorting (engine order)** to keep the server's order everywhere. A sort the setting applies carries the same arrow as one you clicked, and clicking that header reverses it.
 
 <Warning>
-Sorting on a `BLOB`, `JSON`, or spatial column the server cannot order on fails the query. Sort on another column, or set **Default row sort** back to the engine's order.
+Sorting on a `BLOB`, `JSON`, or spatial column the server cannot order on fails the query. Sort on another column, or set **Default row sort** to **No sorting (engine order)**.
 </Warning>
 
 ## Filtering
