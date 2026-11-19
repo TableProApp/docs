@@ -59,9 +59,12 @@ Choose **Vim** under **Settings > Editor > Key bindings**, which is also the onl
 | `gg` | First line |
 | `G` | Last line |
 | `5G` | Line 5 |
-| `H` `M` `L` | Top, middle, bottom of view |
+| `Enter` `+` | First non-blank of the next line |
+| `-` | First non-blank of the line before |
+| `H` `M` `L` | Top, middle, bottom of view. `3H` is the third line from the top, `3L` from the bottom |
 | `gj` `gk` | The same lines as `j` `k`. Wrapped display lines have no motion of their own |
 | `%` | Matching `()`, `[]`, `{}` |
+| `50%` | The line halfway through the text |
 
 ### Find a character
 
@@ -105,6 +108,8 @@ Counts work: `3w` moves three words, `5j` moves five lines down.
 
 `2d3w` deletes six words. `3yy` yanks three lines. `5>>` indents five lines.
 
+Every motion works after an operator: `d%` deletes through the matching bracket, `d}` to the end of the paragraph, `d'a` the lines up to mark `a`, and `d/pattern` `Enter` up to the next match. `cw` changes to the end of the word. `Esc` drops a command still being typed, with its count and register.
+
 Yank, delete, and change all write to the system clipboard, except through the black-hole register `"_`.
 
 ## Text objects
@@ -133,7 +138,7 @@ Use after `d`, `c`, `y`, or in visual mode.
 | `P` | Before cursor (or above the line) |
 | `3p` | Paste three times |
 
-In visual mode, `p` and `P` replace the selection with the register.
+In visual mode, `p` and `P` replace the selection with the register. `p` then keeps the replaced text in `"`, and `P` leaves the registers as they were.
 
 ## Registers
 
@@ -160,7 +165,7 @@ Prefix a command with `"` and the register's name to pick one.
 | `` `< `` `` `> `` | Start, end of last visual selection |
 | `''` `` `` `` | Back to position before the last jump |
 
-Marks shift when you insert or delete text before them. Each query tab keeps its own marks.
+A mark keeps its line and column. Lines added or removed above it move it, a join carries it along, deleting its line removes it, and undo puts it back. Each query tab keeps its own marks.
 
 ## Search
 
