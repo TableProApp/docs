@@ -75,6 +75,17 @@ Hide columns from the columns button in the status bar or from the header menu. 
 
 Widths, order, hidden and frozen columns are remembered per table, scoped to the connection, database, and schema; **Reset Columns** in the popover puts them back. Right-click a header and choose **Display As** to read a column's stored values in a different form; [Cell and Row Viewers](/features/json-viewer) lists the formats.
 
+### Wrap text
+
+Choose **View > Wrap Text**, or **Wrap Text** on the header menu, to show long values on several lines. A row grows to fit its tallest cell, up to 10 lines; a value that needs more ends in an ellipsis. A line break stored in the value starts a new line. With wrap off, every row is one line and a line break shows as a space.
+
+<Frame caption="Rows grow to fit wrapped values">
+  <img className="block dark:hidden" src="/images/data-grid-wrap-text.png" alt="Notes table with Wrap Text on: long body values run over several lines and short rows stay one line" />
+  <img className="hidden dark:block" src="/images/data-grid-wrap-text-dark.png" alt="Notes table with Wrap Text on: long body values run over several lines and short rows stay one line" />
+</Frame>
+
+Wrap applies to the whole grid of one tab, in tables, views and query results, and is saved with the tab. **Wrap text in cells** in [data settings](/customization/data-settings) sets it for new tabs.
+
 ### Freeze columns
 
 Right-click a column's header and choose **Freeze Up to This Column** to hold it and every column before it beside the row numbers. The rest scroll under them, and a line marks where the frozen columns end. Select, copy, edit, find and jump to a frozen column as to any other. **Unfreeze Columns** on the header menu lets them scroll again.
