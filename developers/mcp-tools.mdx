@@ -41,6 +41,15 @@ Past the scope, a call clears three more gates:
 2. **Connection policy.** **External Clients** set to **Blocked** hides the connection: `list_connections` omits it and any tool that names it is refused. An AI policy of **Never** does the same, except that [`purpose: "display"`](#listing-for-display) still lists it. Otherwise the first call that touches a connection asks the user, as often as **Settings > MCP > Approval** says. That question is always a dialog on the user's Mac, never an elicitation: a client that could answer it could also grant itself the connection. It has no deadline, so the client owns the timeout, and a refusal stands for 60 seconds before the question can be put again.
 3. **Safe Mode.** A write goes through the connection's Safe Mode, which may ask the user to confirm it or to authenticate. See [Approvals](/developers/mcp-protocol#approvals-and-input-required).
 
+### The active project
+
+When the user has a [project](/connections/projects) active in TablePro, `list_connections` and the [`tablepro://connections`](/developers/mcp-resources) resource hold that project's connections only. A tool that names a connection of another project by id is refused with `-33007` and the text "This connection is in another project. Switch to that project or to All Connections in TablePro to reach it."
+
+- The user switches project in the app, so the answer can change between two calls of one client.
+- With **All Connections** chosen, nothing is narrowed.
+- The scope only narrows. The token, the allowlist, the connection policy and Safe Mode are checked as before.
+- TablePro for Linux and Windows return a tool error with the code `out_of_scope` instead. See [Linux tools](/integrations/mcp-clients#linux-tools).
+
 `completion/complete` clears the same connection policy without asking: on a connection this client is not approved for, it completes nothing. See [Context matters](/developers/mcp-prompts#context-matters).
 
 A call that opens a connection may also need approval on the Mac for a pre-connect script, environment variables, or [local sign-in credentials](/connections/connection-form#sign-ins-from-this-mac). A refusal returns `denied`; an unanswered prompt returns `timeout`.
@@ -91,7 +100,7 @@ To read a value that was cut, select part of it with a narrower query. To get mo
 
 `switch_database` and `switch_schema` move what the user sees: the sidebar, and the tab strip, which lists the tabs of the database or schema the connection is on. The user's other tabs stay open under their own database.
 
-`list_connections` omits connections blocked for external clients, connections whose AI policy is **Never**, and connections outside the token's allowlist. Its `database` is the session's browsed database when connected, the saved default otherwise.
+`list_connections` omits connections blocked for external clients, connections whose AI policy is **Never**, connections outside the token's allowlist, and connections outside [the active project](#the-active-project). Its `database` is the session's browsed database when connected, the saved default otherwise.
 
 The labels the user gave a connection come with it, so a client can show the list the way the app does:
 

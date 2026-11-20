@@ -73,6 +73,7 @@ Red for production, green for development. On production, set **Safe Mode** to *
 | **Groups** | Folders in the connection list, nested up to three levels. Choose **File > New Group…**, or right-click empty space for **New Group…**. Right-click a group for **Rename**, **Edit Group…**, **New Subgroup…**, **Color**, **Move Group To**, and **Delete Group…**. **Edit Group…** changes the name, icon, color and parent group in one sheet. Deleting a group deletes its subgroups too and leaves the connections inside ungrouped rather than deleted |
 | **Tags** | Several per connection, each with a name and color. Type a tag's name in the search field and pick it to filter by it, or choose tags from **Filter by Tag** in the **View Options** menu. With two or more chosen, **Match** switches between any and all of them, and **Clear Filters** removes them |
 | **Favorites** | Right-click a connection and choose **Add to Favorites**, or drag it onto the **Favorites** header. Favorites gather in a section at the top while the connection keeps its place in its group |
+| **Projects** | One project per product, each holding groups and connections. Choosing one from the pop-up button at the leading edge of the toolbar narrows the list, its search, **Favorites** and **Recent** to it. See [Projects](/connections/projects) |
 | **Recent** | The five connections you opened last, favorites left out. Right-click one for **Remove from Recent**, or the section header for **Clear Recent**. To hide the section, turn off **Show recent connections** in [General settings](/customization/general-settings#connections) |
 
 A connection's icon, group, tags, and favorite sync through iCloud, and so does a group's icon, to the iPhone and iPad app as well, unless it is marked local only. See [iCloud Sync](/features/icloud-sync).
@@ -124,4 +125,4 @@ Right-click a connection to edit or delete it, or select it and press `Delete`. 
 
 Connections are stored in `~/Library/Application Support/TablePro/connections.json` with their passwords in the macOS Keychain, so copying that file to another Mac restores the connections without the passwords. Each save keeps the file it replaces as `connections.json.backup`. A connection this version cannot read is kept as it is and the others load; it stays in the file, or moves to `connections.json.unreadable-records` when the file changed outside TablePro. A file that no longer reads as a list is restored from the backup, and the damaged copy is kept as `connections.json.unreadable`.
 
-Right-clicking the Dock icon lists saved connections under **Open Connection**.
+Right-clicking the Dock icon lists saved connections under **Open Connection**: those of the active [project](/connections/projects), or all of them in **All Connections**.

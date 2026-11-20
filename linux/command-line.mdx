@@ -130,7 +130,7 @@ A pipe closed by its reader, such as `| head`, exits 0.
 
 ## What a query may do
 
-A connection's **External Clients** setting applies to every command that uses it. **Blocked** hides the connection; naming it exits 2. **Read Only** is the default and refuses writes.
+A connection's **External Clients** setting applies to every command that uses it. **Blocked** hides the connection; naming it exits 2. So does naming a connection outside the [project](/linux/connect#projects) picked in the app: `connections` lists that project only. **Read Only** is the default and refuses writes.
 
 With **Read & Write**, each write still needs **Run** in the connection's window. Safe Mode also applies; **Read-Only** refuses writes. `--read-only` refuses a write before it asks for approval.
 

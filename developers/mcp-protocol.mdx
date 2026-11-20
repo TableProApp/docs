@@ -329,7 +329,7 @@ TablePro's own error codes live in `-33000` and above. The `-32000` block is fro
 | `-33003` | 200 | Request timeout. The statement or the handler deadline ran out. |
 | `-33005` | 413 | Payload too large. The body cap is 10 MB. |
 | `-33006` | 503 | Server disabled. |
-| `-33007` | 403 | Forbidden. Token scope, connection allowlist, AI policy, or external access rejected the call. |
+| `-33007` | 403 | Forbidden. Token scope, connection allowlist, AI policy, external access, or [the active project](/developers/mcp-tools#the-active-project) rejected the call. |
 | `-33008` | 401 | Token expired. |
 | `-33009` | 401 | Unauthenticated. No token, or an unknown or revoked one. |
 | `-33010` | 429 | Rate limited. Carries `Retry-After`. |

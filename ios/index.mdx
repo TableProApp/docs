@@ -58,13 +58,14 @@ Cassandra, BigQuery, Spanner, Snowflake and the rest have no iOS driver. Their c
 
 ## The connection list
 
-Favorites come first, then **Recent** with the five connections opened last, then your groups, nested the way the Mac nests them. The **More** menu holds **Sort By** (**Manual**, **Name**, **Database Type**, **Last Connected**), **New Group**, **Manage Tags**, **Open Sample Database**, and import and export. Type a tag's name in the search field to filter by it; with two tags or more chosen, **Match All Tags** appears in the **More** menu.
+Favorites come first, then **Recent** with the five connections opened last, then your groups, nested the way the Mac nests them. The **More** menu holds **Sort By** (**Manual**, **Name**, **Database Type**, **Last Connected**), **New Group**, **Manage Tags**, **Manage Projects…**, **Open Sample Database**, and import and export. Type a tag's name in the search field to filter by it; with two tags or more chosen, **Match All Tags** appears in the **More** menu.
 
 | To | Do this |
 | --- | --- |
 | Favorite a connection | Swipe right on it, or touch and hold and choose **Add to Favorites** |
 | Rename | Touch and hold, choose **Rename**, type the name, and tap **Done** |
 | Move into a group | Touch and hold and choose **Move to Group**, or drag the row onto a group |
+| Move into a project | Touch and hold an ungrouped connection or a top-level group and choose **Move to Project** |
 | Reorder | Tap **Edit** and drag the handles, with **Sort By** on **Manual** |
 | Change several at once | Tap **Edit**, select the rows, and tap **Move**, **Favorite** or **Delete** |
 | Delete | Swipe left, or touch and hold and choose **Delete** |
@@ -76,6 +77,23 @@ Favorites come first, then **Recent** with the five connections opened last, the
 **Duplicate** copies the saved password, SSH secrets, client certificates and file access along with the settings. Recent and the sort order stay on the device.
 
 A connection, group or tag form with unsaved changes stays open when swiped down, and **Cancel** asks before it discards them.
+
+### Projects
+
+A project keeps one product's connections apart. Choose **More > Manage Projects…**, tap **New Project…**, and name it. From then on the list's title is a menu: tap it and pick the project, or **All Connections** for everything. **Manage Projects…** is in that menu too, and **Edit** moves into the **More** menu.
+
+| To | Do this |
+| --- | --- |
+| Put a connection or a group in a project | Touch and hold it and choose **Move to Project**, then the project, or **None** to take it out |
+| Rename a project | Open **Manage Projects…** and tap the project |
+| Reorder projects | Touch and hold a row in **Manage Projects…**, then drag it |
+| Delete a project | Swipe left on it in **Manage Projects…**. Its connections are kept and show under **All Connections** |
+
+**Move to Project** is offered on an ungrouped connection and on a top-level group. A group takes everything in it along, and a connection inside a group follows its top-level group. A connection is in one project at most.
+
+With a project chosen, the list, its search, **Favorites**, **Recent**, **Move to Group** and export show that project only. So do the **Quick Connect** widget, Spotlight and the connections a Shortcuts action offers. A shortcut that already holds a connection, a widget tap and a `tablepro://` link still open a connection of another project. **Open Sample Database** is in the **More** menu under **All Connections** only.
+
+A new connection, a new group and an import land in the project you are in, unless the imported file names a project of its own. A search with no match offers **Search All Connections**. The project you chose, and the projects themselves, stay on this device.
 
 ## The sample database
 
