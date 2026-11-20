@@ -1,10 +1,17 @@
 ---
 title: Browsing a connection
-description: Filter a table, read its structure and DDL, open routines and triggers, export or share results, and find past queries in TablePro for Windows
-tag: "Preview"
+description: Work in the object tree, filter a table, read its structure and DDL, open routines and triggers, share results, and find past queries in TablePro for Windows
 ---
 
 Every object in the tree opens in a tab. Tables and views open as rows, and functions, procedures, triggers and sequences open as their source, read only.
+
+## The object tree
+
+Objects sit in a folder per kind, with their count. Schemas show only when there is more than one besides the system ones. A folder lists its first 500 objects; **Show all** opens the rest in a list. Type in **Filter objects** (`Ctrl+P`) to find any object across schemas, names that start with the text first. `Ctrl+B` hides or shows the tree, and `F5` reads it again.
+
+Click a table or view to open its rows, or bring its open tab forward. Right-click it for **Open in new tab**, **Show structure**, **Show DDL**, **Copy name** and **Import CSV...**, and, where the engine has them and the connection is not read only, **Truncate...** and **Drop...**.
+
+A schema's menu has **New schema...** and **Drop schema**, or **New database...** and **Drop database** where the server's databases are its schemas. **New database...** and **New schema...** are in the **Database** menu too. Each shows its statements under Safe Mode and runs once you confirm. The engine's own databases and schemas, and the one you are in, are never offered for a drop.
 
 ## Filter rows
 
@@ -32,7 +39,9 @@ Add a rule with **+**. With two or more rules, choose **Match all** or **Match a
 - A rule missing its value is pointed out before anything runs.
 - A filter the database refuses keeps the filter you had, and the results say why. Refresh reads the rows again.
 - Changing the filter while edits are pending asks before it discards them.
-- The filter stays with the tab when TablePro restarts.
+- Each table keeps the filter it was last read with, per connection, database and schema. Opening the table again applies it; **Clear** forgets it.
+
+To filter by a value in the grid, right-click the cell and open **Filter**. It offers equal and not equal to the value, greater and less than where the column orders, and **is NULL** or **is not NULL** on a NULL cell, each where the engine has the operator. The rule joins the ones you have and applies at once. A query result has no **Filter**.
 
 ## Read a table's structure
 
@@ -82,29 +91,6 @@ A script whose statements return rows lists each result in the picker above the 
 
 Earlier results are dropped as the script runs, and the status line says how many: `Rows: 1 · 12 ms · 990 earlier results were dropped.` A statement that returns no rows never counts toward the limit. A change applies from the next run.
 
-## Export results
-
-Choose **File > Export results** or press `Ctrl+Shift+E`.
-
-<Frame caption="Export results from a query tab">
-  <img className="block dark:hidden" src="/images/windows-export-results.png" alt="Export results dialog with CSV selected among JSON, Excel, Markdown, HTML and XML" />
-  <img className="hidden dark:block" src="/images/windows-export-results-dark.png" alt="Export results dialog with CSV selected among JSON, Excel, Markdown, HTML and XML" />
-</Frame>
-
-<Steps>
-  <Step title="Pick a format">
-    CSV, JSON, Excel, Markdown, HTML or XML. From a table tab, **SQL INSERT** writes one statement per row for that table.
-  </Step>
-  <Step title="Pick the rows, in a table tab">
-    **Current page** writes the rows on screen. **Entire table** reads every row the filter and sort pick, however many pages they span.
-  </Step>
-  <Step title="Choose where to save">
-    The file appears only once every row is written. A failed or cancelled export leaves no file behind.
-  </Step>
-</Steps>
-
-From a query tab, export writes the result shown. Export waits until the run has finished. CSV is the default; pick Excel for a spreadsheet, which holds up to 1,048,575 rows.
-
 ## Share a result or query
 
 Sharing needs a signed-in [TablePro account](/windows/account); signed out, the share dialog offers **Sign in...**.
@@ -123,7 +109,7 @@ Opening a `tablepro://share` link puts its SQL in a new query tab without runnin
 
 ## Find a past query
 
-Choose **View > Show query history** to open the history beside the tabs. Every query you run in a query tab is kept with its time, duration and outcome, newest first. Type in the search box to find one by any words it contains.
+Choose **Show query history** in the **View** menu to open the history beside the tabs. Every query you run in a query tab is kept with its time, duration and outcome, newest first. Type in the search box to find one by any words it contains.
 
 <Frame caption="The query history beside the tabs">
   <img className="block dark:hidden" src="/images/windows-query-history.png" alt="Query history pane listing a SELECT COUNT query with its time and duration" />
@@ -131,7 +117,7 @@ Choose **View > Show query history** to open the history beside the tabs. Every 
 </Frame>
 
 - Double-click a query, or select it and press `Enter`, to open it in a new query tab.
-- Right-click a query to copy or delete it.
+- Right-click a query to copy, save, pin or delete it. A pinned run comes first and is never removed by the history limits in Settings.
 - **Clear history** removes the history of every connection, after asking.
 
 A statement that can hold a password, such as one that creates a user, is never kept. Sorting a result and committing or rolling back a transaction are not kept either.
@@ -142,4 +128,4 @@ A statement that can hold a password, such as one that creates a user, is never 
 |---|---|
 | Show or hide the filter bar | `Ctrl+Shift+F` |
 | Apply the filter | `Enter` in a value box |
-| Export results | `Ctrl+Shift+E` |
+| Filter objects in the tree | `Ctrl+P` |

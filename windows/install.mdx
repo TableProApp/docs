@@ -1,0 +1,128 @@
+---
+title: Install on Windows
+description: Install TablePro for Windows from its App Installer file, winget or a release bundle, keep it updated, and remove it
+---
+
+One package covers Windows 10 version 1809 (build 17763) and later and Windows 11, on x64 and Arm64. Windows installs the build for its own processor. [Connect](/windows/connect#engines) lists the database engines, and [Not in the Windows app yet](#not-in-the-windows-app-yet) what the Mac app has that this one does not.
+
+## Install
+
+Pick the App Installer file unless you manage software with winget. It is the only way Windows updates TablePro on its own.
+
+### App Installer file
+
+<Steps>
+  <Step title="Download the file">
+    Download [TablePro.appinstaller](https://updates.tablepro.app/windows/TablePro.appinstaller) from updates.tablepro.app.
+  </Step>
+  <Step title="Open it">
+    Open the downloaded file and click **Install** in App Installer. It installs the newest release.
+  </Step>
+</Steps>
+
+Windows then checks that file for a newer release at most once a day when TablePro starts, and every 8 hours in the background.
+
+For betas, download [TablePro-Beta.appinstaller](https://updates.tablepro.app/windows/TablePro-Beta.appinstaller) instead. It installs the newest build of either channel. Windows does not check the beta file on its own: betas arrive through the app's [own check](#updates).
+
+### winget
+
+```powershell
+winget install TablePro.TablePro
+winget upgrade TablePro.TablePro
+```
+
+winget lists releases only, never betas, and updates on `winget upgrade`.
+
+### Release bundle
+
+Each release on [GitHub Releases](https://github.com/TableProApp/TablePro/releases) has a tag starting `windows-v`. Betas are marked as pre-releases.
+
+| File | Holds |
+|---|---|
+| `TablePro_<package version>_x64_arm64.msixbundle` | The x64 and Arm64 packages, signed |
+| `TablePro.appinstaller` or `TablePro-Beta.appinstaller` | The channel's App Installer file, the same as the one on updates.tablepro.app |
+| `SHA256SUMS` | The SHA-256 of each file |
+
+The package version is the release's version with `.99` added, so 0.1.0 ships as `TablePro_0.1.0.99_x64_arm64.msixbundle`. A beta ends in its number instead: 0.2.0-beta.1 is `0.2.0.1`. Compare the hash with `SHA256SUMS`, then install:
+
+```powershell
+Get-FileHash .\TablePro_0.1.0.99_x64_arm64.msixbundle -Algorithm SHA256
+Add-AppxPackage -Path .\TablePro_0.1.0.99_x64_arm64.msixbundle
+```
+
+Opening the bundle in Explorer installs it too.
+
+A bundle or winget install is tied to no App Installer file, so Windows never checks for it. The app's own check still finds updates on the channel Settings picks, and an update installed from the app ties the install to that channel's file.
+
+### Windows Server
+
+Windows Server has no App Installer. Install the bundle with `Add-AppxPackage`. The app still says when an update is out, but installing it from the app fails, so install each new bundle the same way.
+
+## Updates
+
+The app checks for updates when it starts, every 24 hours while it runs, and when you choose **Check for updates...** in the **Help** menu. Once an update is out, that item reads **Update available...** and a bar under the menu bar says **TablePro** and the version **is available**.
+
+<Steps>
+  <Step title="Start the install">
+    Click **Install update...** in the bar or in **Settings > Software update**, then **Restart**.
+  </Step>
+  <Step title="Answer for your open work">
+    Unsaved table changes, open transactions and running queries are asked about as they are when you exit.
+  </Step>
+  <Step title="Wait for the restart">
+    No window shows while Windows downloads and installs the package.
+  </Step>
+</Steps>
+
+<Check>
+TablePro starts on the new version with a bar saying it was updated, and **What's new** opens the release notes.
+</Check>
+
+A failed install names the reason, and TablePro starts again on the version it had.
+
+**Update channel** in **Settings > Software update** picks **Stable** or **Beta**. Until you pick, it shows the channel of the file you installed from. Switching back to Stable keeps the beta you have until a newer release ships.
+
+Settings shows the version as `0.1.0`, or `0.2.0-beta.1` for a beta. Windows Settings shows the package version, which ends in `.99` for a release.
+
+## Where your data lives
+
+| What | Where |
+|---|---|
+| Connections, groups, favorites, saved queries, history, settings, open tabs | The data folder. **Open the data folder** under **Settings > About** opens it |
+| Passwords, passphrases, the MCP token, AI keys, the account sign-in | Windows Credential Manager, as generic credentials named `TablePro/...` |
+
+The data folder is `%LOCALAPPDATA%\Packages\<package family>\LocalState`.
+
+## Uninstall
+
+<Danger>
+Uninstalling deletes the data folder: saved connections, groups, saved queries, query history and settings. Choose **Export connections...** in the **File** menu first to keep your connections. The file holds no passwords.
+</Danger>
+
+Remove TablePro under **Apps > Installed apps** in Windows Settings, or from PowerShell:
+
+```powershell
+Get-AppxPackage -Name TablePro | Remove-AppxPackage
+```
+
+Credential Manager keeps TablePro's credentials after an uninstall. To remove them, open Credential Manager, choose **Windows Credentials**, and remove each generic credential whose name starts with `TablePro/`.
+
+## Not in the Windows app yet
+
+These have no Windows counterpart today. Use the Mac app for them, or SQL where it can do the job.
+
+| Area | Missing |
+|---|---|
+| Editor | Completion, the formatter, snippets |
+| Structure | Creating or altering tables, indexes and keys, and ER diagrams. The structure view is read only |
+| Import and export | Importing a SQL file, exporting a whole database. A CSV file into one table and rows out to a file both work: [Import and export](/windows/import-export) |
+| Grid | Copying rows as CSV, JSON, Markdown or INSERT statements, find in the grid, undoing one pending edit, pasting rows |
+| Workspace | Open Quickly, a connect timeout per connection |
+| Catalog | Staging a truncate or drop until Save: each runs once you confirm it. Dropping views, materialized views and sequences. A database switcher on Redis |
+| AI assistant | Inline suggestions, agent mode, saved conversations, providers beyond Anthropic, OpenAI and an Ollama or compatible server |
+| MCP | Setting a client up from the app, pairing a client with `tablepro://integrations/pair` |
+| Links | `tablepro://import`. A database URL that matches a saved connection opens the connection form, not the connection |
+| Account | Billing, license keys, offline license files, paid features. See [TablePro account](/windows/account) |
+| Engines | Driver plugins. The engines are the ones in [Connect](/windows/connect#engines) |
+| Notifications | Saves, imports and exports. Only query runs notify |
+| Language | Any language but English |
