@@ -18,7 +18,7 @@ Rows come in from a CSV file, one table at a time, and go out to a file from any
     Each column takes a field, or **Skip**. Fields whose header names a column start mapped. A column the database fills says so and is left to it.
   </Step>
   <Step title="Import">
-    Click **Import**. The dialog asks before it writes, with the number of rows and statements.
+    Click **Import**. With Safe Mode off, the rows are written at once. With Safe Mode set to Confirm writes, a dialog first gives the number of rows and lists the statements.
   </Step>
 </Steps>
 
@@ -29,7 +29,7 @@ Rows come in from a CSV file, one table at a time, and go out to a file from any
 
 - The file must be UTF-8 and at most 64 MiB.
 - A field a column cannot read keeps the dialog open, naming its line and column, before anything is written.
-- Safe Mode treats the import as a save: Confirm writes lists the statements first, and Read only refuses it.
+- Read only refuses the import.
 - A failure names the lines of the statement that failed and says whether the table may hold any of the rows. On an engine without transactions, rows written before the failure can stay.
 
 ## Export results
