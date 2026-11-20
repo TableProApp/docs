@@ -111,6 +111,7 @@ Every request needs a token, including one from your own Mac. The server supplie
 
 - Clients work through your saved connections. Passwords never leave the Keychain and are not readable over MCP.
 - AI access is set per connection, including blocking a connection from external clients entirely. A blocked connection is not even listed.
+- With a [project](/connections/projects#outside-clients) active, clients are offered that project's connections only. A project narrows the list and grants nothing.
 - Tokens carry scopes and can be limited to named connections. A request without one gets `401`, from your own Mac too. See [No token, no access](/developers/tokens#no-token-no-access).
 - Writes go through the connection's [Safe Mode](/features/safe-mode#external-clients). Destructive statements need a full-access token and approval every time. See [the confirmation tool](/developers/mcp-tools#writing-data).
 - Reads use the driver's read-only mode where supported. Statements that access files or run server-side code are refused. [What Read Only allows](/developers#what-read-only-allows) covers engine limits and other refusals.

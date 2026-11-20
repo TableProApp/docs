@@ -205,6 +205,8 @@ Call it again to check for `open`.
 
 Arguments marked `?` are optional. Unknown arguments are rejected.
 
+With a [project](/linux/connect#projects) picked in the app, `list_connections` holds that project's connections. A call that names a connection of another project by id fails with a tool error whose text starts with `out_of_scope`. Picking that project, or **All Connections**, in the app clears it.
+
 | Tool | Arguments | Result |
 |---|---|---|
 | `list_connections` | None | Saved connections visible to clients, their open state, external access and Safe Mode |
@@ -301,7 +303,7 @@ The bridge is newer than the app it found. Update TablePro.
 
 ### Forbidden (`-33007`)
 
-**External Clients** is **Blocked**, the connection's AI policy is **Never**, or the token's allowlist excludes it. Any of the three also hides the connection from `list_connections`, except that a launcher token granted [`connections:display`](/developers/mcp-tools#listing-for-display) still lists a connection whose AI policy is **Never**.
+**External Clients** is **Blocked**, the connection's AI policy is **Never**, the token's allowlist excludes it, or it is outside the [project](/connections/projects) active in TablePro. Any of the four also hides the connection from `list_connections`, except that a launcher token granted [`connections:display`](/developers/mcp-tools#listing-for-display) still lists a connection whose AI policy is **Never**.
 
 ### Unauthenticated (`-33009`)
 

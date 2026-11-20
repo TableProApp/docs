@@ -169,7 +169,7 @@ Pairing refusal or expiry also exits 3. See [Status and pairing](#status-and-pai
 
 The command follows the [MCP connection access rules](/features/mcp#connection-access):
 
-- **Blocked** connections, an AI policy of **Never**, and connections outside the token's allowlist are hidden. Naming one exits 2.
+- **Blocked** connections, an AI policy of **Never**, connections outside the token's allowlist, and connections outside the active [project](/connections/projects) are hidden. Naming one exits 2.
 - Writes need both a **Read & Write** token and **Read & Write** external access. `--read-only` still refuses them.
 - **Approval** in **Settings > MCP** controls connection approval. [Safe Mode](/features/safe-mode) also applies to writes.
 - Destructive statements such as `DROP`, `TRUNCATE`, `ALTER ... DROP` and `DELETE` without `WHERE` are refused. Run them in the app. Statements that access files or run server-side code are also refused.

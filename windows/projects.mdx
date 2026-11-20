@@ -1,0 +1,57 @@
+---
+title: Projects
+description: Group saved connections by product on the Connections page of TablePro for Windows and show one product at a time
+tag: "Preview"
+---
+
+A drop-down button beside the **Connections** title names the project the page shows. **All connections** is built in and lists every connection. **File > Project** holds the same choices in every window.
+
+<Frame caption="The project switcher on the Connections page">
+  <img className="block dark:hidden" src="/images/windows-connection-projects.png" alt="Connections page with the project drop-down button beside its title" />
+  <img className="hidden dark:block" src="/images/windows-connection-projects-dark.png" alt="Connections page with the project drop-down button beside its title" />
+</Frame>
+
+## Create and switch
+
+<Steps>
+  <Step title="Choose New project...">
+    It is in the drop-down button's menu and under **File > Project**. Type a name. A name another project has is refused.
+  </Step>
+  <Step title="Move connections in">
+    Right-click an ungrouped connection or a top-level group, choose **Move to project**, then the project. **No project** takes it out again.
+  </Step>
+  <Step title="Switch">
+    Pick the project, or **All connections**, from the button's menu. While the Connections page shows, the title bar names the project.
+  </Step>
+</Steps>
+
+A group takes its subgroups and connections along. A connection inside a group moves with its group, so move the group instead. A connection is in one project at most.
+
+## What follows the project
+
+| Follows the project | Stays as it was |
+|---|---|
+| The connection tree, its search, **Favorites** and **Recent** | Open connections and the rail |
+| **Move to group** and the connection form's group list | Sessions restored at startup |
+| Export of connections | `tablepro://` links |
+| The query history of a file opened without a saved connection | A saved connection's own history and saved queries |
+
+A new connection, a new top-level group and an import land in the project you are in, unless an imported file names a project of its own. A duplicate stays beside the connection it was made from.
+
+A search with no match inside a project offers **Search all connections**, which switches to **All connections** and keeps the text. An empty project reads **No connections in** with its name and offers **New connection**.
+
+The [MCP server](/developers/mcp-tools#the-active-project) lists the project's connections to outside clients.
+
+## Manage projects
+
+Choose **Manage projects...** from the button's menu or from **File > Project**. It appears once a project exists. Select a project, then:
+
+| To | Do this |
+|---|---|
+| Rename | Edit the name in the box and click **Rename** |
+| Reorder | Click **Move up** or **Move down** |
+| Delete | Click **Delete**, then **Delete** again in the flyout |
+
+Deleting a project keeps its connections and groups. They show in **All connections**.
+
+The project you picked is saved per PC.
