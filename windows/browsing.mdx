@@ -41,7 +41,7 @@ Add a rule with **+**. With two or more rules, choose **Match all** or **Match a
 - Changing the filter while edits are pending asks before it discards them.
 - Each table keeps the filter it was last read with, per connection, database and schema. Opening the table again applies it; **Clear** forgets it.
 
-To filter by a value in the grid, right-click the cell and open **Filter**. It offers equal and not equal to the value, greater and less than where the column orders, and **is NULL** or **is not NULL** on a NULL cell, each where the engine has the operator. The rule joins the ones you have and applies at once. A query result has no **Filter**.
+To filter by a value in the grid, right-click the cell and open **Filter**. It offers equal and not equal to the value, greater and less than where the column orders, and **is NULL** or **is not NULL** on a NULL cell, each where the engine has the operator. Under **Match all**, the rule joins the ones you have and applies at once. Under **Match any** with two or more rules, it replaces them all, raw SQL included, so check the filter bar before you export or share the rows. A query result has no **Filter**.
 
 ## Read a table's structure
 
