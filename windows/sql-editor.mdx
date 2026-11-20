@@ -85,7 +85,7 @@ On an engine with several databases, each query tab names its database in its co
 
 `Ctrl+O` opens a `.sql`, `.psql` or `.pgsql` file in a query tab of the connection in front, and **Open recent** in the **File** menu lists the last 10. Dropping a file on the editor opens it the same way. With no connection open, the file waits for the next one to connect.
 
-The tab is named for the file, with a dot while the text differs from it. `Ctrl+S` saves the file and `Ctrl+Shift+S` saves it under another name. A file another program changed shows a bar with **Reload**; a save over that change asks to **Overwrite** or **Reload from disk**.
+The tab is named for the file, with a dot while the text differs from it. With the editor in focus, `Ctrl+S` saves the file and `Ctrl+Shift+S` saves it under another name. With an editable result's grid in focus, `Ctrl+S` saves the row changes to the database instead. A file another program changed shows a bar with **Reload**; a save over that change asks to **Overwrite** or **Reload from disk**.
 
 The file keeps its encoding: its byte order mark, else UTF-8, else Latin-1. A save that would lose a character the encoding cannot store leaves the file untouched; **Save as...** writes UTF-8.
 

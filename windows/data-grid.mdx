@@ -76,7 +76,7 @@ A query tab's result edits like a table's page, with the same keys, marks and qu
 - the run left no transaction open;
 - the tab runs in the connection's own database.
 
-Otherwise the grid stays read only, and trying to edit says why, such as "Rows from more than one table, a subquery or a CTE can't be edited." After a save, the statement runs again to show what the table holds. Pending changes in a query result are not kept across a restart.
+Otherwise the grid stays read only, and trying to edit says why, such as "Rows from more than one table, a subquery or a CTE can't be edited." `Ctrl+S` saves the changes while the grid has focus; from the editor it saves the SQL file. After a save, the statement runs again to show what the table holds. Pending changes in a query result are not kept across a restart.
 
 ## Row and table details
 
