@@ -24,7 +24,7 @@ For a server on a private network, open the **Network** tab and set **Connect vi
 | **Token** | An API token. Leave it empty for a 3.x server started with `--without-auth` |
 | **Database** | The database (3.x) or bucket (2.x) the sidebar opens. Switch it later from the database list |
 | **Organization** | 2.x only. Optional when the token sees one organization |
-| **Skip TLS Verification** | Options tab. Trusts any certificate, even under **Verify CA** or **Verify Identity** |
+| **Skip TLS Verification** | Options section. Trusts any certificate, even under **Verify CA** or **Verify Identity** |
 
 TablePro reads the server version from `/ping` when it connects, and picks the API from it: `/api/v3` on 3.x, `/api/v2` and the v1 `/query` endpoint on 2.x. A wrong token fails the connection instead of the first query: 3.x checks it on `/ping`, and on 2.x TablePro lists one bucket with it. A 1.x server is refused at connect.
 
