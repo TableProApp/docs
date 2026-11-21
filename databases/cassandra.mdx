@@ -26,7 +26,7 @@ There is no Keyspace field. Pick one in the sidebar after connecting, or put it 
 
 ## Consistency
 
-Statements in the CQL editor, table browsing and grid saves run at the **Consistency** level on the connection's **Options** tab. **Default** is `LOCAL_ONE`, or `LOCAL_QUORUM` on Amazon Keyspaces. **Serial Consistency** is the level a lightweight transaction (`IF NOT EXISTS`, `IF EXISTS`, `IF` a condition) checks its condition at: `SERIAL` or `LOCAL_SERIAL`. Its **Default** leaves the choice to the server, which uses `SERIAL`.
+Statements in the CQL editor, table browsing and grid saves run at the **Consistency** level on the connection's **Options** section. **Default** is `LOCAL_ONE`, or `LOCAL_QUORUM` on Amazon Keyspaces. **Serial Consistency** is the level a lightweight transaction (`IF NOT EXISTS`, `IF EXISTS`, `IF` a condition) checks its condition at: `SERIAL` or `LOCAL_SERIAL`. Its **Default** leaves the choice to the server, which uses `SERIAL`.
 
 The result footer names the level each statement ran at, and both levels after a lightweight transaction:
 

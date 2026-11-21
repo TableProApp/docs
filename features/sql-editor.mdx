@@ -104,7 +104,7 @@ The server rolls back what a session leaves open, so closing, disconnecting, qui
 
 ### Manual Commit
 
-With **Manual Commit** on, nothing you change is saved until you commit it. A new connection starts with it off. Turn it on under **Access** on the [connection form's](/connections/connection-form#options) **Options** tab, or choose **Database > Manual Commit** while connected: both change the one setting saved with the connection.
+With **Manual Commit** on, nothing you change is saved until you commit it. A new connection starts with it off. Turn it on under **Access** on the [connection form's](/connections/connection-form#options) **Options** section, or choose **Database > Manual Commit** while connected: both change the one setting saved with the connection.
 
 MySQL, MariaDB, TiDB, OceanBase, Oracle, ClickHouse, Redshift and CockroachDB commit schema and maintenance statements on their own, so Manual Commit is not offered there. The toggle and the menu item are dimmed, with "This database commits schema and maintenance statements on its own, so changes can't wait for Commit." under them, and a connection saved with Manual Commit on runs as if it were off.
 

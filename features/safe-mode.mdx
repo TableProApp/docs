@@ -3,7 +3,7 @@ title: Safe Mode
 description: Per-connection query execution controls, from no restrictions to full read-only lockdown
 ---
 
-Six levels, one per connection. In the [connection form](/connections/connection-form#options), open the **Options** tab and set **Safe Mode** under **Access**. The level decides what stands between a query and the server: nothing, a confirmation, Touch ID, or a refusal.
+Six levels, one per connection. In the [connection form](/connections/connection-form#options), open the **Options** section and set **Safe Mode** under **Access**. The level decides what stands between a query and the server: nothing, a confirmation, Touch ID, or a refusal.
 
 ## Levels
 
@@ -132,7 +132,7 @@ This is a floor on TablePro's own behavior, not on the database. It stops the ap
 
 A write from an external client (Raycast, Cursor, Claude Desktop, any MCP client) clears three locks in order:
 
-1. **External Clients** (per connection: **Blocked** / **Read Only** / **Read & Write**), next to **Safe Mode** under **Access** on the connection form's **Options** tab. A Read Only connection rejects a write before the request reaches the database. Reads also use the driver's read-only mode where supported; see [What Read Only allows](/developers#what-read-only-allows).
+1. **External Clients** (per connection: **Blocked** / **Read Only** / **Read & Write**), next to **Safe Mode** under **Access** on the connection form's **Options** section. A Read Only connection rejects a write before the request reaches the database. Reads also use the driver's read-only mode where supported; see [What Read Only allows](/developers#what-read-only-allows).
 2. **Token scope** (per integration: `readOnly` / `readWrite` / `fullAccess`), issued by the [pairing flow](/developers/pairing). The effective permission is `MIN(token.scope, connection.externalAccess)`.
 3. **Safe Mode**, per query. Everything on this page then applies, Touch ID prompts and confirmation dialogs included.
 

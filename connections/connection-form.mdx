@@ -5,21 +5,21 @@ description: The four sections of the connection editor and the fields each driv
 
 import LocalCredentialConsent from "/snippets/local-credential-consent.mdx";
 
-The editor's sidebar lists the same four sections whatever the driver. Only Network is ever absent, and only for a driver that connects directly and cannot negotiate TLS.
+The editor is one scrolling form. General, Network and Appearance read top to bottom; the less-common Options sit behind **Advanced Options** near the end. Network is absent only for a driver that connects directly and cannot negotiate TLS.
 
-<Frame caption="A PostgreSQL connection on the General tab">
-  <img className="block dark:hidden" src="/images/connection-form-fields.png" alt="Connection editor with a General, Network, Options and Appearance sidebar, credential fields filling the pane, and Test, Cancel and Save along the bottom" />
-  <img className="hidden dark:block" src="/images/connection-form-fields-dark.png" alt="Connection editor with a General, Network, Options and Appearance sidebar, credential fields filling the pane, and Test, Cancel and Save along the bottom" />
+<Frame caption="A PostgreSQL connection, General section">
+  <img className="block dark:hidden" src="/images/connection-form-fields.png" alt="Connection editor as one scrolling form showing the General section's identity, connection and authentication fields, with Test, Cancel and Save along the bottom" />
+  <img className="hidden dark:block" src="/images/connection-form-fields-dark.png" alt="Connection editor as one scrolling form showing the General section's identity, connection and authentication fields, with Test, Cancel and Save along the bottom" />
 </Frame>
 
 | Section | Contents |
 |------|----------|
-| **General** | Name, database type, host, port, database, credentials |
+| **General** | Name, type, environment, where the database lives, and the sign-in |
 | **Network** | How the connection reaches the server, and how it is encrypted |
-| **Options** | Timeouts, driver options, startup SQL, Safe Mode, Manual Commit, external and AI access, iCloud |
 | **Appearance** | Icon, color, tags, group |
+| **Advanced Options** | Timeouts, driver options, startup SQL, Safe Mode, Manual Commit, external and AI access, iCloud. Collapsed until you expand it |
 
-The bar along the bottom carries **Test Connection**, **Cancel** and **Save**, plus **Save & Connect** on a new connection and **Delete** on a saved one. The space to their left holds the reason **Save** is dimmed, prefixed with the tab that holds the empty field, or the warning the last test brought back from the server.
+The bar along the bottom carries **Test Connection**, **Cancel** and **Save**, plus **Save & Connect** on a new connection and **Delete** on a saved one. The space to their left holds the reason **Save** is dimmed, prefixed with the section that holds the empty field, or the warning the last test brought back from the server. A required field inside **Advanced Options** reveals that section so the error is reachable.
 
 ## General
 
@@ -27,6 +27,7 @@ The bar along the bottom carries **Test Connection**, **Cancel** and **Save**, p
 |-------|-------------|
 | **Name** | Display name in the connection list |
 | **Type** | The database type. **Change…** retypes the connection and resets the fields the old type owned |
+| **Environment** | Optional label: Production, Staging, Development or Local |
 | **Connect Using** | MySQL, MariaDB, and PostgreSQL. **Host and Port**, or **Socket** for a server on this Mac. See Unix socket for [MySQL](/databases/mysql#unix-socket) and [PostgreSQL](/databases/postgresql#unix-socket) |
 | **Host** | Empty falls back to the driver's own default, usually `localhost` |
 | **Port** | Pre-filled from the database type |
@@ -67,7 +68,7 @@ Encryption sits below the transport. [SSL/TLS](/connections/ssl) covers the mode
 
 ## Options
 
-**Safe Mode**, **Manual Commit**, **AI Policy** and **External Clients** share the **Access** section.
+Click **Advanced Options** near the end of the form to reveal these fields. **Safe Mode**, **Manual Commit**, **AI Policy** and **External Clients** share the **Access** section.
 
 | Field | Description |
 |-------|-------------|
