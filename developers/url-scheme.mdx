@@ -192,7 +192,8 @@ navigates and never changes a setting.
 
 Ids are matched exactly, case included, and they stay the same when a pane or page is renamed. An
 unknown pane id opens the last-used pane with no error, and an unknown page id, or one that does not
-apply right now such as `devices` while signed out, opens its pane. A link to a pane or page added in
+apply right now, opens its pane: `devices` while signed out, `slash-commands` while AI features are
+off, `approvals` and `tokens` while the MCP server is off. A link to a pane or page added in
 a later version therefore still opens Settings on an older one. Path segments after the page id and
 query items are ignored.
 
