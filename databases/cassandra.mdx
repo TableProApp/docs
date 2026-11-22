@@ -26,7 +26,7 @@ There is no Keyspace field. Pick one in the sidebar after connecting, or put it 
 
 ## Consistency
 
-Statements in the CQL editor, table browsing and grid saves run at the **Consistency** level on the connection's **Options** section. **Default** is `LOCAL_ONE`, or `LOCAL_QUORUM` on Amazon Keyspaces. **Serial Consistency** is the level a lightweight transaction (`IF NOT EXISTS`, `IF EXISTS`, `IF` a condition) checks its condition at: `SERIAL` or `LOCAL_SERIAL`. Its **Default** leaves the choice to the server, which uses `SERIAL`.
+Statements in the CQL editor, table browsing and grid saves run at the **Consistency** level on the connection's **Advanced** pane. **Default** is `LOCAL_ONE`, or `LOCAL_QUORUM` on Amazon Keyspaces. **Serial Consistency** is the level a lightweight transaction (`IF NOT EXISTS`, `IF EXISTS`, `IF` a condition) checks its condition at: `SERIAL` or `LOCAL_SERIAL`. Its **Default** leaves the choice to the server, which uses `SERIAL`.
 
 The result footer names the level each statement ran at, and both levels after a lightweight transaction:
 
@@ -41,7 +41,7 @@ CONSISTENCY QUORUM;
 SERIAL CONSISTENCY LOCAL_SERIAL;
 ```
 
-`CONSISTENCY` or `SERIAL CONSISTENCY` alone names the level in use. The server never sees these lines. The new level holds for every tab on the connection until it disconnects, and a reconnect goes back to the **Options** setting. **Count Exactly**, export and import run on a connection of their own, at the **Options** setting. End the command with a semicolon when a statement follows it on the next line.
+`CONSISTENCY` or `SERIAL CONSISTENCY` alone names the level in use. The server never sees these lines. The new level holds for every tab on the connection until it disconnects, and a reconnect goes back to the **Advanced** pane's setting. **Count Exactly**, export and import run on a connection of their own, at the **Options** setting. End the command with a semicolon when a statement follows it on the next line.
 
 The schema in the sidebar is read at `LOCAL_ONE` whatever the level, so a level the cluster cannot meet, or `ANY`, which the server refuses for reads, leaves the sidebar working.
 
@@ -56,7 +56,7 @@ scylladb://user:password@host:9042/keyspace
 
 ## Amazon Keyspaces
 
-Keyspaces authenticates with SigV4, not a password, so set **Authentication** to an AWS IAM mode and leave Username and Password empty.
+Keyspaces authenticates with SigV4, not a password, so set **Method** under **Authentication** to an AWS IAM mode and leave Username and Password empty.
 
 <Steps>
   <Step title="Point at the regional endpoint">
@@ -126,7 +126,7 @@ Both verifying modes need a **CA Certificate** path, and refuse to connect witho
 - Materialized views do not appear in the sidebar. Query `system_schema.views` in the CQL editor to see them. UDFs and UDAs are listed under Functions; see [Procedures, functions, and triggers](/features/routines-triggers). User-defined types are listed under Types; see [User-Defined Types](/features/user-defined-types).
 - The DDL tab reconstructs `CREATE TABLE` from the column list, so table options (compaction, compression, `gc_grace_seconds`), clustering order, and the split between partition and clustering key are all missing from it. Read the real definition with `DESCRIBE TABLE` in `cqlsh`.
 - DataStax Astra DB does not connect. The Secure Connect Bundle it requires cannot be loaded, and there is no way around it.
-- The connect timeout comes from the connection's **Options** section. The CQL request timeout
+- The connect timeout comes from the connection's **Advanced** pane. The CQL request timeout
   remains fixed at 30 seconds; neither a per-connection query override, the app-wide query timeout,
   nor a multi-DC policy reaches this driver.
 

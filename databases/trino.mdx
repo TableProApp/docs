@@ -29,7 +29,7 @@ Click **New Connection…**, select **Trino** or **Presto**, enter the coordinat
 | **Schema** | Default schema. Optional |
 | **Auth Method** | **Authentication** section on General. `Username & Password` or `JWT Access Token` |
 | **Password / Access Token** | The credential the chosen method needs: the account password, or the JWT in **Access Token** |
-| **Time Zone** | Options section. Optional IANA zone (`America/New_York`) for the session |
+| **Time Zone** | **Advanced** pane. Optional IANA zone (`America/New_York`) for the session |
 
 ## Connection URL
 
@@ -48,7 +48,7 @@ A password or an access token goes only over TLS, as with the Trino JDBC driver.
 | --- | --- |
 | **Username & Password** | HTTP Basic auth, for LDAP or password-file authentication |
 | **JWT Access Token** | The token as a bearer credential |
-| Client certificate | The **Client Certificate** and **Client Key** on the Network tab, for mutual TLS. PEM or DER, with an unencrypted RSA or EC (P-256, P-384, P-521) key, and the certificate file may carry its chain. Works with any SSL mode other than Disabled. A key with no certificate is ignored |
+| Client certificate | **Certificate** and **Key** under **Client Certificates** on the **SSL/TLS** pane, for mutual TLS. PEM or DER, with an unencrypted RSA or EC (P-256, P-384, P-521) key, and the certificate file may carry its chain. Works with any SSL mode other than Disabled. A key with no certificate is ignored |
 
 ## Catalogs, schemas, and tables
 
@@ -119,7 +119,7 @@ Click the Explain dropdown in the query editor to choose:
 - No primary keys, indexes, or foreign keys are reported. The Structure tab's Indexes section is always empty.
 - Import is not available. Export works; see [Import and Export](/features/import-export).
 - Kerberos and OAuth 2.0 authentication are not supported.
-- Neither a connection's **Query timeout** override nor the inherited [global
+- Neither a connection's **Query Timeout** override nor the inherited [global
   setting](/customization/general-settings#query-timeout) reaches Trino. A long query runs until you
   cancel it or the cluster ends it.
 

@@ -14,20 +14,20 @@ A `kubectl port-forward` running in a terminal is a window you cannot close for 
 
 <Steps>
   <Step title="Choose the transport">
-    On the **Network** tab, set **Connect via** to **Tunnel Command**. A connection uses one transport, so choosing this one switches off whichever was selected before.
+    On the **SSH & Proxies** pane, set **Connect Via** to **Tunnel Command**. A connection uses one transport, so choosing this one switches off whichever was selected before.
   </Step>
   <Step title="Pick a method">
-    **kubectl port-forward** and **AWS SSM Session** ask for the two or three things that vary. **Custom Command** takes a command line.
+    Set **Method**. **kubectl port-forward** and **AWS SSM Session** ask for the two or three things that vary. **Custom Command** takes a command line.
   </Step>
   <Step title="Read the Will Run section">
     It shows the exact argument list, with `{port}` standing in for the port that gets allocated on connect.
   </Step>
   <Step title="Test it">
-    On **General**, click **Test Connection**.
+    Click **Test Connection**.
   </Step>
 </Steps>
 
-The **Host** and **Port** on the General section stay the database's own. They are what the forward points at, so a kubectl forward reads the port from there and an SSM session forwards to that host and port from the target instance.
+The **Host** and **Port** on **General** stay the database's own. They are what the forward points at, so a kubectl forward reads the port from there and an SSM session forwards to that host and port from the target instance.
 
 ## Methods
 
@@ -41,7 +41,7 @@ Pick a preset if one fits. A preset takes named values rather than a command lin
 
 ### Where the tool comes from
 
-Both presets look the tool up on `PATH`, with `/usr/local/bin` and `/opt/homebrew/bin` added, because an app started from the Dock inherits a minimal `PATH` rather than your shell's. **Executable path** overrides that with a full path.
+Both presets look the tool up on `PATH`, with `/usr/local/bin` and `/opt/homebrew/bin` added, because an app started from the Dock inherits a minimal `PATH` rather than your shell's. **Executable Path** overrides that with a full path.
 
 An SSM session also needs the [Session Manager plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html), which the AWS CLI finds the same way.
 
@@ -52,8 +52,8 @@ Three placeholders are substituted before the command runs:
 | Placeholder | Value |
 |---|---|
 | `{port}` | The loopback port allocated for this connection. Required |
-| `{host}` | The **Host** field on the General section |
-| `{remotePort}` | The **Port** field on the General section |
+| `{host}` | The **Host** field on **General** |
+| `{remotePort}` | The **Port** field on **General** |
 
 ```bash
 ssh -N -L {port}:{host}:{remotePort} bastion.example.com
@@ -71,7 +71,7 @@ Substitution happens after the split, so a value carrying a space stays a single
 
 The process is held for the life of the connection and killed with its whole process group on disconnect, which is what takes an `aws ssm` session's helper down with it. If it exits on its own while the connection is still open, the connection starts it again and [reconnects](/connections#when-a-connection-drops), with its rows still on screen. That covers an SSM session hitting its idle timeout and a `kubectl port-forward` losing its pod.
 
-The local port shares the connection's **Connect timeout** under **Options**, which uses 30 seconds
+The local port shares the connection's **Connect Timeout** on the **Advanced** pane, which uses 30 seconds
 when empty. Past that deadline the connect fails, and the error carries the last lines the command
 printed to standard error, which is usually where the real reason is.
 
@@ -102,7 +102,7 @@ The command failed on its own terms and its output follows the message. A wrong 
 
 ### The tunnel command did not open its local port in time
 
-The connection's **Connect timeout** passed with the process still running and nothing listening. An
+The connection's **Connect Timeout** passed with the process still running and nothing listening. An
 SSM session waiting on a target that is not registered with Systems Manager behaves this way, as
 does a `kubectl` context pointing at an unreachable cluster.
 

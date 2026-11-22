@@ -29,12 +29,12 @@ MySQL 8 accounts on `caching_sha2_password` connect on the first try, with no au
 | **Database** | empty | Optional. Leave it empty and open one with `Cmd+K` |
 
 Every connection sets its session character set to `utf8mb4` once it logs in, over any `init_connect`
-the server runs, so emoji and non-Latin text round-trip untouched. The **Connect timeout** under
-**Options** bounds the whole attempt; an empty field uses 30 seconds.
+the server runs, so emoji and non-Latin text round-trip untouched. The **Connect Timeout** on the
+**Advanced** pane bounds the whole attempt; an empty field uses 30 seconds.
 
 ## Unix socket
 
-A server on this Mac listens on a socket file as well as a port, and a server started with `skip-networking` listens only there. Set **Connect Using** to **Socket** and enter the file's path. Host and Port leave the form, and **Network** offers only **Direct**: a tunnel cannot reach a file on this Mac.
+A server on this Mac listens on a socket file as well as a port, and a server started with `skip-networking` listens only there. Set **Connect Using** to **Socket** and enter the file's path. Host and Port leave the form, and so does the **SSH & Proxies** pane: a tunnel cannot reach a file on this Mac.
 
 The server reports its path:
 
@@ -69,7 +69,7 @@ mysql://user:password@localhost/database?socket=%2Ftmp%2Fmysql.sock
 | Docker | `localhost` with the mapped port, password from `MYSQL_ROOT_PASSWORD` |
 | MAMP Pro | `localhost:8889`, user and password `root` |
 | AWS RDS / Aurora | Endpoint hostname, password or [AWS IAM](/connections/aws-iam), which signs a fresh 15-minute token on each connect |
-| Google Cloud SQL | **Connect via > Cloud SQL Auth Proxy** and the instance name, or the instance IP with a Google Cloud IAM option in **Authentication**. See [Cloud SQL Auth Proxy](/connections/cloud-sql-proxy) |
+| Google Cloud SQL | **Connect Via** set to **Cloud SQL Auth Proxy** and the instance name, or the instance IP with a Google Cloud IAM option as the **Authentication** method. See [Cloud SQL Auth Proxy](/connections/cloud-sql-proxy) |
 | Remote production | [SSH tunnel](/connections/ssh-tunneling) |
 
 ## Users & Roles
@@ -97,7 +97,7 @@ A MySQL partition belongs to its table rather than standing as one, so its row o
 
 ## Releasing an idle connection
 
-A connection holds a server thread and one slot against `max_connections` for as long as it is open, and MySQL's `wait_timeout` rarely reclaims it because the connection check counts as activity on the server. **Release the Server Connection After**, in **Options**, hands the connection back after that many minutes of no queries and takes a new one on the next query. `0`, the default, keeps it.
+A connection holds a server thread and one slot against `max_connections` for as long as it is open, and MySQL's `wait_timeout` rarely reclaims it because the connection check counts as activity on the server. **Release the Server Connection After**, on the **Advanced** pane, hands the connection back after that many minutes of no queries and takes a new one on the next query. `0`, the default, keeps it.
 
 To stop the check itself, set **Check connections** to **Only when I use the connection** in Settings > General. That is the connection-wide setting; this one is per connection and closes the connection rather than quietening it.
 
@@ -137,7 +137,7 @@ An account with a pre-4.1 password hash cannot sign in: the connection fails wit
 
 A comment or value that reads `ãƒ¡ãƒ¼ãƒ«` where `メール` belongs was written by a client that sent UTF-8 while telling the server it was sending Latin 1. A `mysql` command-line client without a UTF-8 locale does that, and so does a MySQL 5.7 container loading its `docker-entrypoint-initdb.d` scripts, and so does any client on a server whose `init_connect` runs `SET NAMES latin1`. The server stored the garbled form, so every UTF-8 client shows the same thing.
 
-To work with such a database the way that client did, set **Encoding** to **UTF-8 via Latin 1** in **Options** and reconnect. Text written through Latin 1 then reads correctly, text stored correctly still reads correctly, and whatever you save is stored the way the old client stored it, so the application that wrote the data keeps reading it.
+To work with such a database the way that client did, set **Encoding** to **UTF-8 via Latin 1** on the **Advanced** pane and reconnect. Text written through Latin 1 then reads correctly, text stored correctly still reads correctly, and whatever you save is stored the way the old client stored it, so the application that wrote the data keeps reading it.
 
 <Warning>
 With **UTF-8 via Latin 1**, a correctly stored value you edit is saved in the garbled form, and a table or column whose non-Latin name was stored correctly cannot be opened. Use it on a database written through Latin 1, never on one where applications write UTF-8.

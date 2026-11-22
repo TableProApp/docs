@@ -7,15 +7,15 @@ To start a new database, click **New…** beside the file path, name the file, a
 
 ## Quick setup
 
-Click **New Connection…**, select **SQLite**, pick the file with **Browse…** or name a new one with **New…**, and click **Save & Connect**. There is no host, port, or credential to fill in. The driver ships inside TablePro with its own SQLite 3.53.4, whatever macOS version you run, so there is no server version to match.
+Click **New Connection…**, select **SQLite**, pick the file with **Choose…** or name a new one with **New…**, and click **Save & Connect**. There is no host, port, or credential to fill in. The driver ships inside TablePro with its own SQLite 3.53.4, whatever macOS version you run, so there is no server version to match.
 
 `.db`, `.db3`, `.s3db`, `.sl3`, `.sqlite`, `.sqlite3`, and `.sqlitedb` files list TablePro under Finder's **Open With**, as an alternate handler rather than the default one. To make a double-click open them here, select one in Finder, press `Cmd+I`, set **Open with** to TablePro, and click **Change All…**.
 
 A database saved under some other name still opens. Drag it onto a TablePro window, pick it in **File > Open File…**, or drop it on the Dock icon, and the first sixteen bytes decide the driver: a file that starts `SQLite format 3` opens here whether it is called `store.bin`, `export`, or `data.csv`. Finder's double-click is the one route that still needs a name it knows.
 
 <Frame caption="SQLite connection form">
-  <img className="block dark:hidden" src="/images/sqlite-connection-form.png" alt="SQLite connection form with a file path, Browse and New buttons" />
-  <img className="hidden dark:block" src="/images/sqlite-connection-form-dark.png" alt="SQLite connection form with a file path, Browse and New buttons" />
+  <img className="block dark:hidden" src="/images/sqlite-connection-form.png" alt="General pane of a SQLite connection with the File Path field and its Choose… and New… buttons" />
+  <img className="hidden dark:block" src="/images/sqlite-connection-form-dark.png" alt="General pane of a SQLite connection with the File Path field and its Choose… and New… buttons" />
 </Frame>
 
 ## Common locations
@@ -51,7 +51,7 @@ Change the schema outside TablePro, such as a migration that adds a table, and t
 
 ## Attached databases
 
-A schema split across files, such as `app.db`, `auth.db` and `audit.db`, fits in one connection. Open the connection's **Options**, click **+** under **Attached Databases**, and choose the other files. Each one is named after its file without the extension, so `auth.db` attaches as `auth`. Type over the name in its row to change it; `main` and `temp` are taken.
+A schema split across files, such as `app.db`, `auth.db` and `audit.db`, fits in one connection. Open the connection's **Advanced** pane, click **Attach Database…** under **Attached Databases**, and choose the other files. Each one is named after its file without the extension, so `auth.db` attaches as `auth`. Type over the row's **Name** to change it; `main` and `temp` are taken.
 
 ```sql
 SELECT u.email, e.action
@@ -68,11 +68,11 @@ A file that is missing when the connection opens is named in a warning at the to
 A database built with sqlite-vec, SpatiaLite or another loadable extension cannot be read until that extension is loaded: a statement touching its tables fails with `no such module: vec0` or `no such function: ST_AsText`.
 
 <Steps>
-  <Step title="Open the connection's Options">
-    Right-click the connection in the welcome window, choose **Edit…**, and select **Options**. A new connection from **File > New Connection…** has the same pane.
+  <Step title="Open the connection's Advanced pane">
+    Right-click the connection in the welcome window, choose **Edit…**, and select **Advanced** in the sidebar. A new connection from **File > New Connection…** has the same pane.
   </Step>
   <Step title="Add the library">
-    Click **+** under **Extensions** and choose the file: `vec0.dylib` from a [sqlite-vec release](https://github.com/asg017/sqlite-vec/releases), or `/opt/homebrew/lib/mod_spatialite.dylib` after `brew install libspatialite`. The file panel hides `/opt`: press `Cmd+Shift+G` in the panel and type the folder. A row's path can be edited in place afterwards, with the whole file name, `.dylib` included.
+    Click **Add Extension…** under **Extensions** and choose the file: `vec0.dylib` from a [sqlite-vec release](https://github.com/asg017/sqlite-vec/releases), or `/opt/homebrew/lib/mod_spatialite.dylib` after `brew install libspatialite`. The file panel hides `/opt`: press `Cmd+Shift+G` in the panel and type the folder. A row's path can be edited in place afterwards, with the whole file name, `.dylib` included.
   </Step>
   <Step title="Save and connect">
     Click **Save**, then connect. The extension's functions and virtual tables answer in the editor, the sidebar and the Structure tab.
@@ -80,13 +80,13 @@ A database built with sqlite-vec, SpatiaLite or another loadable extension canno
 </Steps>
 
 <Frame caption="Two extensions, loaded top to bottom">
-  <img className="block dark:hidden" src="/images/sqlite-extensions.png" alt="The Options pane of a new SQLite connection. The Extensions list holds /opt/homebrew/lib/mod_spatialite.dylib above ~/Downloads/vec0.dylib, each row's entry point field reads Default entry point, and the add and remove buttons sit under the list" />
-  <img className="hidden dark:block" src="/images/sqlite-extensions-dark.png" alt="The Options pane of a new SQLite connection. The Extensions list holds /opt/homebrew/lib/mod_spatialite.dylib above ~/Downloads/vec0.dylib, each row's entry point field reads Default entry point, and the add and remove buttons sit under the list" />
+  <img className="block dark:hidden" src="/images/sqlite-extensions.png" alt="The Advanced pane of a new SQLite connection. Under Extensions, /opt/homebrew/lib/mod_spatialite.dylib sits above ~/Downloads/vec0.dylib, each row's Entry Point field reads Default entry point, and Add Extension… follows the list" />
+  <img className="hidden dark:block" src="/images/sqlite-extensions-dark.png" alt="The Advanced pane of a new SQLite connection. Under Extensions, /opt/homebrew/lib/mod_spatialite.dylib sits above ~/Downloads/vec0.dylib, each row's Entry Point field reads Default entry point, and Add Extension… follows the list" />
 </Frame>
 
-The list loads in order every time the connection opens, Test Connection and reconnects included. Drag a row to reorder it when one extension needs another loaded first. The first file that fails stops the connect, and the connection window names the file and the reason.
+The list loads in order every time the connection opens, Test Connection and reconnects included. When one extension needs another loaded first, reorder them with **Move Up** and **Move Down** in a row's circled-ellipsis menu. The first file that fails stops the connect, and the connection window names the file and the reason.
 
-Leave a row's entry point field empty for most libraries, where it reads Default entry point: SQLite derives it from the file name, `sqlite3_vec_init` for `vec0.dylib`. Fill it in for a renamed file, or to call a second function the same library exports, such as sqlite-vec's `sqlite3_vec_numpy_init`.
+Leave a row's **Entry Point** empty for most libraries, where it reads Default entry point: SQLite derives it from the file name, `sqlite3_vec_init` for `vec0.dylib`. Fill it in for a renamed file, or to call a second function the same library exports, such as sqlite-vec's `sqlite3_vec_numpy_init`.
 
 Only this list loads code. The `load_extension()` SQL function stays refused, so a statement in the editor, an import or an AI client cannot load a library.
 
@@ -108,7 +108,7 @@ A release built for the other processor fails with `mach-o file, but is an incom
 
 ## A database on another machine
 
-The **Remote File** section on the Network tab points the connection at a database on an SSH server, and the **Open** menu beside the path decides how it is reached. **On the Server** runs your statements on the server against the live file, so reads and writes land on the database the server's own programs are using. **As a Read-Only Copy** fetches a snapshot over SFTP and opens it on this Mac, and the original is never touched.
+On the **Remote File** pane, **Location** set to **Remote Server over SSH** points the connection at a database on an SSH server, and the **Open** menu under the path decides how it is reached. **On the Server** runs your statements on the server against the live file, so reads and writes land on the database the server's own programs are using. **As a Read-Only Copy** fetches a snapshot over SFTP and opens it on this Mac, and the original is never touched.
 
 On the Server needs `python3` on the host, which every mainstream cloud image already carries, and nothing is installed. The read-only copy needs only SFTP, and it runs at Safe Mode [**Read-Only**](/features/safe-mode#connections-that-are-always-read-only). See [Remote Database Files](/connections/remote-database-files).
 

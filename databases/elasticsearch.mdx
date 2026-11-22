@@ -15,7 +15,7 @@ Click **New Connection…**, select **Elasticsearch**, enter a node under **Host
 
 The form shows no Database field: a connection reaches one cluster, and its indices are the objects.
 
-For a node on a private server, open the **Network** tab and set **Connect via** to **SSH Tunnel**, then enter the address Elasticsearch listens on as the SSH server sees it under **Hosts**, usually `localhost:9200`. See [SSH Tunneling](/connections/ssh-tunneling).
+For a node on a private server, open the **SSH & Proxies** pane and set **Connect Via** to **SSH Tunnel**, then enter the address Elasticsearch listens on as the SSH server sees it under **Hosts**, usually `localhost:9200`. See [SSH Tunneling](/connections/ssh-tunneling).
 
 ## Clusters
 
@@ -35,7 +35,7 @@ The connection uses the first node that answers and stays on it:
 | **Hosts** | One or more nodes of the cluster, `localhost:9200` for a local node. A host without a port uses `9200`, a URL without one uses `443` or `80` |
 | **Auth Method** | Username & Password, API Key, or None |
 | **API Key** | Base64-encoded key. Shown when **Auth Method** is API Key |
-| **Skip TLS Verification** | Options section. Trusts any certificate, even under **Verify CA** or **Verify Identity** |
+| **Skip TLS Verification** | **Advanced** pane. Trusts any certificate, even under **Verify CA** or **Verify Identity** |
 
 ## Authentication
 
