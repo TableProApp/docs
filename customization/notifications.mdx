@@ -5,26 +5,26 @@ description: When finished work notifies you, how long it has to run first, and 
 
 You only get told when the result is somewhere you are not. That means TablePro behind another window or in another Space, the window minimized, or the tab that ran the work not the one on screen. Work you cancelled yourself never notifies, and neither does anything that finished faster than the threshold.
 
-<Frame caption="The Notifications tab in Settings">
-  <img className="block dark:hidden" src="/images/settings-notifications.png" alt="Notifications settings tab" />
-  <img className="hidden dark:block" src="/images/settings-notifications-dark.png" alt="Notifications settings tab" />
+<Frame caption="The Notifications pane in Settings">
+  <img className="block dark:hidden" src="/images/settings-notifications.png" alt="Notifications pane with the Show notifications switch and the Treat work as long-running after menu" />
+  <img className="hidden dark:block" src="/images/settings-notifications-dark.png" alt="Notifications pane with the Show notifications switch and the Treat work as long-running after menu" />
 </Frame>
 
 **Settings > Notifications** changes any of it.
 
 | Setting | Default | Covers |
 | --- | --- | --- |
-| **Notify when long-running work finishes** | On | Every kind of work below |
-| **Only after** | 20 seconds | How long work has to run to count: 5, 10, 20 or 30 seconds, or 1, 2, 5 or 10 minutes |
+| **Show notifications** | On | Every notification on this page |
+| **Treat work as long-running after** | 20 seconds | How long work has to run to count: 5, 10, 20 or 30 seconds, or 1, 2, 5 or 10 minutes. It also decides the [tab mark](#the-tab-mark), so it stays editable with notifications off |
 
 The kinds that count: editor queries including Explain, Execute All Statements as one notification for the batch, saving edited rows, structure changes, imports, exports, Copy To and Duplicate Database, database dumps and restores, comparisons and sync scripts from [Compare & Sync](/features/compare-sync), fetching every row of a truncated result, and queries an AI assistant, an MCP client or [a script](/developers/applescript) runs.
 
-Two more ignore **Only after**, because they need you rather than report a result:
+Two more ignore **Treat work as long-running after**, because they need you rather than report a result:
 
 - An [agent session](/features/agent-mode) that is waiting for your answer, or whose reply failed, while it is not on screen. Answering removes the notification, and clicking it opens the session.
-- A [plugin](/features/plugins) update that failed in the background.
+- A [plugin](/features/plugins) that failed to load or to update in the background.
 
-Keep **Only after** below the [query timeout](/customization/general-settings#query-timeout), or a query that times out finishes before its notification is due.
+Keep **Treat work as long-running after** below the [query timeout](/customization/connection-settings#query-timeout), or a query that times out finishes before its notification is due.
 
 ## What a notification carries
 
@@ -38,4 +38,4 @@ A tab whose work finished while you were looking elsewhere carries a mark beside
 
 ## Permission
 
-macOS asks the first time there is actually something to tell you, not at launch. Refuse, or turn TablePro off in **System Settings > Notifications**, and this tab says so with a button that opens the right pane, and catches up when you switch back to TablePro; TablePro bounces its Dock icon in place of the banner. Sound and alert style are per-app System Settings options, so this tab does not repeat them.
+macOS asks the first time there is actually something to tell you, not at launch. Refuse, or turn TablePro off in **System Settings > Notifications**, and while **Show notifications** is on this pane says **Notifications are off in System Settings**, with **Open System Settings**. It catches up when you switch back to TablePro; TablePro bounces its Dock icon in place of the banner. Sound and alert style are per-app System Settings options, so this pane does not repeat them.

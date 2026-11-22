@@ -84,7 +84,7 @@ Minimum IAM roles: `roles/bigquery.user` to run queries, `roles/bigquery.dataVie
 - A partitioned table needs a partition filter for UPDATE and DELETE, or the statement is rejected. Write it in the editor.
 - No transactions, no streaming inserts, no SSH tunnel.
 - Deep pagination rescans from the start of the table. Filter rather than paging far in.
-- A statement that finishes within two seconds returns in one request, and BigQuery may run it without a job. A longer one runs as a job, polled until the [query timeout](/customization/general-settings#query-timeout), then cancelled. With **No limit**, it is polled until it finishes.
+- A statement that finishes within two seconds returns in one request, and BigQuery may run it without a job. A longer one runs as a job, polled until the [query timeout](/customization/connection-settings#query-timeout), then cancelled. With **No limit**, it is polled until it finishes.
 - **Stop** cancels a statement BigQuery has not received yet. Once BigQuery has it, Stop cancels its job if it is still running. A statement that already finished, an `UPDATE` included, stays applied.
 
 ## Troubleshooting

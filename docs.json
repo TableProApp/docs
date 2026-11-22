@@ -406,9 +406,11 @@
               "customization/settings",
               "customization/general-settings",
               "customization/appearance",
+              "customization/notifications",
+              "customization/connection-settings",
+              "customization/sidebar-and-tabs",
               "customization/editor-settings",
-              "customization/data-settings",
-              "customization/notifications"
+              "customization/data-settings"
             ]
           },
           {
