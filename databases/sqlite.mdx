@@ -80,8 +80,8 @@ A database built with sqlite-vec, SpatiaLite or another loadable extension canno
 </Steps>
 
 <Frame caption="Two extensions, loaded top to bottom">
-  <img className="block dark:hidden" src="/images/sqlite-extensions.png" alt="The Advanced pane of a new SQLite connection. Under Extensions, /opt/homebrew/lib/mod_spatialite.dylib sits above ~/Downloads/vec0.dylib, each row's Entry Point field reads Default entry point, and Add Extension… follows the list" />
-  <img className="hidden dark:block" src="/images/sqlite-extensions-dark.png" alt="The Advanced pane of a new SQLite connection. Under Extensions, /opt/homebrew/lib/mod_spatialite.dylib sits above ~/Downloads/vec0.dylib, each row's Entry Point field reads Default entry point, and Add Extension… follows the list" />
+  <img className="block dark:hidden" src="/images/sqlite-extensions.png" alt="The Advanced pane of a new SQLite connection. Under Extensions, /opt/homebrew/lib/mod_spatialite.dylib sits above /Users/Shared/vec0.dylib, each row's Entry Point field reads Default entry point, and Add Extension… follows the list" />
+  <img className="hidden dark:block" src="/images/sqlite-extensions-dark.png" alt="The Advanced pane of a new SQLite connection. Under Extensions, /opt/homebrew/lib/mod_spatialite.dylib sits above /Users/Shared/vec0.dylib, each row's Entry Point field reads Default entry point, and Add Extension… follows the list" />
 </Frame>
 
 The list loads in order every time the connection opens, Test Connection and reconnects included. When one extension needs another loaded first, reorder them with **Move Up** and **Move Down** in a row's circled-ellipsis menu, which also holds **Remove**. The first file that fails stops the connect, and the connection window names the file and the reason.
