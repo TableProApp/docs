@@ -5,6 +5,11 @@ description: Connection checks, the query timeout, recent connections, linked fo
 
 **Settings > Connections** holds what every connection shares. One connection can override the query timeout in its own form.
 
+<Frame caption="The Connections pane">
+  <img className="block dark:hidden" src="/images/settings-connections.png" alt="Connections pane with Check open connections, Query timeout, the Recent Connections section, and the Linked Folders and Trusted Links rows" />
+  <img className="hidden dark:block" src="/images/settings-connections-dark.png" alt="Connections pane with Check open connections, Query timeout, the Recent Connections section, and the Linked Folders and Trusted Links rows" />
+</Frame>
+
 ## Connection checks
 
 **Check open connections** sets how often each open connection is checked for a dropped session: **Every 30 seconds** (the default), **Every 5 minutes**, **Every 15 minutes**, or **Only when used**, for a database that sleeps when idle or bills per query. A new choice reaches connections already open. What a failed check starts is under [Connection health](/connections/connection-form#connection-health).
