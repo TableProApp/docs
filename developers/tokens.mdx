@@ -44,11 +44,11 @@ The effective permission is the lower of the token's scope and the connection's 
 
 ## Creating a token
 
-Pairing is the usual route: see [Pairing](/developers/pairing). To mint one by hand, open **Settings > MCP > Tokens**, click **+**, and pick a name, permission level, connection allowlist and expiry. The plaintext is shown once.
+Pairing is the usual route: see [Pairing](/developers/pairing). To mint one by hand, open **Settings > MCP > Tokens**, click **+** under the list, or **Generate Token…** while the list is empty, and pick a name, permission level, connection allowlist and expiry. Click **Generate**, and the same sheet shows the plaintext once, with **Copy** and the setup for a client. The page lists tokens only while the MCP server is running.
 
 ## Expiry
 
-Optional, and worth setting for anything with write access. The sheet offers 30, 60 and 90 days, a custom date, or **Never**. An expired token stops authenticating: requests get `-33008` with HTTP `401` and `WWW-Authenticate: Bearer error="invalid_token", error_description="token expired"`.
+Optional, and worth setting for anything with write access. **Expires** offers **Never** (the default), 1, 7, 30, 60 and 90 days, or **Custom** with a date. An expired token stops authenticating: requests get `-33008` with HTTP `401` and `WWW-Authenticate: Bearer error="invalid_token", error_description="token expired"`.
 
 ## Rotating a token
 
@@ -56,10 +56,11 @@ Mint the replacement before you retire the old one; two tokens for one client ar
 
 ## Revocation
 
-The list in **Settings > MCP > Tokens** shows prefix, name, permission level, allowlist, last use, and expiry. Right-click a token for:
+The list in **Settings > MCP > Tokens** shows name, permission level, allowlist, prefix, last use, and **Active**, **Expires** with a date, **Expired** or **Revoked**. Select one or more tokens and right-click for:
 
-- **Revoke**: marks the token inactive. It stays in the list and cannot be reactivated.
-- **Delete…**: removes the row entirely. **-** under the list, or the `Delete` key, does the same for the selected tokens.
+- **Revoke…**: asks first, then marks the tokens inactive. They stay in the list and cannot be reactivated.
+- **Copy ID**: copies the token's id, for one token.
+- **Delete…**: asks first, then removes the rows entirely. **-** under the list, or the `Delete` key, does the same.
 
 Revoking cancels every request that token has in flight and clears the connection approvals the user had granted it, so a re-issued token has to ask again. The next call gets `-33009` with HTTP `401`.
 
@@ -93,7 +94,7 @@ The plaintext is `tp_` followed by 32 base64url-encoded random bytes. Tokens liv
 
 ## Activity log
 
-Every authentication, tool call, resource read, and query is recorded in `~/Library/Application Support/TablePro/mcp-audit.db` with the token id, never the plaintext. Open it with **Settings > MCP > View Activity…**.
+Every authentication, tool call, resource read, and query is recorded in `~/Library/Application Support/TablePro/mcp-audit.db` with the token id, never the plaintext. Click **View Activity…** in **Settings > MCP** to open it.
 
 | Field | Values |
 |-------|--------|

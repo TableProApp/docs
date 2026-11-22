@@ -64,7 +64,7 @@ A registry plugin installs where you need it:
 
 A sheet shows the download and then the install. **Cancel**, or Escape, stops the download and leaves nothing behind; once the install step starts it runs to the end. **Settings > Extensions** shows the same install at the top of the pane, with its own **Cancel**.
 
-On a Mac with no network, install from a file: drag a `.tableplugin` or `.zip` onto **Settings > Extensions**, or click **Install from File…** at the bottom of the pane. Installing one file opens its plugin's page. A file for a plugin that is already loaded replaces it the next time TablePro starts. User-installed plugins live in `~/Library/Application Support/TablePro/Plugins`.
+On a Mac with no network, install from a file: drag a `.tableplugin` or `.zip` onto **Settings > Extensions**, or click **Install from File…** at the bottom of the pane, which takes several files at once. The original file stays where it was, and installing one file opens its plugin's page. A file for a plugin that is already loaded replaces it the next time TablePro starts. User-installed plugins live in `~/Library/Application Support/TablePro/Plugins`.
 
 Every plugin is verified before it loads. A registry download must match the SHA-256 checksum in the registry manifest, and the bundle must be signed by TablePro. A bundle signed by anyone else, ad-hoc signed or unsigned is refused, with no override.
 
@@ -94,8 +94,8 @@ An app update can raise the plugin interface version. A plugin built for an olde
 
 **Settings > Extensions** groups plugins under **Database Drivers**, **Export Formats**, **Import Formats** and **Other**. The filter field in the toolbar narrows the list by name, database type or format. Click a plugin to open its page:
 
-- **Details** shows version, source, capabilities, database type, default port and bundle ID. Plugins with their own settings show them under it.
-- **Uninstall…** moves a user-installed plugin to the Trash after a confirmation. Bundled plugins cannot be uninstalled.
+- **Details** shows version, source, capabilities, database type, default port and bundle ID. Plugins with their own settings show them under it, in **Options**, or **Export Options** or **Import Options** for a format.
+- **Uninstall…** moves a user-installed plugin to the Trash and deletes its settings, after a confirmation. Bundled plugins cannot be uninstalled.
 
 macOS cannot fully unload a plugin's code, so removing one adds a row at the top of the pane: **Relaunch TablePro to finish**. **Relaunch** quits, reopens your last session, and installs an app update that already downloaded.
 

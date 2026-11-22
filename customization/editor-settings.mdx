@@ -59,7 +59,7 @@ Autocomplete is always on; see [Autocomplete](/features/autocomplete). Editor sh
 | Section | Setting | Default | Notes |
 |---------|---------|---------|-------|
 | Indentation | Indent with | Spaces | Tabs indent each level with one tab, then line items up with spaces |
-| Indentation | Indent width | 2 spaces | 2, 4, 8, or the editor's **Tab width** |
+| Indentation | Indent width | 2 spaces | 2, 4 or 8, or **Same as editor**, which follows **Tab width** under Editing. With **Tabs**, the widths read as columns |
 | Case | Keywords | Same as editor | `UPPERCASE`, `lowercase`, or **As written**. **Same as editor** writes `lowercase` when **Keyword case** under Editing prefers lowercase, otherwise `UPPERCASE` |
 | Case | Functions | As written | Applies to a call, `count(*)`, never to a column that shares a function's name. ClickHouse keeps the case you typed, since it matches function names by exact case |
 | Case | Data types | As written | Applies to type names such as `date` in `CAST(x AS date)` and in column definitions. ClickHouse keeps the case you typed, since it matches type names by exact case |

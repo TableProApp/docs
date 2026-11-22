@@ -30,7 +30,7 @@ The pane is app-wide, so these values apply to every connection you open; filter
 | Setting | Default | Notes |
 |---------|---------|-------|
 | Date format | ISO 8601 | ISO 8601, ISO Date, US Long, US Short, EU Long, EU Short. Sub-second digits and a UTC offset stored with the value are printed wherever the format renders a time, as the server wrote them: `2024-12-31 23:59:59.123456+07`. A value stored without an offset, such as a MySQL `DATETIME`, never gains one, and a fraction of nothing but zeros is not printed |
-| NULL display | `NULL` | Text shown for NULL cells, up to 20 characters. Press `Return` to apply it, or `Escape` to go back to the saved text |
+| NULL display | `NULL` | Text shown for NULL cells, up to 20 characters. Press `Return` or leave the field to apply it, or `Escape` to go back to the saved text. An empty field restores `NULL` |
 | Color values by type | Off | Draws strings, numbers, dates, binary, JSON, UUID and enum values in the theme's **Values** colors. See [Appearance](/customization/appearance#editing-a-theme) |
 | Smart value detection | On | Reads id-like binary columns as UUIDs, timestamp-named integer columns as dates, and binary columns holding UTF-8 as text. Override per column with Display As, see [Cell and Row Viewers](/features/json-viewer) |
 | Default JSON view | Text | Text or Tree. Switching modes inside the [JSON viewer](/features/json-viewer) writes the choice back to this setting |

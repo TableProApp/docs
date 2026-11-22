@@ -3,11 +3,11 @@ title: Connection Settings
 description: Connection checks, the query timeout, recent connections, linked folders, and trusted links
 ---
 
-**Settings > Connections** holds what every connection shares. A value here reaches a connection when it opens, and one connection can override the query timeout in its own form.
+**Settings > Connections** holds what every connection shares. One connection can override the query timeout in its own form.
 
 ## Connection checks
 
-**Check open connections** sets how often each open connection is checked for a dropped session: **Every 30 seconds** (the default), **Every 5 minutes**, **Every 15 minutes**, or **Only when used**, for a database that sleeps when idle or bills per query. What a failed check starts is under [Connection health](/connections/connection-form#connection-health).
+**Check open connections** sets how often each open connection is checked for a dropped session: **Every 30 seconds** (the default), **Every 5 minutes**, **Every 15 minutes**, or **Only when used**, for a database that sleeps when idle or bills per query. A new choice reaches connections already open. What a failed check starts is under [Connection health](/connections/connection-form#connection-health).
 
 ## Query timeout
 
@@ -35,4 +35,4 @@ Click **Linked Folders** to add a folder of shared `.tablepro` files and see wha
 
 ## Trusted links
 
-Click **Trusted Links** for the links you chose to always allow. **Forget** removes one approval, and **Forget All** removes every one after a confirmation. Nothing here grants trust; see [Trusting a link](/integrations/terminal#trusting-a-link) for which links qualify and when they still ask.
+Click **Trusted Links** for the links you chose to always allow; the row shows how many there are. **Forget** removes one approval, and **Forget All** removes every one after a confirmation. Nothing here grants trust; see [Trusting a link](/integrations/terminal#trusting-a-link) for which links qualify and when they still ask.

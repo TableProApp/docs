@@ -159,9 +159,10 @@ request went through: the user can lower the permission level or leave the check
 ## What the user approves
 
 The sheet names the client and counts down the five minutes the request is good for, dimming
-**Approve** when it runs out. Three controls sit under that: **Permission Level** (starting at what
-the link asked for, movable in either direction), **Allowed Connections** (all, or a checked subset),
-and **Expiration** (never, 1, 7, 30 or 90 days). A link that asks for `connections:display` adds
+**Approve** when it runs out. Three controls sit under that: **Permissions** (starting at what
+the link asked for, movable in either direction), **Connections** (**All**, or **Selected** with a
+searchable checklist and **Select All** and **Select None**), and **Expires** (**Never**, 1, 7, 30, 60
+or 90 days, or **Custom** with a date). A link that asks for `connections:display` adds
 **List connections hidden from AI**, off until the user ticks it. The link's parameters are a
 request, not a grant. **Deny** is the default button: Return and Escape both deny, and **Approve**
 takes a click. The sheet does not take focus from another app; TablePro's Dock icon bounces instead.

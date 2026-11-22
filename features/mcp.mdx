@@ -14,7 +14,7 @@ This page covers the **Settings > MCP** pane. The protocol itself, the tool cata
 
 ## Starting and stopping
 
-Open **Settings > MCP** and turn on **MCP server**. The **Status** row underneath is how you check it before touching a client config: it reads **Running on port 23508**, or **Stopped**, or **Couldn't start** with the reason below it. **Try Again** beside a failure starts the server again.
+Open **Settings > MCP** and turn on **MCP server**. The **Status** row underneath is how you check it before touching a client config: it reads **Running on port 23508**, or **Stopped**, or **Couldn't start** with the reason below it. **Try Again** beside a failure starts the server again. **Status**, **Clients**, **Activity** and the **Access** and **Server** sections show only while the switch is on; **Outside MCP Servers** shows either way.
 
 With the toggle off, nothing starts the server. A client that launches the bundled `tablepro-mcp` bridge gets "The TablePro MCP server is turned off" within a second instead of a timeout, and pairing an extension stops at the same message with **Open MCP Settings**. With the toggle on and a server that fails to start, the bridge reports that failure instead of a timeout.
 
@@ -27,12 +27,12 @@ The default HTTP port is **23508**. If it is taken, the server binds a free port
 | Setting | Default | Range |
 |---------|---------|-------|
 | Port | 23508 | 1,024 to 65,535 |
-| Default row limit | 500 | 1 to 500,000 |
+| Default row limit | 500 | 1 to the maximum row limit |
 | Maximum row limit | 10,000 | 1 to 500,000 |
 | Query timeout | 30 seconds | 1 to 300 seconds |
 | Log MCP queries in history | on | |
 
-A tool can ask for fewer rows or a shorter timeout, never for more than the maximum. Rows also stop at the [answer size limit](/developers/mcp-tools#answer-size), whatever the row limit. These sit under **Server**, shown while the server is on. A port outside its range is not saved, and the row names the range.
+A tool can ask for fewer rows or a shorter timeout, never for more than the maximum. Rows also stop at the [answer size limit](/developers/mcp-tools#answer-size), whatever the row limit. These sit under **Server**. Lowering **Maximum row limit** below **Default row limit** lowers the default with it. A new port applies when you press `Return` or leave the field, and the server restarts on it; a port outside its range is not saved, and the row names the range.
 
 ## Connecting a client
 
@@ -50,12 +50,12 @@ The first time a client reaches one of your connections, TablePro asks. **Approv
 | Approval | What happens |
 |---|---|
 | **Ask Every Time** | Every call that names a connection asks first |
-| **Ask Once for Each Connection** | The first call asks, and the answer is kept until you revoke it. The default |
+| **Ask Once for Each Connection** | The first call asks, and the answer is kept for that client until you forget it. The default |
 | **Never Ask** | Connections are reached without asking |
 
 Leave it at **Ask Once for Each Connection** unless a client runs unattended, in which case **Never
-Ask** stops the prompt from waiting for someone who is not there. Approvals already given are on the
-**Approved Connections** page under **Approval**, each with **Forget**, and **Forget All** clears them
+Ask** stops the prompt from waiting for someone who is not there. Click **Approved connections**,
+under **Approval**, for the approvals already given, each with **Forget**; **Forget All** clears them
 after a confirmation. A row names the connection and the client it was given to: a token's name,
 **Built-in CLI** for the bundled bridge, or [**Claude Agent**](/features/ai-assistant#claude-agent).
 
@@ -95,7 +95,7 @@ Tokens that hold this grant read **Lists connections hidden from AI** in the tok
 
 ## Tokens
 
-Every request needs a token, including one from your own Mac. The server supplies a token to the bundled bridge, so a client set up through **Connect a Client…** needs nothing from you; an HTTP client or a launcher needs a token you generate or pair. Click **Tokens** under **Access** to create, scope, allowlist, expire and revoke them, as described in [Tokens](/developers/tokens).
+Every request needs a token, including one from your own Mac. The server supplies a token to the bundled bridge, so a client set up through **Connect a Client…** needs nothing from you; an HTTP client or a launcher needs a token you generate or pair. Click **Tokens** under **Access** to create, scope, allowlist, expire and revoke them, as described in [Tokens](/developers/tokens). The row counts the active ones.
 
 ## Activity and connected clients
 

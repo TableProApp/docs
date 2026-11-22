@@ -10,13 +10,13 @@ One provider is active at a time and answers every AI request in the app, from t
 Open **Settings > AI** (`Cmd+,`). **Enable AI features** at the top turns the chat, Agent mode, inline suggestions and query actions on or off, and hides the rest of the pane while off. **Default AI policy**, under **Privacy** at the bottom, stays either way, and so does each connection's **AI Policy**, because MCP clients follow them too.
 
 <Frame caption="AI settings">
-  <img className="block dark:hidden" src="/images/ai-chat-settings-provider.png" alt="AI settings" />
-  <img className="hidden dark:block" src="/images/ai-chat-settings-provider-dark.png" alt="AI settings" />
+  <img className="block dark:hidden" src="/images/ai-chat-settings-provider.png" alt="AI pane with the Enable AI features switch, the Active provider picker and the Providers list" />
+  <img className="hidden dark:block" src="/images/ai-chat-settings-provider-dark.png" alt="AI pane with the Enable AI features switch, the Active provider picker and the Providers list" />
 </Frame>
 
 <Steps>
   <Step title="Add the provider">
-    Click **Add Provider** under **Providers** and pick a type. **Custom Provider…** at the end of the menu takes any OpenAI-compatible endpoint.
+    Click **Add Provider** under **Providers** and pick a type from **Sign In With an Account**, **API Key** or **On This Mac**. **Custom Provider…** at the end of the menu takes any OpenAI-compatible endpoint.
   </Step>
   <Step title="Set the Base URL">
     Paste the API base from the server's own documentation, version segment included: `https://api.openai.com/v1`, `https://api.z.ai/api/paas/v4`, `http://localhost:1234/v1`. Under the field is the URL a request resolves to. A full chat completions URL works as well and is used as it stands.
@@ -35,7 +35,7 @@ With no preference, start with Claude or OpenAI on an API key: both take a key, 
 
 | Provider | Sign-in | Worth knowing |
 |---|---|---|
-| GitHub Copilot | GitHub device flow | Runs its own tool loop, so the tool call limit never applies. Its language server starts on first use or when **Settings > AI** lists the provider, and stops when AI is turned off or the provider is removed |
+| GitHub Copilot | GitHub device flow | Runs its own tool loop, so the tool call limit never applies. Its language server starts on first use or when you open the provider's page in **Settings > AI**; until then its row reads **Not started**. It stops when AI is turned off or the provider is removed |
 | ChatGPT | Your ChatGPT account, on the Codex quota from Plus, Pro, Business, and Enterprise plans. **Import from Codex CLI** reuses an existing login | Unofficial interface, may change |
 | xAI | API key from the xAI Console | Presets: Grok 4.5, Grok 4.3 |
 | Meta | API key from the Meta Model API dashboard | Presets: Muse Spark 1.3, Muse Wonder, Muse Ember. The model list shows chat models only. Reasoning has no **Off**: without an effort, Meta runs its default, which is the highest level on Muse Wonder and Muse Ember |
