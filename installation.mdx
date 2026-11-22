@@ -10,7 +10,7 @@ Homebrew is the short route: `brew install --cask tablepro`. Everyone else takes
 ## System requirements
 
 - **macOS**: 13.0 (Ventura) or later
-- **Architecture**: Apple Silicon (M1 or later) or Intel x86_64, one universal app for both
+- **Architecture**: Apple Silicon (M1 or later) or Intel x86_64
 
 Native Apple frameworks only, so there is no Java or .NET runtime to install first.
 
@@ -27,7 +27,7 @@ brew uninstall --zap tablepro   # remove the app and its data
 
 <Steps>
   <Step title="Download the DMG">
-    Download `TablePro-<version>.dmg` from [GitHub Releases](https://github.com/TableProApp/TablePro/releases). The same file runs on every supported Mac.
+    Download the DMG for your Mac's chip from [GitHub Releases](https://github.com/TableProApp/TablePro/releases): `TablePro-<version>-arm64.dmg` for Apple Silicon, `TablePro-<version>-x86_64.dmg` for Intel. A release with a single `TablePro-<version>.dmg` is one universal app for both.
   </Step>
   <Step title="Drag it to Applications">
     Open the DMG and drag **TablePro** onto the **Applications** shortcut.
