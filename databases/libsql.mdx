@@ -65,6 +65,8 @@ A self-hosted sqld answers on `http://localhost:8080` by default. With JWT authe
 
 libSQL takes SQLite syntax, so browsing, `EXPLAIN QUERY PLAN`, data editing and export behave as they do on [SQLite](/databases/sqlite). The structure editor creates tables, adds and drops columns, and adds and drops indexes; **Triggers** in the Structure tab creates, edits and drops those.
 
+To copy a BLOB from a remote database, select its cell and press `Cmd+C`. The [data grid](/features/data-grid) copies the bytes as `0x` followed by their hex digits.
+
 ## SSL/TLS
 
 There is no **SSL Mode**. A Remote connection is encrypted when its **Database URL** starts with `https://` and is not when it starts with `http://`, and a local file is not networked at all. See [SSL/TLS](/connections/ssl).
