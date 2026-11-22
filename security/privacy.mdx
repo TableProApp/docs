@@ -12,10 +12,10 @@ Turn off app usage data in the privacy settings if you do not want to send it. M
 | [Mac usage data](#usage-data), from 0.86.0 (first build 0.86.0-beta.1) | PostHog EU | On; **Settings > General > Privacy > Share usage data** |
 | [Linux usage data](#linux-usage-data), from 0.1.0-beta.1 | PostHog EU | On; **Preferences > General > Privacy > Share Usage Data** |
 | [iOS usage data](#iphone-and-ipad-usage-data) | PostHog EU | Off; **Settings > Privacy > Share Usage Data** |
-| [Mac update check](#update-checks) | `updates.tablepro.app` | On; **Settings > General**, under Software Update |
+| [Mac update check](#update-checks) | `updates.tablepro.app` | On; **Settings > General > Software Update** |
 | [Mac plugin catalog](#the-plugin-catalog) | `updates.tablepro.app` | On; no off switch |
-| [AI provider](#ai-providers) | Your chosen provider | No provider on a fresh install; remove it or turn off **Enable AI Features** |
-| [iCloud sync](#icloud-sync) | Your iCloud account | Off; **Settings > Sync** |
+| [AI provider](#ai-providers) | Your chosen provider | No provider on a fresh install; remove it or turn off **Enable AI features** |
+| [iCloud sync](#icloud-sync) | Your iCloud account | Off; **Settings > iCloud Sync** |
 | [MCP clients](#the-mcp-server) | Local HTTP and a private Unix socket | Off; **Settings > MCP** |
 | [Accounts and Team Library](#license-checks-and-the-team-library) | `api.tablepro.app` | Account requests after sign-in; content uploads when published |
 | [Shared links](#shared-links) | `api.tablepro.app`; link pages on `s.tablepro.app` | Only when you open a share sheet, create or revoke a link, or open one |
@@ -80,14 +80,14 @@ Earlier versions sent a daily report to the relay endpoint above instead, also o
 
 ## AI providers
 
-Nothing reaches a model until you add a provider, and a fresh install has none: with none configured, every AI path returns before it builds a request. **Enable AI Features** in **Settings > AI** is on out of the box, but it gates an empty tab.
+Nothing reaches a model until you add a provider, and a fresh install has none: with none configured, every AI path returns before it builds a request. **Enable AI features** in **Settings > AI** is on out of the box, but with no provider it gates nothing.
 
 One provider is marked active and answers inline suggestions and the editor actions; the chat panel's own model picker can send a turn to any other provider you configured. Requests go to that provider's endpoint. The presets are `api.anthropic.com`, `api.openai.com`, `generativelanguage.googleapis.com`, `api.x.ai`, `openrouter.ai`, `router.requesty.ai`, `api.meta.ai`, `api.cursor.com` and `opencode.ai`, plus `http://localhost:11434` for Ollama and `http://localhost:8080` for llama.cpp and MLX, which keeps their traffic on the machine. Every endpoint field is editable, and a custom provider goes wherever you point it. Meta's `-contributor` models, which Meta may train on what you send, stay out of its model list; one is used only when you type its id under **Other…**.
 
 A chat turn carries:
 
 - The database type and the name of the database you are connected to.
-- The schema, while **Include database schema** is on (the default): table names, estimated row counts, column names and types, primary key and NOT NULL flags, DEFAULT values, and foreign keys, for up to **Max schema tables** tables (20 by default). With more tables than that, the ones your question and current query use come first, and the rest are sent as a count, not by name.
+- The schema, while **Include database schema** is on (the default): table names, estimated row counts, column names and types, primary key and NOT NULL flags, DEFAULT values, and foreign keys, for up to **Maximum tables** tables (20 by default). With more tables than that, the ones your question and current query use come first, and the rest are sent as a count, not by name.
 - The query in the current tab, while **Include current query** is on (the default), truncated at 2,000 characters.
 - Result rows, only if you turn on **Include query results**, which is off by default. It attaches the first 10 rows of the current result, each value cut at 200 characters.
 - The connection's [AI Rules](/features/ai-assistant#per-connection-ai-rules) text, if you wrote any.
@@ -113,7 +113,7 @@ Off by default, and it needs a Pro or Team license. When it is on, records go to
 
 Synced record types are `Connection`, `ConnectionGroup`, `ConnectionTag`, `AppSettings`, `SQLFavorite`, `SQLFavoriteFolder`, `FavoriteTable`, `FavoriteDatabase`, `SSHProfile`, `CredentialProfile`, `TableFolder` and `TableFolderItem`. Credential profiles carry the name, username and password mode, never the password or command source. A connection record carries host, port, username, database, and SSH and SSL settings. Sync runs on launch, about two seconds after you change something synced, when you switch back to the app, and when iCloud notifies the app that another device changed something. That notice goes through Apple's push service, carries no record content, and asks for no notification permission. The app registers for it only while sync is on.
 
-Passwords are not one of those record types. The **Passwords** toggle nested under Connections instead marks keychain items as synchronizable, so Apple's iCloud Keychain carries them end to end encrypted. It is off by default, and it applies to items written after you turn it on.
+Passwords are not one of those record types. The **Passwords** switch under **What Syncs** instead marks keychain items as synchronizable, so Apple's iCloud Keychain carries them end to end encrypted. It is off by default, and it applies to items written after you turn it on.
 
 <Warning>
 That flag is set on every keychain item the app writes, not only connection passwords: AI provider keys and an older license key go through the same helper. Current account tokens never sync. MCP tokens and Google sign-in refresh tokens do not; their stores always write device-only items.
@@ -125,7 +125,7 @@ With password sync off, secrets are written `kSecAttrAccessibleAfterFirstUnlockT
 
 Direct HTTP clients connect through IPv4 loopback. The bundled bridge and CLI use a private Unix socket that accepts only the same macOS user. Both listeners require authentication for data access. Neither has a remote mode. See [MCP transport and handshake](/developers/mcp-protocol#local-socket-and-handshake) for paths and permissions.
 
-It is off by default, and nothing starts it while **Enable MCP Server** is off: not the bundled bridge, not the pairing flow, not a `tablepro://integrations/start-mcp` link. What a paired client can reach is real data, so four gates stack:
+It is off by default, and nothing starts it while the **MCP server** switch is off: not the bundled bridge, not the pairing flow, not a `tablepro://integrations/start-mcp` link. What a paired client can reach is real data, so four gates stack:
 
 1. A token on every request. One that arrives without an `Authorization` header is refused, from your own Mac too, and no setting changes that.
 2. The token's scope and its connection allowlist.
@@ -144,7 +144,7 @@ Sparkle fetches `https://updates.tablepro.app/appcast.xml` once a day, and once 
 
 Updates download from the GitHub release named in the feed. Sparkle checks the feed's EdDSA signature, and each build's, against the public key inside the app, and refuses either one that does not match before it unpacks anything.
 
-**Automatically check for updates** in **Settings > General** is on by default. With it off, only a check you start reaches the feed: **Check Now** in the same section, or **TablePro > Check for Updates…**.
+**Automatically check for updates** in **Settings > General > Software Update** is on by default. With it off, only a check you start reaches the feed: **Check Now** on the same page, or **TablePro > Check for Updates…**.
 
 **Download and install updates automatically** is also on by default, so a new build downloads without being accepted first and installs when TablePro quits. The download is the same signed archive from the same GitHub release, and nothing is sent to fetch it. Turn it off to be asked each time.
 

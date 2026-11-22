@@ -1,30 +1,28 @@
 ---
 title: Editor Settings
-description: SQL editor font, Vim and Emacs key bindings, line numbers, indentation, formatter rules, and query parameter settings
+description: SQL editor font, display, gutter, Vim and Emacs key bindings, query parameters, and SQL formatting rules
 ---
 
-**Settings > Editor** covers typing and how SQL is displayed. Grid, pagination, result cap and JSON viewer settings are on the [Data](/customization/data-settings) tab instead.
+**Settings > Editor** covers typing and how SQL is displayed. Grid, page size, result limit and JSON viewer settings are on the [Data](/customization/data-settings) pane instead.
 
 The font here is set per Mac, not per theme, and is not synced.
 
 <Frame caption="Editor settings">
-  <img className="block dark:hidden" src="/images/settings-editor.png" alt="Editor settings" />
-  <img className="hidden dark:block" src="/images/settings-editor-dark.png" alt="Editor settings" />
+  <img className="block dark:hidden" src="/images/settings-editor.png" alt="Editor pane with the Font, Display, Gutter and Editing sections and the SQL Formatting row" />
+  <img className="hidden dark:block" src="/images/settings-editor-dark.png" alt="Editor pane with the Font, Display, Gutter and Editing sections and the SQL Formatting row" />
 </Frame>
 
 ## Font
 
-| Setting | Default | Applies to |
-|---------|---------|------------|
-| Editor Font | System Mono, 13 pt | SQL editor, the JSON viewer's Text mode, and the DDL, trigger and import previews |
-
-The picker lists the monospaced families installed on your Mac, at 10 to 24 pt. `Cmd+=` and `Cmd+-` change the size over the same range, except while a diagram or a data grid has focus.
+| Setting | Default | Notes |
+|---------|---------|-------|
+| Family | System Mono | The monospaced families installed on your Mac. Applies to the SQL editor, the JSON viewer's Text mode, and the DDL, trigger and import previews |
+| Size | 13 pt | 10 to 24 pt. `Cmd+=` and `Cmd+-` change the size over the same range, except while a diagram or a data grid has focus |
 
 ## Display
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| Show line numbers | On | Turning this off also hides the per-statement run button |
 | Highlight current line | On | |
 | Highlight current statement | On | A faint band behind the statement the cursor is in. See [Statement markers](/features/sql-editor#statement-markers) |
 | Show invisible characters | On | See [Invisible characters](/features/sql-editor#invisible-characters) |
@@ -34,48 +32,49 @@ The picker lists the monospaced families installed on your Mac, at 10 to 24 pt. 
 
 | Setting | Default | Notes |
 |---------|---------|-------|
+| Show line numbers | On | Off removes the gutter, and the run buttons with it |
+| Run button beside each statement | On | Gutter run buttons, revealed when the pointer is over the gutter. Dimmed while line numbers are off |
 | Code folding | On | Shows the fold ribbon in the gutter. See [Code Folding](/features/code-folding) |
-| Run button beside each statement | On | Gutter run buttons, revealed when the pointer is over the gutter. Needs line numbers on |
 
 ## Editing
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| Tab width | 4 spaces | 2, 4, or 8 |
-| Keyword case | Match what I type, otherwise UPPERCASE | The case completed keywords and functions take. `UPPERCASE` and `lowercase` also rewrite keywords as you type them, leaving strings, comments and quoted identifiers untouched. **Format Query** follows it while the formatter's own keyword case is **Same as editor**. See [Keyword case](/features/autocomplete#keyword-case) |
-| Query parameters (`:name` syntax) | On | Detects `:name` placeholders and shows the parameter panel. See [Query Parameters](/features/query-parameters) |
 | Key bindings | Standard | **Vim** for modal editing, see [Vim Mode](/features/vim-mode); **Emacs** for Emacs movement, kill and yank, see [Emacs Mode](/features/emacs-mode) |
+| Tab width | 4 spaces | 2, 4, or 8 |
+| Keyword case | Match what I type, otherwise UPPERCASE | The case completed keywords and functions take. `UPPERCASE` and `lowercase` also rewrite keywords as you type them, leaving strings, comments and quoted identifiers untouched. **Format Query** follows it while the formatter's own **Keywords** case is **Same as editor**. See [Keyword case](/features/autocomplete#keyword-case) |
+| Query parameters | On | Detects `:name` placeholders and asks for their values before the query runs. See [Query Parameters](/features/query-parameters) |
 
 Autocomplete is always on; see [Autocomplete](/features/autocomplete). Editor shortcuts are listed and customized on [Keyboard Shortcuts](/features/keyboard-shortcuts).
 
-## Formatter
+## SQL formatting
 
-**Query > Format Query** (`Cmd+Shift+L`) follows these rules. The preview at the end of the section formats a sample statement with them, in the editor theme. The defaults produce the layout shown under [Formatting](/features/sql-editor#formatting).
+**Query > Format Query** (`Cmd+Shift+L`) follows these rules. Click **SQL Formatting** at the bottom of the Editor pane to open them. The preview at the top of the page formats a sample statement with them, in the editor theme. The defaults produce the layout shown under [Formatting](/features/sql-editor#formatting).
 
 <Frame caption="Each change shows in the preview at once">
-  <img className="block dark:hidden" src="/images/settings-editor-formatter.png" alt="Formatter section of Settings Editor with its pickers above a preview of a formatted SELECT statement" />
-  <img className="hidden dark:block" src="/images/settings-editor-formatter-dark.png" alt="Formatter section of Settings Editor with its pickers above a preview of a formatted SELECT statement" />
+  <img className="block dark:hidden" src="/images/settings-editor-formatter.png" alt="SQL Formatting page with a preview of a formatted SELECT statement above the Indentation, Case and Line Breaks sections" />
+  <img className="hidden dark:block" src="/images/settings-editor-formatter-dark.png" alt="SQL Formatting page with a preview of a formatted SELECT statement above the Indentation, Case and Line Breaks sections" />
 </Frame>
 
-| Setting | Default | Notes |
-|---------|---------|-------|
-| Indent with | Spaces | Tabs indent each level with one tab, then line items up with spaces |
-| Indent width | 2 spaces | 2, 4, 8, or the editor's **Tab width** |
-| Keyword case | Same as editor | `UPPERCASE`, `lowercase`, or **As written**. **Same as editor** writes `lowercase` when **Keyword case** under Editing prefers lowercase, otherwise `UPPERCASE` |
-| Function case | As written | Applies to a call, `count(*)`, never to a column that shares a function's name. ClickHouse keeps the case you typed, since it matches function names by exact case |
-| Data type case | As written | Applies to type names such as `date` in `CAST(x AS date)` and in column definitions. ClickHouse keeps the case you typed, since it matches type names by exact case |
-| Commas | At the end of the line | **At the start of the line** puts `, ` before each item of a SELECT list, SET list and CREATE TABLE column list |
-| AND and OR | At the start of the line | **At the end of the line** ends each broken line of a WHERE or HAVING condition with its `AND` or `OR` |
-| Line width | One item per line | At 80, 100 or 120 characters, a SELECT list, SET list or WHERE condition that fits stays on one line |
-| Clause items | Beside the keyword | **Below the keyword** starts a broken SELECT list, SET list, WITH list, or WHERE or HAVING condition on the line under its keyword, one level in. A single item stays beside its keyword |
-| Join condition | On its own line | **On the JOIN line** writes `LEFT JOIN orders o ON u.id = o.user_id` |
-| Align column aliases | Off | Lines up the `AS` of each SELECT item that sits on one line |
+| Section | Setting | Default | Notes |
+|---------|---------|---------|-------|
+| Indentation | Indent with | Spaces | Tabs indent each level with one tab, then line items up with spaces |
+| Indentation | Indent width | 2 spaces | 2, 4, 8, or the editor's **Tab width** |
+| Case | Keywords | Same as editor | `UPPERCASE`, `lowercase`, or **As written**. **Same as editor** writes `lowercase` when **Keyword case** under Editing prefers lowercase, otherwise `UPPERCASE` |
+| Case | Functions | As written | Applies to a call, `count(*)`, never to a column that shares a function's name. ClickHouse keeps the case you typed, since it matches function names by exact case |
+| Case | Data types | As written | Applies to type names such as `date` in `CAST(x AS date)` and in column definitions. ClickHouse keeps the case you typed, since it matches type names by exact case |
+| Line Breaks | Line width | One item per line | At 80, 100 or 120 characters, a SELECT list, SET list or WHERE condition that fits stays on one line |
+| Line Breaks | Clause items | Beside the keyword | **Below the keyword** starts a broken SELECT list, SET list, WITH list, or WHERE or HAVING condition on the line under its keyword, one level in. A single item stays beside its keyword |
+| Line Breaks | Commas | At the end of the line | **At the start of the line** puts `, ` before each item of a SELECT list, SET list and CREATE TABLE column list |
+| Line Breaks | AND and OR | At the start of the line | **At the end of the line** ends each broken line of a WHERE or HAVING condition with its `AND` or `OR` |
+| Line Breaks | Join condition | On its own line | **On the JOIN line** writes `LEFT JOIN orders o ON u.id = o.user_id` |
+| Line Breaks | Align column aliases | Off | Lines up the `AS` of each SELECT item that sits on one line |
 
-**Restore Defaults** puts every formatter setting back.
+**Restore Defaults**, at the bottom of the page, puts every formatting rule back.
 
 ### Share the rules
 
-Click **Export…** to save the rules as `sql-formatter.json`. The file holds the resolved values: a width that follows **Tab width** is written as the number, and **Same as editor** as the case it means, so the file formats the same on every Mac. Click **Import…** on another Mac to load it into Settings.
+Click **Export…** on the **Rules file** row to save the rules as `sql-formatter.json`. The file holds the resolved values: a width that follows **Tab width** is written as the number, and **Same as editor** as the case it means, so the file formats the same on every Mac. Click **Import…** on another Mac to load it into Settings.
 
 To apply the rules to a [linked SQL folder](/features/favorites#linked-sql-folders) instead, save the file in that folder as `.sql-formatter.json`. A file opened from the folder then formats with it rather than with Settings. The nearest `.sql-formatter.json` wins, from the file's own folder up to the linked folder; nothing above the linked folder is read. A rules file that cannot be read stops Format Query with an error naming it.
 

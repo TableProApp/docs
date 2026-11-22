@@ -77,7 +77,7 @@ Click **Advanced Options** near the end of the form to reveal these fields. **Sa
 | Plugin fields | Driver-specific options, such as MongoDB's `replicaSet`, in a section named after the database type |
 | **Extensions** | SQLite, and libSQL in Local File mode. Libraries loaded into the database file on every connect. See [Extensions](/databases/sqlite#extensions) |
 | **Connect timeout** | Maximum seconds for the network transport and remote database to finish connecting. Empty uses 30 seconds; valid values are 1 to 600 |
-| **Query timeout** | Override of **Settings > General** for this connection. Empty inherits the global value; `0` means no limit. Only drivers that support query timeouts enforce it |
+| **Query timeout** | Override of **Settings > Connections** for this connection. Empty inherits the global value, which the empty field shows, such as **Global (60)**, or **No limit**; `0` means no limit. Only drivers that support query timeouts enforce it |
 | **Load binary values up to** | MySQL and MariaDB. A binary value above this many KB loads when you open, copy or export it. Empty uses 64; valid values are 1 to 1048576. See [Large binary values](/features/data-grid#large-binary-values) |
 | **Identifier case** | PostgreSQL, PGlite, Oracle and Snowflake. The case table, column and schema names take in autocomplete and in **Copy as INSERT Statements** and **Copy as UPDATE Statements**. See [Identifier case](/features/autocomplete#identifier-case) |
 | **Startup Commands** | SQL to run after every connect. See [Startup commands](#startup-commands) |
@@ -86,9 +86,9 @@ Click **Advanced Options** near the end of the form to reveal these fields. **Sa
 | **Post-Disconnect Script** | Shell script run once the session ends, after a pre-connect script ran. See [Connection scripts](#connection-scripts) |
 | **Safe Mode** | Confirms, authenticates or refuses queries before they run. See [Safe Mode](/features/safe-mode) |
 | **Manual Commit** | Off by default. On, the first change opens a transaction and nothing is saved until you commit it. **Database > Manual Commit** is the same setting. Dimmed on engines that commit schema changes on their own. See [Manual Commit](/features/sql-editor#manual-commit) |
-| **AI Policy** | Per-connection override for the in-app AI agents. **Never** also refuses external clients. Under it, each tool you gave **Always Allow** on an [assistant tool card](/features/ai-assistant#tool-calling) is listed by name as **Always allowed**, with **Forget**. After **Save**, a forgotten tool asks again on its next call. Shown while **Enable AI Features** is on |
+| **AI Policy** | Per-connection override of **Default AI policy** in **Settings > AI**, for AI features and MCP clients alike. **Never** also refuses external clients. Shown whether or not AI features are on, since MCP clients follow it either way. While AI features are on, each tool you gave **Always Allow** on an [assistant tool card](/features/ai-assistant#tool-calling) is listed under it by name as **Always allowed**, with **Forget**. After **Save**, a forgotten tool asks again on its next call |
 | **External Clients** | **Blocked**, **Read Only** (the default), or **Read & Write** for MCP clients such as Raycast, Cursor, and Claude Desktop, and for [AppleScript](/developers/applescript) and [Shortcuts](/integrations/shortcuts). A token's own scope cannot raise it. See the [integration security model](/developers#security-model) |
-| **AI Rules** | Guidance the AI reads on every chat turn for this connection: table conventions, columns to avoid, join hints. Shown while **Enable AI Features** is on. See [AI Assistant](/features/ai-assistant) |
+| **AI Rules** | Guidance the AI reads on every chat turn for this connection: table conventions, columns to avoid, join hints. Shown while **Enable AI features** is on. See [AI Assistant](/features/ai-assistant) |
 | **Local only** | Keeps this connection and its passwords off iCloud. Saving an existing synced connection as Local only removes its passwords from iCloud Keychain, so your other devices ask for them again. Shown while **Sync this Mac with iCloud** is on. See [iCloud Sync](/features/icloud-sync#keeping-a-connection-off-icloud) |
 
 The connect timeout is one deadline for the whole network attempt, not a new timeout for each step.
@@ -162,8 +162,8 @@ A connect you did not start never runs the script. A restored window at launch, 
 
 ## Connection health
 
-Every active connection is checked on the interval set by **Check connections** in Settings >
-General, every 30 seconds by default, and the check is skipped while any query, export, import, or
+Every active connection is checked on the interval set by **Check open connections** in
+**Settings > Connections**, every 30 seconds by default, and the check is skipped while any query, export, import, or
 other tracked operation is running. A failed check starts a
 [reconnect](/connections#when-a-connection-drops): the rows stay on screen and the connection tries
 10 times over about 10 minutes before it shows as lost. An authentication failure stops the
@@ -175,9 +175,9 @@ retries going, and the reconnect bar names that certificate error as the cause i
 generic one. A reconnect rebuilds the tunnel, restores the selected database and schema, and
 re-runs the startup commands; the connection shows as reconnecting throughout.
 
-The check is a query, so on a database that sleeps when idle or bills per query it is not free. **Only when I use the connection** stops it: TablePro sends nothing on its own, and instead checks the connection the first time you use it after five quiet minutes. Waking the Mac from sleep counts as a quiet period, so the first thing you do after opening the lid checks too.
+The check is a query, so on a database that sleeps when idle or bills per query it is not free. **Only when used** stops it: TablePro sends nothing on its own, and instead checks the connection the first time you use it after five quiet minutes. Waking the Mac from sleep counts as a quiet period, so the first thing you do after opening the lid checks too.
 
-A Server Dashboard tab keeps its own refresh running on its own interval, which **Check connections** does not change. Close the tab or set its interval to Off.
+A Server Dashboard tab keeps its own refresh running on its own interval, which **Check open connections** does not change. Close the tab or set its interval to Off.
 
 SQLite, DuckDB, Beancount, Snowflake, and Teradata are not checked.
 

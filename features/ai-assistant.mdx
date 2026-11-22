@@ -7,7 +7,7 @@ One provider is active at a time and answers every AI request in the app, from t
 
 ## Configure a provider
 
-Open **Settings > AI** (`Cmd+,`). **Enable AI Features** at the top gates the whole tab; turning it off also hides the per-connection AI policy in the connection form.
+Open **Settings > AI** (`Cmd+,`). **Enable AI features** at the top turns the chat, Agent mode, inline suggestions and query actions on or off, and hides the rest of the pane while off. **Default AI policy**, under **Privacy** at the bottom, stays either way, and so does each connection's **AI Policy**, because MCP clients follow them too.
 
 <Frame caption="AI settings">
   <img className="block dark:hidden" src="/images/ai-chat-settings-provider.png" alt="AI settings" />
@@ -16,7 +16,7 @@ Open **Settings > AI** (`Cmd+,`). **Enable AI Features** at the top gates the wh
 
 <Steps>
   <Step title="Add the provider">
-    Click **Add Provider…** and pick a type. **Add Custom Provider…** at the bottom takes any OpenAI-compatible endpoint.
+    Click **Add Provider** under **Providers** and pick a type. **Custom Provider…** at the end of the menu takes any OpenAI-compatible endpoint.
   </Step>
   <Step title="Set the Base URL">
     Paste the API base from the server's own documentation, version segment included: `https://api.openai.com/v1`, `https://api.z.ai/api/paas/v4`, `http://localhost:1234/v1`. Under the field is the URL a request resolves to. A full chat completions URL works as well and is used as it stands.
@@ -25,11 +25,11 @@ Open **Settings > AI** (`Cmd+,`). **Enable AI Features** at the top gates the wh
     Paste an API key, or sign in for GitHub Copilot and ChatGPT. Leave the key empty for a Custom provider whose server checks none, such as a self-hosted vLLM or LM Studio with authentication off.
   </Step>
   <Step title="Pick a model and test">
-    Type a model name or pick one from the fetched list, then click **Test Connection**. A provider that lists several models with no default starts on **Other…** with an empty **Model ID**, so pick one before saving.
+    Type a model name or pick one from the fetched list, then click **Test Connection**. A provider that lists several models with no default starts on **Other…** with an empty **Model ID**, so pick one before you click **Add**.
   </Step>
 </Steps>
 
-Each provider's row says whether it can answer: **API key set**, **Signed in as …**, **Local** or the server's host when it is ready, and **Needs an API key**, **Not signed in** or **Claude Code not installed**, with a warning symbol, when it needs you. A GitHub Copilot error shows there too. The **Active Provider** picker decides which one handles requests. Setting it to **None** leaves any open conversation readable but read-only, with **No AI Provider** and a **Settings…** button under it. Where a model supports reasoning effort, its detail sheet adds a picker for it and replies render their thinking in a collapsible **Reasoning** block. Gemini and Ollama have no picker, and on a router the picker follows the model: it is gone for a model the router lists as non-reasoning.
+Each provider's row says whether it can answer: **API key set**, **Signed in as …**, **Local** or the server's host when it is ready, and **Needs an API key**, **Not signed in** or **Claude Code not installed**, with a warning symbol, when it needs you. A GitHub Copilot error shows there too. The **Active provider** picker decides which one handles requests; the active one reads **Active** in the list. Setting it to **None** leaves any open conversation readable but read-only, with **No AI Provider** and a **Settings…** button under it. Click a provider's row to open its page: the account or API key, **Edit Connection…** for the name, base URL and key, the model, and **Remove Provider…**. Where a model supports reasoning effort, the page adds a **Reasoning** picker and replies render their thinking in a collapsible **Reasoning** block. Gemini and Ollama have no picker, and on a router the picker follows the model: it is gone for a model the router lists as non-reasoning.
 
 With no preference, start with Claude or OpenAI on an API key: both take a key, tools, and images with no further setup. The others each come with something to know.
 
@@ -63,7 +63,7 @@ The model reads a few thousand tokens at most, so every request is measured befo
 
 Press `Cmd+Option+A`, or choose **View > Show Assistant**, to open the assistant in the window's [trailing pane](/features/connection-window#the-trailing-pane). It shares that pane with the inspector, and the two-segment picker at the leading end of the pane's header moves between them. Over an open inspector the shortcut swaps rather than closes; over an open assistant it closes the pane.
 
-Whichever segment you pick is remembered for that connection, and only a segment you pick counts: opening the pane for a row you clicked, with **Auto-show inspector on row select** on, leaves a pane you left on the assistant alone. The assistant has no toolbar button of its own: the pane toggle opens the column and the picker chooses what it draws.
+Whichever segment you pick is remembered for that connection, and only a segment you pick counts: opening the pane for a row you clicked, with **Show inspector when a row is selected** on, leaves a pane you left on the assistant alone. The assistant has no toolbar button of its own: the pane toggle opens the column and the picker chooses what it draws.
 
 With AI features off in **Settings > AI**, the command is dimmed and the picker is gone, so the pane holds the inspector alone. In [Agent mode](/features/agent-mode) the command is dimmed too, because the conversation is the window's content column there; **View > Focus > Focus Assistant** (`Ctrl+Cmd+Option+A`) puts the insertion point in its composer.
 
@@ -140,7 +140,7 @@ Type `@` in the composer to open a picker at the caret: **Schema**, a specific *
 
 ### Slash commands
 
-Type `/` for **`/review`**, **`/explain`**, **`/optimize`**, and **`/fix`**, or **`/help`** for the list. The first three act on the text typed after the command, or on the whole query tab when there is none, and attach the same table structure as the menu actions. **`/fix`** sends the tab's last failed statement with its error. Add your own under **Settings > AI > Custom Slash Commands**: a template substitutes `{{query}}`, `{{schema}}`, `{{database}}`, and `{{body}}`, the text typed after the command, at send time. A custom command with a built-in's name runs only from the command menu. Deleting one asks first, since the deletion reaches every Mac that syncs settings.
+Type `/` for **`/review`**, **`/explain`**, **`/optimize`**, and **`/fix`**, or **`/help`** for the list. The first three act on the text typed after the command, or on the whole query tab when there is none, and attach the same table structure as the menu actions. **`/fix`** sends the tab's last failed statement with its error. Add your own under **Settings > AI > Slash Commands**: a template substitutes `{{query}}`, `{{schema}}`, `{{database}}`, and `{{body}}`, the text typed after the command, at send time. A custom command with a built-in's name runs only from the command menu. Deleting one asks first, since the deletion reaches every Mac that syncs settings.
 
 ### Model picker
 
@@ -180,9 +180,9 @@ Pin plain-text context to a connection so the AI sees it every turn: open the co
 
 ## Inline suggestions
 
-Turn on **Enable inline suggestions while typing** in the AI tab; it is off by default. Pause typing and the active provider, or Apple Intelligence when it is on, suggests a completion as ghost text at the cursor. `Tab` accepts, `Escape` dismisses, and typing anything else dismisses it too.
+Turn on **Suggest SQL while typing** under **Inline Suggestions** in **Settings > AI**; it is off by default. Pause typing and the active provider, or Apple Intelligence when it is on, suggests a completion as ghost text at the cursor. `Tab` accepts, `Escape` dismisses, and typing anything else dismisses it too.
 
-The pause is the **Debounce** setting beside the toggle: 500 ms by default, adjustable from 100 to 3,000 ms in 50 ms steps. With Copilot active the suggestions come from Copilot's inline-completion model; every other provider serves them through chat completions. Copilot gets the query edit by edit as you type, under a header with the database name, its dialect, and the columns of up to **Max schema tables** tables, the ones the statement you are writing names first.
+The pause is the **Delay** setting under the switch: 500 ms by default, adjustable from 100 to 3,000 ms in 50 ms steps. With Copilot active the suggestions come from Copilot's inline-completion model; every other provider serves them through chat completions. Copilot gets the query edit by edit as you type, under a header with the database name, its dialect, and the columns of up to **Maximum tables** tables, the ones the statement you are writing names first.
 
 Suggestions follow the connection's AI policy, read again at every pause, so a policy you change in the connection form applies from the next one. **Always Allow** suggests right away. On **Ask Each Time**, suggestions start once you click **Allow** in the chat's **Allow AI Access** prompt for that connection, and stop when the connection disconnects. A **Never** connection gets no suggestions, and with Copilot active its editor text is not sent to Copilot either.
 
@@ -192,11 +192,11 @@ Every message carries a system prompt built from **Settings > AI > Context**, so
 
 | Setting | Default | What it sends |
 |---------|---------|---------------|
-| Include database schema | On | Columns and foreign keys for up to **Max schema tables** tables, the ones your question and current query use first |
+| Include database schema | On | Columns and foreign keys for up to **Maximum tables** tables, the ones your question and current query use first |
 | Include current query | On | The editor's text, truncated at 2,000 characters |
 | Include query results | Off | The rows in the results grid |
-| Max schema tables | 20 | |
+| Maximum tables | 20 | |
 
 Apple Intelligence runs inside macOS and sends nothing over the network. Ollama, llama.cpp, and MLX run on your own machine, so nothing reaches a third party. Every other provider is a network call to that vendor under the terms of your account with them.
 
-Per connection, **AI Policy** under **Access** on the connection form's **Options** section takes **Use Default**, **Always Allow**, **Ask Each Time**, or **Never**. A change applies to an open connection from the next message or tool call. The app-wide default is **Ask Each Time**: the chat asks before its first message on a connection, and one **Allow** covers every chat and the inline suggestions on that connection until it disconnects. **Never** also blocks external AI tool calls against that connection. External clients such as Raycast and Claude Desktop reach the same tools through the [MCP server](/features/mcp), bounded by the connection's **External Clients** level and the token's scope.
+Per connection, **AI Policy** under **Access** on the connection form's **Options** section takes **Use Default**, **Always Allow**, **Ask Each Time**, or **Never**. A change applies to an open connection from the next message or tool call. The app-wide default is **Default AI policy** under **Privacy** in **Settings > AI**, **Ask Each Time** out of the box: the chat asks before its first message on a connection, and one **Allow** covers every chat and the inline suggestions on that connection until it disconnects. **Never** also blocks external AI tool calls against that connection. External clients such as Raycast and Claude Desktop reach the same tools through the [MCP server](/features/mcp), bounded by the connection's **External Clients** level and the token's scope.

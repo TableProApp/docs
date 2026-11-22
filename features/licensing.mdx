@@ -68,25 +68,25 @@ The first launch opens **Sign in to TablePro**, with **Sign In** and **Continue 
 </Check>
 
 <Frame caption="Settings > Account on a Pro plan">
-  <img className="block dark:hidden" src="/images/account-settings.png" alt="Account pane with name and email, a Pro plan row, the Features list, Devices with this Mac marked, and Offline with the machine ID" />
-  <img className="hidden dark:block" src="/images/account-settings-dark.png" alt="Account pane with name and email, a Pro plan row, the Features list, Devices with this Mac marked, and Offline with the machine ID" />
+  <img className="block dark:hidden" src="/images/account-settings.png" alt="Account pane with name and email, a Pro plan row with its verification row, and the Features, Devices, Teams, and Offline File and License Key rows" />
+  <img className="hidden dark:block" src="/images/account-settings-dark.png" alt="Account pane with name and email, a Pro plan row with its verification row, and the Features, Devices, Teams, and Offline File and License Key rows" />
 </Frame>
 
-The rest of the pane:
+The rest of the pane is the **Plan** section and four rows that each open a page:
 
-| Section | Shows |
+| Part | Shows |
 |---|---|
-| **Plan** | One row per license: the plan and its cycle, whose it is (Personal, or the team's name), and its status, such as **Renews on**, **Ends on**, **Lifetime** or **Payment problem**. On a plan you pay for, **Billing…** opens its billing in your account. On Free: **You're on Free** with **Upgrade…** |
+| **Plan** | One row per license: the plan and its cycle, whose it is (Personal, or the team's name), and its status, such as **Renews on**, **Ends on**, **Lifetime** or **Payment problem**. On a plan you pay for, **Billing…** opens its billing in your account. On Free: **You're on Free** with **Upgrade…**. The last row says when the plan was last verified and until when it holds, with **Refresh** |
 | **Features** | Every paid feature, marked **Included** or locked |
-| **Devices** | The devices signed in to your account. See [Devices](#devices) |
+| **Devices** | The devices signed in to your account, with how many beside the row. See [Devices](#devices) |
 | **Teams** | Each team you belong to, your role, **Seat** or **No seat**, and **Manage…**, which opens the team in your account |
-| **Offline** | When the plan was last verified and until when it holds, **Refresh**, the **Machine ID**, **Import Offline File…** and **Use License Key…** |
+| **Offline File and License Key** | The **Machine ID**, **Import Offline File…** and **Use License Key…** |
 
 Notices at the top of **Plan** name what needs doing: a failed payment offers **Update Payment Method…**, and a plan that is canceling says when it ends. Seats, invitations and roles are managed in your account; see [Team Plan](/features/team).
 
 ### A license key from an older version
 
-A key saved by an older version of TablePro signs the Mac in on its own, to the account the key belongs to, the first time the new version reaches the server. To use a key by hand, click **Use License Key…** under **Offline**, paste it (`XXXXX-XXXXX-XXXXX-XXXXX-XXXXX`) and click **Use Key**. On a Mac already signed in, the sheet says which account the key replaces. A key is deleted from the Mac once it is used.
+A key saved by an older version of TablePro signs the Mac in on its own, to the account the key belongs to, the first time the new version reaches the server. To use a key by hand, click **Use License Key…** on the **Offline File and License Key** page, paste it (`XXXXX-XXXXX-XXXXX-XXXXX-XXXXX`) and click **Use Key**. On a Mac already signed in, the sheet says which account the key replaces. A key is deleted from the Mac once it is used.
 
 ## Devices
 
@@ -100,9 +100,9 @@ Signing in on a fourth device keeps it on Free and says "Your plan is in use on 
 
 Your plan reaches the Mac as a signed file, valid for up to 14 days and never past the end of the license. The signature is checked on your Mac, with no network, so editing the file changes nothing.
 
-- The plan is refreshed at launch, then 24 hours after a check that worked, or 1 hour after one that failed. **Refresh** under **Offline** checks now. A plan changed in your account shows at the next check.
+- The plan is refreshed at launch, then 24 hours after a check that worked, or 1 hour after one that failed. **Refresh** under **Plan** checks now. A plan changed in your account shows at the next check.
 - Without a network, paid features keep working until the file expires. With 3 days left, **Plan** says **Verify your plan soon**. Once it expires, it says **Your plan could not be verified** and paid features pause until a check succeeds. Both offer **Try Again**.
-- A Mac that never reaches the internet uses an offline file. Copy the **Machine ID** under **Offline**, create an offline file for it in your account, then click **Import Offline File…**. A file is valid until the end of the paid period, or for one year on a lifetime license, and its device keeps its slot until it expires.
+- A Mac that never reaches the internet uses an offline file. Copy the **Machine ID** from the **Offline File and License Key** page, create an offline file for it in your account, then click **Import Offline File…**. A file is valid until the end of the paid period, or for one year on a lifetime license, and its device keeps its slot until it expires.
 
 ## What syncs
 

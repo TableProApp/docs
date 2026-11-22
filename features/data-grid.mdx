@@ -22,10 +22,10 @@ A Cassandra, ScyllaDB or Bigtable table has no header sort, and a query result t
 
 **Sort direction** in [Settings > Data](/customization/data-settings) decides which way that first click goes. It is Ascending out of the box; set it to Descending to open on the newest rows and reach them in one click.
 
-A table opens sorted by its primary key, so each page continues where the last one ended. A table with no primary key opens in the server's order. Set **Default row sort** to **First column**, or to **No sorting (engine order)** to keep the server's order everywhere. A sort the setting applies carries the same arrow as one you clicked, and clicking that header reverses it.
+A table opens sorted by its primary key, so each page continues where the last one ended. A table with no primary key opens in the server's order. Set **Default sort** to **First column**, or to **No sorting (engine order)** to keep the server's order everywhere. A sort the setting applies carries the same arrow as one you clicked, and clicking that header reverses it.
 
 <Warning>
-Sorting on a `BLOB`, `JSON`, or spatial column the server cannot order on fails the query. Sort on another column, or set **Default row sort** to **No sorting (engine order)**.
+Sorting on a `BLOB`, `JSON`, or spatial column the server cannot order on fails the query. Sort on another column, or set **Default sort** to **No sorting (engine order)**.
 </Warning>
 
 ## Filtering
@@ -69,7 +69,7 @@ Rules belong to the table, scoped to the connection, database, and schema, and f
 
 Drag a border to resize a column, or double-click it to fit the content; **Size to Fit** and **Size All Columns to Fit** on the header menu do the same. A fitted column stops at half the visible grid width.
 
-Point at a header for the column's type and, with **Show object comments** on in [General settings](/customization/general-settings), its comment.
+Point at a header for the column's type and, with **Show comments** on in [Sidebar & Tabs settings](/customization/sidebar-and-tabs#objects), its comment.
 
 Hide columns from the columns button in the status bar or from the header menu. A hidden column is not fetched, so hiding a large one makes the table load faster; the primary key and the sorted column are fetched either way. On a schemaless store the popover lists every field the grid can draw, including ones that turn up only in later documents.
 
@@ -137,7 +137,7 @@ Step back with **View > Back** (`Ctrl+Cmd+[`) and **View > Forward** (`Ctrl+Cmd+
 
 ## Inspector
 
-Press `Cmd+Option+I`, or click the button at the trailing end of the toolbar, to open the inspector beside the grid. The table and which row of how many is selected sit under the [pane's header](/features/connection-window#the-trailing-pane), and **Fields** and **JSON** are the two renderings of that row, picked from the header's ellipsis menu. [Cell and Row Viewers](/features/json-viewer) covers both. Turn on **Auto-show inspector on row select** in [Settings > Data](/customization/data-settings) to open it whenever a row is picked, in a query result as well as a table.
+Press `Cmd+Option+I`, or click the button at the trailing end of the toolbar, to open the inspector beside the grid. The table and which row of how many is selected sit under the [pane's header](/features/connection-window#the-trailing-pane), and **Fields** and **JSON** are the two renderings of that row, picked from the header's ellipsis menu. [Cell and Row Viewers](/features/json-viewer) covers both. Turn on **Show inspector when a row is selected** in [Settings > Data](/customization/data-settings) to open it whenever a row is picked, in a query result as well as a table.
 
 Short values sit on one line, label leading and value trailing. Long text, JSON, PHP, binary and images take the full width. Long text and JSON carry a resize handle; PHP, binary and images draw at a fixed height. `Tab` and `Shift+Tab` move between fields; the menu at the trailing edge of each field carries the same values as [Set Value](/features/change-tracking#editing-a-cell): **Set NULL**, **Set DEFAULT**, **Set EMPTY**, **Generate UUID** and **Generate UUIDv7** where the column takes them, and **SQL Functions** with the date and time functions that fit it. `Ctrl+Option+N` and `Ctrl+Option+D` set NULL and DEFAULT. With several rows selected, Generate UUID gives each row its own value. Search filters the list by column name or stored value, and the pencil button narrows it to fields already edited.
 
@@ -284,7 +284,7 @@ SQL Server, Oracle, SpatiaLite, Teradata, Trino, Presto, Spanner, Cassandra and 
 
 Double-click a cell, or press `Return` on it, to edit it in place. A value that holds a line break, or runs past 256 characters, opens in a larger editor anchored to the cell instead: `Return` saves, `Option+Enter` starts a new line and `Escape` cancels. `Option+Enter` while editing in the cell moves the text into that editor. In a grid you cannot edit, the same gestures open the value in a viewer. Nothing reaches the database until you save, and [Change Tracking](/features/change-tracking) covers the type-specific editors, the row operations, and what a Save runs.
 
-With the grid focused, `Cmd+=` and `Cmd+-` make its text bigger or smaller. They change the Data Grid Font size in [data settings](/customization/data-settings), so every grid, the inspector and the cell popovers follow, and the size is kept between launches.
+With the grid focused, `Cmd+=` and `Cmd+-` make its text bigger or smaller. They change **Font size** in [data settings](/customization/data-settings#grid), so every grid, the inspector and the cell popovers follow, and the size is kept between launches.
 
 NULL renders as styled `NULL` text. That text, the date format, row height, row numbers, and alternate row backgrounds are [data settings](/customization/data-settings). Every shortcut the grid answers to, and how to rebind it, is in [Keyboard Shortcuts](/features/keyboard-shortcuts).
 

@@ -238,7 +238,7 @@ A version is kept:
 
 Each tab keeps up to 50 versions, for 30 days or for Query History's **Keep entries for** when that is shorter. Blank text and a copy of the newest version are skipped, and nothing is kept while [Query History is paused](/features/query-history#pausing). Table tabs keep none.
 
-Versions stay when a tab closes, and **File > Reopen Closed Tab** brings them back with it. Deleting the connection, or **Clear History…** in [Settings > Data](/customization/data-settings#query-history), removes them. They never sync.
+Versions stay when a tab closes, and **File > Reopen Closed Tab** brings them back with it. Deleting the connection, or **Clear History…** in [Settings > Data > Query History](/customization/data-settings#query-history), removes them. They never sync.
 
 While the tab is on screen, `Cmd+Z` undoes **Clear Query**, a loaded query, **Apply to Editor** and an inserted saved query.
 
@@ -248,7 +248,7 @@ Press `Cmd+Shift+L` to format the statement at the cursor. The toolbar's format 
 
 The formatter breaks a line per clause and keeps your comments, string literals, cursor position and each engine's quoted names: MySQL backticks, PostgreSQL double quotes, SQL Server brackets. A dollar-quoted body, such as a PL/pgSQL function or `DO` block, stays exactly as written. So does a line the client reads rather than the server: `GO` in a SQL Server script, `DELIMITER` in a MySQL one, a lone `/` in an Oracle one. A keyword or type name used as a column name, such as `date` in `SELECT date FROM events`, keeps the case you typed.
 
-Indentation, case, and where lines break are set in **Settings > Editor > Formatter**; see [Formatter](/customization/editor-settings#formatter). A `.sql-formatter.json` in a [linked SQL folder](/features/favorites#linked-sql-folders) sets them for the files in that folder. JOINs, subqueries, CASE expressions, recursive CTEs, window functions and set operations are all handled. Stored procedures and T-SQL `BEGIN`/`END` blocks pass through with minimal changes. A query larger than 10.5 MB is not formatted: an error says so, and the text stays as it was.
+Indentation, case, and where lines break are set in **Settings > Editor > SQL Formatting**; see [SQL formatting](/customization/editor-settings#sql-formatting). A `.sql-formatter.json` in a [linked SQL folder](/features/favorites#linked-sql-folders) sets them for the files in that folder. JOINs, subqueries, CASE expressions, recursive CTEs, window functions and set operations are all handled. Stored procedures and T-SQL `BEGIN`/`END` blocks pass through with minimal changes. A query larger than 10.5 MB is not formatted: an error says so, and the text stays as it was.
 
 **Before**:
 ```sql
@@ -320,4 +320,4 @@ For the execution plan rather than an opinion, press `Cmd+Option+E` and see [Exp
 
 **Settings > Editor** holds line numbers, current-line and current-statement highlighting, word wrap, [code folding](/features/code-folding), the per-statement run button, [invisible characters](#invisible-characters), tab width, [keyword case](/features/autocomplete#keyword-case), [query parameters](/features/query-parameters), and the [Vim](/features/vim-mode) or [Emacs](/features/emacs-mode) key bindings. Editor font family and size are on that same tab.
 
-The font size set by `Cmd+=` and `Cmd+-` is the Editor Font setting, so it is kept between launches. See [Query Tabs](/features/tabs#switching-tabs).
+The font size set by `Cmd+=` and `Cmd+-` is **Size** in [Editor settings](/customization/editor-settings#font), so it is kept between launches. See [Query Tabs](/features/tabs#switching-tabs).

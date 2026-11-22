@@ -212,7 +212,7 @@ The checks for a document holding both names and for a document the validator wo
 validator already rejected before the save is left alone. Each reads every document that holds a
 changed field and stops at this connection's effective query timeout, or after 10 minutes when the
 timeout is **No limit**. Set an override under **Options**, or leave it empty to inherit **Settings >
-General**. A check that times out changes nothing. Every check reads the primary, whatever the
+Connections**. A check that times out changes nothing. Every check reads the primary, whatever the
 connection's **Read Preference**. Once they pass, the save reads the collection's options, indexes
 and views again, and stops if the options changed or an index, search index or view now uses the
 field.

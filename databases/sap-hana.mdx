@@ -41,7 +41,7 @@ On premises, each database has its own SQL port, built from the two-digit instan
 
 `SELECT DATABASE_NAME, SQL_PORT FROM SYS_DATABASES.M_SERVICES WHERE SQL_PORT <> 0`, run on the system database, lists every tenant's port.
 
-One connection reaches one database. A tenant and the system database are two connections, so there is no database to switch between; the schema picker switches schema instead, on the same session and without reconnecting. `SYS`, `SYS_DATABASES` and HANA's own `_SYS_` schemas are system schemas: the schema picker lists them last, and the sidebar shows them only with [**Show system databases and schemas**](/customization/general-settings#tabs-and-sidebar) on, or when one is the schema in use. An open tab stays on the schema it started with. See [Tabs](/features/tabs#where-a-tab-points).
+One connection reaches one database. A tenant and the system database are two connections, so there is no database to switch between; the schema picker switches schema instead, on the same session and without reconnecting. `SYS`, `SYS_DATABASES` and HANA's own `_SYS_` schemas are system schemas: the schema picker lists them last, and the sidebar shows them only with [**Show system databases and schemas**](/customization/sidebar-and-tabs#objects) on, or when one is the schema in use. An open tab stays on the schema it started with. See [Tabs](/features/tabs#where-a-tab-points).
 
 ## Connection URL
 
@@ -63,7 +63,7 @@ Username and password, over HANA's SCRAM-PBKDF2-SHA256 exchange, so the password
 
 The connection closes instead when the server refuses that statement or takes more than 10 seconds to answer it, and when the statement is still running 30 seconds after **Stop**. If the driver itself has not answered 40 seconds after **Stop**, it is shut down. Each case reconnects on the schema you were using, without your temporary tables and session variables. [Troubleshooting](#stop-reconnects-instead-of-cancelling) says what to change.
 
-The [query timeout](/customization/general-settings#query-timeout) sends the same cancel and closes the connection in the same cases, short of shutting the driver down. When the cancel works, the error says the timeout was reached.
+The [query timeout](/customization/connection-settings#query-timeout) sends the same cancel and closes the connection in the same cases, short of shutting the driver down. When the cancel works, the error says the timeout was reached.
 
 ### Explain
 

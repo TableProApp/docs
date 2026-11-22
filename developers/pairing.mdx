@@ -144,7 +144,7 @@ names more than one level, the sheet starts at the lowest.
 `connections:display` lets the token call [`list_connections`](/developers/mcp-tools#listing-for-display)
 with `purpose: "display"`, which adds connections hidden from AI and each connection's user name. Ask
 for it only to show the user their connections, never to feed a model. The sheet offers it only while
-**Allow apps to list connections hidden from AI** is on under **Settings > MCP**, and its checkbox
+**Allow apps to list connections hidden from AI** is on under **Access** in **Settings > MCP**, and its checkbox
 starts off. Otherwise the token is issued without it.
 
 The exchange response names what was granted:
@@ -172,7 +172,7 @@ redirect. Pairing again creates a separate token. Retire an old token through
 
 ## Revoking a token
 
-Revoke a client's token in **Settings > MCP > Authentication**. For the bundled macOS command,
+Revoke a client's token in **Settings > MCP > Tokens**. For the bundled macOS command,
 use [`tablepro unpair`](/integrations/terminal#status-and-pairing).
 
 The command sends `POST /v1/integrations/revoke` over the private Unix socket, with a form-encoded
@@ -195,7 +195,7 @@ credential with `400 unsupported_token_type`.
 
 ## Errors
 
-With **Enable MCP Server** off, the pair link stops before the approval sheet with an alert that
+With **MCP server** off, the pair link stops before the approval sheet with an alert that
 names **Settings > MCP**. No redirect is opened, so the extension sees no answer.
 
 Approving can still fail before the client gets a code, such as when the token cannot be saved to the

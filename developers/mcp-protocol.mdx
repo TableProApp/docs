@@ -90,7 +90,7 @@ client send the same `clientInfo` and number their requests alike, and this id k
 from one session off the other's request. The server reads it only from requests on the bridge token.
 
 A TablePro the bridge launched that does not start the server writes `mcp-start-refused.json` beside
-the handshake, with `pid`, `refusedAt` and `reason`: `turnedOff` when **Enable MCP Server** is off,
+the handshake, with `pid`, `refusedAt` and `reason`: `turnedOff` when the **MCP server** switch is off,
 `failedToStart` when the server tried and failed. The bridge reads only a refusal written after its own
 launch request, stops polling, and exits with the matching message. A refusal with no `reason` reads as
 `turnedOff`, and one with a reason the bridge does not know reads as `failedToStart`. This file is
