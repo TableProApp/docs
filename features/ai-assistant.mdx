@@ -140,7 +140,9 @@ Type `@` in the composer to open a picker at the caret: **Schema**, a specific *
 
 ### Slash commands
 
-Type `/` for **`/review`**, **`/explain`**, **`/optimize`**, and **`/fix`**, or **`/help`** for the list. The first three act on the text typed after the command, or on the whole query tab when there is none, and attach the same table structure as the menu actions. **`/fix`** sends the tab's last failed statement with its error. Add your own under **Settings > AI > Slash Commands**: a template substitutes `{{query}}`, `{{schema}}`, `{{database}}`, and `{{body}}`, the text typed after the command, at send time. A custom command with a built-in's name runs only from the command menu. Deleting one asks first, since the deletion reaches every Mac that syncs settings.
+Type `/` for **`/review`**, **`/explain`**, **`/optimize`**, and **`/fix`**, or **`/help`** for the list. The first three act on the text typed after the command, or on the whole query tab when there is none, and attach the same table structure as the menu actions. **`/fix`** sends the tab's last failed statement with its error. Add your own under **Settings > AI > Slash Commands**: a template substitutes `{{query}}`, `{{schema}}`, `{{database}}`, and `{{body}}`, the text typed after the command, at send time. Deleting one asks first, since the deletion reaches every Mac that syncs settings.
+
+The command button in the composer's footer lists the built-ins, then yours under **Custom**. Picking one of yours runs it at once, unless its template uses `{{body}}`: then the composer gets `/name ` in front of any text already there, for you to finish and send. A command picked there runs as yours even when a built-in has the same name. Typed by hand, that name runs the built-in.
 
 ### Model picker
 
