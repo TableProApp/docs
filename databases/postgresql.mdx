@@ -11,10 +11,10 @@ Unlike MySQL, PostgreSQL will not connect without a **Database**, and a connecti
 
 | Field | Default | Notes |
 |-------|---------|-------|
-| **Connect Using** | **Host and Port** | **Socket** connects through the server's socket on this Mac. See [Unix socket](#unix-socket) |
+| **Address** | **Host and Port** | **Unix Socket** connects through the server's socket on this Mac. See [Unix socket](#unix-socket) |
 | **Host** | `localhost` | |
-| **Port** | `5432` | With **Socket**, picks the socket file |
-| **Socket** | empty | With **Connect Using** set to **Socket**: the folder holding the socket, or the socket file |
+| **Port** | `5432` | With **Unix Socket**, picks the socket file |
+| **Socket** | empty | With **Address** set to **Unix Socket**: the folder holding the socket, or the socket file |
 | **Username** | - | Not pre-filled; most servers use `postgres`. Empty signs in as your macOS login name |
 | **Database** | - | **Required** |
 
@@ -36,7 +36,7 @@ Any server from 9.1 on works. A feature the server predates stays out of the sid
 
 ## Unix socket
 
-A server on this Mac listens on a socket as well as a port, and a server with `listen_addresses = ''` listens only there. Set **Connect Using** to **Socket** and enter the folder that holds the socket. Host leaves the form, and so does the **SSH & Proxies** pane, since only a direct connection reaches the socket.
+A server on this Mac listens on a socket as well as a port, and a server with `listen_addresses = ''` listens only there. Set **Address** to **Unix Socket** and enter the folder that holds the socket in **Socket**. Host leaves the form, and so does the **SSH & Proxies** pane, since only a direct connection reaches the socket.
 
 The socket file is named after the port, `.s.PGSQL.5432` for port `5432`, so **Port** stays and picks the server. Entering the file itself, such as `/tmp/.s.PGSQL.5433`, saves its folder and sets **Port** from the name. The server lists its folders:
 

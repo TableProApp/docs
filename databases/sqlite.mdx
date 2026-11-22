@@ -51,7 +51,7 @@ Change the schema outside TablePro, such as a migration that adds a table, and t
 
 ## Attached databases
 
-A schema split across files, such as `app.db`, `auth.db` and `audit.db`, fits in one connection. Open the connection's **Advanced** pane, click **Attach Database…** under **Attached Databases**, and choose the other files. Each one is named after its file without the extension, so `auth.db` attaches as `auth`. Type over the row's **Name** to change it; `main` and `temp` are taken.
+A schema split across files, such as `app.db`, `auth.db` and `audit.db`, fits in one connection. Open the connection's **Advanced** pane, click **Attach Database…** under **Attached Databases**, and choose the other files. Each one is named after its file without the extension, so `auth.db` attaches as `auth`. Type over the name at the start of its row to change it; `main` and `temp` are taken. Each row's circled-ellipsis menu holds **Change File…**, **Move Up**, **Move Down** and **Remove**.
 
 ```sql
 SELECT u.email, e.action
@@ -72,7 +72,7 @@ A database built with sqlite-vec, SpatiaLite or another loadable extension canno
     Right-click the connection in the welcome window, choose **Edit…**, and select **Advanced** in the sidebar. A new connection from **File > New Connection…** has the same pane.
   </Step>
   <Step title="Add the library">
-    Click **Add Extension…** under **Extensions** and choose the file: `vec0.dylib` from a [sqlite-vec release](https://github.com/asg017/sqlite-vec/releases), or `/opt/homebrew/lib/mod_spatialite.dylib` after `brew install libspatialite`. The file panel hides `/opt`: press `Cmd+Shift+G` in the panel and type the folder. A row's path can be edited in place afterwards, with the whole file name, `.dylib` included.
+    Click **Add Extension…** under **Extensions** and choose the file: `vec0.dylib` from a [sqlite-vec release](https://github.com/asg017/sqlite-vec/releases), or `/opt/homebrew/lib/mod_spatialite.dylib` after `brew install libspatialite`. The file panel hides `/opt`: press `Cmd+Shift+G` in the panel and type the folder. To point a row at another file later, choose **Change File…** from its circled-ellipsis menu.
   </Step>
   <Step title="Save and connect">
     Click **Save**, then connect. The extension's functions and virtual tables answer in the editor, the sidebar and the Structure tab.
@@ -84,7 +84,7 @@ A database built with sqlite-vec, SpatiaLite or another loadable extension canno
   <img className="hidden dark:block" src="/images/sqlite-extensions-dark.png" alt="The Advanced pane of a new SQLite connection. Under Extensions, /opt/homebrew/lib/mod_spatialite.dylib sits above ~/Downloads/vec0.dylib, each row's Entry Point field reads Default entry point, and Add Extension… follows the list" />
 </Frame>
 
-The list loads in order every time the connection opens, Test Connection and reconnects included. When one extension needs another loaded first, reorder them with **Move Up** and **Move Down** in a row's circled-ellipsis menu. The first file that fails stops the connect, and the connection window names the file and the reason.
+The list loads in order every time the connection opens, Test Connection and reconnects included. When one extension needs another loaded first, reorder them with **Move Up** and **Move Down** in a row's circled-ellipsis menu, which also holds **Remove**. The first file that fails stops the connect, and the connection window names the file and the reason.
 
 Leave a row's **Entry Point** empty for most libraries, where it reads Default entry point: SQLite derives it from the file name, `sqlite3_vec_init` for `vec0.dylib`. Fill it in for a renamed file, or to call a second function the same library exports, such as sqlite-vec's `sqlite3_vec_numpy_init`.
 
@@ -108,7 +108,7 @@ A release built for the other processor fails with `mach-o file, but is an incom
 
 ## A database on another machine
 
-On the **Remote File** pane, **Location** set to **Remote Server over SSH** points the connection at a database on an SSH server, and the **Open** menu under the path decides how it is reached. **On the Server** runs your statements on the server against the live file, so reads and writes land on the database the server's own programs are using. **As a Read-Only Copy** fetches a snapshot over SFTP and opens it on this Mac, and the original is never touched.
+On the **Location** pane, **Location** set to **Remote Server over SSH** points the connection at a database on an SSH server, and the **Open** menu under the path decides how it is reached. **On the Server** runs your statements on the server against the live file, so reads and writes land on the database the server's own programs are using. **As a Read-Only Copy** fetches a snapshot over SFTP and opens it on this Mac, and the original is never touched.
 
 On the Server needs `python3` on the host, which every mainstream cloud image already carries, and nothing is installed. The read-only copy needs only SFTP, and it runs at Safe Mode [**Read-Only**](/features/safe-mode#connections-that-are-always-read-only). See [Remote Database Files](/connections/remote-database-files).
 

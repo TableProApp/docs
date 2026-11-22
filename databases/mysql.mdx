@@ -12,7 +12,7 @@ MySQL 8 accounts on `caching_sha2_password` connect on the first try, with no au
     Click **New Connection…** on the welcome window and pick **MySQL**
   </Step>
   <Step title="Test and Save">
-    Fill in host, port, and credentials, or pick **Socket** under **Connect Using** for a server on this Mac. Click **Test Connection**, then **Save & Connect**
+    Fill in host, port, and credentials, or set **Address** to **Unix Socket** for a server on this Mac. Click **Test Connection**, then **Save & Connect**
   </Step>
 </Steps>
 
@@ -20,10 +20,10 @@ MySQL 8 accounts on `caching_sha2_password` connect on the first try, with no au
 
 | Field | Default | Notes |
 |-------|---------|-------|
-| **Connect Using** | **Host and Port** | **Socket** connects through the server's socket file on this Mac. See [Unix socket](#unix-socket) |
+| **Address** | **Host and Port** | **Unix Socket** connects through the server's socket file on this Mac. See [Unix socket](#unix-socket) |
 | **Host** | `localhost` | Always TCP, `localhost` included |
 | **Port** | `3306` | |
-| **Socket** | empty | With **Connect Using** set to **Socket**: the full path of the socket file |
+| **Socket** | empty | With **Address** set to **Unix Socket**: the full path of the socket file |
 | **Username** | empty | An empty field connects as your macOS login name |
 | **Password** | empty | Stored in the macOS Keychain |
 | **Database** | empty | Optional. Leave it empty and open one with `Cmd+K` |
@@ -34,7 +34,7 @@ the server runs, so emoji and non-Latin text round-trip untouched. The **Connect
 
 ## Unix socket
 
-A server on this Mac listens on a socket file as well as a port, and a server started with `skip-networking` listens only there. Set **Connect Using** to **Socket** and enter the file's path. Host and Port leave the form, and so does the **SSH & Proxies** pane: a tunnel cannot reach a file on this Mac.
+A server on this Mac listens on a socket file as well as a port, and a server started with `skip-networking` listens only there. Set **Address** to **Unix Socket** and enter the file's path in **Socket**. Host and Port leave the form, and so does the **SSH & Proxies** pane: a tunnel cannot reach a file on this Mac.
 
 The server reports its path:
 

@@ -19,7 +19,7 @@ The sidebar lists the panes in this order and leaves out the ones that do not ap
 | Pane | Holds | Left out when |
 |------|-------|---------------|
 | [**General**](#general) | Name, type, environment, where the database lives, and the sign-in | Never |
-| [**SSH & Proxies**](#ssh-%26-proxies) | How the connection reaches the server: directly, through an SSH tunnel, a proxy, or a tunnel command | The driver offers no transport, or **Connect Using** is **Socket**. SQLite names it **Remote File** |
+| [**SSH & Proxies**](#ssh-%26-proxies) | How the connection reaches the server: directly, through an SSH tunnel, a proxy, or a tunnel command | The driver offers no transport, or **Address** is **Unix Socket**. SQLite names it **Location** |
 | [**SSL/TLS**](#ssl%2Ftls) | **SSL Mode** and the certificate files | The driver has no SSL settings, or a PostgreSQL connection uses a socket |
 | [**Appearance**](#appearance) | Icon, color, tags and group | Never |
 | [**Safe Mode**](#safe-mode) | Safe Mode, Manual Commit and masking rules | Never |
@@ -54,19 +54,22 @@ Closing the window, `Cmd+W`, `Escape`, **Cancel** and quitting TablePro all ask 
 | **Name** | Optional. Left empty, the connection saves under the suggestion shown in the field: the host and database (`db.example.com/shop`), the file's name for a database file, or the type. A saved connection with its name cleared keeps the name it had |
 | **Type** | The database type. **Change…** picks another; see [Changing the type](#changing-the-type) |
 | **Environment** | **Production**, **Staging**, **Development**, **Local**, or **None**. Shows with a colored symbol beside the connection's name in the welcome window and in **Switch Connection**. Choosing **Production** on a new connection sets **Safe Mode** to **Alert** until you pick a level yourself |
-| **Connect Using** | MySQL, MariaDB, and PostgreSQL. **Host and Port**, or **Socket** for a server on this Mac. See Unix socket for [MySQL](/databases/mysql#unix-socket) and [PostgreSQL](/databases/postgresql#unix-socket) |
+| **Address** | MySQL, MariaDB, and PostgreSQL. **Host and Port**, or **Unix Socket** for a server on this Mac. See Unix socket for [MySQL](/databases/mysql#unix-socket) and [PostgreSQL](/databases/postgresql#unix-socket) |
 | **Host** | Empty falls back to the driver's own default, usually `localhost`. A connection URL pasted here fills the form; see [Pasting a connection URL](#pasting-a-connection-url) |
 | **Port** | Pre-filled from the database type |
-| **Socket** | Replaces Host when **Connect Using** is **Socket**. MySQL and MariaDB take the socket file, such as `/tmp/mysql.sock`, and drop Port. PostgreSQL takes the folder, such as `/tmp`, and keeps Port, which names the file |
+| **Socket** | Replaces Host when **Address** is **Unix Socket**. MySQL and MariaDB take the socket file, such as `/tmp/mysql.sock`, and drop Port. PostgreSQL takes the folder, such as `/tmp`, and keeps Port, which names the file |
 | **Database** | Optional on drivers that browse every database from one session. PostgreSQL and Redshift do not connect without one |
-| **Credentials** | Under **Authentication**. **Enter Below** keeps the username and password on this connection; a [credential profile](/connections/credential-profiles) supplies both instead |
+| **Credentials** | Under **Authentication**. **Enter Below** keeps the username and password on this connection; a [credential profile](/connections/credential-profiles) supplies both instead. The same menu holds **Save These as a Profile…**, **Edit Profile…**, **New Profile…** and **Manage Profiles…** |
 | **Username** | Not pre-filled. Empty means the driver's own default |
-| **Password** | Stored in the macOS Keychain. The eye button shows a saved one after Touch ID or your Mac's password. The menu beside the field switches between **Store in Keychain** and **Ask Every Time**, which stores nothing and asks on every connect. Reads **API Token** on API-only drivers. A connection whose password comes from a [password source](/features/connection-sharing#password-sources) shows the source here, with **Test Source** |
+| **Save Password** | **In Keychain**, or **Ask Every Time**, which stores nothing, asks on every connect, and removes the **Password** field. Reads **Save API Token** on API-only drivers |
+| **Password** | Stored in the macOS Keychain. The eye button shows a saved one after Touch ID or your Mac's password. Reads **API Token** on API-only drivers. A connection whose password comes from a [password source](/features/connection-sharing#password-sources) shows the source here, with **Test Source** |
 | **Use ~/.pgpass** | PostgreSQL, Redshift, CockroachDB, and KingbaseES. Off by default. See [Password file](/databases/postgresql#password-file) for lookup rules and file permissions |
 
 A driver's own fields sit under **Connection** or **Authentication** on General, or in a section named after the database type on [**Advanced**](#advanced). Each database page says which.
 
 SQLite, DuckDB, libSQL, and Beancount replace the host fields with a file path. **Choose…** picks a file that exists. **New…** names one that does not, and the file is made when you connect; Beancount opens only an existing ledger, so it has no **New…**.
+
+**Choose…** dims files whose extension belongs to another driver. A file with an unfamiliar name can still be picked, and its contents are checked then: the panel refuses one the driver cannot open, with a message such as `“notes.txt” isn’t a database SQLite can open.`
 
 ### Pasting a connection URL
 
@@ -97,9 +100,9 @@ On a saved connection the paste is careful with what is already there. It never 
 
 Leave it on **Direct** unless the database is unreachable from this Mac. Switching to another transport keeps what you typed into the previous one, so switching back costs nothing.
 
-SQLite calls the pane **Remote File**, and its only choice is **Location**: **This Mac**, or **Remote Server over SSH** for a database file on an SSH server. **Open** then picks **On the Server**, which runs statements there, or **As a Read-Only Copy**. See [Remote Database Files](/connections/remote-database-files).
+For SQLite the pane and its one menu are both named **Location**: **This Mac**, or **Remote Server over SSH** for a database file on an SSH server. **Open** then picks **On the Server**, which runs statements there, or **As a Read-Only Copy**. While the file is remote, **File Path** on General is dimmed and unused. See [Remote Database Files](/connections/remote-database-files).
 
-A connection set to **Socket** on General has no **SSH & Proxies** pane, since a tunnel cannot reach a socket file on this Mac. A PostgreSQL socket also has no **SSL/TLS** pane.
+A connection with **Address** set to **Unix Socket** has no **SSH & Proxies** pane, since a tunnel cannot reach a socket file on this Mac. A PostgreSQL socket also has no **SSL/TLS** pane.
 
 **Socket Path**, under **Forward To** with **SSH Tunnel** selected, forwards to a unix socket instead of Host and Port, which are then unused. See [Forwarding to a unix socket](/connections/ssh-tunneling#forwarding-to-a-unix-socket).
 
@@ -195,8 +198,8 @@ A connect you did not start never runs the script. A restored window at launch, 
 | Field | Description |
 |-------|-------------|
 | Driver fields | Options only that driver has, such as MongoDB's **Replica Set**, in a section named after the database type |
-| **Attached Databases** | SQLite, DuckDB, and libSQL in Local File mode. More database files, attached on every connect. See [Attached databases](/databases/sqlite#attached-databases) |
-| **Extensions** | SQLite, and libSQL in Local File mode. Libraries loaded into the database file on every connect. See [Extensions](/databases/sqlite#extensions) |
+| **Attached Databases** | SQLite, DuckDB, and libSQL in Local File mode. More database files, attached on every connect. Each file is one row, and its circled-ellipsis menu holds **Change File…**, **Move Up**, **Move Down** and **Remove**. See [Attached databases](/databases/sqlite#attached-databases) |
+| **Extensions** | SQLite, and libSQL in Local File mode. Libraries loaded into the database file on every connect, one row each with the same menu. See [Extensions](/databases/sqlite#extensions) |
 | **Connect Timeout** | Maximum seconds for the network transport and remote database to finish connecting. Empty uses 30 seconds; valid values are 1 to 600 |
 | **Query Timeout** | Override of **Settings > General** for this connection. Empty inherits the global value; `0` means no limit. Only drivers that support query timeouts enforce it |
 | **Binary Value Limit** | MySQL and MariaDB. A binary value above this many KB loads when you open, copy or export it. Empty uses 64; valid values are 1 to 1048576. See [Large binary values](/features/data-grid#large-binary-values) |
