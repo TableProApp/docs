@@ -25,7 +25,7 @@ There are two paid plans, Pro and Team. Team includes everything in Pro. Starter
 
 The table describes macOS features. The [Linux beta](/linux/install) uses the same plans and accounts; its [account guide](https://github.com/TableProApp/TablePro/blob/main/linux/README.md#tablepro-account) covers device limits and sign-in. The Windows preview signs in to the same accounts: see [TablePro account](/windows/account). The [iPhone and iPad app](/ios) needs no plan.
 
-Signed out, a row, overlay or dialog offers **Sign In** and **Purchase License**. Signed in to an account without the feature, it offers **Upgrade Plan**, which opens the pricing page. A plan you already hold is never offered for sale: when it could not be checked, the gate says what **Settings > Account** says and offers **Try Again**, and past the [device limit](#devices) it offers **Open Account Settings…**. Everything else in the app works without a plan.
+Signed out, a row, overlay or dialog offers **Sign In** and **Purchase License**. Signed in to an account without the feature, it offers **Upgrade Plan**, which opens the pricing page. A plan you already hold is never offered for sale: when it could not be checked, the gate says what **Settings > Account** says and offers **Try Again**, and past the [device limit](#devices) it offers **Open Account Settings…**, which opens **Devices**. Everything else in the app works without a plan.
 
 ## Buy a license
 
@@ -103,6 +103,8 @@ Your plan reaches the Mac as a signed file, valid for up to 14 days and never pa
 - The plan is refreshed at launch, then 24 hours after a check that worked, or 1 hour after one that failed. **Refresh** under **Plan** checks now. A plan changed in your account shows at the next check.
 - Without a network, paid features keep working until the file expires. With 3 days left, **Plan** says **Verify your plan soon**. Once it expires, it says **Your plan could not be verified** and paid features pause until a check succeeds. Both offer **Try Again**.
 - A Mac that never reaches the internet uses an offline file. Copy the **Machine ID** from the **Offline File and License Key** page, create an offline file for it in your account, then click **Import Offline File…**. A file is valid until the end of the paid period, or for one year on a lifetime license, and its device keeps its slot until it expires.
+
+An offline file warns the same way: **Your offline file expires soon** with 3 days left, then **Your offline file has expired**. On the welcome window and on a feature gate, that notice offers **Open Account Settings…**, which opens the **Offline File and License Key** page to import a new file.
 
 ## What syncs
 
