@@ -189,6 +189,16 @@ Quit, **Relaunch to Update**, closing a window, a connection or a tab, and Disco
 
 A stopped restore can leave the database partly restored, and a stopped sync script keeps the statements it already ran.
 
+Option-click a window's close button to close every window. When two or more of them hold unsaved edits or running work, one alert asks before any of them closes:
+
+| Button | Result |
+| --- | --- |
+| **Review Changes…**, the default | Asks each window in turn. **Cancel** in one of them stops there and keeps the rest open |
+| **Cancel**, or Escape | Keeps every window open |
+| **Discard Changes** | Closes them all without saving and stops their running work |
+
+A window with nothing to save closes at once.
+
 ## Open transactions
 
 Closing a window, a connection or a database entry, Disconnect, Quit and **Relaunch to Update** end the session that holds a transaction, so they ask about it last, after running work and unsaved edits, for example **Do you want to commit the open transaction before disconnecting from “name”?**
