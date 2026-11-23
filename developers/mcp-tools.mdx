@@ -89,7 +89,7 @@ To read a value that was cut, select part of it with a narrower query. To get mo
 | `switch_database` | `connection_id`, `database` | `status` (`switched`), `connection_id`, `current_database` |
 | `switch_schema` | `connection_id`, `schema` | `status` (`switched`), `connection_id`, `current_schema` |
 
-`switch_database` and `switch_schema` move what the user sees: the sidebar, and the tab strip, which lists the tabs of the database or schema the connection is on. The user's other tabs stay open under their own database.
+`switch_database` and `switch_schema` move what the user sees: the sidebar, and the tab strip, which lists the tabs of the database or schema the connection is on. The user's other tabs stay open under their own database. A connection that reaches only its own database, such as SQLite or Oracle, refuses `switch_database` with an invalid-argument error and stays where it is.
 
 `list_connections` omits connections blocked for external clients, connections whose AI policy is **Never**, and connections outside the token's allowlist. Its `database` is the session's browsed database when connected, the saved default otherwise.
 
