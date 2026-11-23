@@ -151,6 +151,8 @@ A structure script is checked the same way. Both schemas are read again, and an 
 
 Script generation needs matching database types, with MySQL and MariaDB counting as one family. A cross-engine pair still compares, read-only: column data types are engine-specific strings, so generating DDL for one engine from another's metadata is not sound.
 
+Two schemas with different names pair their tables, views, routines and triggers by name. Tables script into the target's schema, with foreign keys to the source's own schema pointed at the target's. A view, routine or trigger whose source lives in another schema compares but is not scripted, because its definition can name the source's schema.
+
 ## Applying
 
 Anything that would destroy data is generated, listed, and held back. Dropping a table, dropping a column, narrowing a type, adding NOT NULL, changing a primary key and deleting a row each need an explicit allowance, and that allowance covers one run and is never saved.
@@ -163,7 +165,9 @@ A type narrows when the new one holds less: a shorter length, a length where the
   Applying runs the script against the target. Statements that already ran stay applied unless the whole run is inside a transaction that rolls back.
 </Warning>
 
-**On error** chooses between stopping and rolling back, stopping and keeping what ran, and skipping and continuing. A transaction cannot be combined with skip and continue, because together they leave the target half-applied.
+**On error** chooses between stopping and rolling back, stopping and keeping what ran, and skipping and continuing. A transaction cannot be combined with skip and continue, because together they leave the target half-applied. On PostgreSQL a failed statement aborts the transaction, so stopping and keeping what ran inside one keeps nothing: the run rolls back and says so.
+
+On an engine that cannot pool, such as DuckDB and PGlite, the run uses the same session as your tabs. When that session already has a transaction open, from **Manual Commit** or a `BEGIN` of your own, the run joins it instead of starting its own, and the result asks you to commit or roll it back.
 
 Whether a transaction covers the run depends on the engine. MySQL, MariaDB and Oracle commit implicitly on every DDL statement, so a structure sync on those engines runs without one rather than implying a rollback that will not happen. A data sync into a MySQL or MariaDB table on a storage engine that cannot roll back, such as MyISAM, keeps the rows a rolled-back run already wrote, and the result names those tables.
 

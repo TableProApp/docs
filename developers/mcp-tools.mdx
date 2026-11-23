@@ -10,7 +10,7 @@ If a dedicated tool covers the job, it beats hand-written SQL. It quotes identif
 In the tables below, required arguments come first and optional ones follow in parentheses. Unless a row says otherwise:
 
 - `connection_id` is a connection UUID from `list_connections`.
-- `database` and `schema` default to whatever the connection is currently browsing, except that `search_schema` without `schema` looks in every schema. Passing them targets somewhere else **without moving the app's selection**.
+- `database` and `schema` default to whatever the connection is currently browsing, except that `search_schema` without `schema` looks in every schema. Passing them targets somewhere else **without moving the app's selection**. A connection that cannot switch databases (SQLite and other file databases) refuses any `database` but its own, and an engine without schemas (MySQL, MariaDB, SQLite) refuses any `schema`, rather than running the call where it already is.
 - An unknown argument is rejected with `-32602`. There is no silent ignoring.
 - The result comes back twice: as JSON text in `content[0]`, and as a typed object in `structuredContent`. Read `structuredContent`.
 - Timestamps are ISO 8601, error text is redacted, and "a result set" means `columns[]`, `rows[][]`, `row_count`, `rows_affected`, `execution_time_ms`, `is_truncated`, plus `status_message`, `notes`, `database` and `schema` when they apply.
@@ -208,7 +208,7 @@ A batch that raises an error fails the call with the server's message and line n
 
 ### `explain_query`
 
-Pass the query with no `EXPLAIN` prefix. Without `variant` the engine's first variant runs, and every result lists them in `available_variants[]`. `analyze: true` picks the variant that runs the statement, so an analyzed write needs `tools:write` and Safe Mode approval, and it is refused when the engine has no such variant or the `variant` you pass only estimates. An analyzed write goes into query history the way an `execute_query` write does. An engine missing from the [support table](/features/explain-visualization#database-support) is refused.
+Pass the query with no `EXPLAIN` prefix. Without `variant` the engine's first variant runs, and every result lists them in `available_variants[]`. `analyze: true` picks the variant that runs the statement, so an analyzed write needs `tools:write` and Safe Mode approval, and it is refused when the engine has no such variant or the `variant` you pass only estimates. Under **Manual Commit** an analyzed write stays in the connection's open transaction until the user commits it, and `status_message` says so. An analyzed write goes into query history the way an `execute_query` write does. An engine missing from the [support table](/features/explain-visualization#database-support) is refused.
 
 `plan_text` and the plan rows share one answer, `plan_text` first. `is_truncated` appears, set to true, only when the [size limit](#answer-size) left plan rows out.
 
