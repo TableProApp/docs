@@ -303,7 +303,7 @@ Present the form, then repeat the **same** call with the answer and the state ec
 }
 ```
 
-`requestState` is signed and bound to the token, the method, and a digest of the parameters. Change any argument between the two calls and it is rejected with `-32602`. It expires after 5 minutes. An `action` other than `accept`, or `approved: false`, fails the call with a `denied` tool error.
+`requestState` is signed and bound to the token, the method, and a digest of the parameters. Change any argument between the two calls and it is rejected with `-32602`. It expires after 5 minutes. It is also bound to where the statement runs: the connection, database and schema it resolved to, and the statements shown. If the user switches the connection's database or schema between the two calls, the second call returns a new `input_required` naming the new target, and nothing runs until that one is approved. A call that runs several statements, such as `export_data` with several tables, asks once with every statement listed, and the approval runs them all in that call. An `action` other than `accept`, or `approved: false`, fails the call with a `denied` tool error.
 
 A call that carries `inputResponses` or `requestState` is never cached, whatever the method's normal hint says.
 
