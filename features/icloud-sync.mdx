@@ -5,7 +5,7 @@ description: Sync connections, groups, tags, and saved queries to your Macs, iPh
 
 import LocalCredentialConsent from "/snippets/local-credential-consent.mdx";
 
-Sync needs a Pro or Team [license](/features/licensing) and starts off. Press `Cmd+,`, open **Settings > iCloud Sync**, turn on **Sync this Mac with iCloud**, pick what to sync under **What Syncs**, and click **Sync Now**. The iPhone and iPad app shares the same CloudKit data but carries connections, groups, tags, and saved queries only.
+Sync needs a Pro or Team [plan](/features/licensing) and starts off. Press `Cmd+,`, open **Settings > iCloud Sync**, turn on **Sync this Mac with iCloud**, pick what to sync under **What Syncs**, and click **Sync Now**. The iPhone and iPad app shares the same CloudKit data but carries connections, groups, tags, and saved queries only.
 
 <Frame caption="iCloud Sync settings">
   <img className="block dark:hidden" src="/images/settings-sync.png" alt="iCloud Sync pane with the Sync this Mac with iCloud switch dimmed above a row that names the plan required" />
@@ -101,6 +101,6 @@ iCloud refused the changes counted under **Status** and accepted the rest. The r
 
 Signing in to a different iCloud account starts sync over for that account: the next sync is a full fetch rather than a delta, and changes waiting on this Mac go to the new account. Expect the first sync to take longer.
 
-When a license ends, sync stops and local data stays where it is. The row under the switch says **iCloud Sync needs a paid plan** and offers **Upgrade Plan**. The switch still turns sync off, and dims once it is off.
+When your plan ends, sync stops and local data stays where it is. The row under the switch says **iCloud Sync needs a paid plan** and offers **Upgrade Plan**. The switch still turns sync off, and dims once it is off.
 
 A plan this Mac could not verify pauses sync the same way. The row under the switch says **Your plan could not be verified** and offers **Try Again**, which opens **Settings > Account** and checks again. A check that fails says why in the row.

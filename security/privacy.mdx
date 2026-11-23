@@ -17,7 +17,7 @@ Turn off app usage data in the privacy settings if you do not want to send it. M
 | [AI provider](#ai-providers) | Your chosen provider | No provider on a fresh install; remove it or turn off **Enable AI features** |
 | [iCloud sync](#icloud-sync) | Your iCloud account | Off; **Settings > iCloud Sync** |
 | [MCP clients](#the-mcp-server) | Local HTTP and a private Unix socket | Off; **Settings > MCP** |
-| [Accounts and Team Library](#license-checks-and-the-team-library) | `api.tablepro.app` | Account requests after sign-in; content uploads when published |
+| [Accounts and Team Library](#accounts-and-the-team-library) | `api.tablepro.app` | Account requests after sign-in; content uploads when published |
 | [Shared links](#shared-links) | `api.tablepro.app`; link pages on `s.tablepro.app` | Only when you open a share sheet, create or revoke a link, or open one |
 | [Database connections](#your-database-connections) | Your configured servers | When you connect |
 
@@ -109,7 +109,7 @@ Two provider paths run a program rather than call an endpoint. **Claude Agent** 
 
 ## iCloud sync
 
-Off by default, and it needs a Pro or Team license. When it is on, records go to the CloudKit container `iCloud.com.TablePro`, into the private database of your own iCloud account, in the Production environment.
+Off by default, and it needs a Pro or Team plan. When it is on, records go to the CloudKit container `iCloud.com.TablePro`, into the private database of your own iCloud account, in the Production environment.
 
 Synced record types are `Connection`, `ConnectionGroup`, `ConnectionTag`, `AppSettings`, `SQLFavorite`, `SQLFavoriteFolder`, `FavoriteTable`, `FavoriteDatabase`, `SSHProfile`, `CredentialProfile`, `TableFolder` and `TableFolderItem`. Credential profiles carry the name, username and password mode, never the password or command source. A connection record carries host, port, username, database, and SSH and SSL settings. Sync runs on launch, about two seconds after you change something synced, when you switch back to the app, and when iCloud notifies the app that another device changed something. That notice goes through Apple's push service, carries no record content, and asks for no notification permission. The app registers for it only while sync is on.
 
@@ -156,7 +156,9 @@ Installing a plugin downloads its ZIP over HTTPS from the URL in that catalog an
 
 There is no setting that turns the catalog fetch off.
 
-## License checks and the team library
+<span id="license-checks-and-the-team-library" />
+
+## Accounts and the Team Library
 
 From Mac 0.86.0 (including 0.86.0-beta.1), Linux 0.1.0-beta.1 and the Windows preview, sign-in uses the account service at `https://api.tablepro.app`. `POST /v2/devices` registers the machine ID, name, platform and app/OS versions. Account access tokens and signed plan files replace routine license-key checks. On Mac, the machine ID is the SHA-256 hardware identifier; on Linux it is HMAC-SHA256 of `/etc/machine-id` with `app.tablepro.TablePro`, with a stored random fallback; on Windows it is HMAC-SHA256 of the `MachineGuid` registry value with the same key. Refresh tokens use the Mac Keychain, the Linux keyring or Windows Credential Manager; Mac account tokens never sync.
 
