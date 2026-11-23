@@ -248,7 +248,7 @@ On Redis the three actions are `MULTI`, `EXEC` and `DISCARD`. Every command betw
 
 `create_database` takes `options` as a flat object of string values drawn from `describe_create_database_options`, and asks the user before it runs. `drop_database_object` takes `kind` as `database` or `schema`, deletes everything inside, cannot be undone, and is approved first.
 
-`run_maintenance` takes an `operation` name from `list_maintenance_operations` (`VACUUM`, `ANALYZE`, `OPTIMIZE` and whatever else the engine supports) and omits `table` for the whole database. TablePro generates the statements and runs them in order, asking for approval before each one.
+`run_maintenance` takes an `operation` name from `list_maintenance_operations` (`VACUUM`, `ANALYZE`, `OPTIMIZE` and whatever else the engine supports) and omits `table` for the whole database. TablePro generates the statements and runs them in order, with one approval listing all of them. A `schema` without `table` is refused when the engine has no form for one schema alone (REINDEX on SQLite; VACUUM, ANALYZE and REINDEX on PostgreSQL): pass `table`.
 
 <Info>
 `describe_create_database_options`, `list_maintenance_operations` and `list_session_contexts` answer `is_supported: false` on an engine that has no such concept rather than failing, and `list_partitions` answers with an empty list. Everything else that an engine cannot do comes back as an `unsupported` tool error.
