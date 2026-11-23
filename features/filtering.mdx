@@ -5,25 +5,26 @@ description: Build a WHERE clause from the filter bar, or write one by hand, and
 
 A filter is a WHERE clause, and it runs at the database. That is the difference between filtering and the find bar: matches come from every row in the table, not from the page you are looking at. Open the filter bar with `Cmd+Shift+F`, type a condition into the row that appears, and press `Enter`.
 
-<Frame caption="Filter panel with column and raw SQL conditions">
-  <img className="block dark:hidden" src="/images/filter-panel.png" alt="Filter panel above the data grid" />
-  <img className="hidden dark:block" src="/images/filter-panel-dark.png" alt="Filter panel above the data grid" />
+<Frame caption="Three rows under Match any, with the title row applied alone">
+  <img className="block dark:hidden" src="/images/filter-panel.png" alt="Filter bar above the album grid, its title row's play button on and the header reading Only one filter applied" />
+  <img className="hidden dark:block" src="/images/filter-panel-dark.png" alt="Filter bar above the album grid, its title row's play button on and the header reading Only one filter applied" />
 </Frame>
 
-Each row has a drag grip, a checkbox, a column picker, an operator, a value field, and **+**/**−** buttons. Right-clicking a column header in the grid and choosing **Filter with column** pre-fills a row for that column. A value field suggests column names and keywords as you type; `Enter` runs what you typed, and `Down` then `Enter` takes a suggestion instead.
+Each row has a drag grip, a checkbox, a column picker, an operator, a value field, a play button, and **−**/**+** buttons. Right-clicking a column header in the grid and choosing **Filter with column** pre-fills a row for that column. A value field suggests column names and keywords as you type; `Enter` runs what you typed, and `Down` then `Enter` takes a suggestion instead.
 
 | Control | What it does |
 |---------|--------------|
-| Header **Apply**, `Enter` in a value field, or `Cmd+Enter` | Runs every checked row |
+| Header **Apply**, or `Cmd+Enter` | Runs every checked row |
+| `Enter` in a value field | Runs the rows again the way they are applied: a row applied alone stays alone, otherwise every checked row runs |
 | Row checkbox | Turns that row off without deleting it. Press **Apply** to re-run |
-| Row **Apply** | Filters by that row alone, without touching the checkboxes, so the header **Apply** brings the checked set back |
-| **Clear** | Drops the applied filter and keeps the rows |
-| Row grip, or right-click > **Move Up** / **Move Down** | Reorders the list. Order never changes the result |
-| ⋯ > **Remove All Filters** | Deletes every saved row for this table |
+| Row play button, `Option+Cmd+Enter` in its value field, or right-click > **Apply Only This Filter** | Filters by that row alone, checked or not, without touching any checkbox. Turn the button off, or press **Apply**, to run the checked rows again |
+| **Turn Off** | Shows every row again and keeps the filter rows |
+| Row grip | Reorders the list. Order never changes the result |
+| ⋯ > **Remove All Filters…** | After a confirmation, deletes every saved row for this table and closes the bar |
 
-An edit to a row waits for **Apply** or `Enter`. Until then, turning a page, sorting, refreshing or counting rows reruns the filter that last ran, not the edited rows.
+An edit to a row waits for **Apply** or `Enter`. Until then, turning a page, sorting, refreshing or counting rows reruns the filter that last ran, not the edited rows. The header says **Not applied** while checked rows have not run yet, **Changes not applied** once the rows no longer match what the grid shows, and **Only one filter applied** while a row runs alone.
 
-Filters are saved per connection, database, schema, and table, and survive a relaunch, unchecked rows and rows you never applied included. **Clear** keeps the rows and stops filtering, so they come back when you reopen the table. A table with an active filter opens in a new tab rather than replacing the current one.
+Filters are saved per connection, database, schema, and table, and survive a relaunch, unchecked rows and rows you never applied included. **Turn Off** keeps the rows and stops filtering, so they come back when you reopen the table. A table with an active filter opens in a new tab rather than replacing the current one. Renaming or dropping a column in the Structure tab updates the filter rows on it.
 
 <Info>
 Redis shows a key-pattern search bar (`user:*` and the like) with a key-type picker instead of the filter bar. In a [data file](/features/data-files) window the same filter bar runs over the file itself, with no raw SQL row.
@@ -44,7 +45,7 @@ Right-click a cell in a table and open **Filter**. The conditions it offers are 
   <img className="hidden dark:block" src="/images/cell-filter-menu-dark.png" alt="Cell context menu with the Filter submenu open, listing AlbumId = 3, != 3, > 3 and < 3" />
 </Frame>
 
-Choose one and it lands in the filter bar as a checked row and runs. It narrows what the grid already shows: rows that were running stay checked, and every other row is unchecked, including the ones **Clear** left behind. Under **Match any**, with two or more rows running, the new condition runs alone. A `!=` condition also leaves out rows where the column is NULL.
+Choose one and it lands in the filter bar as a checked row and runs. It narrows what the grid already shows: rows that were running stay checked, and every other row is unchecked, including the ones **Turn Off** left behind. Under **Match any**, with two or more rows running, the new condition runs alone. A `!=` condition also leaves out rows where the column is NULL.
 
 There is no **Filter** item on a query result, on Redis, or on a new row or an edited cell. Binary, JSON, XML, spatial, array and large-object columns have none either, and neither does text with a leading or trailing space or over 10,000 characters: type those conditions into the filter bar instead.
 
@@ -115,7 +116,7 @@ Rows sharing an array and set to **same element** group together, and **Match al
 
 ## Raw SQL
 
-A new row starts in raw SQL, unless **Default Column** in the settings says otherwise. Type one WHERE condition:
+A new row starts in raw SQL, unless **Default column** in the settings says otherwise. Type one WHERE condition:
 
 ```sql
 created_at > NOW() - INTERVAL 7 DAY
@@ -135,15 +136,15 @@ On a database that does not speak SQL the row is labeled **Raw Filter** and take
 
 ## Presets and settings
 
-Both live in the ⋯ menu. **Save as Preset…** stores the current rows, clicking a preset name loads it, and **Delete Preset** removes one.
+Presets live in the ⋯ menu. **Save as Preset…** stores the current rows with **Match all** or **Match any**, clicking a preset name loads it, and **Delete Preset** removes one.
 
-**Filter Settings** sets what a new row starts as: **Default Column** is Raw SQL, Primary Key, or Any Column, and **Default Operator** is Equal or Contains. **Always Show Filter Bar** keeps the bar open on a table that has no filter.
+The settings live in **Settings > Data**, under **Filters**, and ⋯ > **Filter Settings…** opens them. **Default column** sets what a new row starts as: Raw SQL, Primary Key, or Any Column, and **Default operator** is Equal or Contains. **Always show the filter bar** keeps the bar open on a table that has no filter.
 
-**Saved Filters** decides what reopening a table does with the rows saved for it.
+**Saved filters** decides what reopening a table does with the rows saved for it.
 
 | Option | Reopening a table |
 |---|---|
-| **Restore and apply** | Runs the filter the table was last showing |
+| **Restore and apply** | Runs the filter the table was last showing, a row applied alone included |
 | **Restore without applying** | Brings the rows back in the filter bar over unfiltered results. Press **Apply** to run them |
 | **Don't save** | Opens unfiltered. Filters last as long as the tab, and rows already saved are kept rather than deleted |
 
