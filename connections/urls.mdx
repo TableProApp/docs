@@ -106,7 +106,7 @@ An omitted `db_host` defaults to `127.0.0.1`.
 
 ## Query parameters
 
-Names are matched case-insensitively. Anything unrecognized is ignored, except on a MongoDB URL, where every unknown parameter is passed to the driver unchanged.
+Names are matched case-insensitively. Anything unrecognized is ignored, except on a MongoDB URL, where an unknown parameter is passed to the driver unchanged unless it holds a secret. See [MongoDB](#mongodb).
 
 ### Connection
 
@@ -115,7 +115,7 @@ Names are matched case-insensitively. Anything unrecognized is ignored, except o
 | `name` | Connection name shown in the sidebar, and part of what a trusted link is matched on | `?name=Production+DB` |
 | `safeModeLevel` | [Safe Mode](/features/safe-mode) for this connection: 0=silent, 1=alert, 2=read-only | `?safeModeLevel=2` |
 | `statusColor` | Connection color as hex, matched to the nearest palette color | `?statusColor=FF3B30` |
-| `env` | Assign an existing tag by name. `environment` is accepted too | `?env=production` |
+| `env` | The connection's **Environment**: `production` or `prod`, `staging` or `stage`, `development` or `dev`, or `local`. `environment` is accepted too | `?env=production` |
 | `socket` | MySQL and MariaDB. Socket file path, in place of host and port. Alias `unix_socket`. See [Unix socket](#unix-socket) | `?socket=%2Ftmp%2Fmysql.sock` |
 | `host`, `port` | PostgreSQL. Override the URL's own host and port. A host starting with `/` is the socket folder. See [PostgreSQL socket](#postgresql-socket) | `?host=/var/run/postgresql` |
 
@@ -157,7 +157,7 @@ postgresql://%2Ftmp:5433/shop
 |-----------|--------|-------------|
 | `sslmode` | `disable`, `prefer`, `require`, `verify-ca`, `verify-full` | SSL mode under libpq's names, in any case and with `_` for `-`, so `VERIFY_FULL` works too. ClickHouse JDBC's `strict` and `none` read as Verify Identity and Required |
 | `tlsmode` | `0`-`4` | The same modes as integers: 0=disable, 1=prefer, 2=require, 3=verify-ca, 4=verify-full |
-| `tls` / `ssl` | `true`, `false` | `true` turns TLS on: Verify Identity for Trino, Presto and ClickHouse, Required for every other database. `false` sets Disabled, even on a port that means TLS |
+| `tls` / `ssl` | `true`, `false` | `true` turns TLS on: Verify Identity for Trino, Presto, ClickHouse, SAP HANA and DuckDB, Required for every other database. `false` sets Disabled, even on a port that means TLS |
 | `SSLVerification` | `FULL`, `CA`, `NONE` | Trino's certificate check once TLS is on: Verify Identity, Verify CA, Required. Ignored while TLS is off. Verify CA also needs a CA certificate file |
 
 `sslmode` or `tlsmode` wins over `ssl`, `tls` and `SSLVerification`. With none of them, a Trino or Presto URL on port `443` and a ClickHouse URL on `443` or `8443` import as Verify Identity, as in [Ports that mean TLS](/connections/ssl#ports-that-mean-tls), and every other URL takes the driver's default from [Per-driver defaults](/connections/ssl#per-driver-defaults). **Import from URL…** and a link opened from a browser or `open` resolve the mode the same way, so `ssl=false` or `sslmode=disable` is how a link asks for plain TCP. A URL that turns TLS on and names no port opens on the driver's TLS port, `443` for Trino and Presto and `8443` for ClickHouse, and a port written in the URL is kept.
@@ -226,7 +226,30 @@ mongodb://user:pass@host1:27017,host2:27017,host3:27017/mydb?replicaSet=rs0
 ```
 
 - `uuidRepresentation` sets **Legacy UUID Encoding**.
+- `tlsCertificateKeyFile` sets **Client Certificate** and **Client Key** to that file.
+- `tlsCertificateKeyFilePassword` sets **Key Passphrase**, and an `AWS_SESSION_TOKEN` inside `authMechanismProperties` sets **AWS Session Token**. Both go to the Keychain, and the rest of `authMechanismProperties` stays an option.
+- `proxyPassword` is dropped.
 - **Copy Connection String** writes an SRV connection as `mongodb+srv://` with no port, and every option percent-encoded.
+
+### DuckDB remote
+
+A `quack://` URL sets the **SSL Mode** among the Remote fields on General, and the pin with it.
+
+| SSL Mode | In the URL |
+|---|---|
+| Automatic | No TLS parameter |
+| Disabled | `sslmode=disable`, or `ssl=false` |
+| Required (skip verify) | `sslmode=require`, or `prefer` |
+| Verify Identity | `sslmode=verify-full`, or `verify-ca`. With no `sslmode`, `ssl` or `tls` set to `true`, `1` or `require` means this too, checked against `/etc/ssl/cert.pem` |
+| Verify Fingerprint | `ssl_fingerprint=`, followed by the SHA-256 fingerprint of the server's certificate. It fills **Certificate Fingerprint** |
+
+`ssl_fingerprint` wins over every other TLS parameter, and `sslmode` wins over `ssl` and `tls` as in [SSL/TLS](#ssl%2Ftls). **Copy Connection String** writes the first value in each row, with the fingerprint as **Certificate Fingerprint** holds it. A connection behind an SSH tunnel copies as `quack+ssh://`, with the server's own host and port after the SSH server and the same parameters:
+
+```text
+quack://quack.internal:9495/remotedb?sslmode=verify-full
+quack://quack.internal:9495/remotedb?ssl_fingerprint=4A:1F:9C:02:7E:B3:58:D6:11:E0:3C:A7:92:5B:F4:08:6D:21:C9:7A:E5:30:4F:B8:17:93:DA:6E:02:C5:8B:F1
+quack+ssh://deploy@bastion.example.com:2222/quack.internal:9495/remotedb?sslmode=require
+```
 
 ## What the path component means
 
@@ -258,8 +281,8 @@ When another client also handles the scheme, `open -b com.TablePro "mysql://…"
 
 Every URL opened from outside the app raises an **Open External Database Connection?** alert naming the database type, host and port or socket, user, and database. **Connect** does not answer the Return key. Escape is the only keyboard answer, and it cancels.
 
-**Always Allow** appears only for a database on this machine (`localhost`, `127.x.x.x`, `::1`, or a socket). A trusted link is matched on database type, host, socket, database, username, and the URL's `name` parameter, never the port, so the same link on a different port still connects without asking again. Trusting `localhost` does not cover a socket link. Trusting one socket does not cover another, and a PostgreSQL socket on another port is another socket. Remote hosts always prompt, and so does a link through an SSH tunnel, whose database is on the SSH server.
+**Always Allow** appears only for a database on this machine (`localhost`, `127.x.x.x`, `::1`, or a socket). A trusted link is matched on database type, host, socket, database, username, and the URL's `name` parameter, never the port, so the same link on a different port still connects without asking again. Trusting `localhost` does not cover a socket link. Trusting one socket does not cover another, and a PostgreSQL socket on another port is another socket. Remote hosts always prompt, and so does a link to a connection reached through an SSH tunnel, an SSH profile, a SOCKS proxy, a tunnel command, Cloudflare or the Cloud SQL Auth Proxy, whose database is on another machine. The alert names each of those it would go through. A link that opens a saved connection is trusted for that saved connection only, so trusting it covers no other saved connection and no link that opens none.
 
 A link with a [filter](#filtering) asks every time and offers no **Always Allow**. Read the filter in the box under the target before choosing **Connect**: it runs on the table as soon as the connection opens.
 
-Trusted links are listed under **Settings > General**, where **Forget** drops one and **Forget All** drops every one.
+Trusted links are listed in **Settings > Connections > Trusted Links**, where **Forget** drops one and **Forget All** drops every one after a confirmation.

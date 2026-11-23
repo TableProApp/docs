@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "aspen",
   "name": "TablePro",
-  "description": "TablePro is a native macOS database client for MySQL, PostgreSQL, SQLite, MongoDB, Redis and more, built on AppKit and SwiftUI with a plugin-based driver system.",
+  "description": "Database guides for TablePro on macOS, iPhone and iPad, and Linux beta. Windows is in development.",
   "colors": {
     "primary": "#A85A00",
     "light": "#FFBB6B",
@@ -44,6 +44,10 @@
     }
   },
   "redirects": [
+    {
+      "source": "/linux",
+      "destination": "/linux/install"
+    },
     {
       "source": "/development/setup",
       "destination": "/development/overview"
@@ -196,19 +200,30 @@
   "navigation": {
     "tabs": [
       {
-        "tab": "Documentation",
+        "tab": "Overview",
+        "icon": "house",
         "groups": [
           {
             "group": "Start here",
             "pages": [
               "index",
+              "faq",
+              "changelog"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "macOS",
+        "groups": [
+          {
+            "group": "Start here",
+            "pages": [
               "installation",
               "beta-updates",
               "quickstart",
               "switching",
-              "faq",
-              "troubleshooting",
-              "changelog"
+              "troubleshooting"
             ]
           },
           {
@@ -254,21 +269,26 @@
               "databases/firebase",
               "databases/bigquery",
               "databases/bigtable",
+              "databases/influxdb",
               "databases/kafka",
               "databases/kingbasees",
               "databases/libsql",
               "databases/mariadb",
+              "databases/memcached",
               "databases/mssql",
               "databases/mongodb",
               "databases/mysql",
+              "databases/neo4j",
               "databases/oceanbase",
               "databases/oracle",
               "databases/pglite",
               "databases/postgresql",
+              "databases/qdrant",
               "databases/redis",
               "databases/sap-hana",
               "databases/snowflake",
               "databases/spanner",
+              "databases/starrocks",
               "databases/sqlite",
               "databases/surrealdb",
               "databases/teradata",
@@ -313,12 +333,14 @@
               "features/table-structure",
               "features/routines-triggers",
               "features/routine-debugger",
+              "features/live-messages",
               "features/user-defined-types",
               "features/table-operations",
               "features/er-diagram",
               "features/join-builder",
               "features/explain-visualization",
               "features/server-dashboard",
+              "features/table-health",
               "features/users-roles"
             ]
           },
@@ -374,7 +396,8 @@
               "features/icloud-sync",
               "features/handoff",
               "features/licensing",
-              "features/team"
+              "features/team",
+              "features/shared-links"
             ]
           },
           {
@@ -383,16 +406,11 @@
               "customization/settings",
               "customization/general-settings",
               "customization/appearance",
+              "customization/notifications",
+              "customization/connection-settings",
+              "customization/sidebar-and-tabs",
               "customization/editor-settings",
-              "customization/data-settings",
-              "customization/notifications"
-            ]
-          },
-          {
-            "group": "iPhone and iPad",
-            "icon": "mobile",
-            "pages": [
-              "ios/index"
+              "customization/data-settings"
             ]
           },
           {
@@ -402,7 +420,54 @@
               "security/privacy",
               "security/managed-updates",
               "features/safe-mode",
+              "features/data-masking",
               "features/acknowledgements"
+            ]
+          }
+        ],
+        "icon": "apple"
+      },
+      {
+        "tab": "iPhone and iPad",
+        "icon": "mobile",
+        "groups": [
+          {
+            "group": "iPhone and iPad",
+            "icon": "mobile",
+            "pages": [
+              "ios/index"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Linux beta",
+        "icon": "linux",
+        "groups": [
+          {
+            "group": "TablePro for Linux",
+            "pages": [
+              "linux/install",
+              "linux/connect",
+              "linux/sql-editor",
+              "linux/data-grid",
+              "linux/command-line",
+              "linux/keyboard-shortcuts",
+              "linux/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Windows preview",
+        "icon": "windows",
+        "groups": [
+          {
+            "group": "TablePro for Windows",
+            "pages": [
+              "windows/data-grid",
+              "windows/browsing",
+              "windows/account"
             ]
           }
         ]

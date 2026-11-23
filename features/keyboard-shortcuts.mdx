@@ -125,6 +125,7 @@ Every row except the five find rows is built into the editor and cannot be rebou
 | Delete selected rows | `Delete`, `Forward Delete` or `Cmd+Delete` |
 | Truncate table (tables selected in the sidebar) | `Option+Delete` |
 | Preview FK reference | `Space` |
+| Open Value Editor | `Option+Enter` |
 | Include or leave out the selected rows (Compare & Sync) | `Space` |
 | Commit changes | `Cmd+S` |
 | Discard changes (**File > Discard Changes…**) | none |
@@ -178,12 +179,13 @@ See [Filtering](/features/filtering) for the filter bar itself.
 
 | Action | Shortcut |
 |--------|----------|
-| Export | `Cmd+Shift+E` |
+| Export tables | `Cmd+Shift+E` |
+| Export results | `Cmd+Option+Shift+E` |
 | Import | `Cmd+Shift+I` |
 
 ## Tabs and windows
 
-`Cmd+W` closes whatever is in front. In a connection window that is the current editor tab, and the File menu reads **Close Tab**. Settings, MCP Activity, a JSON or PHP viewer, and the welcome window have no tabs, so it closes the window and the menu reads **Close Window**. While the connections strip holds the keyboard it closes the highlighted entry, and so it does when the database you are on has no tab left; the menu names the entry, and an entry that is its connection's last one takes the connection with it. `Cmd+1` through `Cmd+9` count the tabs in the strip, which are the current database's.
+`Cmd+W` closes whatever is in front. In a connection window that is the current editor tab, and the File menu reads **Close Tab**; in [Agent mode](/features/agent-mode) no tab is in front, so it closes the database or the connection. Settings, MCP Activity, a JSON or PHP viewer, and the welcome window have no tabs, so it closes the window and the menu reads **Close Window**. While the connections strip holds the keyboard it closes the highlighted entry, and so it does when the database you are on has no tab left; the menu names the entry, and an entry that is its connection's last one takes the connection with it. `Cmd+1` through `Cmd+9` count the tabs in the strip, which are the current database's.
 
 | Action | Shortcut |
 |--------|----------|
@@ -211,6 +213,10 @@ See [Filtering](/features/filtering) for the filter bar itself.
 | Manage connections | none by default, rebindable |
 | Switch connection | `Ctrl+Cmd+C` |
 | Move tab to connection | `Ctrl+Option+Cmd+C` |
+| [Server Dashboard](/features/server-dashboard) | `Cmd+Option+Shift+D` |
+| [Query Insights](/features/query-insights) | `Cmd+Option+Shift+I` |
+| [Commit transaction](/features/sql-editor#the-open-transaction-bar) | none by default, rebindable |
+| [Roll back transaction](/features/sql-editor#the-open-transaction-bar) | none by default, rebindable |
 | Open database switcher | `Cmd+K` |
 | New database (database switcher open) | `Cmd+N` |
 | Refresh | `Cmd+R` |
@@ -351,21 +357,21 @@ Choose Vim or Emacs under **Settings > Editor > Key bindings**. Either applies o
 
 ## Customizing shortcuts
 
-Open **Settings > Keyboard** (`Cmd+,`). Each action has a recorder field: click it and press the new combination, and the menu bar updates immediately. Actions are listed under their own names there: the sidebar toggle is Toggle Table Browser. Filter with the search field, press `Delete` in a recorder field to clear a binding, click the curved-arrow button beside a changed shortcut to restore that one, or **Reset to Defaults** to restore all.
+Open **Settings > Keyboard** (`Cmd+,`). Each action has a shortcut button: click it, or select the row and press `Return`, then press the new combination, and the menu bar updates immediately. `Escape` cancels and `Delete` clears the binding. Actions are listed under their own names there: the sidebar toggle is Toggle Table Browser. Filter with the search field in the toolbar (`Cmd+F`), click the curved-arrow button beside a changed shortcut to restore that one, or click **Restore Defaults** under the list to restore all after a confirmation. Right-click a row for **Record Shortcut**, **Remove Shortcut** and **Reset to Default**.
 
-Some actions ship with no default and show as unassigned. That is a command waiting for a binding, not one you cleared, and **Reset to Defaults** leaves it unassigned.
+Some actions ship with no default and show as unassigned. That is a command waiting for a binding, not one you cleared, and **Restore Defaults** leaves it unassigned.
 
 <Frame caption="Keyboard shortcut customization">
-  <img className="block dark:hidden" src="/images/settings-keyboard.png" alt="Keyboard settings" />
-  <img className="hidden dark:block" src="/images/settings-keyboard-dark.png" alt="Keyboard settings" />
+  <img className="block dark:hidden" src="/images/settings-keyboard.png" alt="Keyboard pane listing actions by category, each with its shortcut button, and Restore Defaults under the list" />
+  <img className="hidden dark:block" src="/images/settings-keyboard-dark.png" alt="Keyboard pane listing actions by category, each with its shortcut button, and Restore Defaults under the list" />
 </Frame>
 
-A combination already taken by another action in the same context raises a dialog naming it: **Cancel** keeps the existing assignment, **Reassign** moves the shortcut and clears it from the other action. Editor and grid actions can share a key without conflict.
+A combination already taken by another action in the same context raises a dialog naming every action that holds it: **Cancel** keeps the existing assignment, **Reassign** moves the shortcut and clears it from the others. Editor and grid actions can share a key without conflict.
 
-Menu actions need `Cmd` or `Ctrl`, with `Option` and `Shift` available alongside them but not on their own; function keys `F1` through `F12` work bare, as do grid actions that read the key directly, like Preview FK Reference (`Space`).
+Menu actions need `Cmd` or `Ctrl`, with `Option` and `Shift` available alongside them but not on their own; function keys `F1` through `F12` work bare, as do grid actions that read the key directly, like Preview FK Reference (`Space`). Open Value Editor (`Option+Enter`) is read by the grid too, so its menu item shows no key and the combination still breaks a line while you type in a cell.
 
 <Info>
-Some shortcuts cannot be reassigned: editor built-ins such as `Cmd+/`, tab selection (`Cmd+1` through `Cmd+9`), zoom (`Cmd+=`, `Cmd+-`), and macOS system shortcuts, which are read live from System Settings. The recorder warns if you try.
+Some shortcuts cannot be reassigned: editor built-ins such as `Cmd+/`, tab selection (`Cmd+1` through `Cmd+9`), zoom (`Cmd+=`, `Cmd+-`), and macOS system shortcuts, which are read live from System Settings. Try one and the row says why under it, with a beep, and keeps recording.
 </Info>
 
 ## Outside the app

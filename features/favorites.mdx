@@ -42,7 +42,7 @@ Table favorites are scoped to the connection, database, and schema, and sync thr
 
 ## Recent tables
 
-Turn on **Show recent tables** in [General settings](/customization/general-settings) for a **Recent** section at the top of the object list. It holds the last 10 tables per connection and database, newest first, and stepping through preview tabs records only the one you stop on.
+Turn on **Show recent tables** in [Sidebar & Tabs settings](/customization/sidebar-and-tabs#sidebar) for a **Recent** section at the top of the object list. It holds the last 10 tables per connection and database, newest first, and stepping through preview tabs records only the one you stop on.
 
 Click a row to reopen the table. Right-click to remove one entry or clear the list. Recents stay on this Mac.
 
@@ -108,7 +108,9 @@ The cursor lands right after `orders.`, ready for a column name. `;;` means the 
 
 ## Working with saved queries
 
-Double-click a favorite, or press `Return`, to insert it into the editor. The right-click menu has **Insert in Editor**, **Run in New Tab**, **Copy Query**, **Edit…**, **Show History**, **Move to**, and **Delete**. Arrow keys move between rows, typing jumps to a name, and `Delete` asks first.
+Double-click a favorite, or press `Return`, to insert it into the editor. The right-click menu has **Insert in Editor**, **Run in New Tab**, **Copy Query**, **Share…**, **Edit…**, **Show History**, **Move to**, and **Delete**. Arrow keys move between rows, typing jumps to a name, and `Delete` asks first.
+
+**Share…** makes a web link to the query's SQL that anyone with the link can open; the connection never goes with it. See [Shared Links](/features/shared-links).
 
 Folders come from the same background menu. A folder's own menu has **New Favorite…**, **New Subfolder**, **Rename**, **Global**, and **Delete Folder**; deleting one moves what was inside up to the parent level. A global folder carries a globe, and **Global** changes that folder alone: the queries inside keep the scope they had, so mark them global too if you want them everywhere. Anything kept in a folder a connection cannot see is listed at that connection's top level, whether it is a global query or a global subfolder. Drag a query or a linked file out of the sidebar to drop its SQL into the editor or another app.
 
@@ -199,7 +201,9 @@ When a linked folder sits inside a Git working copy, a changed file carries a le
 | U | Untracked |
 | ! | Merge conflict |
 
-A file with no letter matches its last commit. Letters refresh when a file changes, when the repository changes, and when you switch back to TablePro.
+A file with no letter matches its last commit. Letters refresh when a file changes and when the repository changes.
+
+The letters come from a status read with every Git filter switched off, so a file that Git LFS or git-crypt rewrites can show **M** until you stage it.
 
 <Frame caption="Comparing a commit of a linked file with the current version">
   <img className="block dark:hidden" src="/images/linked-file-history.png" alt="Sidebar with M and U letters beside linked files, next to a history tab listing three commits and a split diff" />
@@ -230,5 +234,5 @@ Only the checked files are staged and committed. Files outside the linked folder
 While a command runs, a spinner sits on the folder's row and the Git commands are hidden. When one fails, the alert shows what Git printed.
 
 <Warning>
-Link only repositories you trust. Reading a file's status runs the repository's own content filters, and committing, pulling, and pushing run its hooks, exactly as `git` in Terminal does.
+Link only repositories you trust. **Commit…**, **Pull**, and **Push** run the repository's hooks and filters, exactly as `git` in Terminal does.
 </Warning>

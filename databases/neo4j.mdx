@@ -1,0 +1,86 @@
+---
+title: Neo4j
+description: Connect to Neo4j over Bolt, browse labels and relationship types, and run Cypher
+---
+
+import RegistryPlugin from "/snippets/registry-plugin.mdx";
+
+Labels and relationship types take the place of tables. Open one to see its nodes or relationships as rows, one column per property, and run any Cypher in the editor.
+
+## Quick setup
+
+Click **New Connection…**, select **Neo4j**, enter the host, the Bolt port and your user and password, and connect. The driver speaks Bolt 4.2 to 5.4, so it reaches Neo4j 4.2 and later. It is tested on Neo4j 4.4 and 5.26.
+
+<RegistryPlugin name="Neo4j" plugin="Neo4j Driver" />
+
+## Connection settings
+
+| Field | Description |
+|-------|-------------|
+| **Host** | Server host, such as `localhost` |
+| **Port** | Bolt port, default `7687`. The browser port, `7474`, does not work |
+| **Username / Password** | A Neo4j user. Leave both empty for a server with authentication turned off |
+| **Database** | The database to open. Empty opens the user's home database |
+
+## Connection URL
+
+```text
+neo4j://neo4j:password@localhost:7687/neo4j
+neo4j+s://neo4j:password@xxxxxxxx.databases.neo4j.io
+```
+
+`neo4j`, `neo4j+s`, `neo4j+ssc`, `bolt`, `bolt+s` and `bolt+ssc` all open a Neo4j connection. `+s` sets SSL to **Verify Identity**, `+ssc` to **Required**, which accepts a self-signed certificate. See [Connection URL Reference](/connections/urls).
+
+A `neo4j://` URL connects to the host it names. TablePro does not follow a cluster's routing table, so on a cluster it talks to the member you point it at.
+
+## Databases, labels and relationship types
+
+Every database the user can see is listed in the sidebar. Inside each one, **Labels** lists the node labels and **Relationship Types** lists the relationship types. Switching database does not reconnect.
+
+## Nodes and relationships in the grid
+
+Opening a label shows one row per node:
+
+- `<id>` is the node's element id, and `<labels>` lists all of its labels.
+- Every other column is a property key. A node without that property shows an empty cell.
+- Property keys come from the first 1,000 nodes, plus any new key on the page you are looking at.
+
+A relationship type shows `<id>`, `<start>` and `<end>`, the element ids of the relationship and its two nodes, then its properties.
+
+Dates, times and durations read the way Cypher's `toString` writes them, such as `2024-01-01T07:00:00+07:00` or `P1Y2M`. Points show as `point({srid: 4326, x: 106.7, y: 10.8})`, and lists and maps as JSON.
+
+Sort and filter work on any column. A filter on a number also matches the same number stored as a string, since Neo4j does not fix a property's type.
+
+## Cypher
+
+The editor runs one Cypher statement at a time. Each returned key becomes a column. A node, relationship or path shows as JSON with its element id, labels or type, and properties.
+
+```cypher
+MATCH (p:Person)-[:ACTED_IN]->(m:Movie)
+RETURN p.name, m.title
+LIMIT 25
+```
+
+**Stop** cancels the running statement on the server and keeps the connection. Safe Mode reads the statement's clauses: `CREATE`, `MERGE`, `SET`, `REMOVE`, `DELETE` and a procedure call it does not know to be read-only count as writes, and `DROP` as destructive.
+
+## SSL/TLS
+
+**Required** encrypts without checking the certificate, like `+ssc`. **Verify CA** checks the certificate against the CA file on the **SSL/TLS** tab, or the system trust store when none is set. **Verify Identity** also checks the host name, like `+s`.
+
+## Limitations
+
+- The grid and structure are read-only. Change data with Cypher in the editor.
+- Cluster routing is not followed. Connect to the member that should run your queries.
+- Import is not available. Export works, see [Import and Export](/features/import-export).
+- Explain and Profile plans are not shown.
+- The editor treats Cypher as plain text, with no syntax coloring.
+
+## Troubleshooting
+
+### Connection reset by peer during the Bolt handshake
+
+The server closed the connection before it answered the Bolt handshake, and the error ends with "If the server requires TLS, turn on SSL." Usually the server only accepts TLS: set SSL to **Required** or **Verify Identity**.
+
+### this port speaks HTTP; use the Bolt port, usually 7687
+
+The port is the Neo4j Browser's HTTP port. Use the Bolt port.

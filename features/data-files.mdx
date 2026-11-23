@@ -41,7 +41,9 @@ When a guess is wrong, choose **Edit > Data > File Properties…** to set the de
 
 ## Filter, search and sort
 
-`Cmd+Shift+F` shows the filter bar. It is the filter bar a table tab uses, run over the file instead of a database: all 18 operators, **Match all** or **Match any**, a checkbox per row, **Match Case**, and saved presets. It has no raw SQL row. See [Filtering](/features/filtering) for how each operator reads a value.
+`Cmd+Shift+F` shows the filter bar. It is the filter bar a table tab uses, run over the file instead of a database: all 18 operators, **Match all** or **Match any**, a checkbox per row, **Match Case**, and saved presets. See [Filtering](/features/filtering) for how each operator reads a value.
+
+There is no raw SQL row to add, but presets are shared with table tabs, so a preset can bring in a raw SQL row or a row on a column the file lacks. **Apply** refuses either one with `This file cannot filter rows with these conditions.` in the status bar, and the rows stay as they were. Delete that row, or pick one of the file's columns for it. A running filter stops with the same message when the file no longer has its column, after switching the header row for instance.
 
 A comparison is numeric whenever the cell and the value both read as numbers, so `> 50` keeps `100` and drops `9`. Anything else compares as text. A CSV cell is never NULL, so **is NULL** matches nothing and **is empty** matches blank cells. In JSON, a `null` value and a missing key are both NULL.
 
@@ -107,7 +109,7 @@ Rows hidden by a filter or search are left alone by every command here.
 
 ## Large files
 
-A file opens without being read into memory: the rows are indexed, and cells are read when they are shown, filtered or sorted. Rows appear a page at a time, at the **Default page size** from **Settings > Data**, and the status bar has the page controls.
+A file opens without being read into memory: the rows are indexed, and cells are read when they are shown, filtered or sorted. Rows appear a page at a time, at the **Page size** from **Settings > Data**, and the status bar has the page controls.
 
 Filtering, sorting, searching, statistics and bulk edits run in the background. When one takes longer than a moment, the status bar shows its progress and a **Cancel** button; a cancelled bulk edit changes nothing. Editing is paused while a bulk edit runs.
 
@@ -133,7 +135,7 @@ A workbook is read-only. To keep a sheet, choose **File > Save As** and pick CSV
 
 **File > Save As** (`Cmd+Shift+S`) writes a delimited file as CSV, TSV or pipe-separated text, and a JSON file as JSON, JSON Lines, CSV or TSV.
 
-To write another format, choose **File > Export > Export Results…**, or right-click the grid and choose **Export Results…**. The export dialog offers every installed export format that works without a database, including CSV, JSON, SQL, XLSX and Markdown, and exports all rows, the rows passing the current filter, or the selected rows.
+To write another format, choose **File > Export > Export Results…** (`Cmd+Option+Shift+E`), or right-click the grid and choose **Export Results…**. The export dialog offers every installed export format that works without a database, including CSV, JSON, SQL, XLSX and Markdown, and exports all rows, the rows passing the current filter, or the selected rows.
 
 ### Import into a table
 

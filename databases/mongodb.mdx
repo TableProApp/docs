@@ -28,14 +28,17 @@ The query tab is a JavaScript shell. Write `db.orders.find({status: "new"})` the
 | **Username** | - | Leave empty for local dev without auth |
 | **Password** | - | |
 | **Database** | - | Opens straight into that database. Leave it empty to browse them all |
-| **Auth Database** | - | Options tab. Where your user account lives, usually `admin` |
+| **Auth Database** | - | **Advanced** pane. Where your user account lives, usually `admin` |
 | **Auth Mechanism** | Default | SCRAM-SHA-1, SCRAM-SHA-256, X.509, or AWS IAM, under Authentication |
+| **AWS Session Token** | - | Under Authentication, once **Auth Mechanism** is AWS IAM. Kept in the Keychain |
 
 Naming a **Database** skips listing every database on the server, which is worth doing on a cluster with hundreds. Leave it empty and the first non-system database opens instead. `Cmd+K` switches either way, on the same connection, with no reconnect.
 
 **Auth Database** is a separate question: it says where your account is defined, not what you browse. Left empty, it follows the **Database** field, except under X.509 and AWS IAM, which authenticate against `$external`. An account defined in `admin` needs **Auth Database** set to `admin` whenever **Database** names something else, or authentication fails. SRV connections authenticate against `admin` regardless, unless told otherwise. Switching databases in the app never changes it, so browsing a database your user has no account in is fine.
 
-Also on the Options tab: **Read Preference**, **Write Concern**, **Use SRV Record**, **Replica Set** name, and **Legacy UUID Encoding**. The server has to be MongoDB 4.0 or later; the driver refuses to connect to anything older.
+AWS IAM takes the access key ID in **Username** and the secret access key in **Password**. Temporary credentials also need their session token in **AWS Session Token**.
+
+Also on the **Advanced** pane: **Read Preference**, **Write Concern**, **Use SRV Record**, **Replica Set** name, and **Legacy UUID Encoding**. The server has to be MongoDB 4.0 or later; the driver refuses to connect to anything older.
 
 **Write Concern** covers every insert, update and delete, from a query tab or from a save in the data grid, unless the statement passes its own `writeConcern`. Index, collection and database commands, and `db.runCommand`, go to the server as written. On a server that is not a replica set, pick **Default**, **Majority** or **1**: with **2** or **3** every write fails with `cannot use 'w' > 1 when a host is not replicated`. `journal` and `wtimeoutMS` in a pasted connection URL go out with every write too.
 
@@ -55,6 +58,8 @@ mongodb+srv://user:password@cluster.mongodb.net/database
 
 `mongodb+srv://` resolves hosts through DNS SRV records and takes no port; one pasted into the field is stripped before connecting. Plain `mongodb://` keeps whatever port you give it. See [Connection URL Reference](/connections/urls).
 
+Secrets in a pasted string do not stay among its options. `tlsCertificateKeyFilePassword` lands in **Key Passphrase** and an `AWS_SESSION_TOKEN` in `authMechanismProperties` lands in **AWS Session Token**, both in the Keychain, and `proxyPassword` is dropped. [MongoDB parameters](/connections/urls#mongodb) lists the ones that fill a field.
+
 ## MongoDB Atlas (SRV)
 
 An Atlas connection needs the cluster hostname, a username, and a password. Atlas requires SRV and TLS, so a host ending in `.mongodb.net` gets both turned on for you, TLS only if the SSL mode was still Disabled. Elsewhere the **Use SRV Record** toggle in Advanced does the same job. Add your current IP to the cluster's access list in the Atlas console first: traffic from an address that is not on it times out rather than failing.
@@ -63,23 +68,21 @@ An SRV connection does not open through an SSH tunnel or another tunnel. The rec
 
 ## Replica sets
 
-The **Hosts** field takes comma-separated pairs (`host1:27017,host2:27017,host3:27017`), the primary is discovered, and writes are routed to it. Set the replica set name on the Options tab. A multi-host URI pastes in directly:
+The **Hosts** field takes comma-separated pairs (`host1:27017,host2:27017,host3:27017`), the primary is discovered, and writes are routed to it. Set the replica set name on the **Advanced** pane. A multi-host URI pastes in directly:
 
 ```text
 mongodb://user:pass@host1:27017,host2:27017,host3:27017/db?replicaSet=rs0
 ```
 
 <Warning>
-<Warning>
 Over an SSH tunnel only the first host is used and the rest of the list is dropped. Replica set discovery and failover are off for that session, with nothing on screen to say so.
-</Warning>
 </Warning>
 
 ## Browsing collections
 
-Click a collection to page through its documents. The columns are the fields in the documents on screen, then any field the collection's `$jsonSchema` validator declares that none of them hold, so an empty collection still shows the fields it was created with. A top-level ObjectId renders as its hex string. A nested object or array shows as Extended JSON in the order it is stored: `{"$oid": "…"}`, `{"$date": "2024-05-01T10:00:00.123Z"}`, `{"$numberLong": "5"}`, and `3.0` for a double that holds a whole number.
+Click a collection to page through its documents. The columns are the fields in the documents on screen, then any field the collection's `$jsonSchema` validator declares that none of them hold, so an empty collection still shows the fields it was created with. A top-level ObjectId renders as its hex string. A nested object or array shows as Extended JSON in the order it is stored: `{"$oid": "…"}`, `{"$date": "2024-05-01T10:00:00.123Z"}`, `{"$numberLong": "5"}`, and `3.0` for a double that holds a whole number. Sorting by a column also sorts by `_id` last, so documents that share a value keep one order from page to page.
 
-An edited cell keeps its field's type. A date stays a date, whether typed as `2024-01-02T03:04:05Z`, as `2024-01-02`, or picked in the date picker, which writes your local time. An ObjectId stays an ObjectId, an integer past 2^53 is sent as a 64-bit integer, and a field the validator declares as `string` is written as text even when it reads `123` or `true`. Where the grid has no type to go on, `123` is a number and `{"a": 1}` a document; text that only looks like JSON is written as a string.
+An edited cell keeps its field's type. A number keeps the type the cell was read as, so editing a double in a field that mostly holds int32 values saves a double. A date stays a date, whether typed as `2024-01-02T03:04:05Z`, as `2024-01-02`, or picked in the date picker, which writes your local time. An ObjectId stays an ObjectId, an integer past 2^53 is sent as a 64-bit integer, and a field the validator declares as `string` is written as text even when it reads `123` or `true`. Where the grid has no type to go on, `123` is a number and `{"a": 1}` a document; text that only looks like JSON is written as a string.
 
 Editing a nested object or array writes only the paths that changed, such as `address.city` or `tags.1`, so every other value in it keeps its type and its place. Adding two keys at once, reordering keys, or changing an array's length writes the whole value instead. A binary cell keeps its BSON subtype when its bytes are edited, and a duplicated or pasted row keeps its binary fields.
 
@@ -95,7 +98,7 @@ The Structure tab lists a collection's indexes, and [renames or removes a field]
 
 ### Views
 
-Views sit in their own **Views** group in the sidebar and open read-only, with no cell edits, **Add Row** or **Delete**, and no **Rename** or **Truncate** on the context menu. **Show DDL** writes the `db.createView(…)` that makes the view again, pipeline and collation included. **Edit View Definition** opens a `collMod` holding the view's source and pipeline: run it to change the view in place, collation kept. Both write each value in its own BSON type, so the text runs the same in a query tab and in mongosh: `NumberLong("…")` for an Int64, `Double(1.0)` for a whole Double, `ISODate("…")` for a date, `BSONRegExp("…", "…")` for a regular expression. A date before year 1 or after 9999 is written as `new Date(…)`. Export writes a view's documents; import and table transfer skip views.
+Views sit in their own **Views** group in the sidebar and open read-only, with no cell edits, **Add Row** or **Delete**, and no **Rename** or **Truncate** on the context menu. **Show DDL** writes the `db.createView(…)` that makes the view again, pipeline and collation included. **Edit View Definition** opens a `collMod` holding the view's source and pipeline: run it to change the view in place, collation kept. Both write each value in its own BSON type, so the text runs the same in a query tab and in mongosh: `NumberLong("…")` for an Int64, `Double(1.0)` for a whole Double, `ISODate("…")` for a date, `BSONRegExp("…", "…")` for a regular expression. A date before year 1 or after 9999 is written as `new Date(…)`. Export writes a view's documents; table transfer skips views.
 
 A time-series collection is listed with the other collections, and its DDL starts with a `// Time series:` line naming its time and meta fields. `system.views`, `system.profile` and the `system.buckets.*` collections behind time series are marked as system collections, with no **Rename** or **Truncate**.
 
@@ -208,8 +211,8 @@ The checks for a document holding both names and for a document the validator wo
 **Save Changes** only, never in **Preview SQL**. Under a `moderate` validator, a document the
 validator already rejected before the save is left alone. Each reads every document that holds a
 changed field and stops at this connection's effective query timeout, or after 10 minutes when the
-timeout is **No limit**. Set an override under **Options**, or leave it empty to inherit **Settings >
-General**. A check that times out changes nothing. Every check reads the primary, whatever the
+timeout is **No limit**. Set an override on the **Advanced** pane, or leave it empty to inherit **Settings >
+Connections**. A check that times out changes nothing. Every check reads the primary, whatever the
 connection's **Read Preference**. Once they pass, the save reads the collection's options, indexes
 and views again, and stops if the options changed or an index, search index or view now uses the
 field.
@@ -373,9 +376,9 @@ valid at the cursor; see [Autocomplete](/features/autocomplete#mongodb). For a q
 
 ## SSL/TLS
 
-New connections default to **Disabled**, and the driver has no TLS fallback: **Preferred** behaves exactly as **Required**, which is what the Network tab warns about. For an unencrypted local instance use **Disabled** or [SSH tunneling](/connections/ssh-tunneling). See [SSL/TLS](/connections/ssl).
+New connections default to **Disabled**, and the driver has no TLS fallback: **Preferred** behaves exactly as **Required**, which is what the **SSL/TLS** pane warns about. For an unencrypted local instance use **Disabled** or [SSH tunneling](/connections/ssh-tunneling). See [SSL/TLS](/connections/ssl).
 
-The driver reads a client certificate and its private key from one file. A key chosen in its own file is joined with the certificate in a temporary file only your user can read, removed when the connection closes.
+The driver reads a client certificate and its private key from one file. A key chosen in its own file is joined with the certificate in a temporary file only your user can read, removed when the connection closes. An encrypted key takes its passphrase in **Key Passphrase**, which appears once **Client Key** has a path.
 
 ## On iPhone and iPad
 
@@ -397,6 +400,7 @@ The MongoDB driver is compiled into TablePro Mobile, with the same C driver and 
 - **Edit Document…** needs MongoDB 4.0 or later, and refuses a view and a time-series collection. Edit the collection a view reads, and change time-series documents with `updateMany` in a query tab.
 - In a collection whose default collation is not simple, saving a document with a string `_id` reads the whole collection to find it. On a large collection, change the document with `updateOne` in a query tab instead.
 - Transactions are not exposed. Statements always run standalone, on any topology.
+- CSV, JSON, XLSX and SQL files do not import into MongoDB. Load documents with `insertMany` in a query tab, or with `mongoimport`.
 - A collection takes one text index. A second **FULLTEXT** row fails after the collection and the indexes before it are created: list every text field in one index instead.
 - **New Table…** writes the validator with the server's own level and action. To log bad documents instead of refusing them, run `db.runCommand({collMod: "articles", validationAction: "warn"})` after creating the collection.
 - Nested paths filter but do not sort. Sorting works on the grid's own columns.
@@ -421,7 +425,7 @@ The MongoDB driver is compiled into TablePro Mobile, with the same C driver and 
 
 **Connection refused**: check MongoDB is running (`brew services start mongodb-community`) and that the port and `bindIp` in `mongod.conf` match what you entered.
 
-**Authentication fails on connect**: the error names the database that was authenticated against. If your user does not live there, set **Auth Database** on the Options tab; otherwise check the username, password, and auth mechanism. The MQL editor does not parse `db.getUsers()` or `db.createUser()`; read users with `db.runCommand({"usersInfo": 1})`.
+**Authentication fails on connect**: the error names the database that was authenticated against. If your user does not live there, set **Auth Database** on the **Advanced** pane; otherwise check the username, password, and auth mechanism. The MQL editor does not parse `db.getUsers()` or `db.createUser()`; read users with `db.runCommand({"usersInfo": 1})`.
 
 **Timeout**: for Atlas, add your IP to the cluster's access list first. Otherwise verify host and port and check the network and firewall.
 

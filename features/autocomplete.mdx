@@ -68,7 +68,7 @@ PostgreSQL and PGlite read an unquoted name as lowercase, Oracle and Snowflake a
 SELECT * FROM mix|  -- "MixedCase"
 ```
 
-Set how the other names are spelled under **Autocomplete > Identifier case** in the connection's [Options](/connections/connection-form#options) tab:
+Set how the other names are spelled with **Identifier Case**, under **Autocomplete** on the connection's [Advanced](/connections/connection-form#advanced) pane:
 
 | Value | Snowflake table `MY_TABLE`, typing `my_t` |
 |-------|-------------------------------------------|
@@ -109,6 +109,21 @@ SELECT price * qty AS line_total FROM items ORDER BY li|  -- line_total
 ```
 
 `SET` and an `INSERT` column list offer the columns of the table the statement writes, never those of a table its FROM or SELECT reads, also inside a `WITH` body.
+
+## Join conditions
+
+Right after the `ON` of a join, the foreign keys between the joined table and the tables before it come first, each as a whole condition:
+
+```sql
+SELECT * FROM orders o JOIN customers c ON |  -- o.customer_id = c.id
+```
+
+- A key in either direction counts, and the earlier table's column comes first.
+- A key over several columns is one condition, its pairs joined with `AND`.
+- The nearest earlier table comes first. A table joined after the cursor, a derived table and a `WITH` table give none.
+- The alias names a table when it has one, otherwise the table name as you wrote it.
+
+The keys are read once per table, on engines that report foreign keys. After `o.`, or once the condition has begun, the list offers columns as before.
 
 ## Aliases, subqueries and CTEs
 

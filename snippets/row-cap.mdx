@@ -5,5 +5,5 @@ CockroachDB, Redshift, SQLite, MSSQL, Oracle, Cassandra, Redis, DynamoDB, BigQue
 ClickHouse, SAP HANA and MongoDB, so the rest of the result never crosses the network. Cloudflare D1, LibSQL,
 Etcd, DuckDB, Elasticsearch, Typesense, SurrealDB, Beancount and Dameng still read the whole result and keep the
 first rows. A plan that has to finish before it can return a first row, a sort with no index or a
-`GROUP BY`, runs to completion on the server either way. Both numbers are in **Settings > Data**
-([Data settings](/customization/data-settings)).
+`GROUP BY`, runs to completion on the server either way. The cap is **Query result limit** in
+**Settings > Data** ([Data settings](/customization/data-settings#query-result-limit)).

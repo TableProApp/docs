@@ -1,0 +1,20 @@
+```bash
+tablepro connections --format json
+tablepro databases -c Staging
+tablepro schemas -c Staging --database shop
+tablepro tables -c Staging --database shop --schema public
+tablepro describe -c Staging --schema public orders
+tablepro describe -c Staging --ddl orders
+```
+
+| Command | Result | Scope options |
+|---|---|---|
+| `connections` | Saved connection names, ids and types; hidden connections are omitted | None |
+| `databases` | Databases on the connection | `-c` |
+| `schemas` | Schemas in a database | `-c`, `--database` |
+| `tables` | Tables and views in a schema | `-c`, `--database`, `--schema` |
+| `describe <table>` | Columns, indexes and foreign keys as separate result sets | `-c`, `--database`, `--schema` |
+
+`-c` is short for `--connection`. Pass a saved connection's name or id. If a name matches several connections, use an id from `connections`.
+
+All five commands accept `--format`. For `describe`, use `--ddl` to print the `CREATE` statement instead; it cannot be combined with `--format`.

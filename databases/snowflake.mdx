@@ -29,8 +29,8 @@ Click **New Connection…**, select **Snowflake**, enter the **Account Identifie
 | **Warehouse** | No | Compute warehouse such as `COMPUTE_WH` |
 | **Database** | No | Default database. Empty browses all of them |
 | **Schema** | No | Default schema, `PUBLIC` if empty |
-| **Role** | No | Session role, Options section |
-| **CLI Connection Name** | No | Section in `~/.snowflake/connections.toml`, Options section |
+| **Role** | No | Session role, **Advanced** pane |
+| **CLI Connection Name** | No | Section in `~/.snowflake/connections.toml`, **Advanced** pane |
 
 ## Connection URL
 
@@ -62,7 +62,7 @@ Paste an access token issued for the account. Nothing refreshes it for you.
 
 ## Browsing and sessions
 
-The sidebar groups objects by database and schema. Object lists come from `SHOW` commands, which the metadata service answers with no warehouse running; column details come from `INFORMATION_SCHEMA`, which needs one.
+The sidebar groups objects by database and schema. Object lists and a table's columns, row count, size and comment come from `SHOW` commands, which the metadata service answers with no warehouse running. Reads across a whole schema, such as autocomplete, take their columns from `INFORMATION_SCHEMA`, which needs one.
 
 **Database > Session Context** moves the session to another **Warehouse** or **Role** with `USE WAREHOUSE` and `USE ROLE`, no reconnect. A tab bound to a second database stays on that session too: `USE DATABASE` runs ahead of its statements. One TablePro connection is one Snowflake session, held open while idle by a heartbeat.
 
@@ -85,7 +85,7 @@ No **SSL Mode**, and no plaintext option. Every request is HTTPS to the account 
 
 ## Limitations
 
-- No SSH tunnel. The form has no Network tab, and the endpoint is reached over HTTPS only.
+- No SSH tunnel. The editor has no **SSH & Proxies** pane, and the endpoint is reached over HTTPS only.
 - A grid edit keys on the declared primary key, or on every column when there is none. Snowflake never enforces key constraints, so an edit or delete first looks its row up, and when another row matches too, the save stops before anything is written. Edit such rows with a query.
 - `TIMESTAMP_LTZ` values read as the UTC instant, marked `Z`, rather than converted to the session's `TIMEZONE`.
 
@@ -105,7 +105,7 @@ Key-pair auth. The JWT issuer carries your account locator and a timestamp, so c
 
 ### No databases in the sidebar
 
-The connecting role needs `USAGE` on the databases. Set **Warehouse** too: column metadata runs on `INFORMATION_SCHEMA`, which needs one.
+The connecting role needs `USAGE` on the databases. Set **Warehouse** too: reads across a whole schema, such as autocomplete, run on `INFORMATION_SCHEMA`, which needs one.
 
 ### The browser never came back
 

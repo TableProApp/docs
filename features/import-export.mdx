@@ -3,13 +3,13 @@ title: Import & Export
 description: Export to CSV, JSON, SQL, MQL, XLSX, or a data dictionary. Import SQL, JSON, and CSV files with column mapping and transaction safety
 ---
 
-**File > Export** (`Cmd+Shift+E`) re-reads every table you tick with `SELECT * FROM`, so what is on screen has no bearing on the file: filters, sort, hidden columns, and the page you are on are all ignored, and table size does not matter. **Export Results…** on the grid's right-click menu writes what the tab has loaded instead. **File > Export > Export Data Dictionary…** describes the tables rather than their rows. Import is `Cmd+Shift+I`.
+**File > Export** (`Cmd+Shift+E`) re-reads every table you tick with `SELECT * FROM`, so what is on screen has no bearing on the file: filters, sort, hidden columns, and the page you are on are all ignored, and table size does not matter. **File > Export > Export Results…** (`Cmd+Option+Shift+E`), also on the grid's right-click menu, writes what the tab has loaded instead. **File > Export > Export Data Dictionary…** describes the tables rather than their rows. Import is `Cmd+Shift+I`.
 
 ## Export data
 
 <Steps>
   <Step title="Open the export dialog">
-    Open a table or run a query, then choose **File > Export** (`Cmd+Shift+E`), or right-click the results grid and choose **Export Results…**.
+    Open a table or run a query, then choose **File > Export** (`Cmd+Shift+E`). To export only the rows the tab holds, press `Cmd+Option+Shift+E` or right-click the results grid and choose **Export Results…**.
   </Step>
   <Step title="Choose a format and scope">
     Pick a format, tick objects in the tree, and set the options for that format.
@@ -92,11 +92,11 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
     | Line breaks in values to spaces | No |
     | Line ending (LF, CRLF, CR) | LF |
     | Decimal separator (period, comma) | Period |
-    | Sanitize formula-like values | Yes |
+    | Sanitize formula-like values | No |
     | Encoding (UTF-8, ISO Latin 1, Windows-1252) | UTF-8 |
     | Include byte order mark | No |
 
-    Sanitizing prefixes a value starting with `=`, `+`, `-`, or `@` with a single quote, so a spreadsheet treats it as text. A plain number such as `-5` or `+1.5e3` is written as it is.
+    Sanitizing prefixes a value starting with `=`, `+`, `-`, or `@` with a single quote, so a spreadsheet treats it as text. A plain number such as `-5` or `+1.5e3` is written as it is. The quote stays in the data for any program that imports the file, so turn it on only for a file meant for a spreadsheet; the export then says how many values it quoted.
 
     Excel on Windows needs the byte order mark to read a UTF-8 file. Readers that do not expect one read it as part of the first column name. Only UTF-8 carries a mark, so the checkbox dims for the other two encodings.
 
@@ -194,7 +194,7 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
     | Include headers (bold first row) | Yes |
     | NULL as empty cells | Yes |
 
-    Each table becomes its own worksheet and numbers are stored as numeric cells. A table over 1,048,576 rows, Excel's limit, splits across sheets.
+    Each table becomes its own worksheet and numbers are stored as numeric cells. Excel holds 1,048,576 rows a sheet and 32,767 characters a cell: a longer table splits across sheets, and a longer value is cut to fit, with a warning that counts the values cut. Export to CSV to keep long values whole.
   </Tab>
   <Tab title="Markdown">
     GitHub-flavoured tables.
@@ -215,7 +215,7 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
     | Compression (Snappy, Zstd, Gzip, None) | Snappy |
     | Rows per group | 122,880 |
 
-    Column types come from the source engine's own declarations, so numbers, dates and booleans arrive as those rather than as strings. A value that will not convert is written as null rather than failing the export.
+    Column types come from the source engine's own declarations, so numbers, dates and booleans arrive as those rather than as strings. A timestamp or time with time zone is written adjusted to UTC, so it keeps the instant it names. A column holding a value that will not convert is written as text, and the export says which column.
 
     <Warning>
     Parquet holds one table per file. Selecting several writes `dump.users.parquet`, `dump.orders.parquet` and so on beside the name you chose.
@@ -284,7 +284,7 @@ The extension picks the format, so one command covers all of them. A file no for
     Encoding, transaction wrapping, and error handling for SQL; parsing and column mapping for CSV and JSON. TablePro remembers the options from your last successful import, and **Reset to Defaults** restores the stock ones.
   </Step>
   <Step title="Review and import">
-    Check the preview, statement count, and file size, then click **Import**. The connection's [Safe Mode](/features/safe-mode) asks once for the whole file where its level calls for a confirmation or Touch ID.
+    Check the preview, statement count, and file size, then click **Import**. The progress bar of a SQL file follows how much of the file has been read, and the count beside it counts statements. The connection's [Safe Mode](/features/safe-mode) asks once for the whole file where its level calls for a confirmation or Touch ID.
   </Step>
 </Steps>
 
@@ -299,14 +299,18 @@ The extension picks the format, so one command covers all of them. A file no for
 |--------|-------------|---------|
 | On error | Stop and Rollback, Stop and Commit, or Skip and Continue | Stop and Rollback |
 | Encoding | UTF-8, UTF-16, UTF-16 LE, UTF-16 BE, Latin-1, Windows-1252, ASCII, Shift JIS, EUC-JP, GB 18030, Big5, or EUC-KR | UTF-8 |
-| Wrap in transaction | Runs every statement inside one transaction. Dimmed in Skip and Continue | Yes |
+| Wrap in transaction | Starts an import transaction when the connection has none. An existing transaction stays under your control. Dimmed in Skip and Continue | Yes |
 | Disable foreign key checks | Suspends constraint checks for the import | Yes |
 
 | Mode | What happens on a failed statement |
 |------|-----------|
-| **Stop and Rollback** | Stops there. With the transaction on, everything rolls back, except on MySQL and MariaDB after a `CREATE`, `ALTER` or `DROP`: those commit as they run, and the error says some statements were kept |
-| **Stop and Commit** | Stops there, keeping what already succeeded |
-| **Skip and Continue** | Logs it and carries on, including a line the parser cannot read. No transaction |
+| **Stop and Rollback** | Stops there and rolls back the transaction the import still controls. Changes outside that transaction can stay |
+| **Stop and Commit** | Stops there and commits the transaction the import still controls. A failed transaction can only roll back |
+| **Skip and Continue** | Logs it and carries on, including a line the parser cannot read. No import transaction |
+
+Keep the default **Stop and Rollback** unless you want to retain partial work or continue past errors. These options handle errors; clicking **Stop** asks separately what to do with the work already done.
+
+Rollback does not undo changes already committed, writes to nontransactional tables, or other effects the database cannot roll back. For example, MySQL and MariaDB `CREATE`, `ALTER`, and `DROP` statements can commit earlier work. Review the result before retrying a file.
 
 **UTF-16** reads the byte order from the mark at the start of the file and falls back to big-endian, which is what a file with no mark means. Pick **UTF-16 LE** or **UTF-16 BE** for a file that has no mark and is not big-endian. Latin-1 and Windows-1252 differ over the bytes `0x80` to `0x9F`: a dump written by MySQL keeps its curly quotes, en dashes and euro sign there, so Windows-1252 is the one to pick for it.
 
@@ -314,9 +318,30 @@ When the preview cannot read the file in the chosen encoding, the dialog switche
 
 The import runs on the connection's own session, and afterwards puts back the session settings a dump changes: on MySQL and MariaDB the SQL mode, time zone, character set, `autocommit` and the foreign key and unique checks; on PostgreSQL the ones `pg_dump` sets, `search_path` among them. A file that stopped early with `autocommit` off while a transaction is still open keeps `autocommit` off, so commit or roll back that transaction yourself.
 
+On PostgreSQL with **Wrap in transaction** on, `INSERT`, `UPDATE`, `DELETE`, `CREATE`, `ALTER`, `DROP`, `COMMENT`, `GRANT`, `REVOKE` and `TRUNCATE` statements go to the server together, up to 200 statements or 4 MiB at a time, so a dump over a slow link waits one round trip per batch instead of one per statement. A failure still stops at its own line, and nothing after it runs. Every other statement, and any statement holding a backslash, runs on its own. When a statement sent with others changes `standard_conforming_strings`, through a function that calls `set_config`, the import stops at the next statement it had already read, because that statement may end somewhere else under the new setting. Import that file with **Wrap in transaction** off.
+
 On SQL Server a file that holds a `GO` line runs a batch at a time, cut at its `GO` lines the way `sqlcmd` cuts it, so every count and failure here is a batch rather than a statement. A file with no `GO` line runs a statement at a time. See [Scripts and batches](/databases/mssql#scripts-and-batches).
 
-Skip and Continue collects up to 1,000 failures with their line numbers and messages, and the summary counts successes against failures behind a **Copy Details** button. **Save Report…** writes them all to a CSV with a line, a statement and the database's own error per row, so a large import's failures can be sorted and searched rather than scrolled. A stop shows the line, the database's own message, and the failing statement, with the dialog still open behind it, ready for a changed setting and another run. The alert shows the first 10,000 characters of a longer statement and the first five errors of a batch that raised more, and **Copy Details** copies all of them.
+On PostgreSQL, CockroachDB and KingbaseES the rows after a `COPY ... FROM STDIN`, the form `pg_dump` writes table rows in by default, load through the server's copy protocol inside the import's transaction, read from the file as they are sent. They run up to the line holding only `\.`, which is not sent, and never run as SQL. Text and CSV rows load. Binary rows cannot come from a file, so that `COPY` fails with no rows sent. The line under the progress bar counts the rows sent. **Stop** ends the `COPY` at once, with none of its rows loaded, and stops the import as a failed statement would: no **Stop Import?** question, and the import's own transaction rolls back. A transaction you opened yourself is left failed, so roll it back. On Redshift and PGlite, which cannot take rows this way, the file stops at the `COPY` before sending it, and the error names its line: dump it again with `pg_dump --inserts`. The `\restrict` and `\unrestrict` lines a current `pg_dump` writes run nothing. On MySQL and MariaDB a `DELIMITER` line is read as the `mysql` client reads it: only as the first thing on its line, before any statement text.
+
+SQL Server SQL imports do not automatically commit or roll back after a file batch runs, even with **Wrap in transaction** selected and even without a `GO` line. A batch can change which transaction is open. Read the completion message: if a transaction remains open, commit or roll it back on this connection. This also applies after a successful import. Imports into a selected table from CSV, JSON, or XLSX use the row-import transaction options instead.
+
+Skip and Continue collects up to 1,000 failures with their line numbers and messages, and the summary counts successes against failures behind a **Copy Details** button. **Save Report…** writes them all to a CSV with a line, a statement and the database's own error per row, so a large import's failures can be sorted and searched rather than scrolled. An error that stops the import shows the line, the database's own message, and the failing statement, with the dialog still open behind it, ready for a changed setting and another run. The alert shows the first 10,000 characters of a longer statement and the first five errors of a batch that raised more, and **Copy Details** copies all of them.
+
+### Stop an import
+
+<Frame caption="Choose what to do with the paused import">
+  <img className="block dark:hidden" src="/images/import-stop.png" alt="Stop Import dialog offering rollback, commit, and Continue for genre rows" />
+  <img className="hidden dark:block" src="/images/import-stop-dark.png" alt="Stop Import dialog offering rollback, commit, and Continue for genre rows" />
+</Frame>
+
+Click **Stop** during a SQL or row import. **Pausing…** means a database operation already in progress is finishing. The **Stop Import?** question appears after that operation finishes; no further import work starts while you decide. A PostgreSQL `COPY` block is the exception: **Stop** ends it at once and stops the import with no question.
+
+Choose **Continue** to resume. When the import still controls a healthy open transaction and can identify its changes, the question offers **Stop and Rollback** and **Stop and Commit**. It names transactional tables separately from tables whose changes stay either way. In other cases, **Stop Import** ends the run with the limits described in the question. A message that changes may stay is not a promise of rollback.
+
+After stopping, read the result for each file: not imported, direct changes rolled back, changes committed or kept, changes still in an open transaction, or changes that may stay. Row counts describe rows submitted in completed writes, not an exact count of rows inserted. A failed write can have made additional changes. **Copy Details** includes the recorded errors and transaction or session cleanup failures.
+
+If a transaction was already open before the import, commit or roll it back yourself. The same applies when the file opens or replaces a transaction. A failed open transaction needs rollback. The result lists table creation and table clearing done before row import separately; rolling back the rows does not undo preparation already committed.
 
 ### Disabling foreign key checks
 
@@ -333,7 +358,7 @@ A server that rejects the statement stops the import with that error, so clear t
 
 ### Import JSON
 
-The sheet accepts an array of objects `[{…}, {…}]`, newline-delimited JSON streamed a line at a time, and TablePro's own export shape `{ "table": [ {…} ] }`, so an export round-trips. Then choose a destination:
+The sheet accepts an array of objects `[{…}, {…}]`, newline-delimited JSON streamed a line at a time, a single object as one row, and TablePro's own export shape `{ "table": [ {…} ] }`, so an export round-trips. A `.json` file is read one value at a time whatever its size, in UTF-8, UTF-16 or UTF-32, with or without a byte order mark. Then choose a destination:
 
 - **Existing table**: map each JSON field to a column, as [Map fields to columns](#map-fields-to-columns) describes. A column with no field mapped to it keeps its default or NULL. The list holds tables and partitioned tables, and the server routes each row to the right partition.
 - **New table**: the name field opens on a name derived from the file, already selected, so one keystroke replaces it. Review the inferred columns underneath. Name, type, primary key, nullable flag, and default are all editable before the table is created.
@@ -395,7 +420,11 @@ Saved mappings stay on this Mac. They follow a renamed table and are forgotten w
 
 ### Row imports
 
-CSV and JSON insert in batches, and the on-error and transaction options behave as they do for SQL. They add **Delete existing rows before import**, which clears the target table inside the import transaction, so a failure in the default Stop and Rollback mode brings the rows back. A row where no field matches a mapped column writes nothing and is reported rather than counted.
+CSV and JSON insert in batches, and the on-error and transaction options behave as they do for SQL. They add **Delete existing rows before import**, which clears the target table before writing rows. The deletion rolls back only if it belongs to a transaction the import rolls back and the table supports rollback. A row where no field matches a mapped column writes nothing and is reported rather than counted.
+
+A binary column reads a value the way the export wrote it: `0x` and hex digits from CSV and XLSX, `0x` alone for zero bytes, and Base64 from JSON. A CSV or XLSX value without `0x`, or a JSON value that is not Base64, is written as its text. A value that starts with `0x` but is not hex fails its row. On MySQL, MariaDB, SQL Server and SQLite, a boolean column takes `true`, `false`, `yes`, `no`, `on`, `off`, `t`, `f`, `y` and `n` as `1` and `0`.
+
+A CSV line of empty fields, such as `,,`, is a row, the way CSV export writes a row of NULLs. An empty line is skipped, except in a file of one column, where it is that column's NULL. Empty lines and lines of empty fields after the last value are not rows: a spreadsheet saves its empty rows that way. A JSON row `{}` is a row of column defaults.
 
 ### Update existing rows
 
@@ -434,14 +463,14 @@ Select several files in **Import Data…**, or a folder, and each one loads into
 
 Each file starts on the table its name matches, ignoring case, or on a new table under the name a single import would propose. No two files get the same new name: `sales.csv` and `sales.json` propose `sales` and `sales_2`. In a file's row, pick another destination from the menu, clear the checkbox to leave the file out, or click **Edit…** for the one-file sheet: the column mapping of an existing table, starting from its saved mapping, or the columns of a new table. A run only inserts, so that sheet has no **Import as**: [update existing rows](#update-existing-rows) one file at a time.
 
-The options under the list apply to every file of that format. With **Auto-detect** set, the delimiter and encoding are still read from each file. A run that mixes formats shows the options of each, and their **On error** and **Wrap in transaction** have to match, because the run has one transaction.
+The options under the list apply to every file of that format. With **Auto-detect** set, the delimiter and encoding are still read from each file. A run that mixes formats shows the options of each, and their **On error** and **Wrap in transaction** have to match, because the run shares one transaction when transaction wrapping is available.
 
 | On error | What a failure in one file does |
 |---|---|
-| **Stop and Rollback** | Stops there and rolls back the rows of every file, the finished ones included |
-| **Stop and Commit** | Stops there, keeping every file before it and the rows of the failing file that went in |
-| **Skip and Continue** | Skips the failing row, or the whole file when it cannot be read, and carries on. No transaction |
+| **Stop and Rollback** | Stops there and rolls back the shared transaction if it is still under import control. Direct changes to transactional tables roll back together; nontransactional changes stay |
+| **Stop and Commit** | Stops there and commits completed writes in the shared import transaction, unless that transaction has failed |
+| **Skip and Continue** | Skips the failing row, or the whole file when it cannot be read, and carries on. No import transaction |
 
-New tables are created before any rows go in, so a run that rolls back leaves them empty, and running it again from the same sheet reuses them. [Safe Mode](/features/safe-mode) asks once for the whole run. The summary lists each file with its table and row count, and **Copy Details** adds every skipped row's error.
+New tables are created before any rows go in. Retrying from the same sheet can reuse and clear those tables before row import starts. Review the preparation details in a stopped or failed result; a later rollback does not undo a clearing operation already committed. [Safe Mode](/features/safe-mode) asks once for the whole run. The summary lists each file with its table and row count, and **Copy Details** adds every skipped row's error. [Stopping the run](#stop-an-import) reports each file's outcome separately, including files already processed and files not reached.
 
 Two files can fill one existing table, except with **Delete existing rows before import** on: the second file would clear the first one's rows.

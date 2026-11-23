@@ -1,5 +1,5 @@
 ---
-title: Troubleshooting
+title: Troubleshooting on macOS
 description: Symptom-first checks for launch, connection, plugin, tunnel and save failures
 ---
 
@@ -27,10 +27,11 @@ A failure that happens on one engine only is on that engine's page, which ends w
 
 ## A connection fails
 
-A failed connect paints the window with **Could not connect to `…`**, the driver's own message, and three buttons: **Try Again**, **Manage Connections…**, **Copy Details**.
+A failed connect paints the connection's window with **Could not connect to `…`**, the driver's own message, and three buttons: **Try Again**, **Manage Connections…**, **Copy Details**. That holds for a connect started from the welcome window or the connection switcher too: the error lands in the window, not in an alert.
 
 - **Refused** means something answered and said no: the server is not listening on that port, or it is bound to `127.0.0.1` only. **Timed out** means nothing answered, which points at a firewall, a security group or a VPN. Tell them apart with `nc -zv host port`.
 - **Still on Connecting**: after 12 seconds on one step the pane says "This is taking longer than usual." **Cancel** gives up at once. **Reopen Last Session** brings that connection back as **Not connected** without dialing it; a connect that fails on its own dials again.
+- **Disconnected from `…`** after a run of **Reconnecting to `…`**: the tunnel, the proxy or the server dropped, and every try failed or you clicked **Cancel**. The pane names the cause; fix it and click **Reconnect**. See [When a connection drops](/connections#when-a-connection-drops).
 - On macOS 15 and later, a host at a local network address (`192.168.x.x`, `10.x.x.x`, `.local`) needs the Local Network permission. Without it the window reads **Local Network Access Required** and names the host it could not reach: the database, the SSH server or jump host, or the SOCKS proxy. **Open System Settings** takes you to **Privacy & Security**; turn TablePro on under **Local Network**, then click **Try Again**. **Copy Details** still holds the driver's message. Loopback and internet hosts are unaffected.
 - Authentication failures are engine-specific. See [PostgreSQL](/databases/postgresql), [MySQL](/databases/mysql) or [SQL Server](/databases/mssql).
 
@@ -40,7 +41,7 @@ A handshake failure names the cause and the SSL Mode to switch to, with the driv
 
 ## A plugin will not install or load
 
-A plugin that fails any of its checks appears as a banner in **Settings > Extensions** with the reason.
+A plugin that fails any of its checks appears under **Couldn't Load** in **Settings > Extensions**. Click it for the reason.
 
 ### "Plugin code signature verification failed: …"
 
@@ -52,7 +53,7 @@ The download does not match the SHA-256 in the registry manifest. Retry the inst
 
 ### "Plugin was built for PluginKit version …; this release of TablePro needs version …"
 
-This plugin predates the app's current driver interface. TablePro fetches a compatible build on its own, retrying after 30 seconds, then 5 and 10 minutes, five attempts in all. Click **Update Now** in the banner, or **Update TablePro** when the plugin needs a newer app.
+This plugin predates the app's current driver interface. TablePro fetches a compatible build on its own, retrying after 30 seconds, then 5 and 10 minutes, five attempts in all. Click **Update Now** in the banner. A plugin that needs a newer app offers **Check for Updates…** instead, which reads **Update Available…** or **Relaunch to Update** once that app is waiting.
 
 ### "Couldn't reach the plugin registry"
 
@@ -62,7 +63,7 @@ A network problem, not a bad plugin. Retry once you are online.
 
 A saved connection's driver is missing. The failure screen offers **Install Plugin…**.
 
-Removing a plugin needs a relaunch, offered as **Quit & Reopen**. Plugins you installed live in `~/Library/Application Support/TablePro/Plugins`. See [Plugins](/features/plugins).
+Removing a plugin needs a relaunch, offered as **Relaunch** in the banner. Plugins you installed live in `~/Library/Application Support/TablePro/Plugins`. See [Plugins](/features/plugins).
 
 ## SSH tunnel failures
 
@@ -82,7 +83,7 @@ Failures on the far side start with "The SSH server could not reach …". Those,
 
 A capped result offers **Fetch All** in the status bar, and **Query > Execute Query Without Limit** runs one query with the cap off. Browsing a table pages instead of capping.
 
-A query that runs past the timeout in **Settings > General** is cancelled ([Settings](/customization/settings)); cancel one yourself with `Cmd+.`. A changed timeout reaches new connections only, so reconnect after changing it or the old value stays in force with nothing to say so.
+A query that runs past the timeout in **Settings > Connections** is cancelled ([Query timeout](/customization/connection-settings#query-timeout)); cancel one yourself with `Cmd+.`. A changed timeout reaches new connections only, so reconnect after changing it or the old value stays in force with nothing to say so.
 
 ## Edits will not save
 
@@ -104,7 +105,7 @@ log show --predicate 'subsystem BEGINSWITH "com.TablePro"' --last 30m
 
 Oracle alone adds a diagnostic sheet on a recognized driver error, with **Copy Diagnostic Info** and **Open Issue Tracker**.
 
-Application data is in `~/Library/Application Support/TablePro`, preferences in `~/Library/Preferences/com.TablePro.plist`. **Settings > General** has **Reset All Settings to Defaults**.
+Application data is in `~/Library/Application Support/TablePro`, preferences in `~/Library/Preferences/com.TablePro.plist`. **Settings > General** has **Reset all settings**.
 
 Neither copy button includes a password. **Copy Details** carries the host, the database name, the SSH host, and any non-default port; **Copy Diagnostic Info** adds the user name.
 

@@ -18,7 +18,8 @@ Raycast extension with `open()` from `@raycast/api`.
 | [`import?…`](#import-a-connection) | A review sheet that saves a new connection |
 | [`integrations/pair?…`](#start-pairing) | The pairing approval sheet |
 | [`integrations/start-mcp`](#start-the-mcp-server) | Nothing. Starts the MCP server and returns |
-| [`settings/<pane>`](#open-a-settings-pane) | Settings on that pane, or on the last-used pane |
+| [`settings/<pane>/<page>`](#open-a-settings-pane) | Settings on that pane or page, or on the last-used pane |
+| [`share?token=…`](#open-a-shared-link) | A new query tab with a shared link's SQL, never run |
 
 ## Connection IDs are UUIDs
 
@@ -133,7 +134,7 @@ tablepro://integrations/start-mcp
 ```
 
 Starts the MCP server if it is not running, then returns. The bundled `tablepro-mcp` CLI uses this
-to bootstrap on a cold launch. With **Enable MCP Server** off in **Settings > MCP**, the start is
+to bootstrap on a cold launch. With **MCP server** off in **Settings > MCP**, the start is
 refused: no listener, no alert, and a launch made only for this URL quits again.
 
 The server takes the configured port (`23508` by default) and falls back to a kernel-assigned free
@@ -165,33 +166,49 @@ open "tablepro://import?name=Staging&host=db.example.com&port=5432&type=postgres
 ```text
 tablepro://settings
 tablepro://settings/<pane>
+tablepro://settings/<pane>/<page>
 ```
 
 The bare link opens Settings on the last-used pane, the same as `Cmd+,`. With a pane id it opens that
-pane. The link only navigates and never changes a setting.
+pane, and with a page id after it, that page, with **Back** leading to the pane. The link only
+navigates and never changes a setting.
 
-| Pane | id |
-|---|---|
-| General | `general` |
-| Appearance | `appearance` |
-| Editor | `editor` |
-| Data | `data` |
-| Keyboard | `keyboard` |
-| Profiles | `profiles` |
-| Notifications | `notifications` |
-| AI | `ai` |
-| MCP | `mcp` |
-| Extensions | `plugins` |
-| Sync | `sync` |
-| Account | `license` |
+| Pane | Pane id | Page ids |
+|---|---|---|
+| General | `general` | `software-update`, `command-line-tool` |
+| Appearance | `appearance` | `themes` |
+| Notifications | `notifications` | |
+| Keyboard | `keyboard` | |
+| Connections | `connections` | `linked-folders`, `trusted-links` |
+| Profiles | `profiles` | |
+| Sidebar & Tabs | `sidebar` | |
+| Editor | `editor` | `sql-formatting` |
+| Data | `data` | `query-history`, `data-rewind` |
+| AI | `ai` | `slash-commands` |
+| MCP | `mcp` | `approvals`, `tokens` |
+| Extensions | `plugins` | A plugin's bundle ID, as its page shows it |
+| iCloud Sync | `sync` | |
+| Account | `license` | `features`, `devices`, `teams`, `offline` |
 
-Ids are lowercase and matched exactly, and they stay the same when a pane is renamed. An unknown id
-opens the last-used pane with no error, so a link to a pane added in a later version still opens
-Settings on an older one. Path segments and query items after the id are ignored.
+Ids are matched exactly, case included, and they stay the same when a pane or page is renamed. An
+unknown pane id opens the last-used pane with no error, and an unknown page id, or one that does not
+apply right now, opens its pane: `devices` while signed out, `slash-commands` while AI features are
+off, `approvals` and `tokens` while the MCP server is off. A link to a pane or page added in
+a later version therefore still opens Settings on an older one. Path segments after the page id and
+query items are ignored.
 
 ```bash
-open "tablepro://settings/mcp"
+open "tablepro://settings/mcp/tokens"
+open "tablepro://settings/plugins/com.TablePro.CSVExportPlugin"
 ```
+
+## Open a shared link
+
+```
+tablepro://share?token=<token>
+```
+
+**Open in TablePro** on a [shared link](/features/shared-links#open-in-tablepro) page sends this URL. The token is the 43 letters and digits at the end of the link. TablePro reads the link, asks for its password if it has one, and opens the SQL in a new query tab without running it. A link that hides its SQL opens nothing. The Linux and Windows apps answer this path too.
 
 ## On iPhone and iPad
 

@@ -66,7 +66,8 @@ const params = new URLSearchParams({
 });
 await openUrl(`tablepro://integrations/pair?${params}`); // however your host opens a URL
 
-// Step 3. Your callback receives ?code=<uuid>&state=<state>, or ?error=access_denied when the user says no.
+// Step 3. Your callback receives ?code=<uuid>&state=<state>, ?error=access_denied when the user says no,
+// or ?error=server_error when TablePro could not issue the token after the user approved.
 // 23508 is the default port. Make it a setting: if the port is taken, the server binds another one,
 // and the Status row in Settings > MCP shows the port in use.
 export async function exchange(callback: URL, port = 23508): Promise<string> {
@@ -100,7 +101,8 @@ Three constraints decide whether TablePro accepts the request at all:
   name, such as `smb://`, `ssh://` and `webcal://`.
 
 The exchange endpoint takes no bearer token: the single-use code plus the verifier is the credential.
-It and `/mcp` are the only paths the server serves, and both accept `POST` only.
+The public HTTP routes are `/v1/integrations/exchange` and `/mcp`; both accept `POST` only.
+The bundled command also uses a [private revocation route](#revoking-a-token).
 
 ## Response modes
 
@@ -112,6 +114,10 @@ passes an extension a single launch parameter named `context`, as Raycast does.
 | `query` | `?code=<uuid>&state=<state>` | `?error=access_denied&error_description=user_denied&state=<state>` |
 | `context` | `?context={"code":"<uuid>","state":"<state>"}` | `?context={"error":"access_denied","error_description":"user_denied","state":"<state>"}` |
 | absent (deprecated) | `?context={"code":"<uuid>"}` for `raycast://`, `?code=<uuid>` for any other scheme | `error=denied` and `error_description=user_denied`, wrapped the same way |
+
+When the user approves and TablePro then cannot issue the token, the redirect carries
+`error=server_error` and `error_description=token_not_issued`, with `state`, in the same shape as a
+deny for the request's mode. Treat it as a failure to retry, not as a refusal.
 
 The `context` value is JSON with sorted keys, percent-encoded like any other query value. Any other
 `response_mode` drops the link: no sheet opens and nothing reaches `redirect`. Query items already on
@@ -138,7 +144,7 @@ names more than one level, the sheet starts at the lowest.
 `connections:display` lets the token call [`list_connections`](/developers/mcp-tools#listing-for-display)
 with `purpose: "display"`, which adds connections hidden from AI and each connection's user name. Ask
 for it only to show the user their connections, never to feed a model. The sheet offers it only while
-**Allow apps to list connections hidden from AI** is on under **Settings > MCP**, and its checkbox
+**Allow apps to list connections hidden from AI** is on under **Access** in **Settings > MCP**, and its checkbox
 starts off. Otherwise the token is issued without it.
 
 The exchange response names what was granted:
@@ -153,17 +159,31 @@ request went through: the user can lower the permission level or leave the check
 ## What the user approves
 
 The sheet names the client and counts down the five minutes the request is good for, dimming
-**Approve** when it runs out. Three controls sit under that: **Permission Level** (starting at what
-the link asked for, movable in either direction), **Allowed Connections** (all, or a checked subset),
-and **Expiration** (never, 1, 7, 30 or 90 days). A link that asks for `connections:display` adds
+**Approve** when it runs out. Three controls sit under that: **Permissions** (starting at what
+the link asked for, movable in either direction), **Connections** (**All**, or **Selected** with a
+searchable checklist and **Select All** and **Select None**), and **Expires** (**Never**, 1, 7, 30, 60
+or 90 days, or **Custom** with a date). A link that asks for `connections:display` adds
 **List connections hidden from AI**, off until the user ticks it. The link's parameters are a
 request, not a grant. **Deny** is the default button: Return and Escape both deny, and **Approve**
 takes a click. The sheet does not take focus from another app; TablePro's Dock icon bounces instead.
 
 Approving mints the token, holds the plaintext against a one-time code for 5 minutes, and opens the
-redirect. Pairing again mints a second token rather than replacing the first, so an extension that
-re-pairs should stop using its old one. Revoke either under
-**Settings > MCP > Authentication**.
+redirect. Pairing again creates a separate token. Retire an old token through
+[revocation](#revoking-a-token) once the client uses its replacement.
+
+## Revoking a token
+
+Revoke a client's token in **Settings > MCP > Tokens**. For the bundled macOS command,
+use [`tablepro unpair`](/integrations/terminal#status-and-pairing).
+
+The command sends `POST /v1/integrations/revoke` over the private Unix socket, with a form-encoded
+`token` field. The route does not exist on the TCP listener and is outside the
+[stability contract](/developers/versioning#what-is-not-under-the-contract). Do not use it as a
+public client API.
+
+A successful response is `200 {}`, including for an unknown or already revoked token. A `503`
+means revocation was not saved: the token remains valid. The server refuses the stdio bridge
+credential with `400 unsupported_token_type`.
 
 ## Security properties
 
@@ -176,8 +196,14 @@ re-pairs should stop using its old one. Revoke either under
 
 ## Errors
 
-With **Enable MCP Server** off, the pair link stops before the approval sheet with an alert that
+With **MCP server** off, the pair link stops before the approval sheet with an alert that
 names **Settings > MCP**. No redirect is opened, so the extension sees no answer.
+
+Approving can still fail before the client gets a code, such as when the token cannot be saved to the
+Keychain. TablePro shows **Pairing Failed** with the reason and opens the redirect with the
+[`server_error` answer](#response-modes). Start a new pair request once the cause is fixed. The bundled
+`tablepro pair` reports this as a failure and exits 1; see
+[Status and pairing](/integrations/terminal#status-and-pairing).
 
 A failed verification burns the code, so retrying with a guessed verifier is not an option: start a
 new pair request.

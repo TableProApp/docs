@@ -1,6 +1,6 @@
 ---
 title: Cell and Row Viewers
-description: View and edit JSON, PHP serialized, image and binary cell values, decode MessagePack and Protobuf, set per-column display formats, and inspect whole rows in the sidebar
+description: View and edit JSON, PHP serialized, image and binary cell values, decode MessagePack, Protobuf, igbinary and Avro, with schemas from a file or a Schema Registry, set per-column display formats, and inspect whole rows in the sidebar
 ---
 
 Click the chevron on a JSON or blob cell to open its value in a popover anchored to that cell. Which viewer opens follows the column: its declared type, or the **Display As** choice on its header, and that choice changes rendering only, never what is stored.
@@ -21,7 +21,10 @@ Right-click a column header and pick **Display As**. The submenu lists the forma
 | Unix Timestamp (milliseconds) | integer | Same, treating the number as milliseconds |
 | JSON | text | Opens the cell in the JSON viewer |
 | PHP Serialized | text | Opens the cell in the PHP serialized viewer |
-| MessagePack, Protobuf | binary | Decodes the bytes and opens the cell in the [binary value viewer](#binary-value-viewer) |
+| MessagePack, Protobuf, igbinary | binary | Decodes the bytes and opens the cell in the [binary value viewer](#binary-value-viewer) |
+| Avro Schema… | binary | Asks for the `.avsc` file the values were written with, then decodes like the formats above |
+| Protobuf Schema… | binary | Asks for the `.proto` file or descriptor set the values were written with, and the message type, then shows field names |
+| Schema Registry | binary, text | Fetches each value's schema from the connection's Schema Registry. Offered when the connection names one |
 
 An override persists per column, scoped to the connection and table. A column with a format set copies in that format when you copy the single cell; a block of cells or a whole row always copies the stored value.
 
@@ -35,6 +38,8 @@ Id-like binary and character columns, integer columns whose names read as timest
 
 A JSON-typed column opens on the chevron; double-click or `Enter` edits it inline instead. A text column holding JSON needs **Display As > JSON** first.
 
+Right-click the cell and choose **Open Value Editor**, or press `Option+Enter` on it, to open the popover from any JSON cell. In a result or a table you cannot edit, where no chevron shows, the item reads **View Value**. The same item opens the viewer or editor of any cell that has one: long or multi-line text, binary data, dates, enums and the other formats on this page.
+
 The popover has two modes. **Text** is syntax-highlighted and pretty-printed, and editable when the cell is. **Tree** is a collapsible outline with a search field. It never edits, but its rows and the text in them select and copy. Both keep your key order and exact number values, integers larger than JavaScript can represent included.
 
 <Frame caption="JSON editor popover with Text and Tree modes">
@@ -42,7 +47,7 @@ The popover has two modes. **Text** is syntax-highlighted and pretty-printed, an
   <img className="hidden dark:block" src="/images/json-editor-popover-dark.png" alt="JSON editor popover" />
 </Frame>
 
-The mode you switch to becomes the default for the next value, which is the same preference as **JSON Viewer > Default view** in Settings. The pop-out button detaches the viewer into its own resizable window.
+The mode you switch to becomes the default for the next value, which is the same preference as **Default JSON view** in [Settings > Data](/customization/data-settings#values). The pop-out button detaches the viewer into its own resizable window.
 
 Opening a value and seeing it pretty-printed is not an edit: the row is marked changed only once you alter the content. **Save** commits a compact value, key order and numbers preserved, through the [change tracking](/features/change-tracking) queue. Text that is not valid JSON prompts first.
 
@@ -101,15 +106,21 @@ An array or object row copies as its summary, such as `[2 items]`, not as its co
 
 ## Binary value viewer
 
-Set **Display As > MessagePack** or **Protobuf** on a binary column. The grid shows each value decoded on one line, and double-click or `Enter` opens the viewer. It is read-only. On an editable table the chevron still opens the hex editor, and so does double-clicking a NULL cell.
+Set **Display As > MessagePack**, **Protobuf** or **igbinary** on a binary column, pick **Avro Schema…** or **Protobuf Schema…** and choose the column's schema file, or pick **Schema Registry** on a connection that names one. The grid shows each value decoded on one line, and double-click or `Enter` opens the viewer. It is read-only. On an editable table the chevron still opens the hex editor, and so does double-clicking a NULL cell.
 
-| Mode | MessagePack | Protobuf |
-| --- | --- | --- |
-| **Tree** | The [JSON tree](#selecting-and-copying-in-a-tree), with `bin`, `ext` and `time` badges for the types JSON lacks | Field numbers, badged with the wire type: `varint`, `i32`, `i64`, `len` or `group` |
-| **Text** | JSON. Bytes as `0x` hex, an extension as `ext(5) 0x…`, a timestamp in UTC | Text format, as `protoc --decode_raw` prints it |
-| **Hex** | The stored bytes | The stored bytes |
+| Mode | MessagePack, Avro | Protobuf | igbinary |
+| --- | --- | --- | --- |
+| **Tree** | The [JSON tree](#selecting-and-copying-in-a-tree), with `bin`, `ext` and `time` badges for the types JSON lacks | Field numbers, badged with the wire type: `varint`, `i32`, `i64`, `len` or `group` | The [PHP serialized tree](#php-serialized-viewer) |
+| **Text** | JSON. Bytes as `0x` hex, an extension as `ext(5) 0x…`, a timestamp in UTC | Text format, as `protoc --decode_raw` prints it | The value as PHP's `serialize()` writes it |
+| **Hex** | The stored bytes | The stored bytes | The stored bytes |
 
 Protobuf without its schema has no field names or types. A length-delimited field reads as a nested message when its bytes parse as one, else as text when they are UTF-8, else as escaped bytes, so a short string can read as a message. A value that starts with a Schema Registry frame, as Kafka producers write it, shows its schema ID and message index above the tree.
+
+**Protobuf Schema…** takes a `.proto` file or a descriptor set from `protoc --descriptor_set_out`. Use a descriptor set built with `--include_imports` when the message uses types from other files: a `.proto` file is read alone, so a field of an imported type shows by number. When the file defines more than one message, TablePro asks which one the column holds, and the menu names the format after it, as in **Protobuf (Order)**. The tree shows each field by name, badged with its declared type, enums by value name, and maps as `key` and `value` entries. **Text** mode prints the value as `protoc --decode` does, except that UTF-8 text keeps its characters. A field the schema does not declare, or declares with another wire type, shows by number as it would without a schema. TablePro keeps a copy of the file, as it does for Avro.
+
+Avro reads each value as one datum written with the chosen schema. A record shows its fields in schema order, a union shows the branch it holds, and logical types read as what they stand for: `decimal` as a number, `uuid`, `date`, `time` and `duration` as text, `timestamp` in UTC, `local-timestamp` without a zone. The menu names the column's format after the schema's root type, as in **Avro (Order)**. TablePro keeps a copy of the schema, so moving or deleting the file later changes nothing; pick **Avro Schema…** again to replace it. A value with the Kafka wire-format prefix decodes past it, and the viewer shows its schema ID. A value in Avro's single-object encoding, as Java's `toByteBuffer()` writes it, decodes when its schema fingerprint matches the chosen schema, and the viewer shows the fingerprint.
+
+**Schema Registry** reads the schema ID from each value's wire-format prefix and fetches the schema from the registry named in the connection's settings, see [Kafka](/databases/kafka). Avro and Protobuf values decode as above, a Protobuf message picked by the message index in the prefix, and JSON Schema values open in the JSON tree. A cell shows the stored bytes while its schema is being fetched. A value with no prefix, or whose schema the registry does not return, stays hex, and the viewer says why.
 
 A value that does not decode stays hex in the grid, and the viewer says where it broke above its hex dump. Copying a single cell copies the decoded text, cut at 40,000 characters. **Find** searches the decoded text.
 
@@ -140,11 +151,11 @@ A value that refuses to open in one mode still opens in another.
 
 | Viewer | Cap | Past the cap |
 | --- | --- | --- |
-| JSON pretty-printing | 500,000 characters | The value shows as stored |
+| JSON pretty-printing | 2,000,000 characters, counting the indented text | The value shows as stored |
 | JSON tree | 100,000 characters, indentation not counted | "JSON Too Large". Read it in Text mode |
 | JSON and PHP trees | 5,000 nodes | The first 5,000 load, and a `…` row marks the cut |
 | PHP serialized | 5,000,000 characters, 256 levels deep | Tree shows a placeholder, Raw still works |
-| MessagePack, Protobuf | 5,000,000 bytes; 256 levels deep, 100 for Protobuf | The cell stays hex, and the viewer says why |
+| MessagePack, Protobuf, igbinary, Avro | 5,000,000 bytes; 256 levels deep, 100 for Protobuf | The cell stays hex, and the viewer says why |
 | Decoded binary in the grid | 40,000 characters | The text ends in `…` |
 | Decoded binary in **Text** mode | 500,000 characters | The text ends in `…` |
 | Hex dump and hex editor | 10 KB | The dump is truncated, and the editor opens read-only |
@@ -162,7 +173,7 @@ A value that refuses to open in one mode still opens in another.
 | A spatial column whose value the map reads, or GeoJSON in a JSON column | [Map](#geometry-fields), stored value behind **Text** |
 | A JSON column, or text that parses as JSON | JSON editor |
 | A PHP serialized value | Read-only [PHP viewer](#php-serialized-viewer) |
-| A binary column set to MessagePack or Protobuf | Read-only [binary value viewer](#binary-value-viewer) |
+| A binary column set to MessagePack, Protobuf, igbinary or Avro | Read-only [binary value viewer](#binary-value-viewer) |
 | An image, in any column | [Image viewer](#image-viewer), source behind the second segment |
 | An enum, set, or boolean column | Picker |
 | A blob column, or other bytes in a spatial column | Hex editor |
@@ -178,9 +189,9 @@ Type in a field and the grid cell beside it follows, tinted as a pending change 
 
 The hex editor shows the first 10 KB of a blob. Past that it reads **Truncated, read only** and refuses edits, rather than saving back the part it could show.
 
-The text box, the JSON editor and the map each carry a drag handle under them, with separate remembered heights that survive a relaunch.
+The text box, the JSON editor and the map each carry a drag handle under them. Dragging it sizes that field only. The size belongs to the column's name, so it holds on every row, in every result showing that column, and across a relaunch. A field you never dragged starts at its default height.
 
-**Open in Window** detaches a JSON, PHP, decoded binary or text value into its own resizable window; on an editable row, edits there join the same pending changes as the field. An image and a map detach read-only. The text window's status bar counts the value's characters, as the Unicode code points `CHAR_LENGTH` counts, and its bytes in UTF-8, and warns when the value holds a bidirectional control that can reorder how the text reads. The expand button on a JSON, PHP, decoded binary, long text or geometry field grows it to fill the inspector's height with the other fields still listed around it; click it again to shrink it back. Binary and image fields draw at a fixed height and carry no expand button, and neither does a geometry field stored as bytes, whose map still takes the drag handle.
+**Open in Window** detaches a JSON, PHP, decoded binary or text value into its own resizable window; on an editable row, edits there join the same pending changes as the field. An image and a map detach read-only. The text window's status bar counts the value's characters, as the Unicode code points `CHAR_LENGTH` counts, and its bytes in UTF-8, and warns when the value holds a bidirectional control that can reorder how the text reads. The expand button on a JSON, PHP, decoded binary, long text or geometry field grows it to fill the inspector's height with the other fields still listed around it, and the field stays expanded as you select other rows, until the result's columns change; click it again to shrink it back. Binary and image fields draw at a fixed height and carry no expand button, and neither does a geometry field stored as bytes, whose map still takes the drag handle.
 
 Every field carries a menu at its trailing edge, and right-clicking the field opens the same one. **Set NULL**, **Set DEFAULT**, **Set EMPTY**, **Generate UUID**, **Generate UUIDv7** and **SQL Functions** need an editable field and appear only where the column takes them, as in [Set Value](/features/change-tracking#editing-a-cell); `Ctrl+Option+N` and `Ctrl+Option+D` set NULL and DEFAULT from the keyboard. **Copy Value** is always there, and a read-only field keeps its text selectable.
 
@@ -223,4 +234,4 @@ Editing stays on **Fields**. Right-click the empty part of a line, before its te
 
 Caps: a document stored as more than 100,000 characters prints as a string rather than as nested keys. The [JSON tree](#limits) has the same cap, counted without indentation. A binary value shows its first 64 bytes followed by an ellipsis, the same cap the grid's own **Copy** applies.
 
-For whole-row JSON, switch the result to JSON mode with the switcher at the leading edge of the status bar, or from **View > Result View**. It shows what the [grid](/features/data-grid) shows, in the same order, minus hidden columns and rows marked for deletion, which the count line reports separately. Select rows in Data mode first to narrow it, then click **Copy JSON**. Its **Tree** mode is the cell viewer's tree, where `Cmd+A` then `Cmd+C` copies one row object per line.
+For whole-row JSON, switch the result to JSON mode with the switcher at the leading edge of the status bar, or from **View > Result View**. It shows what the [grid](/features/data-grid) shows, in the same order, minus hidden columns and rows marked for deletion, which the count line reports separately. The document holds the first 50,000 rows, and past that the count line reads "50000 of 120000 rows". Select rows in Data mode first to narrow it, then click **Copy JSON**. Its **Tree** mode is the cell viewer's tree, where `Cmd+A` then `Cmd+C` copies one row object per line.

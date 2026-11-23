@@ -3,11 +3,11 @@ title: Tokens
 description: Token model, scopes, connection allowlists, expiry, revocation, and the activity log
 ---
 
-**Read Only** is where the **Generate Token** sheet starts, and it is the right level for a client that only reads. Move to **Read & Write** when an agent has to change data, and to **Full Access** only for `DROP` and `TRUNCATE`, which nothing below it can reach. The plaintext is shown once at creation and never again; what persists is a salted SHA-256 hash in the login keychain.
+**Read Only** is where the **Generate Token** sheet starts, and it is the right level for a client that only reads. Move to **Read & Write** when an agent has to change data, and to **Full Access** for destructive statements through [`confirm_destructive_operation`](/developers/mcp-tools#writing-data). The plaintext is shown once at creation and never again; what persists is a salted SHA-256 hash in the login keychain.
 
-<Frame caption="The MCP tab in Settings">
-  <img className="block dark:hidden" src="/images/mcp-tokens.png" alt="MCP tokens" />
-  <img className="hidden dark:block" src="/images/mcp-tokens-dark.png" alt="MCP tokens" />
+<Frame caption="Settings > MCP > Tokens">
+  <img className="block dark:hidden" src="/images/mcp-tokens.png" alt="Tokens page listing each token's name, permission level, connections and last use, with add and remove buttons under the list" />
+  <img className="hidden dark:block" src="/images/mcp-tokens-dark.png" alt="Tokens page listing each token's name, permission level, connections and last use, with add and remove buttons under the list" />
 </Frame>
 
 ## Permission levels
@@ -15,10 +15,10 @@ description: Token model, scopes, connection allowlists, expiry, revocation, and
 | Level | Scopes | What it can do |
 |-------|--------|----------------|
 | **Read Only** | `tools:read`, `resources:read` | Read schema and run `SELECT`. |
-| **Read & Write** | plus `tools:write` | `INSERT`, `UPDATE`, `DELETE`, connect and disconnect, switch database or schema, open and focus tabs. |
-| **Full Access** | plus `admin` | Also `confirm_destructive_operation`, the only tool that runs `DROP` or `TRUNCATE`. |
+| **Read & Write** | plus `tools:write` | Non-destructive writes, connect and disconnect, switch database or schema, open and focus tabs. |
+| **Full Access** | plus `admin` | Also `confirm_destructive_operation`, the tool for destructive statements. |
 
-`connections:display` sits outside the levels. Only [pairing](/developers/pairing#scopes) grants it, and only while **Allow apps to list connections hidden from AI** is on under **Settings > MCP > Connection Access**. The **Generate Token** sheet never does. It does one thing: lets [`list_connections`](/developers/mcp-tools#listing-for-display) take `purpose: "display"`. A token holding it reads **Lists connections hidden from AI** in the token list.
+`connections:display` sits outside the levels. Only [pairing](/developers/pairing#scopes) grants it, and only while **Allow apps to list connections hidden from AI** is on under **Access** in **Settings > MCP**. The **Generate Token** sheet never does. It does one thing: lets [`list_connections`](/developers/mcp-tools#listing-for-display) take `purpose: "display"`. A token holding it reads **Lists connections hidden from AI** in the token list.
 
 `confirm_destructive_operation` also needs the connection's external access to be **Read & Write**, and no permission level skips the user's approval. [Scopes and gates](/developers/mcp-tools#scopes-and-gates) names which tools sit on which scope.
 
@@ -44,11 +44,11 @@ The effective permission is the lower of the token's scope and the connection's 
 
 ## Creating a token
 
-Pairing is the usual route: see [Pairing](/developers/pairing). To mint one by hand, open **Settings > MCP > Authentication**, click **Generate Token**, and pick a name, permission level, connection allowlist and expiry. The plaintext is shown once.
+Pairing is the usual route: see [Pairing](/developers/pairing). To mint one by hand, open **Settings > MCP > Tokens**, click **+** under the list, or **Generate Token…** while the list is empty, and pick a name, permission level, connection allowlist and expiry. Click **Generate**, and the same sheet shows the plaintext once, with **Copy** and the setup for a client. The page lists tokens only while the MCP server is running.
 
 ## Expiry
 
-Optional, and worth setting for anything with write access. The sheet offers 30, 60 and 90 days, a custom date, or **Never**. An expired token stops authenticating: requests get `-33008` with HTTP `401` and `WWW-Authenticate: Bearer error="invalid_token", error_description="token expired"`.
+Optional, and worth setting for anything with write access. **Expires** offers **Never** (the default), 1, 7, 30, 60 and 90 days, or **Custom** with a date. An expired token stops authenticating: requests get `-33008` with HTTP `401` and `WWW-Authenticate: Bearer error="invalid_token", error_description="token expired"`.
 
 ## Rotating a token
 
@@ -56,20 +56,26 @@ Mint the replacement before you retire the old one; two tokens for one client ar
 
 ## Revocation
 
-The token list in **Settings > MCP > Authentication** shows prefix, name, permission level, allowlist, last use, and expiry. Each row offers:
+The list in **Settings > MCP > Tokens** shows name, permission level, allowlist, prefix, last use, and **Active**, **Expires** with a date, **Expired** or **Revoked**. Select one or more tokens and right-click for:
 
-- **Revoke**: marks the token inactive. It stays in the list and cannot be reactivated.
-- **Delete…**: removes the row entirely.
+- **Revoke…**: asks first, then marks the tokens inactive. They stay in the list and cannot be reactivated.
+- **Copy ID**: copies the token's id, for one token.
+- **Delete…**: asks first, then removes the rows entirely. **-** under the list, or the `Delete` key, does the same.
 
 Revoking cancels every request that token has in flight and clears the connection approvals the user had granted it, so a re-issued token has to ask again. The next call gets `-33009` with HTTP `401`.
 
-**Disconnect** in the Connected Clients list revokes that client's token. It is not a soft disconnect: the client has to pair again or be given a new token.
+**Disconnect** in the Connected Clients list revokes the token of a client that holds its own. It is not a soft disconnect: the client has to pair again or be given a new token. A client on the stdio bridge is the exception, under [The stdio bridge token](#the-stdio-bridge-token).
+
+For the bundled macOS command, follow [Status and pairing](/integrations/terminal#status-and-pairing)
+to replace or remove its token. Its [revocation route](/developers/pairing#revoking-a-token) is private.
 
 ## The stdio bridge token
 
-Every server start mints a token named `__stdio_bridge__` and writes it into the handshake file for the bundled bridge. It is **Read & Write**, so an agent going through the bridge can read and write but cannot call `confirm_destructive_operation`.
+Every server start mints a token named `__stdio_bridge__` and writes it into the [handshake file](/developers/mcp-protocol#local-socket-and-handshake) for the bundled bridge. The bridge sends it over the private socket after checking the socket and host process. It is **Read & Write**, so an agent going through the bridge can read and write but cannot call `confirm_destructive_operation`.
 
 It expires after an hour and is rotated 15 minutes before that, deleted when the server stops, and any stale copy is removed the next time the store loads. It is hidden from the Settings token list, though its name can appear in the activity log. For a narrower scope, skip the bridge and connect over [HTTP with a token you mint](/integrations/mcp-clients#http-transport).
+
+Renewing the token does not cancel work. The old token stops authenticating at once and the bridge picks up the new one, but a request the old token already started, such as a long query or one waiting on a Safe Mode prompt, keeps running until the old token's own expiry, 15 minutes after the renewal. Every stdio client shares this token, and Connected Clients lists each one by the name it sends, across renewals. **Disconnect** on one of them cancels that client's requests in flight and revokes nothing: the others keep working, and the disconnected one can send new requests at once. Remove TablePro from it in **Connect a Client…**, or turn off the server, to stop it.
 
 ## Stored fields
 
@@ -88,11 +94,12 @@ The plaintext is `tp_` followed by 32 base64url-encoded random bytes. Tokens liv
 
 ## Activity log
 
-Every authentication, tool call, resource read, and query is recorded in `~/Library/Application Support/TablePro/mcp-audit.db` with the token id, never the plaintext. Open it with **Settings > MCP > View Activity…**.
+Every authentication, tool call, resource read, and query is recorded in `~/Library/Application Support/TablePro/mcp-audit.db` with the token id, never the plaintext. Click **View Activity…** in **Settings > MCP** to open it.
 
 | Field | Values |
 |-------|--------|
 | Timestamp | when the call happened |
+| Client | the name the client sent in `clientInfo`, its `title` when it has one; empty for rows no client caused |
 | Token | the token behind the call, by name and id |
 | Category | `auth`, `access`, `admin`, `query`, `tool`, `resource` |
 | Action | `auth.success`, `auth.failure`, `auth.rateLimited`, `pairing.exchange`, `pairing.redirectRejected`, `token.created`, `token.revoked`, `server.started`, `server.stopped`, `query.executed`, `tool.<name>`, `resource.read` |
@@ -124,9 +131,9 @@ Request limits are keyed by token id, and `subscriptions/listen` is exempt. Fail
 | Read SSH keys | no |
 | Read license data | no |
 | Read or change app settings | no |
-| Read files outside TablePro's own support directory | no |
+| Read arbitrary local files | no |
 | Change Safe Mode rules | no |
 | Create, change, or read other tokens | no |
 | Create or edit connection records | no |
 
-Statements that reach the filesystem or run server-side code are refused before they reach the driver, on every tool. The reachable surface is the [tool catalog](/developers/mcp-tools), the [resources](/developers/mcp-resources), and the [prompts](/developers/mcp-prompts). Nothing outside those lists is exposed.
+`export_data` can write a new file in Downloads under its [path rules](/developers/mcp-tools#export_data). SQL statements that reach the filesystem or run server-side code are refused before they reach the driver, on every tool, along with the rest of [what no external caller may send](/developers#what-read-only-allows). The reachable surface is the [tool catalog](/developers/mcp-tools), the [resources](/developers/mcp-resources), and the [prompts](/developers/mcp-prompts). Nothing outside those lists is exposed.

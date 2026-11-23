@@ -1,72 +1,68 @@
 ---
 title: Team Plan
-description: Seats, roles and invitations in the account portal, and the Team Library every member with a seat syncs
+description: Share one plan across your team, manage members and seats in your account, and join a team from an emailed invitation
 ---
 
-A team runs from the account portal at [account.tablepro.app](https://account.tablepro.app), and each member signs in to TablePro with an account of their own. A member holding a seat gets Team Catalog and Team Library on their devices, along with everything in Starter.
+Joining a team happens in the browser, from an emailed invitation. The app's part is that you are signed in to the account that accepted it. Members, seats, roles and billing all live in your account at [account.tablepro.app](https://account.tablepro.app).
 
-## Seats
-
-A Team plan is sold per seat, 5 at least, and the team's seats are the sum of the seats on its licenses. A member holds a seat or does not, and only a seat brings the paid features. One seat covers one person on up to 3 Macs. The limit is per account, not per plan, so a seat and a Starter plan on the same account share those 3; see [Devices](/features/licensing#devices).
+## Roles and seats
 
 | Role | Can |
 |------|-----|
-| Owner | Everything an admin can, plus billing, transferring the team and deleting it. There is exactly one, and the owner needs no seat |
-| Admin | Members, roles and seats, invitations, Team Library publishing, API tokens and the audit log. Nothing that touches the owner |
-| Member | Uses the team's features with a seat. Sees the team, its plan, its seat counts, and their own role and seat |
+| Owner | Everything an admin can, plus billing, transferring ownership and deleting the team. Exactly one per team, and never removed |
+| Admin | Change members' roles and seats, invite and remove members, publish to the team library, manage API tokens |
+| Member | Use the team's features and library, and leave the team |
 
-## Manage your team on the web
+A seat turns the team's paid features on for one person, on up to 3 of their devices; see [Devices](/features/licensing#devices). Someone in the team without a seat keeps a Free plan unless they have one of their own. The owner does not need a seat.
 
-Sign in at [account.tablepro.app](https://account.tablepro.app) and open the team. Owners and admins invite people by email with a role and, if they choose, a seat, which the invitation reserves until it is accepted or revoked. They change roles and seats and remove members on the same page. The owner changes the number of seats in **Billing**.
+## Manage your team
 
-In the app, **Teams** in **Settings > Account** lists each team you belong to with your role and **Seat** or **No seat**. **Manage…** opens that team in the portal.
+Sign in at [account.tablepro.app](https://account.tablepro.app) and open the team. **Members** lists who is in it, their role and seat, and the seats taken, such as `3 of 5 seats taken`. Owners and admins work from there:
 
-Removing a member, or their seat, takes the team's features off their devices at the next refresh, within a day while they are online. A device that stays offline keeps them until its signed copy expires, 14 days at most.
+- **Invite member…** sends an invitation to an email address, with a role and, while a seat is free, **Include a seat**. The seat stays reserved until the invitation is accepted or revoked.
+- Pending invitations have **Resend invitation**, which sends a new link, and **Revoke invitation…**, which frees a reserved seat.
+- Each member's menu has **Change role**, **Give seat** or **Take seat…**, and **Remove member…**.
+- The owner adds seats in **Billing**.
+
+A member whose seat is taken, or who is removed, loses the team's features at their app's next check, within a day while online. On a device that stays offline, they last until its plan file expires, at most 14 days.
+
+In TablePro, **Settings > Account > Teams** lists your teams, with your role, **Seat assigned** or **No seat**, and **Manage…**, which opens the team in your account.
 
 ## Join a team
 
 <Steps>
-  <Step title="Accept the invitation">
-    Open the link in the invitation email. It works for 7 days. Sign in, or sign up with the invited address, and click **Accept invitation**. Any TablePro account can accept, and the page says whether the invitation comes with a seat.
+  <Step title="Open the invitation">
+    The link in the email opens the invitation in your browser. It works for 7 days, and the page says your role and whether a seat comes with it.
   </Step>
-  <Step title="Sign in on the Mac">
-    Sign in to TablePro with the same account. See [Sign in](/features/licensing#sign-in).
+  <Step title="Accept it">
+    Sign in, then click **Accept invitation**. Any TablePro account can accept, not only the address it was sent to. Signing in with that address creates an account if you have none.
   </Step>
-  <Step title="Refresh">
-    On a Mac that was signed in already, click **Refresh** in **Settings > Account**. A team joined in the portal reaches the Mac at its next refresh otherwise.
+  <Step title="Sign in on your Mac">
+    Sign in to the same account under **Settings > Account**. The team's features turn on at the next check; **Refresh** under **Plan** checks now.
   </Step>
 </Steps>
 
-<Check>**Teams** lists the team with **Seat**, and **Features** marks Team Catalog and Team Library **Included**.</Check>
+<Check>
+**Teams** in **Settings > Account** lists the team with **Seat**, and **Features** marks the team's features **Included**.
+</Check>
 
-Versions before TablePro accounts can no longer join a team with an invite code. Update TablePro, then accept the invitation from its email.
+<Frame caption="An invitation that includes a seat">
+  <img className="block dark:hidden" src="/images/team-invitation.png" alt="Invitation page naming the team, the invited address, the Member role and a reserved seat, above Accept invitation" />
+  <img className="hidden dark:block" src="/images/team-invitation-dark.png" alt="Invitation page naming the team, the invited address, the Member role and a reserved seat, above Accept invitation" />
+</Frame>
+
+An expired invitation says so; ask an owner or admin to resend it. When every seat is taken and the invitation's seat was taken back, the page says that too, and accepting works once a seat is free. Leave a team from its **Settings** page in your account. The owner cannot leave, only transfer ownership or delete the team.
 
 ## Share connections with your team
 
-Two routes, and the choice is whether your team already shares a folder. If it does, publish connection definitions into it with [Team Catalog](/features/connection-sharing#team-catalog). If it does not, use Team Library, which keeps the shared set on TablePro's server instead.
+Two routes, and the choice is whether your team already shares a folder. If it does, publish connection definitions into it with [Team Catalog](/features/connection-sharing#team-catalog). If it does not, use Team Library, which keeps the shared set in your account instead.
 
 ### Team Library
 
-Every member with a seat reads the library. Owners and admins publish to it from the app, and delete any item under **Library** in the portal, which lists who last changed each one.
+Owners and admins publish: right-click a connection and choose **Share > Publish to Team Library…**, or publish saved queries from the Favorites sidebar with **Publish Saved Queries to Team…**. Only the connection definition and the query text are sent, never passwords, tunnel commands or startup SQL.
 
-To publish connections, right-click one, choose **Share > Publish to Team Library…**, and click **Publish**. Someone who publishes to several teams picks one from a submenu. Publishing again updates the team's copy.
+Everyone with a seat gets the connections in their list the way a Linked Folder delivers them, and shared queries in the Favorites sidebar under **Team Library**, labeled with whoever published each one. The app pulls the library at launch, every 15 minutes and after each publish. A pulled connection arrives without its startup SQL, because it lands with no confirmation step and nothing that would run by itself travels with it.
 
-To publish saved queries, right-click empty space in the Favorites sidebar and choose **Publish Saved Queries to Team…**. Your saved queries go up with their folders, and the ones you published from this Mac and deleted since leave the library. What other people published stays.
+Shared sign-in settings need [approval on each Mac](/connections/connection-form#sign-ins-from-this-mac) before using local cloud credentials or Kerberos tickets.
 
-Only the connection definition and the query text travel, never passwords, key passphrases or TOTP secrets. The server refuses a publish holding an item over 256 KiB or a field named like a credential, and stores none of it.
-
-TablePro pulls the library at launch, every 15 minutes and right after each publish, and sends only what changed. The **Team Library** header shows a spinner while it syncs and a warning icon after a sync that failed; hover the header for when it last updated. A publish the server cannot take right now says **Not published yet**, stays on the Mac, and goes out once the server answers.
-
-Teammates find the connections in a **Team Library** section of the welcome window, read only, without startup SQL or a tunnel command. Queries land under **Team Library** in the Favorites sidebar, each labeled with who last changed it, or with its folder when the library names no one.
-
-### Library conflicts
-
-A publish that changes an item someone else changed since your last sync leaves a conflict instead. The header shows **1 Conflict**; click it, or choose **Resolve Team Library Conflicts…** from a right-click. The sheet sets **Your Version** beside **Team's Version**, which names who changed it:
-
-- **Keep Mine** replaces the team's version with yours.
-- **Keep Theirs** leaves the team's version, and holds until your copy on this Mac changes again.
-- **Decide Later** closes the sheet and keeps the conflict.
-
-When the team's plan ends, or your seat goes, Team Library connections and queries disappear from the Mac. The library stays on the server until the owner deletes the team.
-
-Versions before TablePro accounts pull the library at launch, at most once a week, and right after they publish. A publish from one of them replaces what that account published before, and skips any item changed since through a newer version or the portal.
+The team's **Library** page in your account lists what was published, and owners and admins delete items there.

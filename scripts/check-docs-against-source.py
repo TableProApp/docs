@@ -44,6 +44,8 @@ SHORTCUT_ALIASES = {
     "Toggle results": "toggleResults",
     "Find": "find",
     "Jump to column": "jumpToColumn",
+    "Export tables": "export",
+    "Export results": "exportResults",
 }
 
 RUNTIME_LEAVES = {

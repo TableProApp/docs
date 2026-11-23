@@ -49,7 +49,7 @@ Search matches partial words, so `cust` finds `customers`. Several words must al
 | AI and MCP | Queries run by an AI assistant or an MCP client |
 | AppleScript | Queries run by [a script](/developers/applescript) |
 | Shortcuts | Queries and inserts run by a [Shortcuts action](/integrations/shortcuts) |
-| Command Line | Queries run by [`tablepro query`](/integrations/terminal#run-a-query) |
+| Command Line | Queries from the [macOS command](/integrations/terminal#run-a-query) |
 
 **My Queries**, the default, is Editor and Explain. Add **Table Browsing** to see what the app sent while you clicked around a table, **Structure Changes** to review what altered a schema and when.
 
@@ -76,13 +76,13 @@ An entry belonging to another connection loads into a new tab in that connection
 
 ## Pausing
 
-The pause button stops recording on this Mac, from every source: row edits, structure changes, imports and AI clients included. The drawer says so until you resume. Pausing is local to the Mac you press it on and survives relaunch.
+The pause button stops recording on this Mac, from every source: row edits, structure changes, imports and AI clients included. Query tabs keep no [earlier versions](/features/sql-editor#earlier-versions) while it is paused. The drawer says so until you resume. Pausing is local to the Mac you press it on and survives relaunch.
 
 ## Clearing history
 
 The trash button deletes exactly the entries the drawer is listing. Anything the source, date, outcome or search filters are hiding stays, which at the default **My Queries** source spares table browsing, row edits, imports and AI queries. The confirmation names what it is about to delete. There is no undo.
 
-**Settings > Data > Query History > Clear History…** clears everything, for every connection.
+**Settings > Data > Query History > Clear History…** clears everything, for every connection, query tabs' earlier versions included.
 
 ## Storage and retention
 
@@ -94,9 +94,9 @@ Configure retention in **Settings > Data > Query History**:
 
 | Setting | Default | Options |
 |---------|---------|---------|
-| Maximum entries | 10,000 | 100 to 10,000, or Unlimited |
+| Remove old entries automatically | On | Enforces the entry count and the age limit. Turn it off and nothing is pruned. |
+| Maximum entries | 10,000 | 100 to 10,000, or No limit |
 | Keep entries for | 90 days | 7 days to 1 year, or Forever |
-| Auto cleanup | On | Enforces the entry count and the age limit. Turn it off and nothing is pruned. |
 
 Deleting a connection deletes its query history with it.
 

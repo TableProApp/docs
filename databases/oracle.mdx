@@ -27,7 +27,7 @@ A RAC SCAN listener, a shared server, or a load balancer in front of the databas
 | **Role** | Normal | SYSDBA or SYSOPER for an administrative logon. The account needs the matching privilege, and the session runs as `SYS` rather than as the user you signed in with |
 | **Network Encryption** | Accepted | Matches `SQLNET.ENCRYPTION_CLIENT`, and sets the data-integrity checksum to the same level because the driver negotiates both in one exchange. Accepted offers AES without insisting, which is what Oracle's own clients send. Rejected skips the negotiation, Requested prefers it, Required refuses to connect without it |
 
-There is no Database field. Each user is a schema, and `Cmd+K` or the **Schema** toolbar button switches the active one. Oracle's own schemas, such as `SYS`, `SYSTEM` and `XDB`, sit at the end of the schema switcher, and the sidebar lists them only with [**Show system databases and schemas**](/customization/general-settings#tabs-and-sidebar) on, or when one is the schema in use. A tab binds to a schema rather than a database, so nothing reconnects when you switch.
+There is no Database field. Each user is a schema, and `Cmd+K` or the **Schema** toolbar button switches the active one. Oracle's own schemas, such as `SYS`, `SYSTEM` and `XDB`, sit at the end of the schema switcher, and the sidebar lists them only with [**Show system databases and schemas**](/customization/sidebar-and-tabs#objects) on, or when one is the schema in use. A tab binds to a schema rather than a database, so nothing reconnects when you switch.
 
 <Frame caption="Oracle connection form">
   <img className="block dark:hidden" src="/images/oracle-connection-form.png" alt="Oracle connection form with Connection Type and Service Name fields" />
@@ -71,7 +71,7 @@ The database has to accept TLS without mutual TLS: set **Mutual TLS (mTLS) authe
 
 ## Editing and queries
 
-Table info carries columns, types, nullability, primary keys, indexes, foreign keys, and CREATE TABLE DDL. The structure editor writes `ALTER TABLE` with double-quoted identifiers for case-sensitive names: ADD, RENAME COLUMN, MODIFY, DROP, and CREATE INDEX.
+Table info carries columns, types, nullability, primary keys, indexes, foreign keys, and CREATE TABLE DDL. The DDL, and a SQL export, declare the table's primary key, unique and check constraints, so the foreign keys an export adds after the tables find the keys they reference. The structure editor writes `ALTER TABLE` with double-quoted identifiers for case-sensitive names: ADD, RENAME COLUMN, MODIFY, DROP, and CREATE INDEX.
 
 The editor runs SQL and PL/SQL, and grid paging is written as `OFFSET … ROWS FETCH NEXT … ROWS ONLY`. Import and export work as they do elsewhere, and a remote server reaches through an [SSH tunnel](/connections/ssh-tunneling).
 
@@ -134,7 +134,7 @@ NCHAR, NVARCHAR2 and NCLOB read the same under either national character set Ora
 | BINARY_FLOAT, BINARY_DOUBLE | Native Swift Float/Double |
 | DATE | `YYYY-MM-DD HH:MM:SS` |
 | TIMESTAMP(p) | `YYYY-MM-DD HH:MM:SS` plus exactly p fractional digits |
-| TIMESTAMP WITH TIME ZONE | As TIMESTAMP, followed by the value's own offset, such as `+02:00` |
+| TIMESTAMP WITH TIME ZONE | As TIMESTAMP, followed by the value's own offset, such as `+02:00`, or by its region name, such as `Europe/Paris` |
 | TIMESTAMP WITH LOCAL TIME ZONE | As TIMESTAMP, in the session time zone, followed by that zone's offset |
 | INTERVAL DAY TO SECOND | `D HH:MM:SS` plus fractional seconds when non-zero (up to 9 digits, trailing zeros trimmed) |
 | INTERVAL YEAR TO MONTH | `Y-MM` |
@@ -145,9 +145,13 @@ NCHAR, NVARCHAR2 and NCLOB read the same under either national character set Ora
 | REF | `<unsupported: ref>` placeholder |
 | Object types, such as XMLTYPE and SDO_GEOMETRY | `<unsupported: object>` placeholder; a NULL object shows as NULL |
 
-To read a geometry as text, select `SDO_UTIL.TO_WKTGEOMETRY(column)` instead of the column. A `TIMESTAMP WITH TIME ZONE` stored with a region name such as `Europe/Paris` shows `<unsupported: time zone region>`; select `TO_CHAR(column, 'YYYY-MM-DD HH24:MI:SS.FF TZR')` to read it.
+To read a geometry as text, select `SDO_UTIL.TO_WKTGEOMETRY(column)` instead of the column.
+
+A `TIMESTAMP WITH TIME ZONE` stored with a region name shows the wall clock in that region, then the name: `2026-01-01 00:00:00.000000 Europe/Paris`. The names come from the server's `V$TIMEZONE_NAMES`, read once per connection. When the account cannot read that view, or macOS does not know the region's name, the value shows in UTC with `+00:00`, the same instant without its region. Grant `SELECT` on `V_$TIMEZONE_NAMES` to see the names.
 
 Grid edits, deletes and filters spell dates and timestamps in a form that does not depend on the session's `NLS_DATE_FORMAT`, so they work whatever it is set to. A table without a primary key matches the row by every column, and an edit is refused when that match would need a LOB, LONG, BFILE, XMLTYPE, JSON, VECTOR or object value, since Oracle cannot compare those.
+
+Import and **Copy To** write each value the way a grid edit writes it for the target column's type, so `00123` stays `00123` in a `VARCHAR2`, a date goes through a fixed format, and text for an `NVARCHAR2` keeps characters the database character set lacks. A query parameter follows the type picked for it, as in [Query parameters](/features/query-parameters).
 
 Anything else renders as `<unsupported: type>`. Report those through [GitHub Issues](https://github.com/TableProApp/TablePro/issues).
 
@@ -157,7 +161,7 @@ Anything else renders as `<unsupported: type>`. Report those through [GitHub Iss
 
 ## SSL/TLS
 
-New connections default to **Disabled**, and there is no opportunistic upgrade: **Preferred** connects in plain TCP, which is why the Network tab flags it in red. **Required** is TCPS. **Verify CA** checks the server's certificate against the file in **CA Certificate** and skips the hostname, so it needs a CA certificate: without one, the connection is refused. **Verify Identity** checks the hostname as well. See [SSL/TLS](/connections/ssl).
+New connections default to **Disabled**, and there is no opportunistic upgrade: **Preferred** connects in plain TCP, which is why the **SSL/TLS** pane flags it in red. **Required** is TCPS. **Verify CA** checks the server's certificate against the file in **CA Certificate** and skips the hostname, so it needs a CA certificate: without one, the connection is refused. **Verify Identity** checks the hostname as well. See [SSL/TLS](/connections/ssl).
 
 ## On iPhone and iPad
 
@@ -177,7 +181,7 @@ The SSL mode offers no certificate rows there, so **Verify Identity** checks the
 
 ### ORA-28002: the password will expire within … days
 
-The login worked, and the password is in its grace period. Oracle AI Database 26ai sends `ORA-28098: Profile limits PASSWORD_LIFE_TIME and PASSWORD_GRACE_TIME are not unlimited, password will expire within … days.` instead. The message stays in a yellow banner above the editor until you dismiss it, and comes back on every connect. Change the password with `ALTER USER name IDENTIFIED BY "new password"`, or ask the DBA to, before the grace period ends: after that the login fails with ORA-28001.
+The login worked, and the password is in its grace period. Oracle AI Database 26ai sends `ORA-28098: Profile limits PASSWORD_LIFE_TIME and PASSWORD_GRACE_TIME are not unlimited, password will expire within … days.` instead. The message stays in a bar above the editor until you dismiss it, and comes back on every connect. Change the password with `ALTER USER name IDENTIFIED BY "new password"`, or ask the DBA to, before the grace period ends: after that the login fails with ORA-28001.
 
 ### PROCEDURE … was created with compilation errors
 
@@ -201,7 +205,7 @@ The server is 10g or earlier. Nothing on this side helps; the database has to be
 
 ### Login Handshake Timed Out
 
-TCP connected but the login never finished, so the attempt stops when the connection's **Connect timeout** expires. An empty field under **Options** uses 30 seconds. The dialog names the step the server stopped answering at. If that step is network encryption, set **Network Encryption** to Rejected and connect again. Otherwise confirm the host and port reach the listener, and look for a firewall, VPN, or proxy that stalls traffic once the TCP handshake is done.
+TCP connected but the login never finished, so the attempt stops when the connection's **Connect Timeout** expires. An empty field on the **Advanced** pane uses 30 seconds. The dialog names the step the server stopped answering at. If that step is network encryption, set **Network Encryption** to Rejected and connect again. Otherwise confirm the host and port reach the listener, and look for a firewall, VPN, or proxy that stalls traffic once the TCP handshake is done.
 
 ### Connection Dropped During Handshake
 

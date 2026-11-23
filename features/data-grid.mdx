@@ -3,9 +3,9 @@ title: Data Grid
 description: Sort, size, hide, highlight, chart, map and copy the rows a table or a query puts in the grid
 ---
 
-Most of the grid's controls sit in the status bar beneath it. The view switcher is at the leading edge, followed by the row count and, while cells are selected, their [sum](#selection-summary). The columns, highlight, filter and page buttons sit at the trailing edge.
+Most of the grid's controls sit in the status bar beneath it. The view switcher is at the leading edge, followed by the row count and, while cells are selected, their [sum](#selection-summary). The columns, highlight, [auto refresh](#auto-refresh), filter and page buttons sit at the trailing edge.
 
-A narrow window trims that bar rather than cutting it off. The Columns and Filters buttons drop their titles first, and **First** and **Last** leave with them; the Query menu still carries all four page commands. Narrower still, the view switcher becomes a pull-down naming the current mode and rows-per-page moves into the page indicator's menu. Everything else keeps its place.
+A narrow window trims that bar rather than cutting it off. The Columns, Auto Refresh and Filters buttons drop their titles first, and **First** and **Last** leave with them; the Query menu still carries all four page commands. Narrower still, the view switcher becomes a pull-down naming the current mode and rows-per-page moves into the page indicator's menu. Everything else keeps its place.
 
 <Frame caption="Data grid with query results">
   <img className="block dark:hidden" src="/images/data-grid.png" alt="Data grid" />
@@ -22,10 +22,10 @@ A Cassandra, ScyllaDB or Bigtable table has no header sort, and a query result t
 
 **Sort direction** in [Settings > Data](/customization/data-settings) decides which way that first click goes. It is Ascending out of the box; set it to Descending to open on the newest rows and reach them in one click.
 
-To sort on open, set **Default row sort** to **Primary key** or **First column**; out of the box the order is the server's. A sort the setting applies carries the same arrow as one you clicked, and clicking that header reverses it.
+A table opens sorted by its primary key, so each page continues where the last one ended. A table with no primary key opens in the server's order. Set **Default sort** to **First column**, or to **No sorting (engine order)** to keep the server's order everywhere. A sort the setting applies carries the same arrow as one you clicked, and clicking that header reverses it.
 
 <Warning>
-Sorting on a `BLOB`, `JSON`, or spatial column the server cannot order on fails the query. Sort on another column, or set **Default row sort** back to the engine's order.
+Sorting on a `BLOB`, `JSON`, or spatial column the server cannot order on fails the query. Sort on another column, or set **Default sort** to **No sorting (engine order)**.
 </Warning>
 
 ## Filtering
@@ -69,11 +69,22 @@ Rules belong to the table, scoped to the connection, database, and schema, and f
 
 Drag a border to resize a column, or double-click it to fit the content; **Size to Fit** and **Size All Columns to Fit** on the header menu do the same. A fitted column stops at half the visible grid width.
 
-Point at a header for the column's type and, with **Show object comments** on in [General settings](/customization/general-settings), its comment.
+Point at a header for the column's type and, with **Show comments** on in [Sidebar & Tabs settings](/customization/sidebar-and-tabs#objects), its comment.
 
 Hide columns from the columns button in the status bar or from the header menu. A hidden column is not fetched, so hiding a large one makes the table load faster; the primary key and the sorted column are fetched either way. On a schemaless store the popover lists every field the grid can draw, including ones that turn up only in later documents.
 
 Widths, order, hidden and frozen columns are remembered per table, scoped to the connection, database, and schema; **Reset Columns** in the popover puts them back. Right-click a header and choose **Display As** to read a column's stored values in a different form; [Cell and Row Viewers](/features/json-viewer) lists the formats.
+
+### Wrap text
+
+Choose **View > Wrap Text**, or **Wrap Text** on the header menu, to show long values on several lines. A row grows to fit its tallest cell, up to 10 lines; a value that needs more ends in an ellipsis. A line break stored in the value starts a new line. With wrap off, every row is one line and a line break shows as a space.
+
+<Frame caption="Rows grow to fit wrapped values">
+  <img className="block dark:hidden" src="/images/data-grid-wrap-text.png" alt="Notes table with Wrap Text on: long body values run over several lines and short rows stay one line" />
+  <img className="hidden dark:block" src="/images/data-grid-wrap-text-dark.png" alt="Notes table with Wrap Text on: long body values run over several lines and short rows stay one line" />
+</Frame>
+
+Wrap applies to the whole grid of one tab, in tables, views and query results, and is saved with the tab. **Wrap text in cells** in [data settings](/customization/data-settings) sets it for new tabs.
 
 ### Freeze columns
 
@@ -83,7 +94,7 @@ Frozen columns cover at most two thirds of the grid's width. The menu item is di
 
 ### Large binary values
 
-On MySQL and MariaDB, a binary value larger than the connection's limit stays on the server until you need it, in any table with a primary key. The cell shows the value's size in italics, such as *5.2 MB*. Set the limit under **Options > Load binary values up to** in the [connection form](/connections/connection-form#options); it is 64 KB until you change it.
+On MySQL and MariaDB, a binary value larger than the connection's limit stays on the server until you need it, in any table with a primary key. The cell shows the value's size in italics, such as *5.2 MB*. Set the limit with **Binary Value Limit**, under **Table Data** on the connection editor's [Advanced](/connections/connection-form#advanced) pane; it is 64 KB until you change it.
 
 The value is read by its primary key when you open the cell, copy it, show its row in the inspector with one row selected, duplicate the row, list the column's values with **Filter Values…**, or export the rows with **Export Results…**. **File > Export** reads every value as before. Set NULL, paste and **Fill Column** read the value first, so undo puts it back. A table without a primary key, a sorted column and a column under a value filter load every value with the page.
 
@@ -126,7 +137,7 @@ Step back with **View > Back** (`Ctrl+Cmd+[`) and **View > Forward** (`Ctrl+Cmd+
 
 ## Inspector
 
-Press `Cmd+Option+I`, or click the button at the trailing end of the toolbar, to open the inspector beside the grid. The table and which row of how many is selected sit under the [pane's header](/features/connection-window#the-trailing-pane), and **Fields** and **JSON** are the two renderings of that row, picked from the header's ellipsis menu. [Cell and Row Viewers](/features/json-viewer) covers both. Turn on **Auto-show inspector on row select** in [Settings > Data](/customization/data-settings) to open it whenever a row is picked, in a query result as well as a table.
+Press `Cmd+Option+I`, or click the button at the trailing end of the toolbar, to open the inspector beside the grid. The table and which row of how many is selected sit under the [pane's header](/features/connection-window#the-trailing-pane), and **Fields** and **JSON** are the two renderings of that row, picked from the header's ellipsis menu. [Cell and Row Viewers](/features/json-viewer) covers both. Turn on **Show inspector when a row is selected** in [Settings > Data](/customization/data-settings) to open it whenever a row is picked, in a query result as well as a table.
 
 Short values sit on one line, label leading and value trailing. Long text, JSON, PHP, binary and images take the full width. Long text and JSON carry a resize handle; PHP, binary and images draw at a fixed height. `Tab` and `Shift+Tab` move between fields; the menu at the trailing edge of each field carries the same values as [Set Value](/features/change-tracking#editing-a-cell): **Set NULL**, **Set DEFAULT**, **Set EMPTY**, **Generate UUID** and **Generate UUIDv7** where the column takes them, and **SQL Functions** with the date and time functions that fit it. `Ctrl+Option+N` and `Ctrl+Option+D` set NULL and DEFAULT. With several rows selected, Generate UUID gives each row its own value. Search filters the list by column name or stored value, and the pencil button narrows it to fields already edited.
 
@@ -174,6 +185,31 @@ On a table tab, sorting, filtering, and changing page or page size start at the 
 
 Saving edits, importing rows, **Insert Document…**, a structure change and **Refresh Materialized View…** reload every tab showing the table they changed, in every window of the connection. The tab in front reloads at once and keeps its place. A tab behind it reloads when you switch to it. A tab with a cell open or unsaved edits is not interrupted. It reloads as soon as the cell is closed and its edits are saved, undone or discarded. Tabs on other tables stay as they are. A SQL file import reaches every table tab of the connection the same way. A statement run from the SQL editor reloads nothing, so press `Cmd+R` on the tabs it touched.
 
+When another session changes a table's columns or primary key after the schema loaded, the first page of that table can open with the old structure: a new column missing while some columns are hidden, or rows sorted by the old key. A bar over the grid then names the table. Click **Reload** to read the page again with the current columns and the sort they give, or close the bar to keep the rows as they are. Nothing reloads by itself. When the old structure makes the page fail, the bar shows under the error.
+
+<Frame caption="The primary key moved from id to code after the schema loaded">
+  <img className="block dark:hidden" src="/images/outdated-page-notice.png" alt="A bar above the shot_orders grid says its structure changed and offers Reload" />
+  <img className="hidden dark:block" src="/images/outdated-page-notice-dark.png" alt="A bar above the shot_orders grid says its structure changed and offers Reload" />
+</Frame>
+
+### Auto Refresh
+
+To watch a table change, click the clock button in the status bar, or open **Database > Auto Refresh**, and pick **Every 5 Seconds**, **Every 10 Seconds**, **Every 30 Seconds**, **Every Minute** or **Every 5 Minutes**. **Off** stops it. Each refresh reads the rows the way `Cmd+R` does and keeps your place, but leaves the row count as it was and adds nothing to [query history](/features/query-history). `Cmd+R` recounts and starts the wait over.
+
+Each table tab keeps its own interval, and only the tab in front refreshes. The interval is not saved: opening another table in the tab, closing the tab or quitting turns it off. Query tabs have no Auto Refresh, and the button shows only in **Data** view.
+
+A refresh never asks or interrupts. It waits for the next interval while:
+
+- the table has unsaved changes, or a cell is being edited
+- rows are loading
+- the connection is down
+- a transaction is open on the tab's database
+- rows are selected in a table without a primary key
+- the tab is not the one in front, or its window is not on screen
+- the tab is in another view mode, you are scrolling or dragging a selection, or a value viewer or value filter is open
+
+For the first five, the clock button's tooltip names the reason. Another app in front does not stop it while the window stays on screen. A refresh that fails turns Auto Refresh off and leaves the error in the tab.
+
 ## Copying
 
 Click a cell to select its row and put the cell cursor on that cell. Drag or `Shift`-click for a range of cells, and `Cmd`-click to add or remove a cell. Click a row number to select a whole row; drag down the row numbers, or `Shift`-click or `Cmd`-click them, for several. `Cmd+A` selects every row and leaves no cell cursor. `Escape` shrinks a range of cells to the cursor's row, and a second `Escape` clears the selection.
@@ -192,7 +228,9 @@ After a plain click on a cell, `Cmd+C` copies the value of the cell under the cu
 
 **Copy rows as** offers TSV, TSV with Headers, JSON, CSV, CSV with Headers and Markdown. Whatever the format, `Cmd+V` in a table pastes the copied rows, not the text. To copy one value out of a selection, choose **Edit > Copy Special > Copy Cell Value** for the cell the cursor is on, or **Copy Cell Value** in the right-click menu for the cell under the pointer.
 
-Right-click and open **Copy as** for CSV, CSV with Headers, Markdown, and **IN Clause**, which writes `('a', 'b', 'c')` for a `WHERE col IN (…)`. **INSERT Statement(s)** and **UPDATE Statement(s)** appear when the result comes from a single table whose structure has loaded, and never on MongoDB or Redis. UPDATE is also missing on a table without a primary key that has a column no match can compare, such as a SQL Server `sql_variant`. **Copy Column Values** on the header menu copies one column, one value per line. Every format is also in **Edit > Copy Special**, where IN Clause takes the one column a cell selection covers, or the cursor's column. Those items have no shortcut until you record one in **Settings > Keyboard**.
+A binary value copies whole as `0x` and its hex digits, however much the cell shows, and pasting that into a binary column writes the bytes back. A pasted value that starts with `0x` but is not hex, such as one cut short with `…`, leaves the cell as it was, and pasted rows holding one are not added.
+
+Right-click and open **Copy as** for CSV, CSV with Headers, Markdown, and **IN Clause**, which writes `('a', 'b', 'c')` for a `WHERE col IN (…)`, booleans as `1` and `0` on an engine without `TRUE` and `FALSE` such as SQL Server, and binary values as the engine's binary literal. **INSERT Statement(s)** and **UPDATE Statement(s)** appear when the result comes from a single table whose structure has loaded, and never on MongoDB or Redis. UPDATE is also missing on a table without a primary key that has a column no match can compare, such as a SQL Server `sql_variant`. **Copy Column Values** on the header menu copies one column, one value per line. Every format is also in **Edit > Copy Special**, where IN Clause takes the one column a cell selection covers, or the cursor's column. Those items have no shortcut until you record one in **Settings > Keyboard**.
 
 Every copy follows the grid as shown: hidden columns are left out, columns keep their current order, and over a cell selection only those columns go out. INSERT and UPDATE write what a save of the same row would. They leave out the columns the server fills in, such as identity and computed columns. INSERT leaves a cell set to `DEFAULT` to the server, and UPDATE assigns it `DEFAULT`. The table name carries its schema. UPDATE finds the row as it is stored, not as you have edited it: by every column of the primary key, whether or not those cells are selected, or on a table without one by every column, hidden ones included, which also changes any identical copy of the row. A row you added and have not saved gets no UPDATE.
 
@@ -214,7 +252,7 @@ Switch between **Data**, **Structure**, **JSON**, **Chart**, **Map**, and **Outp
 
 ### Chart mode
 
-<Info>Needs a [Starter plan](/features/licensing).</Info>
+<Info>Needs a [Pro plan](/features/licensing).</Info>
 
 Pick a bar, line, area, or scatter chart, then a numeric Y column. X takes row numbers, another numeric column, a date or timestamp column, or a categorical column; an optional text, boolean, enum, or set column splits the result into series. Date and timestamp columns plot on a real time axis, whatever order the rows arrive in. Hover the plot for exact values.
 
@@ -246,7 +284,7 @@ SQL Server, Oracle, SpatiaLite, Teradata, Trino, Presto, Spanner, Cassandra and 
 
 Double-click a cell, or press `Return` on it, to edit it in place. A value that holds a line break, or runs past 256 characters, opens in a larger editor anchored to the cell instead: `Return` saves, `Option+Enter` starts a new line and `Escape` cancels. `Option+Enter` while editing in the cell moves the text into that editor. In a grid you cannot edit, the same gestures open the value in a viewer. Nothing reaches the database until you save, and [Change Tracking](/features/change-tracking) covers the type-specific editors, the row operations, and what a Save runs.
 
-With the grid focused, `Cmd+=` and `Cmd+-` make its text bigger or smaller. They change the Data Grid Font size in [data settings](/customization/data-settings), so every grid, the inspector and the cell popovers follow, and the size is kept between launches.
+With the grid focused, `Cmd+=` and `Cmd+-` make its text bigger or smaller. They change **Font size** in [data settings](/customization/data-settings#grid), so every grid, the inspector and the cell popovers follow, and the size is kept between launches.
 
 NULL renders as styled `NULL` text. That text, the date format, row height, row numbers, and alternate row backgrounds are [data settings](/customization/data-settings). Every shortcut the grid answers to, and how to rebind it, is in [Keyboard Shortcuts](/features/keyboard-shortcuts).
 

@@ -1,6 +1,6 @@
 ---
 title: iPhone and iPad
-description: Browse tables, run queries, and edit rows on twelve database engines from a synced connection list
+description: Browse tables, run queries, and edit rows on thirteen database engines from a synced connection list
 ---
 
 You need iOS 18 or later. Builds ship on their own schedule, so a feature in a Mac release note may not be on your phone yet. Your version and build are under **Settings > About**. Connections and saved queries from a Mac come over iCloud; the rest of your Mac setup stays on the Mac.
@@ -17,18 +17,18 @@ A welcome sheet lists what the app does. **Continue** leads to at most two quest
 | Question | Shown when | If you swipe the sheet away |
 | --- | --- | --- |
 | **Sync with iCloud** | The device is signed in to iCloud | Sync stays off |
-| **Share Usage Data?** | Always | Nothing is sent |
+| **Share Usage Data?** | Until you answer it | Nothing is sent |
 
 Both answers can change later, under **Settings > iCloud** and **Settings > Privacy**. After an update, a **What's New** sheet lists what changed, once per version.
 
 <Frame caption="Swipe the sheet down to skip both questions">
-  <img className="block dark:hidden" src="/images/ios-first-run.png" alt="Welcome to TablePro sheet with four feature rows, beside the Share Usage Data page listing what the daily report contains" />
-  <img className="hidden dark:block" src="/images/ios-first-run-dark.png" alt="Welcome to TablePro sheet with four feature rows, beside the Share Usage Data page listing what the daily report contains" />
+  <img className="block dark:hidden" src="/images/ios-first-run.png" alt="Welcome to TablePro sheet with four feature rows and a Continue button" />
+  <img className="hidden dark:block" src="/images/ios-first-run-dark.png" alt="Welcome to TablePro sheet with four feature rows and a Continue button" />
 </Frame>
 
 ## Supported databases
 
-Every driver is compiled in, so there is no plugin system and nothing to install. The type picker offers these twelve:
+Every driver is compiled in, so there is no plugin system and nothing to install. The type picker offers these thirteen:
 
 | Type | Notes |
 | --- | --- |
@@ -39,6 +39,7 @@ Every driver is compiled in, so there is no plugin system and nothing to install
 | **SQL Server** | TDS, including Microsoft Entra ID sign-in on a connection synced from the Mac |
 | **Oracle** | Service name or SID |
 | **ClickHouse** | Port 8123 by default, the HTTP interface |
+| **Cloudflare D1** | No host or port: an **Account ID** and an **API Token**, then pick the database from the account |
 | **MongoDB** | Port 27017 by default. **Hosts** takes every server of a replica set |
 | **Redis** | Port 6379 by default |
 | **SQLite** | Copies the file you pick into the app |
@@ -78,7 +79,7 @@ A connection, group or tag form with unsaved changes stays open when swiped down
 
 ## The sample database
 
-**Open Sample Database** sits on the empty list and in the **More** menu. It opens Chinook, a SQLite database of a music store, at its **Track** table, with no server to set up. The sample stays on this device: it never syncs, exports or hands off to another device. To throw away your edits, touch and hold **Chinook (Sample)** and choose **Reset Database**.
+**Open Sample Database** sits on the empty list and in the **More** menu. It opens Chinook, a SQLite database of a music store, at its **Track** table, with no server to set up. The sample stays on this device: it never syncs, goes into a `.tablepro` file or hands off to another device. To throw away your edits, touch and hold **Chinook (Sample)** and choose **Reset Database**.
 
 ## What syncs over
 
@@ -93,7 +94,7 @@ Four things a connection depends on are per device and never sync:
 | A jump host's key file | The hop under **Jump Hosts** reads **No key on this device** | Open the hop and pick or paste its key, or turn on **Same Key as SSH Server** |
 | SQLite and DuckDB files | Opening one says the file isn't available on this device | Edit the connection and pick the file here |
 
-Passwords are a separate opt-in, off by default, at **Settings > iCloud > Sync Passwords**. They ride iCloud Keychain and only new saves are affected, so re-save a password on the Mac to push it across. A private key saved on this device, a jump host's included, follows the same setting: with **Sync Passwords** on, iCloud Keychain copies the key to your other iPhones and iPads, which use it, and to your Mac, which does not. Pull down on the connection list to sync now; a background refresh runs about every 30 minutes.
+Passwords, a Cloudflare D1 API token included, are a separate opt-in, off by default, at **Settings > iCloud > Sync Passwords**. They ride iCloud Keychain and only new saves are affected, so re-save a password on the Mac to push it across. A private key saved on this device, a jump host's included, follows the same setting: with **Sync Passwords** on, iCloud Keychain copies the key to your other iPhones and iPads, which use it, and to your Mac, which does not. A change made on another device arrives within seconds while the app is open. In the background, iOS decides when to wake the app for it, and turning off **Background App Refresh** for TablePro stops those wakes. Coming back to the app syncs too, at most once a minute. Pull down on the connection list to sync now; a background refresh runs about every 30 minutes.
 
 When a sync cannot finish, the connection list and **Settings > iCloud** name the reason, and changes made meanwhile wait on the device. For **iCloud Storage Is Full**, open the Settings app, tap your name, then tap **iCloud**, and free up space or add storage. The upload is tried again after 5 minutes, then twice as long each time up to an hour; pull down on the list to try at once. For **TablePro Data Was Removed from iCloud**, choose **Upload Again** to send everything on the device back up, or **Turn Off iCloud Sync** to keep it here only.
 
@@ -140,7 +141,16 @@ On iPhone Duo the system draws the toolbar and the tab bar down the side of the 
 
 ### Browsing
 
-A row in the list previews four of its fields, and eight where the display is wide enough. Search the table list by name. A PostgreSQL materialized view sits under **Views** and opens read only. Page a table at 50, 100, 200, or 500 rows, jump to a page number, sort by a column, search text columns, and stack filters with AND or OR.
+Rows show as cards or as a grid. Pick **Cards** or **Grid** in a table's **More** menu, or in the **More** menu of **Query** once it has results, and the choice applies everywhere. iPhone starts with cards and iPad with the grid. A card previews four of its fields, and eight where the display is wide enough. The grid shows one row per line under a fixed header, and the row's key column stays at the leading edge while the other columns scroll sideways. Touch and hold a row in either layout to share, copy, or delete it.
+
+<Frame caption="The key column stays put while the other columns scroll">
+  <img className="block dark:hidden" src="/images/ios-row-grid.png" alt="Track table as a grid on iPhone, scrolled sideways with TrackId held at the left, beside the More menu with Grid checked under Cards" />
+  <img className="hidden dark:block" src="/images/ios-row-grid-dark.png" alt="Track table as a grid on iPhone, scrolled sideways with TrackId held at the left, beside the More menu with Grid checked under Cards" />
+</Frame>
+
+To work on several rows, choose **Select Rows** in a table's **More** menu and tap the rows; the title counts them. **Select All** takes every row on the page. The bar at the bottom holds **Export**, **Copy** as JSON, CSV or, on a SQL engine, SQL `INSERT`, and **Delete**, which asks first and appears where a row can be deleted. **Done** leaves Select mode. Loading another page, or changing the sort, search or filters, clears the picks. The **More** menu of **Query** has **Select Rows** for a result too, with **Export** and **Copy**, and a new run ends it.
+
+Search the table list by name. A PostgreSQL materialized view sits under **Views** and opens read only. Page a table at 50, 100, 200, or 500 rows, jump to a page number, sort by a column, search text columns, and stack filters with AND or OR. On PostgreSQL, ClickHouse, SQL Server and Oracle, pages follow the primary key, after your sort when you pick one, so paging never repeats or skips a row. The search field types quotes and dashes as you key them, so `O'Brien` finds `O'Brien` with Smart Punctuation on.
 
 To follow a foreign key, tap the link under its value on a row, or long-press a row in the list and pick the key. A sheet previews the row it points at, titled with the table and, when it differs from the one open, the schema. A value in the preview that is itself a foreign key opens the next row in the same sheet, and **Back** returns one step. **Open Table** opens that table filtered to the key, and when one row matches it lands on that row, ready to edit. **Back** then returns to the filtered list and to the row you started from. While that row has an edit open, **Open Table** is dimmed.
 
@@ -178,7 +188,7 @@ A `json` or `jsonb` field opens indented on the row screen. Tap **View as JSON**
 
 To change a JSON field, tap **Edit**, then **Edit JSON**. Smart quotes, dashes and autocorrect stay off, and the value saves exactly as typed; **Format** reindents it only when tapped. While the text is not valid JSON, the line under it names the spot, as in `Line 18, column 1: Unexpected character.`, and **Done** stays dimmed. Tap that line to move the cursor there.
 
-A value over 4 KB arrives cut. Tap **Load full value** first; until then it is plain text with no **View as JSON**. Rows opened from **Query** results have no **Load full value**.
+A table value over 4 KB arrives cut. Tap **Load full value** first; until then it is plain text with no **View as JSON**. A **Query** result keeps long values whole while they fit in the memory the device has free; past that they arrive cut, the result says so, and the row marks them **Shown in part**. A value too long to show on the row opens in full with **View Full Value**.
 
 ### Querying
 
@@ -193,7 +203,9 @@ Suggestions fill the bar above the keyboard as you type, in front of the fixed k
 
 Touch and hold **Run** for **Run All Statements**, which sends every statement in the editor in order. It is in the **More** menu too. On a hardware keyboard, `Cmd+Enter` runs the statement or the selection, `Cmd+Shift+Enter` runs every statement, and `Cmd+.` stops. On iPad the menu bar's **Query** menu lists **Run Statement**, **Run All Statements**, **Stop** and **Clear Query**, and its **View** menu switches sections with `Cmd+1` through `Cmd+4`.
 
-Tap a query in **History** or **Saved Queries**, or a table under **SELECT * FROM ...** in the **More** menu, to add it to the editor. It fills an empty editor; otherwise it goes after your text as a statement of its own, with the cursor in it, and **Undo** takes it back. A statement that creates, alters or drops a table refreshes the table list in every window open on the connection.
+On MySQL, MariaDB, TiDB, OceanBase and SQL Server, a `USE` you run moves the table list and the database menu to that database, and a dropped connection reconnects there; while a window has unsaved changes on the connection, the `USE` is undone and a message says why. Until a run with a `USE` ends and the menu has followed it, **Run** waits in every window. **Tables** names the database the menu shows in every statement it sends, as `[database].[schema].[table]` on SQL Server, so a save, insert, delete, truncate or drop reaches the table on screen wherever the session sits. On PostgreSQL, a `SET search_path` you run, or a **Roll Back** that undoes one, moves the schema menu to the schema the session uses.
+
+Tap a query in **History** or **Saved Queries**, or a table under **SELECT * FROM ...** in the **More** menu, to add it to the editor. It fills an empty editor; otherwise it goes after your text as a statement of its own, with the cursor in it, and **Undo** takes it back. A statement that creates, alters or drops a table refreshes the table list in every window open on the connection. **History** keeps the last 200 runs on the device, fewer once their text passes 2 MB, and drops the oldest first, so a script it shows is always whole.
 
 <Frame caption="The band marks the statement Run sends">
   <img className="block dark:hidden" src="/images/ios-query-run.png" alt="Query section with the second of three SELECT statements banded and its result b 2, beside the Run menu holding Run Statement and Run All Statements" />
@@ -204,11 +216,11 @@ Safe Mode reads only the text that runs, so a `SELECT` before an `UPDATE` runs w
 
 On SQL Server, lines with no semicolon between them are one statement up to the next line holding only `GO`, so **Run** sends that batch. In a selection or **Run All Statements**, each `GO` line ends a batch, each batch goes to the server whole, and `GO 5` runs its batch five times.
 
-On MongoDB the editor takes the shell JavaScript the Mac takes. A statement ends where the program's top level does, so a loop or a function body runs whole, and Safe Mode counts a statement as a read only when every call in it reads and its arguments are plain data: see [MongoDB](/databases/mongodb#writing-queries). `use analytics` moves the table list and the database menu along with it once the statement returns, a stopped one included. While another window has unsaved changes on the connection, the `use` is undone instead. Browsing and row edits always run in the database the menu names.
+On MongoDB the editor takes the shell JavaScript the Mac takes. A statement ends where the program's top level does, so a loop or a function body runs whole, and Safe Mode counts a statement as a read only when every call in it reads and its arguments are plain data: see [MongoDB](/databases/mongodb#writing-queries). `use analytics` moves the table list and the database menu along with it once the statement returns, a stopped one included. While a window, this one included, has unsaved changes on the connection, the `use` is undone instead. Browsing and row edits always run in the database the menu names.
 
 On Redis a command ends at a semicolon or at a line break outside quotes, so each line is its own command and a quoted value may run across lines. A command with an unclosed quote fails without running. Quotes and escapes read as they do on the Mac: see [Redis CLI](/databases/redis#redis-cli).
 
-**Stop** cancels the running statement and starts no other. On MySQL and Redis the statement keeps running on the server until it finishes. Results copy or export as JSON, CSV, or SQL `INSERT`, which Redis and MongoDB leave out. A value over 4 KB, or a binary value, stops the copy or export with **Cannot Export**: leave that column out of the `SELECT`. Copying rows from a table reads values over 4 KB in full first.
+**Stop** cancels the running statement and starts no other. On MySQL and Redis the statement keeps running on the server until it finishes. **Share Results** and **Copy Results** in the **More** menu give the result as JSON, CSV, or SQL `INSERT` text; Redis and MongoDB leave out SQL `INSERT`. In JSON, a numeric column gives numbers and a boolean column `true` or `false`; every other typed column gives strings, so a `VARCHAR` holding `1e10` or `true` stays text. A column with no type, such as `count(*)` on SQLite, gives a number or a boolean when its value reads as one. A value shown in part, or a binary value, stops that text with **Cannot Export**: leave that column out of the `SELECT`, or write a file with **Export Results…**, which runs a single read statement again and takes every value whole, bytes included. A result too large for the memory left stops the text with a message to return fewer rows. Copying rows from a table reads values over 4 KB in full first.
 
 A running query appears in a Live Activity on the lock screen and Dynamic Island, with the elapsed time and the row count so far. **Settings > Live Activities > Hide Query** replaces the SQL text there with "Running query". The card clears when the query ends. Quitting the app mid-query leaves it behind, marked interrupted, until the next launch clears it.
 
@@ -255,21 +267,89 @@ The bar shows on PostgreSQL, Redshift, MySQL, MariaDB, TiDB, SQLite, Oracle, Duc
 
 A connection that drops with a transaction open reconnects and says the server rolled the transaction back. One that drops during **Commit** never got the answer: check which changes were saved before running them again. Switching database on PostgreSQL or Redshift, saving a connection edit that reconnects, or deleting the connection asks first while a transaction is open, since each rolls it back. On MySQL, MariaDB, TiDB, OceanBase and Oracle, **Truncate** and **Drop** commit an open transaction, and their confirmation says so. Two iPad windows on one connection follow each other's database switch.
 
+### When the connection drops
+
+Returning to the app, reopening a connection that is still open, or a tunnel that dies checks the session, and one that stopped answering is dialed again once. While that runs, **Reconnecting** and a spinner sit in the toolbar and the screen stays as it was. A database or schema switch shows **Switching to \<name\>…** in the same place; the content takes no taps until it lands, and the tabs and **Connections** stay usable.
+
+When the redial fails, **Connection lost** takes the screen with the error and **Reconnect**. A row with unsaved edits keeps its screen instead, and **Reconnect** sits in the toolbar. A connect that fails shows its error the same way, with **Edit Connection** beside **Reconnect** when the fix is in the form.
+
+The **Status** row in **Info** uses the same words: **Connected**, **Not Connected**, **Connecting**, **Reconnecting**, **Connection lost** or **Couldn't connect**.
+
+## Export and import
+
+The formats and their options are the Mac's, and [Import & Export](/features/import-export) explains each one. Export works on every engine and at every [safe mode](/features/safe-mode) level. Import writes: **Read-Only** hides it, **Confirm Writes** asks once before each file, and MongoDB and Redis import nothing. An import, rows or a SQL file, has its connection to itself: it starts only when nothing else runs there, and until it ends, a query, an edit, a page load or a database switch on that connection stops with "An import is running on this connection."
+
+### Export to a file
+
+| Start from | What the file holds |
+| --- | --- |
+| A table in **Tables**: touch and hold it, then **Export…** | That table |
+| An open table's **More > Export…** | **Whole Table**, or while a search, filter or sort is on, **Filtered and Sorted**: every row they match, not only the page |
+| **More > Export Database…** on the table list | **Database Objects**: everything in the database, or the schema, that the toolbar menu names |
+| **More > Export Results…** in **Query** | The result. A single statement that reads runs again and every row it returns goes in, unless the connection has run a write, `SET`, `USE`, temporary table or transaction statement; then, and for anything else, the rows shown go in |
+| **Export** in Select mode | The selected rows |
+
+Pick a **Format**. Every engine offers CSV, JSON, XLSX and Markdown, the SQL engines add SQL, and MongoDB adds MQL. CSV comes first; pick SQL for a file to restore and XLSX for a spreadsheet. The footer under **File Name** shows the extension the format adds.
+
+**Database Objects** lists the objects in a section per kind, in the order a restore needs them, all selected. **Select All** in a section's header selects or clears that kind. SQL writes every kind the Mac writes, routines, triggers, types, sequences, events and privileges included; the other formats take tables and views. With SQL or MQL, a selected row carries a menu of its options, **Structure**, **Drop** and **Data** or **Drop**, **Indexes** and **Data**, all on to start. With **Drop** on, the file drops each object before creating it, so turn it off for a file you might run against a database that holds data.
+
+Tap **Export**. **Cancel** stops the run and keeps no file. Once the file is written, the share sheet opens: save it to Files, AirDrop it, or hand it to another app. **Split every** gives several files, and the share sheet gets them all. After the share sheet closes, the export sheet shows how many rows went out, the file names and any warnings, with **Share Again**. **Done** deletes the app's copy, so keep the file through the share sheet first.
+
+A file export reads every value whole, bytes included. Selected rows are read again from their table when it has a primary key, on every engine but ClickHouse, MongoDB and Redis. Other selected rows, and a query result that is not run again, are written as shown: a value shown in part, or a binary value, stops the export with **Cannot Export**. While a transaction is open on the connection, selected rows go out as shown, and an export read on a connection of its own leaves out that transaction's changes and says so when it ends. At **Read-Only** the export opens no transaction, so **Read every table at one snapshot** does nothing.
+
+An open MongoDB collection exports whole: a search or filter does not narrow the file, and there is no **Filtered and Sorted**. On Redis, **Export Database…** lists each numbered database as one object, written as a row per key with its type, TTL, length and value. A string's value goes in whole; a hash, list, set, sorted set or stream gets the preview the Mac writes.
+
+### Import rows
+
+Rows from a CSV, TSV, JSON or XLSX file go into an existing table or a new one. An open table's **More > Import Rows…** starts on that table; **More > Import…** on the table list starts on none.
+
+<Steps>
+  <Step title="Pick the file">
+    Choose it in the file picker. The parsing options are the Mac's [CSV](/features/import-export#import-csv) and [XLSX](/features/import-export#import-xlsx) ones, and changing one reads the file again.
+  </Step>
+  <Step title="Choose the destination">
+    **Existing table** imports into the table under **Import into**, which lists tables and leaves views out. **New table** proposes a name from the file and a column per field.
+  </Step>
+  <Step title="Map the fields">
+    For an existing table, point each field at a column or at **Do not import**. **Match Columns** offers **Match by Name**, **Match by Position** and **Use Saved Mapping**. For a new table, tap a column to set **Import this field**, **Name**, **Type**, **Allows NULL**, **Primary Key** and **Default**, which is SQL written as it is: quote a text value.
+  </Step>
+  <Step title="Import">
+    Tap **Import**. The summary counts the rows inserted, updated, skipped and failed.
+  </Step>
+</Steps>
+
+**Import as** decides what happens to a row whose key the table already holds: **Insert**, the default, **Update**, **Insert or Update**, or **Insert, Skip Existing**, as [Update existing rows](/features/import-export#update-existing-rows) lays out. The last three match on the key picked under **Match on** and leave columns you did not map as they were. **Delete existing rows first** comes with **Insert** only, and always asks before it empties the table. Starting an import saves the mapping for that table on this device, and the next file into it starts from it.
+
+**On error** and **Wrap in transaction** behave as the Mac's [options](/features/import-export#options). **Stop** asks what to keep: **Stop and Rollback** or **Stop and Commit** while the import holds its own transaction, otherwise **Stop Import**, and the rows written so far stay. With a transaction already open on the connection, the rows go into it; commit or roll it back when the import ends.
+
+### Run a SQL file
+
+**More > Run SQL File…** on the table list runs a `.sql` or `.sql.gz` file on the connection, and a SQL file picked under **Import…** opens the same sheet. It counts the statements and reads the file as UTF-8, falling back to the encoding the file declares or matches; when the sheet says part of the file does not read, choose its **Encoding**. **On error**, **Wrap in transaction (BEGIN/COMMIT)** and **Disable foreign key checks** are the Mac's [options](/features/import-export#options), and on PostgreSQL the rows of a `COPY … FROM STDIN` block load through the copy protocol. Tap **Run**.
+
+### Files from other apps
+
+Share a `.csv`, `.tsv`, `.json`, `.xlsx` or `.sql` file from Files, Mail or another app and choose TablePro. With a connection open, the file goes to it, into **Import Rows** or **Run SQL File**. With none open, **Import Into** lists your connections, leaving out the ones marked **Opens on Mac only**, and the one you pick opens with the file. The **Connection** menu in the sheet moves the file to another connection and closes this one. A connection that cannot take the file says why in the sheet, such as "Import is not supported for MongoDB connections.", and keeps **Import** or **Run** dimmed.
+
+### Leaving the app
+
+An export or import keeps running when you switch away. From iOS 26 the system shows its progress, titled **Exporting** or **Importing** and the file name. Where iOS does not start that, and on iOS 18 to 25, the run has the background time iOS allows. When you stop it from the system's progress, iOS ends it, or that time runs out, an export stops and keeps no file. An import stops as **Stop and Rollback** would and says it stopped when TablePro moved to the background: rows in its own transaction roll back, and under **Skip and Continue**, or with **Wrap in transaction** off, the rows already written stay.
+
 ## What is missing
 
-- **Schema changes.** Truncating and dropping a table is the whole list; creating or altering tables, columns, indexes, triggers, and views is Mac only.
+- **Schema changes.** Truncating and dropping a table is the whole list; creating or altering tables, columns, indexes, triggers, and views is Mac only, and so is creating or dropping a Cloudflare D1 database.
 - **Changing Redis data.** Keys open read only; change them in **Query**.
 - **Whole MongoDB documents.** **Edit Document…**, **Insert Document…** and renaming or removing a field are Mac only; edit field by field here, or use **Query**.
 - **Socket connections.** A MySQL or MariaDB connection that uses a socket on the Mac opens there only. The connection list shows **Mac socket** and the path, marked **Opens on Mac only**, and a tap says why. Importing a `.tablepro` file marks such a row the same way. Its socket path syncs here and back intact.
+- **Some of export and import.** Parquet and Data Dictionary, a row filter on one table of an export, several files in one import, and **Transfer To…** are Mac only.
 - **AI.** No chat, no inline suggestions, no MCP server.
 
 ## Security
 
 Turn on Face ID, Touch ID, or Optic ID under **Settings > Security**. A cold launch always asks, and the connection from your last session waits behind that question: no connecting screen, no host key prompt, nothing dialed until you authenticate. After that **Auto-Lock** relocks immediately or after 1, 5, 15, or 60 minutes idle, starting at 5. The lock covers open sheets and connections, and the app switcher shows a locked card instead of your data; a connection open underneath stays connected. Turning the lock off asks you to authenticate first.
 
-Each connection carries its own [safe mode](/features/safe-mode) level, synced from the Mac. Set it with **Safe Mode** under **Organization** in the connection's form. iOS has three: **Off**, **Confirm Writes**, and **Read-Only**, which refuses writes outright. **Default Safe Mode** under **Settings > New Connections** sets the level a new connection starts at.
+Each connection carries its own [safe mode](/features/safe-mode) level, synced from the Mac. Set it with **Safe Mode** under **Organization** in the connection's form. iOS has three: **Off**, **Confirm Writes**, and **Read-Only**, which refuses writes outright. A read can still call a function that writes, such as `SELECT purge_orders()`. At Read-Only on PostgreSQL, MySQL 5.6.5 and later, and MariaDB 10.0 and later, **Query** runs each statement in the server's read-only transaction and then rolls it back. The server refuses a write the function makes in that transaction. On PostgreSQL, a setting it changes, as with `set_config`, is undone. What a function does outside the transaction still happens: `dblink_exec` writes over a connection of its own, and `pg_terminate_backend` and `GET_LOCK` act on the server. Some sessions cannot take the read-only transaction: OceanBase, Oracle, MySQL before 5.6.5, MariaDB before 10.0, and a session with a transaction or a `LOCK TABLES` open. A MySQL or MariaDB session with autocommit off has a transaction open after any statement. There, Read-Only refuses a query that calls a function outside TablePro's list of built-ins; switch to **Confirm Writes** to run it. **Default Safe Mode** under **Settings > New Connections** sets the level a new connection starts at.
 
-SSH tunnels authenticate with a password, a private key or **Keyboard Interactive**. A tunnel set to **SSH Agent** on the Mac signs in here with a private key on this device and stays **SSH Agent** on the Mac. When the server asks for more, after the password or key or through keyboard-interactive, a password prompt gets the SSH password and a code prompt gets the code from **Two-Factor Authentication**. Any other question, or a code in **Prompt at Connect** mode, appears on the connection's screen for you to answer. **Auto Generate** takes the Base32 secret from your authenticator setup with its algorithm, digits and period, and shares them with the Mac; a tunnel that follows a Mac SSH profile uses the profile's. A private key on a security key does not work here, and the **SSH Sign-In Unavailable** alert says so. An unknown host key, the SSH server's or a jump host's, prompts with its fingerprint first, on the connection's own screen. The question waits there until you answer it, and leaving the screen ends that attempt. A key pasted under **Paste Key**, or picked as a text file, is kept in the Keychain beside the connection's passwords, never in the saved connection list. A key file that is not text is copied into the app and read from there. Setting **Auth Method** to **Password**, choosing **Import File**, or turning **SSH Tunnel** off deletes the saved key when you tap **Save**. A tunnel the Mac forwards to a unix socket on the server forwards to the same socket here. Turning the tunnel off keeps its other settings, here and on the Mac, for when you turn it back on. A tunnel that drops while the connection is open reconnects it, as returning to the app does.
+SSH tunnels authenticate with a password, a private key or **Keyboard Interactive**. A tunnel set to **SSH Agent** on the Mac signs in here with a private key on this device and stays **SSH Agent** on the Mac. When the server asks for more, after the password or key or through keyboard-interactive, a password prompt gets the SSH password and a code prompt gets the code from **Two-Factor Authentication**. Any other question, or a code in **Prompt at Connect** mode, appears on the connection's screen for you to answer. **Auto Generate** takes the Base32 secret from your authenticator setup with its algorithm, digits and period, and shares them with the Mac; a tunnel that follows a Mac SSH profile uses the profile's. A private key on a security key does not work here, and the **SSH Sign-In Unavailable** alert says so. An unknown host key, the SSH server's or a jump host's, prompts with its fingerprint first, on the connection's own screen. The question waits there until you answer it, and leaving the screen ends that attempt. A key pasted under **Paste Key**, or picked as a text file, is kept in the Keychain beside the connection's passwords, never in the saved connection list. A key file that is not text is copied into the app and read from there. Setting **Auth Method** to **Password**, choosing **Import File**, or turning **SSH Tunnel** off deletes the saved key when you tap **Save**. A tunnel the Mac forwards to a unix socket on the server forwards to the same socket here. Turning the tunnel off keeps its other settings, here and on the Mac, for when you turn it back on. A tunnel that drops while the connection is open reconnects it, as returning to the app does; see [When the connection drops](#when-the-connection-drops).
 
 ### Jump hosts
 
@@ -292,7 +372,18 @@ A connection that uses an [SSH profile](/connections/ssh-profiles) on the Mac ar
 
 ## Privacy
 
-**Share Usage Data** under **Settings > Privacy** sends one small report a day: a hashed device identifier, the app and iOS versions, your language, the database types you use, and when you first connected and first ran a query. It is off unless you chose **Share Usage Data** on first launch, and it never carries a hostname, username, password, query, or row.
+Nothing is sent until you choose **Share Usage Data** on first launch, or turn on **Share Usage Data** under **Settings > Privacy**. While it is on, the app sends events to PostHog, the product analytics service, at `https://eu.i.posthog.com` in the EU:
+
+| Event | Sent | Properties |
+| --- | --- | --- |
+| `app_opened` | Once per local day, ten seconds after the app comes to the front | `database_types` and `connection_count` of the connections open at that moment |
+| `connection_attempted`, `connection_succeeded`, `first_query_executed` | Once per install | `database_type`, such as `PostgreSQL` or `SQL Server` |
+
+Events carry a random ID that the library makes on the device, and PostHog builds no profile from it. The library, posthog-ios, adds the device model, screen size, language, time zone, whether the device is on Wi-Fi or cellular, the app's version, build and bundle ID, the iOS version, whether the build came from TestFlight, the library's version, and a random session ID. PostHog sees the IP address of each request and derives an approximate location from it, such as the country and city. While the switch is on, the library also fetches its settings from `eu-assets.i.posthog.com`.
+
+No hostname, username, password, query, or row. With the switch off the app sends PostHog nothing, and a launch with it off never starts the library.
+
+Earlier versions sent one report a day to TablePro's server instead. If you had chosen **Share Usage Data**, it stays on after the update and sends to PostHog, and a device that already reported its first connection and query does not send them again. If you declined, it stays off, and if you never answered, the question comes up on the next launch.
 
 **Settings > About** holds the version, **What's New**, the privacy policy, and **Acknowledgements** for the open source libraries the app ships.
 
