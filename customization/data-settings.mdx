@@ -63,7 +63,7 @@ The pane is app-wide, so these values apply to every connection you open; filter
 
 Tables with more estimated rows than the threshold show an approximate count instead of running a slow `COUNT(*)`. A table or view with no estimate is counted up to the threshold. Past it the total stays blank until you click **Count Exactly**. **Always** runs the full `COUNT(*)` whatever the table's size.
 
-A total stays in place while you page through the table, and is counted again when you refresh or change the filters. Spanner, Cloudflare D1 and SurrealDB tables are counted only through **Count Exactly**, because a count there reads the whole table.
+A total stays in place while you page through the table, and is counted again when you refresh or change the filters. A save counts it again, except past the threshold, where the total stays as an estimate. Spanner, Cloudflare D1 and SurrealDB tables are counted only through **Count Exactly**, because a count there reads the whole table.
 
 ### Query result limit
 

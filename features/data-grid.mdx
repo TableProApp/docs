@@ -173,7 +173,7 @@ A large table shows an estimated total prefixed with `~` instead of running a sl
 
 Cassandra, ScyllaDB, Bigtable and the Firebase Realtime Database have no estimate, and their count reads every partition or key, so a table there shows no total until you click **Count Exactly**.
 
-A query tab does not page. It stops at the [row cap](/customization/data-settings) instead and offers **Fetch All** to load the rest, and a query carrying its own `LIMIT`, `FETCH FIRST`, or `TOP` is never capped. `Cmd+.` cancels a running query or a Fetch All.
+A query tab does not page, and the Query menu's page commands are unavailable there. It stops at the [row cap](/customization/data-settings) instead and offers **Fetch All** to load the rest, and a query carrying its own `LIMIT`, `FETCH FIRST`, or `TOP` is never capped. `Cmd+.` cancels a running query or a Fetch All.
 
 Some engines cannot skip rows and return a fixed maximum from one query. On those, a table tab shows its leading rows only: First, Previous, Next, Last and **All rows…** are gone, the rows-per-page menu stops at the engine's maximum, and the total is counted only when you click **Count Exactly**. Filter or sort to decide which rows load. [Cloudflare R2 SQL](/databases/cloudflare-r2-sql#pagination) works this way.
 
