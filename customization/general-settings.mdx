@@ -1,18 +1,18 @@
 ---
 title: General Settings
-description: Language, startup behavior, tabs, sidebar layout, connections, query timeout, the command line tool, updates, and reset
+description: Language, startup behavior, software updates, the command line tool, usage data, and reset
 ---
 
-Most of this tab takes effect the moment you click. Language waits for a relaunch, and the query timeout reaches a connection only when that connection opens.
+A new language waits for a relaunch. Everything else on this pane takes effect the moment you click. Sidebar, tab and connection settings have panes of their own: [Sidebar & Tabs](/customization/sidebar-and-tabs) and [Connections](/customization/connection-settings).
 
-<Frame caption="The General tab">
-  <img className="block dark:hidden" src="/images/settings-general.png" alt="General settings tab" />
-  <img className="hidden dark:block" src="/images/settings-general-dark.png" alt="General settings tab" />
+<Frame caption="The General pane">
+  <img className="block dark:hidden" src="/images/settings-general.png" alt="General pane with Language, When TablePro starts, the Software Update and Command Line Tool rows, Privacy and Reset all settings" />
+  <img className="hidden dark:block" src="/images/settings-general-dark.png" alt="General pane with Language, When TablePro starts, the Software Update and Command Line Tool rows, Privacy and Reset all settings" />
 </Frame>
 
 ## Language
 
-System (the default), English, Tiếng Việt, 简体中文, 繁體中文, 한국어, Türkçe, Français. Pick a different one and the tab offers **Relaunch** to finish the switch.
+System (the default), English, Tiếng Việt, 简体中文, 繁體中文, 한국어, Türkçe, Français. Pick a different one and the pane offers **Relaunch** to finish the switch.
 
 ## Startup
 
@@ -20,55 +20,9 @@ System (the default), English, Tiếng Việt, 简体中文, 繁體中文, 한�
 
 A relaunch from **Relaunch to Update**, or from a **Relaunch** button in Settings, reopens the last session once, whichever you pick.
 
-## Tabs and sidebar
-
-| Setting | Default | What it does |
-|---------|---------|--------------|
-| **Enable preview tabs** | On | Single-click opens a temporary tab that the next click replaces; double-clicking the table, the tab, or editing it makes it permanent |
-| **Show connections** | On | The [connections strip](/features/workspace-rail) on the window's leading edge |
-| **Show recent tables** | Off | A [Recent section](/features/favorites#recent-tables) at the top of the sidebar |
-| **Show object icons** | On | A type icon before each object name. Off gives a plain list of names |
-| **Show object comments** | On | Database object comments beside tables in the sidebar and in a grid column header's tooltip |
-| **Show partitions** | On | A partitioned table's partitions listed under it, and how many it holds beside its name |
-| **Show system databases and schemas** | Off | `mysql`, `information_schema`, `master` and the other system databases and schemas in the sidebar tree and its database and schema filters. The database switcher lists them either way |
-| **Row size** | Match System | Match System follows **Sidebar icon size** in **System Settings > Appearance**. Small, Medium, or Large overrides it to fit more objects on screen |
-| **Default layout for new connections** | List | List or Tree, on servers with a database tree. Switch the connection you are in from the **View** menu |
-
-Icons, comments, system databases and schemas, partitions, and row size are also under **View Options**, the button beside the sidebar's filter field. Right-clicking the empty space below the object list reaches the same options.
-
-## Connections
-
-**Show recent connections** is on out of the box and puts a [Recent section](/connections#organize-connections) in the welcome window and **Switch Connection**. Turning it off hides the section and keeps the history. **Clear Recent**, on the **Recent connection history** row, forgets it, which also starts sorting by **Last Connected** over. The switch and the history both stay on this Mac.
-
-**Check connections** sets how often each open connection is checked for a dropped session. The choices, and what a failed check starts, are under [Connection health](/connections/connection-form#connection-health).
-
-## Query timeout
-
-How many seconds a query runs before it is cancelled. The default is 60; the picker offers 10 to 600 seconds and **No limit**. The value is read when a connection opens, so a change reaches an open connection only after you reconnect.
-
-A connection can override this value with **Query Timeout** on its **Advanced** pane. Leave that field empty to inherit this setting, or enter `0` for no limit. The same pane has a separate **Connect Timeout** for tunnels, proxies and database sign-in; it does not change how long a query can run.
-
-Where the engine can enforce it, the timeout becomes a server-side setting: `statement_timeout` on PostgreSQL, `max_execution_time` on MySQL and ClickHouse, `max_statement_time` on MariaDB, `ob_query_timeout` on OceanBase, `query_timeout` on StarRocks. On SQLite it bounds how long a statement waits for a locked database instead. Drivers that talk HTTP (BigQuery, Bigtable, Spanner, Cloudflare D1, LibSQL, Etcd, DynamoDB, Elasticsearch, Typesense, and ClickHouse) bound the request at the timeout plus 30 seconds, and Oracle enforces it in the client: the connection is closed to unblock the call, and the next query reconnects and restores your current schema. SAP HANA ends the statement with the same `ALTER SYSTEM CANCEL SESSION` that **Stop** sends.
-
-Older servers have neither: MySQL before 5.7.8, MariaDB before 10.1.1. A statement that passes the timeout there is stopped with `KILL QUERY` from a second connection, which reaches a `SELECT` on MySQL and any statement at all on MariaDB. A server behind a proxy that reports a version it does not have still gets the right one of the two.
-
-**No limit** still caps an HTTP request at one hour, because the transport needs a ceiling.
-
-An export, **Copy To**, a table transfer and a data comparison read with the timeout off and put it back when they finish. Their reads wait for the side that writes, so a long copy would otherwise be cancelled part way. MySQL and MariaDB give up on a read left waiting for 10 minutes, and TablePro raises the session's `net_write_timeout` to that when a read starts.
-
-On InfluxDB and Typesense such a read is one HTTP response that lasts as long as the copy, so the one-hour cap does not apply to it.
-
-## Command line tool
-
-**Command Line** shows whether the shell command links to this copy of the app. Copy its Terminal line to install or remove the link. See [Terminal](/integrations/terminal#install) for installation and commands.
-
-## Trusted links
-
-Use **Forget** to remove one saved link approval, or **Forget All** to remove them all. See [Trusting a link](/integrations/terminal#trusting-a-link) for which links qualify and when they still ask.
-
 ## Software update
 
-The top row says where updates stand, and its button takes the next step:
+Click **Software Update** to open its page. The top row says where updates stand, and its button takes the next step:
 
 | State | The row reads | Button |
 |-------|---------------|--------|
@@ -79,23 +33,21 @@ The top row says where updates stand, and its button takes the next step:
 
 **Check Now** and **TablePro > Check for Updates…** check at once. A check you start ignores the schedule and any staged rollout, so it always offers the newest build.
 
-**Update channel** is **Stable** out of the box. Pick **Beta** to be offered each new version as a beta before its stable release. [Beta updates](/beta-updates) covers going back to stable.
+**What's New**, under the status row, opens the highlights of the version you are running, with a button to the full changelog. It is also **Help > What's New**.
 
-The two switches are on out of the box. The first one stops the daily check, the second stops the install.
+The two switches under **Automatic Updates** are on out of the box. The first one stops the daily check, the second stops the install.
 
 **Automatically check for updates** runs the check in the background once a day. Turn it off and nothing reaches the network until you start a check yourself.
 
 **Download and install updates automatically** fetches the new version in the background and swaps it in the next time TablePro quits, with no dialog. Turn it off to be asked first. With the check switched off the switch is dimmed and installs never run.
 
-Updates arrive through [Sparkle](https://sparkle-project.org/) and are signature-checked before they install.
+**Update channel** is **Stable** out of the box. Pick **Beta** to be offered each new version as a beta before its stable release. [Beta updates](/beta-updates) covers going back to stable.
 
-**What's New** opens the highlights of the version you are running, with a button to the full changelog. It is also **Help > What's New**.
-
-An administrator can pin the channel, both switches and the interval across a fleet. See [Managed updates](/security/managed-updates).
+Updates arrive through [Sparkle](https://sparkle-project.org/) and are signature-checked before they install. An administrator can pin the channel, both switches and the interval across a fleet. See [Managed updates](/security/managed-updates).
 
 ### When an update is waiting
 
-A waiting update shows in four places: a button at the trailing end of each connection window's title bar, a link under the version on the welcome window, the **TablePro > Check for Updates…** menu item, and the top row of this section. There is no notification and no Dock badge. With nothing waiting, the button and the link are gone.
+A waiting update shows in four places: a button at the trailing end of each connection window's title bar, a link under the version on the welcome window, the **TablePro > Check for Updates…** menu item, and **Software Update** in Settings, beside its row on the General pane and in the page's top row. There is no notification and no Dock badge. With nothing waiting, the button and the link are gone.
 
 The button and the link take one of two names:
 
@@ -106,10 +58,14 @@ The menu item follows the same state: **Check for Updates…**, **Update Availab
 
 A relaunch quits the usual way: unsaved edits and a running sync still ask first, and backing out leaves the update waiting. Otherwise a downloaded update installs, staged plugins load, and TablePro opens on your last session.
 
+## Command line tool
+
+Click **Command Line Tool** for a page that shows whether the `tablepro` command links to this copy of the app, with the Terminal line to install or remove the link. See [Terminal](/integrations/terminal#install) for installation and commands.
+
 ## Privacy
 
-Turn off **Share usage data** under **Settings > General > Privacy** to stop app usage events. It starts on. From 0.86.0, events go directly to PostHog and can link to your account. The switch does not stop account requests or server analytics. [Privacy](/security/privacy#usage-data) lists the fields and older-version behavior.
+Turn off **Share usage data** under **Privacy** to stop app usage events. It starts on. From 0.86.0, events go directly to PostHog and can link to your account. The switch does not stop account requests or server analytics. [Privacy](/security/privacy#usage-data) lists the fields and older-version behavior.
 
 ## Reset
 
-**Reset All Settings to Defaults** is at the bottom of the tab. What it restores and what it leaves alone is under [Where settings live](/customization/settings#where-settings-live).
+Click **Reset…** on the **Reset all settings** row at the bottom of the pane. What it restores and what it leaves alone is under [Where settings live](/customization/settings#where-settings-live).

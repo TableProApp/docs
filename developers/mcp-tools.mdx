@@ -110,7 +110,7 @@ A launcher that shows the user their connections passes `purpose: "display"`. Le
 `purpose: "display"` needs two things, or it fails with `-33007` and `data.requiredScopes` set to `["connections:display"]`:
 
 - a token issued with the `connections:display` scope, which only [pairing](/developers/pairing#scopes) grants;
-- **Allow apps to list connections hidden from AI** turned on under **Settings > MCP > Connection Access**. Turning it off stops every token at once.
+- **Allow apps to list connections hidden from AI** turned on under **Access** in **Settings > MCP**. Turning it off stops every token at once.
 
 The display list adds connections whose AI policy is **Never**. Blocked connections and connections outside the token's allowlist stay out. Each entry has `id`, `name`, `type`, `host`, `port`, `database`, `is_connected`, `tags`, `color`, `group` and `username`, and no `ai_policy`, `external_access` or `safe_mode`.
 

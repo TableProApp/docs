@@ -131,8 +131,8 @@ Type a tag's name in **Tags** and press `Return` to add it: known tags complete 
 | Field | Description |
 |-------|-------------|
 | **Access**, under **External Clients** | **Blocked**, **Read Only** (the default), or **Read & Write** for MCP clients such as Raycast, Cursor, and Claude Desktop, and for [AppleScript](/developers/applescript) and [Shortcuts](/integrations/shortcuts). A token's own scope cannot raise it. See the [integration security model](/developers#security-model) |
-| **Policy**, under **AI** | **Use Default**, **Always Allow**, **Ask Each Time** or **Never**: when the in-app AI agents and MCP clients may read the connection. Shown even while **Enable AI Features** is off, since MCP clients follow it too. While it is on, each tool you gave **Always Allow** on an [assistant tool card](/features/ai-assistant#tool-calling) is listed under it by name, with **Forget**. After **Save**, a forgotten tool asks again on its next call |
-| **AI Rules** | Guidance the AI reads on every chat turn for this connection: table conventions, columns to avoid, join hints. Shown while **Enable AI Features** is on. See [Per-connection AI rules](/features/ai-assistant#per-connection-ai-rules) |
+| **Policy**, under **AI** | **Use Default**, **Always Allow**, **Ask Each Time** or **Never**: when the in-app AI agents and MCP clients may read the connection. Shown even while **Enable AI features** is off, since MCP clients follow it too. While it is on, each tool you gave **Always Allow** on an [assistant tool card](/features/ai-assistant#tool-calling) is listed under it by name, with **Forget**. After **Save**, a forgotten tool asks again on its next call |
+| **AI Rules** | Guidance the AI reads on every chat turn for this connection: table conventions, columns to avoid, join hints. Shown while **Enable AI features** is on. See [Per-connection AI rules](/features/ai-assistant#per-connection-ai-rules) |
 
 ## Startup
 
@@ -201,7 +201,7 @@ A connect you did not start never runs the script. A restored window at launch, 
 | **Attached Databases** | SQLite, DuckDB, and libSQL in Local File mode. More database files, attached on every connect. Each file is one row, and its circled-ellipsis menu holds **Change File…**, **Move Up**, **Move Down** and **Remove**. See [Attached databases](/databases/sqlite#attached-databases) |
 | **Extensions** | SQLite, and libSQL in Local File mode. Libraries loaded into the database file on every connect, one row each with the same menu. See [Extensions](/databases/sqlite#extensions) |
 | **Connect Timeout** | Maximum seconds for the network transport and remote database to finish connecting. Empty uses 30 seconds; valid values are 1 to 600 |
-| **Query Timeout** | Override of **Settings > General** for this connection. Empty inherits the global value; `0` means no limit. Only drivers that support query timeouts enforce it |
+| **Query Timeout** | Override of **Settings > Connections** for this connection. Empty inherits the global value, which the empty field shows, such as **Global (60)**, or **No limit**; `0` means no limit. Only drivers that support query timeouts enforce it |
 | **Binary Value Limit** | MySQL and MariaDB. A binary value above this many KB loads when you open, copy or export it. Empty uses 64; valid values are 1 to 1048576. See [Large binary values](/features/data-grid#large-binary-values) |
 | **Identifier Case** | PostgreSQL, PGlite, Oracle and Snowflake. The case table, column and schema names take in autocomplete and in **Copy as INSERT Statements** and **Copy as UPDATE Statements**. See [Identifier case](/features/autocomplete#identifier-case) |
 | **Local Only** | Under **iCloud Sync**. Keeps this connection and its passwords off iCloud. Saving an existing synced connection as Local Only removes its passwords from iCloud Keychain, so your other devices ask for them again. Shown while **Sync this Mac with iCloud** is on. See [iCloud Sync](/features/icloud-sync#keeping-a-connection-off-icloud) |
@@ -219,8 +219,8 @@ session picks it up.
 
 ## Connection health
 
-Every active connection is checked on the interval set by **Check connections** in Settings >
-General, every 30 seconds by default, and the check is skipped while any query, export, import, or
+Every active connection is checked on the interval set by **Check open connections** in
+**Settings > Connections**, every 30 seconds by default, and the check is skipped while any query, export, import, or
 other tracked operation is running. A failed check starts a
 [reconnect](/connections#when-a-connection-drops): the rows stay on screen and the connection tries
 10 times over about 10 minutes before it shows as lost. An authentication failure stops the
@@ -232,9 +232,9 @@ retries going, and the reconnect bar names that certificate error as the cause i
 generic one. A reconnect rebuilds the tunnel, restores the selected database and schema, and
 re-runs the startup commands; the connection shows as reconnecting throughout.
 
-The check is a query, so on a database that sleeps when idle or bills per query it is not free. **Only when I use the connection** stops it: TablePro sends nothing on its own, and instead checks the connection the first time you use it after five quiet minutes. Waking the Mac from sleep counts as a quiet period, so the first thing you do after opening the lid checks too.
+The check is a query, so on a database that sleeps when idle or bills per query it is not free. **Only when used** stops it: TablePro sends nothing on its own, and instead checks the connection the first time you use it after five quiet minutes. Waking the Mac from sleep counts as a quiet period, so the first thing you do after opening the lid checks too.
 
-A Server Dashboard tab keeps its own refresh running on its own interval, which **Check connections** does not change. Close the tab or set its interval to Off.
+A Server Dashboard tab keeps its own refresh running on its own interval, which **Check open connections** does not change. Close the tab or set its interval to Off.
 
 SQLite, DuckDB, Beancount, Snowflake, and Teradata are not checked.
 

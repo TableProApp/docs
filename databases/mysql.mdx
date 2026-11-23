@@ -99,7 +99,7 @@ A MySQL partition belongs to its table rather than standing as one, so its row o
 
 A connection holds a server thread and one slot against `max_connections` for as long as it is open, and MySQL's `wait_timeout` rarely reclaims it because the connection check counts as activity on the server. **Release the Server Connection After**, on the **Advanced** pane, hands the connection back after that many minutes of no queries and takes a new one on the next query. `0`, the default, keeps it.
 
-To stop the check itself, set **Check connections** to **Only when I use the connection** in Settings > General. That is the connection-wide setting; this one is per connection and closes the connection rather than quietening it.
+To stop the check itself, set **Check open connections** to **Only when used** in **Settings > Connections**. That is the connection-wide setting; this one is per connection and closes the connection rather than quietening it.
 
 Reconnecting costs a TCP connect, the TLS handshake and authentication: measured at 2ms against a server on the same machine and 800ms to 1.9s across the internet. That cost lands on the first query after an idle period, so leave this at `0` for a remote server unless the slot matters more than the wait.
 
@@ -115,7 +115,7 @@ A read that fails because the server closed the connection is run once more on a
 
 A connection with startup commands that run `SET` is holding a changed session setting from the moment it opens, so it reports the error rather than retrying. **Database > Reconnect** takes a new connection and puts back the database and the startup commands.
 
-Waiting has its own limit, and reaching it is a different case. The socket gives the server the [query timeout](/customization/general-settings#query-timeout) plus 30 seconds, and a statement that outlasts that is never sent again: the first copy is almost certainly still running there. It is stopped with `KILL QUERY` from a second connection, and the error comes back after that. MySQL 4.1 has no `KILL QUERY`; see [Older servers](#older-servers).
+Waiting has its own limit, and reaching it is a different case. The socket gives the server the [query timeout](/customization/connection-settings#query-timeout) plus 30 seconds, and a statement that outlasts that is never sent again: the first copy is almost certainly still running there. It is stopped with `KILL QUERY` from a second connection, and the error comes back after that. MySQL 4.1 has no `KILL QUERY`; see [Older servers](#older-servers).
 
 ## Older servers
 

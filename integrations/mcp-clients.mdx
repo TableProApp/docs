@@ -20,7 +20,7 @@ TablePro for Linux has no bridge. Its clients get an address and a token instead
 
 <Steps>
   <Step title="Turn on the server">
-    Turn on **Enable MCP Server** in **Settings > MCP**. While it is off, the sheet says so and clients you add cannot connect yet.
+    Turn on **MCP server** in **Settings > MCP**. While it is off, the sheet says so and clients you add cannot connect yet.
   </Step>
   <Step title="Open the client list">
     Click **Connect a Client…**. Clients found on this Mac are under **On This Mac**, the rest under **Other Clients**. The same button is on the toolbar of **Connected Clients** in the MCP Activity window.
@@ -84,7 +84,7 @@ Both read `~/.codex/config.toml`, so installing one sets up both, and both rows 
 | **Set up** | The entry starts this copy of TablePro | None |
 | **Connected** | The client called the server in the last five minutes. A client that connects while the list is open reads **Connected just now** for a minute | None |
 | **Turned off** | The entry is there, but turned off in the client's own MCP settings | None. Turn it on in the client |
-| **Set up with a token** | The entry reaches the HTTP server with a token from **Settings > MCP > Authentication** | None. TablePro keeps it, with the token's limits. To use the bridge instead, remove it, then install |
+| **Set up with a token** | The entry reaches the HTTP server with a token from **Settings > MCP > Tokens** | None. TablePro keeps it, with the token's limits. To use the bridge instead, remove it, then install |
 | **TablePro moved** | The entry starts a `tablepro-mcp` that is no longer there | **Update** |
 | **Uses another copy** | The entry starts a different copy of TablePro, such as a beta in another folder | **Update** |
 | **One project only** | Claude Code has TablePro in one project's settings only | **Install** adds it for every project |
@@ -136,7 +136,7 @@ claude mcp add --scope user tablepro -- /Applications/TablePro.app/Contents/MacO
 
 ## What the config leaves out
 
-TablePro does not have to be open first, but **Enable MCP Server** has to be on. Finding no trusted handshake, the bridge runs `open -g tablepro://integrations/start-mcp` and polls for one every 200ms for up to 10 seconds. With the toggle off, or a server that fails to start, TablePro writes down its refusal and the bridge exits with the matching error at once. A TablePro started that way stays out of the Dock, the app switcher and the menu bar until it has a window to show; open the app yourself and it behaves normally for the rest of that run.
+TablePro does not have to be open first, but **MCP server** has to be on in **Settings > MCP**. Finding no trusted handshake, the bridge runs `open -g tablepro://integrations/start-mcp` and polls for one every 200ms for up to 10 seconds. With the toggle off, or a server that fails to start, TablePro writes down its refusal and the bridge exits with the matching error at once. A TablePro started that way stays out of the Dock, the app switcher and the menu bar until it has a window to show; open the app yourself and it behaves normally for the rest of that run.
 
 The token is not yours to manage either. Each server start mints one named `__stdio_bridge__`, writes it into the handshake file, and rotates it 15 minutes before its one-hour expiry. It is **Read & Write**, so an agent on the bridge can read and write but cannot call `confirm_destructive_operation`.
 
@@ -238,7 +238,7 @@ optional `direction`: `ascending` by default, or `descending`.
 
 ## HTTP transport
 
-Use HTTP when the client cannot start a local process. Click **Generate Token** in **Settings > MCP > Authentication**. The sheet that shows the new token has a **Client** menu: pick the client for its command or configuration with the address filled in, or **Other Client** for the address and header alone. The token is masked on screen, and the copy button includes it.
+Use HTTP when the client cannot start a local process. Click **+** in **Settings > MCP > Tokens** to generate a token. The sheet that shows the new token has a **Client** menu: pick the client for its command or configuration with the address filled in, or **Other Client** for the address and header alone. The token is masked on screen, and the copy button includes it.
 
 For a client that is not in the menu:
 
@@ -277,7 +277,7 @@ The bridge writes its failure to stderr and as a JSON-RPC error, so the message 
 
 ### The TablePro MCP server is turned off
 
-**Enable MCP Server** is off in **Settings > MCP**. Turn it on, then relaunch the client.
+**MCP server** is off in **Settings > MCP**. Turn it on, then relaunch the client.
 
 ### The TablePro MCP server is turned on but failed to start
 
@@ -285,7 +285,7 @@ The bridge writes its failure to stderr and as a JSON-RPC error, so the message 
 
 ### TablePro is not running
 
-The bridge could not launch the app, or got no trusted handshake within 10 seconds. Open TablePro and check that **Settings > MCP** shows the server running; if it does, toggle **Enable MCP Server** off and on, then relaunch the client.
+The bridge could not launch the app, or got no trusted handshake within 10 seconds. Open TablePro and check that **Settings > MCP** shows the server running; if it does, turn **MCP server** off and on, then relaunch the client.
 
 ### The local MCP endpoint did not prove it belongs to TablePro
 

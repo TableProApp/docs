@@ -41,7 +41,7 @@ A handshake failure names the cause and the SSL Mode to switch to, with the driv
 
 ## A plugin will not install or load
 
-A plugin that fails any of its checks appears as a banner in **Settings > Extensions** with the reason.
+A plugin that fails any of its checks appears under **Couldn't Load** in **Settings > Extensions**. Click it for the reason.
 
 ### "Plugin code signature verification failed: …"
 
@@ -83,7 +83,7 @@ Failures on the far side start with "The SSH server could not reach …". Those,
 
 A capped result offers **Fetch All** in the status bar, and **Query > Execute Query Without Limit** runs one query with the cap off. Browsing a table pages instead of capping.
 
-A query that runs past the timeout in **Settings > General** is cancelled ([Settings](/customization/settings)); cancel one yourself with `Cmd+.`. A changed timeout reaches new connections only, so reconnect after changing it or the old value stays in force with nothing to say so.
+A query that runs past the timeout in **Settings > Connections** is cancelled ([Query timeout](/customization/connection-settings#query-timeout)); cancel one yourself with `Cmd+.`. A changed timeout reaches new connections only, so reconnect after changing it or the old value stays in force with nothing to say so.
 
 ## Edits will not save
 
@@ -105,7 +105,7 @@ log show --predicate 'subsystem BEGINSWITH "com.TablePro"' --last 30m
 
 Oracle alone adds a diagnostic sheet on a recognized driver error, with **Copy Diagnostic Info** and **Open Issue Tracker**.
 
-Application data is in `~/Library/Application Support/TablePro`, preferences in `~/Library/Preferences/com.TablePro.plist`. **Settings > General** has **Reset All Settings to Defaults**.
+Application data is in `~/Library/Application Support/TablePro`, preferences in `~/Library/Preferences/com.TablePro.plist`. **Settings > General** has **Reset all settings**.
 
 Neither copy button includes a password. **Copy Details** carries the host, the database name, the SSH host, and any non-default port; **Copy Diagnostic Info** adds the user name.
 

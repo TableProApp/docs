@@ -82,7 +82,7 @@ SELECT results stream, so a large result or a full-table export is not capped at
 
 Each statement commits on its own. `BEGIN` opens a read-write transaction that holds every statement until `COMMIT` or `ROLLBACK`. While one is open, saving grid edits is refused, so a save never commits or abandons it. When Spanner aborts the transaction, later statements fail until you run `ROLLBACK`; then run them again. A single statement outside a transaction is retried automatically when Spanner aborts it.
 
-`CREATE`, `ALTER` and `DROP` go through Spanner's schema-change API, outside any transaction. The editor waits for the change up to the [query timeout](/customization/general-settings#query-timeout); a change still running then keeps running on the server.
+`CREATE`, `ALTER` and `DROP` go through Spanner's schema-change API, outside any transaction. The editor waits for the change up to the [query timeout](/customization/connection-settings#query-timeout); a change still running then keeps running on the server.
 
 ## Editing rows
 
