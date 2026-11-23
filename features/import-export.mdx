@@ -194,7 +194,7 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
     | Include headers (bold first row) | Yes |
     | NULL as empty cells | Yes |
 
-    Each table becomes its own worksheet and numbers are stored as numeric cells. A table over 1,048,576 rows, Excel's limit, splits across sheets.
+    Each table becomes its own worksheet and numbers are stored as numeric cells. Excel holds 1,048,576 rows a sheet and 32,767 characters a cell: a longer table splits across sheets, and a longer value is cut to fit, with a warning that counts the values cut. Export to CSV to keep long values whole.
   </Tab>
   <Tab title="Markdown">
     GitHub-flavoured tables.
