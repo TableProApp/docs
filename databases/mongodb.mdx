@@ -28,7 +28,7 @@ The query tab is a JavaScript shell. Write `db.orders.find({status: "new"})` the
 | **Username** | - | Leave empty for local dev without auth |
 | **Password** | - | |
 | **Database** | - | Opens straight into that database. Leave it empty to browse them all |
-| **Auth Database** | - | Options section. Where your user account lives, usually `admin` |
+| **Auth Database** | - | **Advanced** pane. Where your user account lives, usually `admin` |
 | **Auth Mechanism** | Default | SCRAM-SHA-1, SCRAM-SHA-256, X.509, or AWS IAM, under Authentication |
 | **AWS Session Token** | - | Under Authentication, once **Auth Mechanism** is AWS IAM. Kept in the Keychain |
 
@@ -38,7 +38,7 @@ Naming a **Database** skips listing every database on the server, which is worth
 
 AWS IAM takes the access key ID in **Username** and the secret access key in **Password**. Temporary credentials also need their session token in **AWS Session Token**.
 
-Also in the Options section: **Read Preference**, **Write Concern**, **Use SRV Record**, **Replica Set** name, and **Legacy UUID Encoding**. The server has to be MongoDB 4.0 or later; the driver refuses to connect to anything older.
+Also on the **Advanced** pane: **Read Preference**, **Write Concern**, **Use SRV Record**, **Replica Set** name, and **Legacy UUID Encoding**. The server has to be MongoDB 4.0 or later; the driver refuses to connect to anything older.
 
 **Write Concern** covers every insert, update and delete, from a query tab or from a save in the data grid, unless the statement passes its own `writeConcern`. Index, collection and database commands, and `db.runCommand`, go to the server as written. On a server that is not a replica set, pick **Default**, **Majority** or **1**: with **2** or **3** every write fails with `cannot use 'w' > 1 when a host is not replicated`. `journal` and `wtimeoutMS` in a pasted connection URL go out with every write too.
 
@@ -68,7 +68,7 @@ An SRV connection does not open through an SSH tunnel or another tunnel. The rec
 
 ## Replica sets
 
-The **Hosts** field takes comma-separated pairs (`host1:27017,host2:27017,host3:27017`), the primary is discovered, and writes are routed to it. Set the replica set name in the Options section. A multi-host URI pastes in directly:
+The **Hosts** field takes comma-separated pairs (`host1:27017,host2:27017,host3:27017`), the primary is discovered, and writes are routed to it. Set the replica set name on the **Advanced** pane. A multi-host URI pastes in directly:
 
 ```text
 mongodb://user:pass@host1:27017,host2:27017,host3:27017/db?replicaSet=rs0
@@ -211,7 +211,7 @@ The checks for a document holding both names and for a document the validator wo
 **Save Changes** only, never in **Preview SQL**. Under a `moderate` validator, a document the
 validator already rejected before the save is left alone. Each reads every document that holds a
 changed field and stops at this connection's effective query timeout, or after 10 minutes when the
-timeout is **No limit**. Set an override under **Options**, or leave it empty to inherit **Settings >
+timeout is **No limit**. Set an override on the **Advanced** pane, or leave it empty to inherit **Settings >
 Connections**. A check that times out changes nothing. Every check reads the primary, whatever the
 connection's **Read Preference**. Once they pass, the save reads the collection's options, indexes
 and views again, and stops if the options changed or an index, search index or view now uses the
@@ -376,7 +376,7 @@ valid at the cursor; see [Autocomplete](/features/autocomplete#mongodb). For a q
 
 ## SSL/TLS
 
-New connections default to **Disabled**, and the driver has no TLS fallback: **Preferred** behaves exactly as **Required**, which is what the Network tab warns about. For an unencrypted local instance use **Disabled** or [SSH tunneling](/connections/ssh-tunneling). See [SSL/TLS](/connections/ssl).
+New connections default to **Disabled**, and the driver has no TLS fallback: **Preferred** behaves exactly as **Required**, which is what the **SSL/TLS** pane warns about. For an unencrypted local instance use **Disabled** or [SSH tunneling](/connections/ssh-tunneling). See [SSL/TLS](/connections/ssl).
 
 The driver reads a client certificate and its private key from one file. A key chosen in its own file is joined with the certificate in a temporary file only your user can read, removed when the connection closes. An encrypted key takes its passphrase in **Key Passphrase**, which appears once **Client Key** has a path.
 
@@ -425,7 +425,7 @@ The MongoDB driver is compiled into TablePro Mobile, with the same C driver and 
 
 **Connection refused**: check MongoDB is running (`brew services start mongodb-community`) and that the port and `bindIp` in `mongod.conf` match what you entered.
 
-**Authentication fails on connect**: the error names the database that was authenticated against. If your user does not live there, set **Auth Database** in the Options section; otherwise check the username, password, and auth mechanism. The MQL editor does not parse `db.getUsers()` or `db.createUser()`; read users with `db.runCommand({"usersInfo": 1})`.
+**Authentication fails on connect**: the error names the database that was authenticated against. If your user does not live there, set **Auth Database** on the **Advanced** pane; otherwise check the username, password, and auth mechanism. The MQL editor does not parse `db.getUsers()` or `db.createUser()`; read users with `db.runCommand({"usersInfo": 1})`.
 
 **Timeout**: for Atlas, add your IP to the cluster's access list first. Otherwise verify host and port and check the network and firewall.
 

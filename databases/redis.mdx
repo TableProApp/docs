@@ -25,8 +25,8 @@ The sidebar splits keys into folders at every `:`, and each key gets a grid row 
 | **Port** | `6379` | Standalone only |
 | **Username** | - | Redis 6 ACL user, sent as `AUTH username password`. Empty signs in as `default` |
 | **Password** | - | Empty for a server with no `requirepass`, and for a `nopass` ACL user |
-| **Database Index** | `0` | Options section. Type the index or use the stepper; connecting fails with the server's error if it has no such database |
-| **Key Separator** | `:` | Options section. What the sidebar splits key names on |
+| **Database Index** | `0` | **Advanced** pane. Type the index or use the stepper; connecting fails with the server's error if it has no such database |
+| **Key Separator** | `:` | **Advanced** pane. What the sidebar splits key names on |
 
 No minimum server version. ACL users need Redis 6, a Sentinel ACL user needs 6.2, and Cluster mode reads routing tips from Redis 7 where they exist.
 
@@ -82,11 +82,11 @@ The wrong mode is caught at connect, on Valkey as on Redis: Standalone against a
 
 ## Amazon ElastiCache (IAM)
 
-Set **Authentication** to an AWS IAM mode (Access Key, Profile, or SSO). A short-lived IAM token becomes the Redis password and the username is your IAM-enabled Redis user. Enter the AWS region and the cache name (replication group ID), and turn TLS on, which ElastiCache IAM requires. Profiles resolve from `~/.aws/config` and `~/.aws/credentials`, `credential_process`, SSO, and assumed roles included.
+Set **Method** under **Authentication** to an AWS IAM mode (Access Key, Profile, or SSO). A short-lived IAM token becomes the Redis password and the username is your IAM-enabled Redis user. Enter the AWS region and the cache name (replication group ID), and turn TLS on, which ElastiCache IAM requires. Profiles resolve from `~/.aws/config` and `~/.aws/credentials`, `credential_process`, SSO, and assumed roles included.
 
 ## Browsing keys
 
-`user:1` and `user:2` sit under a `user` folder, nested as deep as the key goes (`app:cache:session:1`). Change the separator in the Options section. When the tree cannot load, the server's error takes its place; right-click **Keys** and choose **Refresh** to try again.
+`user:1` and `user:2` sit under a `user` folder, nested as deep as the key goes (`app:cache:session:1`). Change the separator on the **Advanced** pane. When the tree cannot load, the server's error takes its place; right-click **Keys** and choose **Refresh** to try again.
 
 <Frame caption="Keys grouped by namespace with type-aware values">
   <img className="block dark:hidden" src="/images/redis-key-browser.png" alt="Redis keys grouped by namespace in the sidebar with values in the data grid" />
@@ -144,7 +144,7 @@ If the connection drops while a block is open or keys are watched, the server di
 
 ## SSL/TLS
 
-Set **SSL Mode** on the **Network** tab. Upstash, Redis Cloud and the like require TLS; `rediss://` turns it on when importing a URL.
+Set **SSL Mode** on the **SSL/TLS** pane. Upstash, Redis Cloud and the like require TLS; `rediss://` turns it on when importing a URL.
 
 | Mode | hiredis behavior | Use for |
 |---|---|---|

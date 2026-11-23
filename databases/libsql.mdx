@@ -33,9 +33,9 @@ There is no host, no port and no Database field: the URL names one database and 
 
 | Field | Description |
 |-------|-------------|
-| **Database File** | Path to the file. **Browse…** picks one, **New…** names one that does not exist yet, and `~` expands. A path that does not exist is created, along with any missing folders |
+| **Database File** | Path to the file. **Choose…** picks one, **New…** names one that does not exist yet, and `~` expands. A path that does not exist is created, along with any missing folders |
 
-The API Token field is hidden here; a local file needs no authentication. **Options** gains two lists in this mode: **Attached Databases**, which attaches more files the way it does for [SQLite](/databases/sqlite#attached-databases), and **Extensions**, which loads SQLite extensions the way it does for [SQLite](/databases/sqlite#extensions).
+The API Token field is hidden here; a local file needs no authentication. The **Advanced** pane gains two lists in this mode: **Attached Databases**, which attaches more files the way it does for [SQLite](/databases/sqlite#attached-databases), and **Extensions**, which loads SQLite extensions the way it does for [SQLite](/databases/sqlite#extensions).
 
 <Danger>
 Do not open a file that is being synced as a Turso embedded replica while the owning app is running. Concurrent access to a syncing replica can corrupt it.

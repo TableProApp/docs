@@ -3,18 +3,18 @@ title: Remote Database Files
 description: Work with a SQLite database on an SSH server, live on the server or as a read-only copy on this Mac
 ---
 
-A SQLite database on an SSH server can be reached two ways, and the **Open** menu beside the path is where you choose. Run your statements on the server against the live file, or fetch a read-only copy and open it here.
+A SQLite database on an SSH server can be reached two ways, and the **Open** menu under the path is where you choose. Run your statements on the server against the live file, or fetch a read-only copy and open it here.
 
 The choice turns on where SQLite runs. Its file locking is only reliable for a process on the same machine as the file, so a client that wrote across the network would eventually corrupt the database. Running on the server keeps every read and write on that one machine; the copy sidesteps the question by never writing at all.
 
 ## Set one up
 
 <Steps>
-  <Step title="Choose the transport">
-    Create or edit a SQLite connection, open the **Network** tab, and set **Connect via** to **Remote Database File**.
+  <Step title="Choose the location">
+    Create or edit a SQLite connection, select **Location** in the editor's sidebar, and set the **Location** menu to **Remote Server over SSH**. **File Path** on General is dimmed from then on: the file on the server replaces it.
   </Step>
   <Step title="Name the server">
-    Fill in **SSH Host**, **SSH Port**, and **SSH User**, then pick an authentication method. Password, private key, SSH agent, keyboard-interactive, jump hosts, and one-time codes all work the way they do for a tunnel, and a saved [SSH profile](/connections/ssh-profiles) supplies all of it at once.
+    Under **Server**, fill in **Host**, **Port**, and **Username**, then pick a **Method** under **Authentication**. Password, private key, SSH agent, keyboard-interactive, jump hosts, and one-time codes all work the way they do for a tunnel, and a saved [SSH profile](/connections/ssh-profiles) supplies all of it at once.
   </Step>
   <Step title="Name the file">
     Put the database's path on the server in **Path**. An absolute path is taken as written. A relative path, or one starting `~`, resolves against the SSH account's home directory.

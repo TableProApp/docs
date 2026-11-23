@@ -7,7 +7,7 @@ One provider is active at a time and answers every AI request in the app, from t
 
 ## Configure a provider
 
-Open **Settings > AI** (`Cmd+,`). **Enable AI features** at the top turns the chat, Agent mode, inline suggestions and query actions on or off, and hides the rest of the pane while off. **Default AI policy**, under **Privacy** at the bottom, stays either way, and so does each connection's **AI Policy**, because MCP clients follow them too.
+Open **Settings > AI** (`Cmd+,`). **Enable AI features** at the top turns the chat, Agent mode, inline suggestions and query actions on or off, and hides the rest of the pane while off. Turning it off also hides **AI Rules** in the connection editor. **Default AI policy**, under **Privacy** at the bottom, stays either way, and so does each connection's **Policy**, because MCP clients follow them too.
 
 <Frame caption="AI settings">
   <img className="block dark:hidden" src="/images/ai-chat-settings-provider.png" alt="AI pane with Enable AI features on, Active provider set to None, an empty Providers list with Add Provider, and the Apple Intelligence and Inline Suggestions sections" />
@@ -113,7 +113,7 @@ Every engine follows one rule: reads, plus the commands that change data. Anythi
 
 ### Tool calling
 
-In Edit and Agent modes each tool call appears as a card in the reply. Read-only tools run immediately. Write tools wait for **Run**, for **Always Allow** (which lets that one tool run on that one connection without asking from then on, and syncs with the connection over iCloud), or for **Reject**, which hands the model an error result and lets it carry on. To take an **Always Allow** back, click **Forget** beside the tool under **AI Policy** in the [connection form](/connections/connection-form#options), then **Save**.
+In Edit and Agent modes each tool call appears as a card in the reply. Read-only tools run immediately. Write tools wait for **Run**, for **Always Allow** (which lets that one tool run on that one connection without asking from then on, and syncs with the connection over iCloud), or for **Reject**, which hands the model an error result and lets it carry on. To take an **Always Allow** back, click **Forget** beside the tool under **Policy** on the connection editor's [AI & MCP](/connections/connection-form#ai-%26-mcp) pane, then **Save**.
 
 <Frame caption="Per-card tool approval">
   <img className="block dark:hidden" src="/images/ai-chat-tool-approval.png" alt="Per-card tool approval" />
@@ -178,7 +178,7 @@ The reply comes back as a walkthrough. Optimize and Fix diff your statement agai
 
 ## Per-connection AI rules
 
-Pin plain-text context to a connection so the AI sees it every turn: open the connection's edit form, select **Options**, and fill in **AI Rules**. Use it for what the schema cannot show, like `Always filter orders by deleted_at IS NULL` or `Never select users.ssn`. The text joins the system prompt and syncs with the connection over iCloud.
+Pin plain-text context to a connection so the AI sees it every turn: open the connection's editor, select **AI & MCP**, and fill in **AI Rules**. Use it for what the schema cannot show, like `Always filter orders by deleted_at IS NULL` or `Never select users.ssn`. The text joins the system prompt and syncs with the connection over iCloud.
 
 ## Inline suggestions
 
@@ -201,4 +201,4 @@ Every message carries a system prompt built from **Settings > AI > Context**, so
 
 Apple Intelligence runs inside macOS and sends nothing over the network. Ollama, llama.cpp, and MLX run on your own machine, so nothing reaches a third party. Every other provider is a network call to that vendor under the terms of your account with them.
 
-Per connection, **AI Policy** under **Access** on the connection form's **Options** section takes **Use Default**, **Always Allow**, **Ask Each Time**, or **Never**. A change applies to an open connection from the next message or tool call. The app-wide default is **Default AI policy** under **Privacy** in **Settings > AI**, **Ask Each Time** out of the box: the chat asks before its first message on a connection, and one **Allow** covers every chat and the inline suggestions on that connection until it disconnects. **Never** also blocks external AI tool calls against that connection. External clients such as Raycast and Claude Desktop reach the same tools through the [MCP server](/features/mcp), bounded by the connection's **External Clients** level and the token's scope.
+Per connection, **Policy** under **AI** on the connection editor's **AI & MCP** pane takes **Use Default**, **Always Allow**, **Ask Each Time**, or **Never**. A change applies to an open connection from the next message or tool call. The app-wide default is **Default AI policy** under **Privacy** in **Settings > AI**, **Ask Each Time** out of the box: the chat asks before its first message on a connection, and one **Allow** covers every chat and the inline suggestions on that connection until it disconnects. **Never** also blocks external AI tool calls against that connection. External clients such as Raycast and Claude Desktop reach the same tools through the [MCP server](/features/mcp), bounded by the connection's **External Clients** level and the token's scope.

@@ -15,7 +15,7 @@ Click **New Connection…**, select **Weaviate**, enter host and port, pick an *
 
 There is no Database field. One connection reaches one Weaviate instance, and its collections are the objects.
 
-For a node on a private server, open the **Network** tab and set **Connect via** to **SSH Tunnel**, then set **Host** to the address Weaviate listens on as the SSH server sees it, usually `localhost`. See [SSH Tunneling](/connections/ssh-tunneling).
+For a node on a private server, open the **SSH & Proxies** pane and set **Connect Via** to **SSH Tunnel**, then set **Host** to the address Weaviate listens on as the SSH server sees it, usually `localhost`. See [SSH Tunneling](/connections/ssh-tunneling).
 
 ## Connection settings
 
@@ -25,7 +25,7 @@ For a node on a private server, open the **Network** tab and set **Connect via**
 | **Port** | `8080` by default. Weaviate Cloud answers on `443` |
 | **Auth Method** | None, or API Key |
 | **API Key** | Sent as an `Authorization: Bearer` header, and only when **Auth Method** is API Key |
-| **Skip TLS Verification** | Options section. Trusts any certificate, even under **Verify CA** or **Verify Identity** |
+| **Skip TLS Verification** | **Advanced** pane. Trusts any certificate, even under **Verify CA** or **Verify Identity** |
 
 ## Authentication
 

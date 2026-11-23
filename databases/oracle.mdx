@@ -161,7 +161,7 @@ Anything else renders as `<unsupported: type>`. Report those through [GitHub Iss
 
 ## SSL/TLS
 
-New connections default to **Disabled**, and there is no opportunistic upgrade: **Preferred** connects in plain TCP, which is why the Network tab flags it in red. **Required** is TCPS. **Verify CA** checks the server's certificate against the file in **CA Certificate** and skips the hostname, so it needs a CA certificate: without one, the connection is refused. **Verify Identity** checks the hostname as well. See [SSL/TLS](/connections/ssl).
+New connections default to **Disabled**, and there is no opportunistic upgrade: **Preferred** connects in plain TCP, which is why the **SSL/TLS** pane flags it in red. **Required** is TCPS. **Verify CA** checks the server's certificate against the file in **CA Certificate** and skips the hostname, so it needs a CA certificate: without one, the connection is refused. **Verify Identity** checks the hostname as well. See [SSL/TLS](/connections/ssl).
 
 ## On iPhone and iPad
 
@@ -205,7 +205,7 @@ The server is 10g or earlier. Nothing on this side helps; the database has to be
 
 ### Login Handshake Timed Out
 
-TCP connected but the login never finished, so the attempt stops when the connection's **Connect timeout** expires. An empty field under **Options** uses 30 seconds. The dialog names the step the server stopped answering at. If that step is network encryption, set **Network Encryption** to Rejected and connect again. Otherwise confirm the host and port reach the listener, and look for a firewall, VPN, or proxy that stalls traffic once the TCP handshake is done.
+TCP connected but the login never finished, so the attempt stops when the connection's **Connect Timeout** expires. An empty field on the **Advanced** pane uses 30 seconds. The dialog names the step the server stopped answering at. If that step is network encryption, set **Network Encryption** to Rejected and connect again. Otherwise confirm the host and port reach the listener, and look for a firewall, VPN, or proxy that stalls traffic once the TCP handshake is done.
 
 ### Connection Dropped During Handshake
 

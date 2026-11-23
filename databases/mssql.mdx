@@ -5,7 +5,7 @@ description: Connect to SQL Server and Azure SQL Database with the FreeTDS-based
 
 import RegistryPlugin from "/snippets/registry-plugin.mdx";
 
-Named instances are not supported. Give the host and the TCP port, `1433` by default, and let the **Authentication** dropdown decide the rest of the form: a SQL Server login, a Kerberos ticket from your domain, or a Microsoft Entra ID work account. The protocol underneath is TDS 7.4, which every server from 2012 on speaks, so Windows, Linux, Docker and Azure SQL Database are all reachable.
+Named instances are not supported. Give the host and the TCP port, `1433` by default, and let **Method** under **Authentication** decide the rest of the form: a SQL Server login, a Kerberos ticket from your domain, or a Microsoft Entra ID work account. The protocol underneath is TDS 7.4, which every server from 2012 on speaks, so Windows, Linux, Docker and Azure SQL Database are all reachable.
 
 <RegistryPlugin name="SQL Server" plugin="MSSQL Driver" />
 
@@ -38,7 +38,7 @@ See [Connection URL Reference](/connections/urls) for all parameters.
 
 ## Windows Authentication (Kerberos)
 
-On macOS, Windows Authentication means Kerberos. Set **Authentication** to **Windows Authentication (Kerberos)**, then either leave **Kerberos Principal** and **Password** blank to use the ticket in your credential cache, or enter `user@REALM.COM` and your domain password to have one requested at connect. Get a cached ticket with `kinit user@REALM.COM`; `klist` shows it.
+On macOS, Windows Authentication means Kerberos. Set **Method** under **Authentication** to **Windows Authentication (Kerberos)**, then either leave **Kerberos Principal** and **Password** blank to use the ticket in your credential cache, or enter `user@REALM.COM` and your domain password to have one requested at connect. Get a cached ticket with `kinit user@REALM.COM`; `klist` shows it.
 
 Four things have to hold:
 
@@ -58,7 +58,7 @@ A host with no `[domain_realm]` entry falls back to `default_realm`. TablePro ne
 
 ## Microsoft Entra ID
 
-Set **Authentication** to **Microsoft Entra ID** to sign in with a work account instead of a SQL Server login: Azure SQL Database, Azure SQL Managed Instance, and SQL Server 2022 with Entra authentication enabled.
+Set **Method** under **Authentication** to **Microsoft Entra ID** to sign in with a work account instead of a SQL Server login: Azure SQL Database, Azure SQL Managed Instance, and SQL Server 2022 with Entra authentication enabled.
 
 | Field | Notes |
 |-------|-------|
@@ -155,7 +155,7 @@ SQL Server connections can also run through the [Cloud SQL Auth Proxy](/connecti
 - A `sql_variant` value shows as NULL, because FreeTDS does not report its base type. Select `CAST(col AS nvarchar(4000))` to read it.
 - NTLM is not supported: Windows Authentication on macOS is Kerberos only.
 - Entra ID connections are created on the Mac only, through the device code flow only. iPhone and iPad take them over sync and prompt to sign in when you open one.
-- The Network tab offers no certificate fields here, and your own `freetds.conf` is not read. A server certificate from a private CA fails Verify CA and Verify Identity: use **Required (skip verify)** for that server.
+- The **SSL/TLS** pane offers no certificate fields here, and your own `freetds.conf` is not read. A server certificate from a private CA fails Verify CA and Verify Identity: use **Required (skip verify)** for that server.
 - A result set from a batch offers **Fetch All**, and sorts on the server, only when its query can run again on its own. One that reads a variable, or comes from a procedure call or a loop, stays at the row limit and sorts the rows already shown: raise **Row cap** in [Settings](/customization/settings), or run the query by itself.
 - A batch keeps its first 100 result sets. The statements behind the rest still run, and the status bar says how many result sets were not kept.
 - With a transaction open under `SET XACT_ABORT ON`, a query cut at the row limit reads its whole result before any rows appear. Stop ends it, and SQL Server then rolls the transaction back.

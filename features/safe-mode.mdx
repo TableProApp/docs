@@ -3,7 +3,7 @@ title: Safe Mode
 description: Per-connection query execution controls, from no restrictions to full read-only lockdown
 ---
 
-Six levels, one per connection. In the [connection form](/connections/connection-form#options), open the **Options** section and set **Safe Mode** under **Access**. The level decides what stands between a query and the server: nothing, a confirmation, Touch ID, or a refusal.
+Six levels, one per connection. In the [connection editor](/connections/connection-form#safe-mode), select the **Safe Mode** pane and set **Safe Mode**. The level decides what stands between a query and the server: nothing, a confirmation, Touch ID, or a refusal.
 
 ## Levels
 
@@ -16,7 +16,7 @@ Six levels, one per connection. In the [connection form](/connections/connection
 | **Safe Mode (Full)** | Confirmation + Touch ID | Confirmation + Touch ID | Touch ID / password |
 | **Read-Only** | Blocked entirely | Execute immediately | None |
 
-New connections start at **Silent**, which is the right choice for a local database you own. Move a shared staging connection to **Alert** and anything with real customer data in it to **Safe Mode** or **Read-Only**.
+New connections start at **Silent**, which is the right choice for a local database you own, or at **Alert** when **Environment** on General is set to **Production** before you pick a level. Move a shared staging connection to **Alert** and anything with real customer data in it to **Safe Mode** or **Read-Only**.
 
 Four things the table cannot carry. The confirmation dialog shows the whole statement, syntax highlighted and scrollable, with a **Copy All** button and a line naming the connection and whatever asked to run it. Touch ID falls back to your macOS password on a Mac without it.
 
@@ -28,13 +28,13 @@ Four things the table cannot carry. The confirmation dialog shows the whole stat
 
 ## Connections that are always read-only
 
-A connection that cannot take a write runs at **Read-Only** whatever level it was given. The connection form shows the level as fixed text, and **Read-Only** is the only level the padlock and **Database > Safe Mode Level** offer. The level you chose stays saved and applies again once the condition no longer holds.
+A connection that cannot take a write runs at **Read-Only** whatever level it was given. The connection editor shows the level as fixed text, and **Read-Only** is the only level the padlock and **Database > Safe Mode Level** offer. The level you chose stays saved and applies again once the condition no longer holds.
 
 | Connection | Condition |
 |------------|-----------|
 | [Beancount](/databases/beancount) | The ledger is a projection of text files, and nothing writes it back |
 | [Cloudflare R2 SQL](/databases/cloudflare-r2-sql) | The engine runs read queries only |
-| [SQLite](/databases/sqlite) on **Remote Database File**, opened **As a Read-Only Copy** | The file is a copy fetched over SFTP, and nothing writes it back |
+| [SQLite](/databases/sqlite) on **Remote Server over SSH**, opened **As a Read-Only Copy** | The file is a copy fetched over SFTP, and nothing writes it back |
 
 ## Agent mode raises the level
 
@@ -132,7 +132,7 @@ This is a floor on TablePro's own behavior, not on the database. It stops the ap
 
 A write from an external client (Raycast, Cursor, Claude Desktop, any MCP client) clears three locks in order:
 
-1. **External Clients** (per connection: **Blocked** / **Read Only** / **Read & Write**), next to **Safe Mode** under **Access** on the connection form's **Options** section. A Read Only connection rejects a write before the request reaches the database. Reads also use the driver's read-only mode where supported; see [What Read Only allows](/developers#what-read-only-allows).
+1. **External Clients** (per connection: **Blocked** / **Read Only** / **Read & Write**), the **Access** setting on the connection editor's [**AI & MCP**](/connections/connection-form#ai-%26-mcp) pane. A Read Only connection rejects a write before the request reaches the database. Reads also use the driver's read-only mode where supported; see [What Read Only allows](/developers#what-read-only-allows).
 2. **Token scope** (per integration: `readOnly` / `readWrite` / `fullAccess`), issued by the [pairing flow](/developers/pairing). The effective permission is `MIN(token.scope, connection.externalAccess)`.
 3. **Safe Mode**, per query. Everything on this page then applies, Touch ID prompts and confirmation dialogs included.
 

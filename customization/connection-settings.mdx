@@ -3,7 +3,7 @@ title: Connection Settings
 description: Connection checks, the query timeout, recent connections, linked folders, and trusted links
 ---
 
-**Settings > Connections** holds what every connection shares. One connection can override the query timeout in its own form.
+**Settings > Connections** holds what every connection shares. One connection can override the query timeout on its own **Advanced** pane.
 
 <Frame caption="The Connections pane">
   <img className="block dark:hidden" src="/images/settings-connections.png" alt="Connections pane with Check open connections, Query timeout, the Recent Connections section, and the Linked Folders and Trusted Links rows" />
@@ -18,7 +18,7 @@ description: Connection checks, the query timeout, recent connections, linked fo
 
 How long a query runs before it is cancelled. The default is 1 minute; the menu offers 10 seconds to 10 minutes and **No limit**. The value is read when a connection opens, so a change reaches an open connection only after you reconnect.
 
-A connection can override this value under **Options > Query timeout**. Leave that field empty to inherit this setting: the field shows the value it inherits, such as **Global (60)**, or **No limit**. Enter `0` for no limit on that connection alone. The same section has a separate connect timeout for tunnels, proxies and database sign-in; it does not change how long a query can run.
+A connection can override this value with **Query Timeout** on its [Advanced pane](/connections/connection-form#advanced). Leave that field empty to inherit this setting: the field shows the value it inherits, such as **Global (60)**, or **No limit**. Enter `0` for no limit on that connection alone. The same section has a separate **Connect Timeout** for tunnels, proxies and database sign-in; it does not change how long a query can run.
 
 Where the engine can enforce it, the timeout becomes a server-side setting: `statement_timeout` on PostgreSQL, `max_execution_time` on MySQL and ClickHouse, `max_statement_time` on MariaDB, `ob_query_timeout` on OceanBase, `query_timeout` on StarRocks. On SQLite it bounds how long a statement waits for a locked database instead. Drivers that talk HTTP (BigQuery, Bigtable, Spanner, Cloudflare D1, LibSQL, Etcd, DynamoDB, Elasticsearch, Typesense, and ClickHouse) bound the request at the timeout plus 30 seconds, and Oracle enforces it in the client: the connection is closed to unblock the call, and the next query reconnects and restores your current schema. SAP HANA ends the statement with the same `ALTER SYSTEM CANCEL SESSION` that **Stop** sends.
 

@@ -94,7 +94,7 @@ Frozen columns cover at most two thirds of the grid's width. The menu item is di
 
 ### Large binary values
 
-On MySQL and MariaDB, a binary value larger than the connection's limit stays on the server until you need it, in any table with a primary key. The cell shows the value's size in italics, such as *5.2 MB*. Set the limit under **Options > Load binary values up to** in the [connection form](/connections/connection-form#options); it is 64 KB until you change it.
+On MySQL and MariaDB, a binary value larger than the connection's limit stays on the server until you need it, in any table with a primary key. The cell shows the value's size in italics, such as *5.2 MB*. Set the limit with **Binary Value Limit**, under **Table Data** on the connection editor's [Advanced](/connections/connection-form#advanced) pane; it is 64 KB until you change it.
 
 The value is read by its primary key when you open the cell, copy it, show its row in the inspector with one row selected, duplicate the row, list the column's values with **Filter Values…**, or export the rows with **Export Results…**. **File > Export** reads every value as before. Set NULL, paste and **Fill Column** read the value first, so undo puts it back. A table without a primary key, a sorted column and a column under a value filter load every value with the page.
 
