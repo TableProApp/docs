@@ -396,6 +396,7 @@
               "features/icloud-sync",
               "features/handoff",
               "features/licensing",
+              "features/company-server",
               "features/team",
               "features/shared-links"
             ]
