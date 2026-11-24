@@ -159,7 +159,7 @@ Installing a plugin downloads its ZIP over HTTPS from the URL in that catalog an
 
 A provider's own model list leaves out facts the app needs, such as which of OpenAI's models can chat and which reasoning levels a model takes. A catalog built from [models.dev](https://models.dev) fills them in. It ships inside each app, so nothing is fetched while AI is off or no provider is set up.
 
-When the model list of Claude, OpenAI, ChatGPT, Gemini, xAI or Meta loads, the Mac app asks for `https://updates.tablepro.app/ai/models-v1.json`, and its HTTP cache answers without a request while the last response is under ten minutes old. The Linux and Windows apps ask at most once an hour, when a Claude or OpenAI list loads, sending only the ETag of the copy they hold. No key, account or model choice goes with the request; GitHub Pages sees the IP address. A newer copy replaces the bundled one until the next app update brings a newer one still.
+When the model list of Claude, OpenAI, ChatGPT, Gemini, xAI or Meta loads, the Mac app asks for `https://updates.tablepro.app/ai/models-v1.json`, at most once an hour. The Linux and Windows apps do the same when a Claude or OpenAI list loads. Each sends the ETag of the copy it holds. No key, account or model choice goes with the request; GitHub Pages sees the IP address. A newer copy replaces the bundled one until the next app update brings a newer one still.
 
 There is no setting that turns the catalog fetch off.
 
