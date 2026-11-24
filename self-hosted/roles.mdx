@@ -1,0 +1,57 @@
+---
+title: Roles on a self-hosted server
+description: The server's owner, admins and members, the owner, admin, editor and member roles inside each team, and how to remove someone from the server
+---
+
+A self-hosted server has two layers of roles. The server role decides who runs the server: who creates teams and who removes people. The team role decides what someone does inside one team, as on tablepro.app.
+
+## Server roles
+
+| Role | Can |
+|---|---|
+| Owner | Everything an admin can, plus remove or restore an admin, and, when no IdP group decides, make a member an admin or an admin a member. Exactly one. Never removed |
+| Admin | Create teams, see everyone who has signed in under **Server > Members**, and remove or restore members |
+| Member | Sign in, and join the teams they are invited to |
+
+The owner is whoever opens the link `bootstrap` printed and signs in. Everyone else becomes a member at their first sign-in, unless the IdP's admin group says otherwise.
+
+How someone becomes an admin depends on `IDP_ADMIN_GROUP_ID`:
+
+- **Set.** The IdP group decides, at each sign-in, and for OIDC at each check the server makes with the IdP. Someone with no groups is in no group. **Server > Members** shows the roles read-only, and a change in the group takes effect at the person's next sign-in.
+- **Unset.** The owner chooses **Make admin** or **Make member** on **Server > Members**, and each change is audited. A sign-in keeps the role.
+
+Setting `IDP_ADMIN_GROUP_ID` on a server that ran without it hands the choice to the group at each person's next sign-in. The owner stays owner either way.
+
+### Replace the owner
+
+When the owner can no longer sign in, run `bootstrap --replace-owner` as on [Docker Compose](/self-hosted/docker-compose#run-a-command) or [AWS](/self-hosted/aws#run-a-command). Whoever opens its link within the hour and signs in becomes the owner, and the owner before them a member.
+
+## Team roles
+
+The owner or an admin of the server creates a team with **Create a team…** and becomes its owner. Inside each team:
+
+| Role | Can |
+|---|---|
+| Owner | Everything an admin can, plus transfer ownership and delete the team. Exactly one per team, and never removed |
+| Admin | Invite and remove members, change their roles, make API tokens, read the audit log, rename the team, and change the Team Library |
+| Editor | Add, change and remove the team's Team Library items: publish connections and queries from the Mac, and delete items on the team's **Library** page |
+| Member | Read the team's library and leave the team |
+
+Owners and admins invite with **Invite member…**, an email address and a role, then **Create invitation**. The server sends no email: copy the link it shows and send it yourself. A link works for 7 days for whoever opens it with an account on this server. **New link** on a pending invitation replaces the earlier link.
+
+Every team member reads the library through their server seat. Teams have no seats of their own on a self-hosted server.
+
+## Seats
+
+Each person takes one seat of the license at their first sign-in and keeps it until removed. A sign-in with every seat taken, or with no license installed, is refused. `license status` shows the seats taken; see [License](/self-hosted/operations#license).
+
+## Remove someone
+
+Removing someone from the IdP stops their sign-ins, but the seat and some credentials stay until they are removed on the server. An owner or admin opens **Server > Members** and chooses **Remove from server…** beside the person. That:
+
+- signs them out of the portal and every app, and they cannot sign in again until restored;
+- takes them out of every team, and makes the remover the owner of each team they owned;
+- revokes the team API tokens they created and the invitation links they were handed;
+- frees their seat.
+
+Only the owner removes an admin, and nobody removes the owner or themselves. **Restore…** lets a removed person sign in again; their next sign-in takes a seat, and their teams are not given back.

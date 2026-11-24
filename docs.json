@@ -402,6 +402,20 @@
             ]
           },
           {
+            "group": "Self-hosted server",
+            "icon": "server",
+            "pages": [
+              "self-hosted/index",
+              "self-hosted/image",
+              "self-hosted/settings",
+              "self-hosted/docker-compose",
+              "self-hosted/aws",
+              "self-hosted/sign-in",
+              "self-hosted/roles",
+              "self-hosted/operations"
+            ]
+          },
+          {
             "group": "Customization",
             "pages": [
               "customization/settings",

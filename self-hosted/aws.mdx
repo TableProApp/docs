@@ -1,0 +1,275 @@
+---
+title: Run on AWS Fargate
+description: Run the self-hosted TablePro server as one ECS Fargate task behind an Application Load Balancer, with RDS for PostgreSQL 18 and keys in Secrets Manager
+---
+
+Fargate runs the server as one ECS service with one task, behind an Application Load Balancer, with RDS for PostgreSQL 18 and the secrets in Secrets Manager. The server calls no AWS API, so the task needs no task role.
+
+Replace every `<...>` in the files on this page with your own values.
+
+## Network
+
+- **Load balancer.** An internet-facing ALB in two public subnets. Listener 443 with an ACM certificate for both hostnames (a wildcard covers them) and the policy `ELBSecurityPolicy-TLS13-1-2-2021-06`. Listener 80 redirects to 443.
+- **Target group.** Type `ip`, port 8080, health check path `/readyz`, matcher 200, interval 15 seconds, healthy threshold 2, unhealthy threshold 5, deregistration delay 30 seconds. No host rules: the server routes by `Host` itself.
+- **ALB attributes.** `routing.http.drop_invalid_header_fields.enabled=true`, `routing.http.preserve_host_header.enabled=true`, `routing.http.xff_header_processing.mode=append` (the default), `deletion_protection.enabled=true`.
+- **Security groups.** The ALB takes 443 and 80 from the clients. The task takes 8080 from the ALB's group only. RDS takes 5432 from the task's group only.
+- **Egress.** The task pulls the image from GHCR, and with OIDC it calls the IdP. Use private subnets with a NAT gateway, or public subnets with `assignPublicIp`. With no egress, mirror the image to ECR with `oras cp -r` ([Image and keys](/self-hosted/image#mirror-to-a-private-registry)) and run an OIDC IdP inside the VPC. A SAML IdP needs no route from the task: the browser carries its answer.
+- **Client address.** `CLIENT_ADDRESS=xff`, with `CLIENT_ADDRESS_TRUSTED_CIDRS` set to the CIDRs of the ALB's subnets, which hold nothing else. Not the VPC's CIDR: a workload elsewhere in it would set its own rate-limit key.
+
+## Database
+
+- **Instance.** RDS for PostgreSQL 18, single-AZ, `db.t4g.small`, gp3 20 GB, encrypted, automated backups kept 7 to 35 days, deletion protection on. Check the class is orderable in your Region first:
+
+  ```bash
+  aws rds describe-orderable-db-instance-options --engine postgres --engine-version 18.6 --db-instance-class db.t4g.small
+  ```
+
+- **Role.** Connect once as the master user and create the server's own role and database. The server never uses the master user.
+
+  ```sql
+  create role tablepro login password '<password>';
+  create database tablepro owner tablepro;
+  ```
+
+- **TLS.** RDS forces TLS from PostgreSQL 15. `DATABASE_URL` checks the server against the RDS CA bundle in the image with `sslmode=verify-full&sslrootcert=/etc/ssl/rds-global-bundle.pem`.
+
+## Secrets and the execution role
+
+| Secret | Holds | Injected as |
+|---|---|---|
+| `tablepro/db` | `{"password": "<the tablepro role's password>"}` | `PGPASSWORD`, by its `password` key |
+| `tablepro/oidc` | The OIDC client secret, as plain text. None with SAML or a public OIDC client | `OIDC_CLIENT_SECRET` |
+| `tablepro/keys` | The output of [`credentials.sh`](/self-hosted/image#generate-the-keys) | `TABLEPRO_CREDENTIALS` |
+
+The task execution role `tablepro-cloud-execution` has `AmazonECSTaskExecutionRolePolicy`, plus `secretsmanager:GetSecretValue` on the three secrets, and `kms:Decrypt` when they use a customer managed key.
+
+ECS reads a secret only when a task starts. After changing one, run `aws ecs update-service --cluster tablepro --service tablepro-cloud --force-new-deployment`.
+
+## Task definition
+
+ARM64, 0.5 vCPU and 1 GB, with `GOMEMLIMIT=700MiB`. `migrate` runs `migrate up` and exits; `app` starts only once it exited 0. Both run read-only with every capability dropped.
+
+```json ecs-task-definition.json
+{
+  "family": "tablepro-cloud",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "512",
+  "memory": "1024",
+  "runtimePlatform": {
+    "cpuArchitecture": "ARM64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "executionRoleArn": "arn:aws:iam::<account-id>:role/tablepro-cloud-execution",
+  "containerDefinitions": [
+    {
+      "name": "migrate",
+      "image": "ghcr.io/tableproapp/tablepro-cloud:<version>@sha256:<digest>",
+      "essential": false,
+      "command": ["migrate", "up"],
+      "readonlyRootFilesystem": true,
+      "linuxParameters": {
+        "capabilities": { "drop": ["ALL"] }
+      },
+      "environment": [
+        { "name": "PROFILE", "value": "selfhosted" },
+        { "name": "DATABASE_URL", "value": "postgres://tablepro@<rds-endpoint>:5432/tablepro?sslmode=verify-full&sslrootcert=/etc/ssl/rds-global-bundle.pem" },
+        { "name": "ACCOUNT_HOST", "value": "tablepro-account.example.com" },
+        { "name": "API_HOST", "value": "tablepro.example.com" },
+        { "name": "CLIENT_ADDRESS", "value": "xff" },
+        { "name": "CLIENT_ADDRESS_TRUSTED_CIDRS", "value": "<alb-subnet-a-cidr>,<alb-subnet-b-cidr>" },
+        { "name": "OIDC_ISSUER", "value": "https://<idp>" },
+        { "name": "OIDC_CLIENT_ID", "value": "<client-id>" }
+      ],
+      "secrets": [
+        { "name": "PGPASSWORD", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:tablepro/db-<suffix>:password::" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/tablepro-cloud",
+          "awslogs-region": "<region>",
+          "awslogs-stream-prefix": "migrate"
+        }
+      }
+    },
+    {
+      "name": "app",
+      "image": "ghcr.io/tableproapp/tablepro-cloud:<version>@sha256:<digest>",
+      "essential": true,
+      "command": ["serve"],
+      "dependsOn": [{ "containerName": "migrate", "condition": "SUCCESS" }],
+      "portMappings": [{ "name": "http", "containerPort": 8080, "protocol": "tcp" }],
+      "stopTimeout": 60,
+      "readonlyRootFilesystem": true,
+      "linuxParameters": {
+        "capabilities": { "drop": ["ALL"] }
+      },
+      "healthCheck": {
+        "command": ["CMD", "/tablepro-cloud", "healthcheck"],
+        "interval": 15,
+        "timeout": 6,
+        "retries": 3,
+        "startPeriod": 60
+      },
+      "environment": [
+        { "name": "PROFILE", "value": "selfhosted" },
+        { "name": "DATABASE_URL", "value": "postgres://tablepro@<rds-endpoint>:5432/tablepro?sslmode=verify-full&sslrootcert=/etc/ssl/rds-global-bundle.pem" },
+        { "name": "ACCOUNT_HOST", "value": "tablepro-account.example.com" },
+        { "name": "API_HOST", "value": "tablepro.example.com" },
+        { "name": "CLIENT_ADDRESS", "value": "xff" },
+        { "name": "CLIENT_ADDRESS_TRUSTED_CIDRS", "value": "<alb-subnet-a-cidr>,<alb-subnet-b-cidr>" },
+        { "name": "OIDC_ISSUER", "value": "https://<idp>" },
+        { "name": "OIDC_CLIENT_ID", "value": "<client-id>" },
+        { "name": "IDP_ADMIN_GROUP_ID", "value": "<admin-group-id>" },
+        { "name": "IDP_DISPLAY_NAME", "value": "<idp-name>" },
+        { "name": "GOMEMLIMIT", "value": "700MiB" }
+      ],
+      "secrets": [
+        { "name": "PGPASSWORD", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:tablepro/db-<suffix>:password::" },
+        { "name": "OIDC_CLIENT_SECRET", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:tablepro/oidc-<suffix>" },
+        { "name": "TABLEPRO_CREDENTIALS", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:tablepro/keys-<suffix>" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/tablepro-cloud",
+          "awslogs-region": "<region>",
+          "awslogs-stream-prefix": "app"
+        }
+      }
+    }
+  ]
+}
+```
+
+With a SAML IdP, replace `OIDC_ISSUER` and `OIDC_CLIENT_ID` with `SAML_IDP_ENTITY_ID` in both containers, and drop the `OIDC_CLIENT_SECRET` secret. Every container reads the IdP settings, since each checks the whole configuration at start.
+
+```bash
+aws ecs register-task-definition --cli-input-json file://ecs-task-definition.json
+```
+
+- `app`'s health check runs `/tablepro-cloud healthcheck`, which checks `/healthz`, so a database outage restarts nothing.
+- `stopTimeout` 60 covers the 10 seconds HTTP drains and the 30 seconds background jobs drain after SIGTERM.
+
+## Service
+
+| Setting | Value |
+|---|---|
+| `desiredCount` | 1 |
+| `minimumHealthyPercent` | 100 |
+| `maximumPercent` | 200 |
+| `deploymentCircuitBreaker` | On, with rollback |
+| `healthCheckGracePeriodSeconds` | 60 |
+| Platform version | `LATEST` |
+
+- Create the log group `/ecs/tablepro-cloud` with a retention of 30 to 90 days before the first task starts.
+- An EventBridge rule on `SERVICE_DEPLOYMENT_FAILED` to an SNS topic tells you when a deploy fails.
+
+<Warning>
+Keep one task. Each task runs the migrations as it starts, and the second half of them takes no lock. Start a one-off command only while no deploy is under way, since it runs `migrate` too.
+</Warning>
+
+## Run a command
+
+A one-off command is `aws ecs run-task` with the task definition and a command override on `app`, in the service's subnets and security group. A standalone task does not take the service's network settings: use `assignPublicIp=ENABLED` in public subnets, or it cannot pull the image, and `DISABLED` behind a NAT gateway.
+
+```bash
+aws ecs run-task --cluster tablepro --task-definition tablepro-cloud --launch-type FARGATE \
+  --network-configuration 'awsvpcConfiguration={subnets=[<subnet>],securityGroups=[<task-group>],assignPublicIp=<ENABLED|DISABLED>}' \
+  --overrides '{"containerOverrides":[{"name":"app","command":["bootstrap","<first team name>"]}]}'
+```
+
+The output lands in the task's log stream under the prefix `app`. `license status`, `bootstrap --replace-owner` and `sync new-epoch` run the same way, with their words as the command.
+
+<Warning>
+`bootstrap` prints the owner's claim link to the log stream, where anyone who reads the log group can use it within its hour. Running `bootstrap` again voids the earlier link.
+</Warning>
+
+## Install the license
+
+A second task definition writes the license file to a volume only its own task holds, then runs `license install` on it. Register it once, with the same values as the first:
+
+```json ecs-license-task-definition.json
+{
+  "family": "tablepro-cloud-license",
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "runtimePlatform": {
+    "cpuArchitecture": "ARM64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "executionRoleArn": "arn:aws:iam::<account-id>:role/tablepro-cloud-execution",
+  "volumes": [{ "name": "license" }],
+  "containerDefinitions": [
+    {
+      "name": "license-file",
+      "image": "public.ecr.aws/docker/library/busybox:1.37.0@sha256:a7dbc319b1438115a207e11930dc4bb3e643dcb3ec0bdd694bb36cd8fad289ec",
+      "essential": false,
+      "command": ["sh", "-c", "printf '%s' \"$LICENSE\" > /license/license.jwt"],
+      "environment": [{ "name": "LICENSE", "value": "<overridden by run-task>" }],
+      "mountPoints": [{ "sourceVolume": "license", "containerPath": "/license" }],
+      "readonlyRootFilesystem": true,
+      "linuxParameters": {
+        "capabilities": { "drop": ["ALL"] }
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/tablepro-cloud",
+          "awslogs-region": "<region>",
+          "awslogs-stream-prefix": "license"
+        }
+      }
+    },
+    {
+      "name": "install",
+      "image": "ghcr.io/tableproapp/tablepro-cloud:<version>@sha256:<digest>",
+      "essential": true,
+      "command": ["license", "install", "/license/license.jwt"],
+      "dependsOn": [{ "containerName": "license-file", "condition": "SUCCESS" }],
+      "mountPoints": [{ "sourceVolume": "license", "containerPath": "/license", "readOnly": true }],
+      "readonlyRootFilesystem": true,
+      "linuxParameters": {
+        "capabilities": { "drop": ["ALL"] }
+      },
+      "environment": [
+        { "name": "PROFILE", "value": "selfhosted" },
+        { "name": "DATABASE_URL", "value": "postgres://tablepro@<rds-endpoint>:5432/tablepro?sslmode=verify-full&sslrootcert=/etc/ssl/rds-global-bundle.pem" },
+        { "name": "ACCOUNT_HOST", "value": "tablepro-account.example.com" },
+        { "name": "API_HOST", "value": "tablepro.example.com" },
+        { "name": "CLIENT_ADDRESS", "value": "xff" },
+        { "name": "CLIENT_ADDRESS_TRUSTED_CIDRS", "value": "<alb-subnet-a-cidr>,<alb-subnet-b-cidr>" },
+        { "name": "OIDC_ISSUER", "value": "https://<idp>" },
+        { "name": "OIDC_CLIENT_ID", "value": "<client-id>" }
+      ],
+      "secrets": [
+        { "name": "PGPASSWORD", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:tablepro/db-<suffix>:password::" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/tablepro-cloud",
+          "awslogs-region": "<region>",
+          "awslogs-stream-prefix": "license"
+        }
+      }
+    }
+  ]
+}
+```
+
+Then run it with the file. A renewal is the same run with the new file:
+
+```bash
+aws ecs run-task --cluster tablepro --task-definition tablepro-cloud-license --launch-type FARGATE \
+  --network-configuration 'awsvpcConfiguration={subnets=[<subnet>],securityGroups=[<task-group>],assignPublicIp=<ENABLED|DISABLED>}' \
+  --overrides "$(jq -n --rawfile license license.jwt \
+    '{containerOverrides: [{name: "license-file", environment: [{name: "LICENSE", value: ($license | rtrimstr("\n"))}]}]}')"
+```
+
+The file holds no secret. The result is in the log stream with the prefix `license`.
+
+Upgrades, restores and the log events to alert on are under [License and upkeep](/self-hosted/operations).
