@@ -244,8 +244,8 @@ Right-click tables in the sidebar and choose **Transfer To…** to copy their ro
   <Step title="Open both connections">
     The destination list holds the connections that are already open. A connection that is not open does not appear.
   </Step>
-  <Step title="Pick the destination and its database">
-    Then tick the tables to copy.
+  <Step title="Pick the destination, its database and schema">
+    On an engine with schemas, **Schema** picks where the rows land. It starts on the source table's schema when the destination has one by that name, otherwise on the schema the destination is browsing. Then tick the tables to copy.
   </Step>
   <Step title="Transfer">
     The destination's [Safe Mode](/features/safe-mode) covers the whole transfer, with one confirmation and one Touch ID prompt where its level asks for them. Each table is wrapped in its own transaction by default, so a table that fails leaves its own rows untouched and the ones before it committed.
