@@ -15,6 +15,7 @@ Turn off app usage data in the privacy settings if you do not want to send it. M
 | [Mac update check](#update-checks) | `updates.tablepro.app` | On; **Settings > General > Software Update** |
 | [Mac plugin catalog](#the-plugin-catalog) | `updates.tablepro.app` | On; no off switch |
 | [AI provider](#ai-providers) | Your chosen provider | No provider on a fresh install; remove it or turn off **Enable AI features** |
+| [AI model catalog](#the-ai-model-catalog), Mac, Linux and Windows | `updates.tablepro.app` | Only when a provider's model list loads; no provider on a fresh install |
 | [iCloud sync](#icloud-sync) | Your iCloud account | Off; **Settings > iCloud Sync** |
 | [MCP clients](#the-mcp-server) | Local HTTP and a private Unix socket | Off; **Settings > MCP** |
 | [Accounts and Team Library](#accounts-and-the-team-library) | `api.tablepro.app` | Account requests after sign-in; content uploads when published |
@@ -82,7 +83,7 @@ Earlier versions sent a daily report to the relay endpoint above instead, also o
 
 Nothing reaches a model until you add a provider, and a fresh install has none: with none configured, every AI path returns before it builds a request. **Enable AI features** in **Settings > AI** is on out of the box, but with no provider it gates nothing.
 
-One provider is marked active and answers inline suggestions and the editor actions; the chat panel's own model picker can send a turn to any other provider you configured. Requests go to that provider's endpoint. The presets are `api.anthropic.com`, `api.openai.com`, `generativelanguage.googleapis.com`, `api.x.ai`, `openrouter.ai`, `router.requesty.ai`, `api.meta.ai`, `api.cursor.com` and `opencode.ai`, plus `http://localhost:11434` for Ollama and `http://localhost:8080` for llama.cpp and MLX, which keeps their traffic on the machine. Every endpoint field is editable, and a custom provider goes wherever you point it. Meta's `-contributor` models, which Meta may train on what you send, stay out of its model list; one is used only when you type its id under **Other…**.
+One provider is marked active and answers inline suggestions and the editor actions; the chat panel's own model picker can send a turn to any other provider you configured. Requests go to that provider's endpoint, and loading its model list also reads the [AI model catalog](#the-ai-model-catalog). ChatGPT's model list comes from `chatgpt.com/backend-api/codex/models`, the host its chat already uses. The presets are `api.anthropic.com`, `api.openai.com`, `generativelanguage.googleapis.com`, `api.x.ai`, `openrouter.ai`, `router.requesty.ai`, `api.meta.ai`, `api.cursor.com` and `opencode.ai`, plus `http://localhost:11434` for Ollama and `http://localhost:8080` for llama.cpp and MLX, which keeps their traffic on the machine. Every endpoint field is editable, and a custom provider goes wherever you point it. Meta's `-contributor` models, which Meta may train on what you send, stay out of its model list; one is used only when you type its id under **Other…**.
 
 A chat turn carries:
 
@@ -153,6 +154,12 @@ Updates download from the GitHub release named in the feed. Sparkle checks the f
 At launch the app asks for `https://updates.tablepro.app/plugins/v3.json`, and its HTTP cache answers without a request while the last response is under ten minutes old. It asks the server again before it reports a plugin missing, and when it repairs a plugin that a newer app version rejected. The request adds no header of its own; GitHub Pages sees the IP address and the user agent URLSession sends. The response is cached on disk.
 
 Installing a plugin downloads its ZIP over HTTPS from the URL in that catalog and checks it against the SHA-256 the catalog declares.
+
+## The AI model catalog
+
+A provider's own model list leaves out facts the app needs, such as which of OpenAI's models can chat and which reasoning levels a model takes. A catalog built from [models.dev](https://models.dev) fills them in. It ships inside each app, so nothing is fetched while AI is off or no provider is set up.
+
+When the model list of Claude, OpenAI, ChatGPT, Gemini, xAI or Meta loads, the Mac app asks for `https://updates.tablepro.app/ai/models-v1.json`, and its HTTP cache answers without a request while the last response is under ten minutes old. The Linux and Windows apps ask at most once an hour, when a Claude or OpenAI list loads, sending only the ETag of the copy they hold. No key, account or model choice goes with the request; GitHub Pages sees the IP address. A newer copy replaces the bundled one until the next app update brings a newer one still.
 
 There is no setting that turns the catalog fetch off.
 
