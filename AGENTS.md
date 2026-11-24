@@ -48,4 +48,4 @@ Short sentences, plain words, specific numbers and names. No em dashes, no fille
 
 ## Commits and pull requests
 
-Squash merges use the pull request title as the commit subject. Conventional Commits, at most 72 characters: `docs(<area>): <description>` for pages, `ci:` or `chore:` for tooling. Areas are the top-level directories (`features`, `databases`, `connections`, `developers`, `integrations`, `customization`, `development`, `ios`, `security`) and `changelog`.
+Squash merges use the pull request title as the commit subject. Conventional Commits, at most 72 characters: `docs(<area>): <description>` for pages, `ci:` or `chore:` for tooling. Areas are the top-level directories (`features`, `databases`, `connections`, `developers`, `integrations`, `customization`, `development`, `ios`, `security`, `self-hosted`) and `changelog`.

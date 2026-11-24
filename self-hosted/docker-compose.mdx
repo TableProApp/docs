@@ -1,0 +1,200 @@
+---
+title: Run with Docker Compose
+description: Run the self-hosted TablePro server and PostgreSQL 18 on one Linux host with Docker Compose, behind your own TLS reverse proxy
+---
+
+Three containers come up: PostgreSQL 18, `migrate`, which applies pending migrations and exits before every start of the server, and `app`, which serves on `127.0.0.1:8080`. Each server container runs read-only with every capability dropped, and logs rotate at 5 files of 10 MB.
+
+You need Docker with Compose v2, the image digest and `credentials.sh` from [Image and keys](/self-hosted/image), and a TLS reverse proxy for both hostnames.
+
+## Files
+
+Save both files in one directory on the host.
+
+```yaml compose.yaml
+# The self-hosted TablePro server with Docker Compose: https://docs.tablepro.app/self-hosted/docker-compose
+# Settings come from .env beside this file. TLS terminates at your reverse proxy, which forwards to the published port.
+name: tablepro
+
+x-tablepro: &tablepro
+  image: ${TABLEPRO_IMAGE:?set TABLEPRO_IMAGE in .env}
+  env_file: .env
+  environment:
+    PROFILE: selfhosted
+    DATABASE_URL: postgres://tablepro@postgres:5432/tablepro?sslmode=disable
+    PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    # The network below holds only these containers and its gateway, where a proxy on this host comes from.
+    CLIENT_ADDRESS: ${CLIENT_ADDRESS:-xff}
+    CLIENT_ADDRESS_TRUSTED_CIDRS: ${CLIENT_ADDRESS_TRUSTED_CIDRS-${TABLEPRO_SUBNET:-172.28.47.0/24}}
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "5"
+
+services:
+  postgres:
+    image: postgres:18.7-trixie@sha256:f5cbc081c25690710f3fc6f4c61a7565382bae01ca0d0f2028a53d7926b85a20
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tablepro
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: tablepro
+    volumes:
+      - postgres:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tablepro -d tablepro"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  # Runs before every start of app; a no-op when no migration is pending.
+  migrate:
+    <<: *tablepro
+    command: ["migrate", "up"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    <<: *tablepro
+    command: ["serve"]
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "${TABLEPRO_PUBLISH:-127.0.0.1:8080}:8080"
+    # HTTP drains for 10 seconds and background jobs for 30 after SIGTERM.
+    stop_grace_period: 60s
+    healthcheck:
+      test: ["CMD", "/tablepro-cloud", "healthcheck"]
+      interval: 15s
+      timeout: 6s
+      retries: 3
+      start_period: 30s
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${TABLEPRO_SUBNET:-172.28.47.0/24}
+
+volumes:
+  postgres:
+```
+
+```ini .env
+# Fill in, then chmod 600 .env. Every variable: https://docs.tablepro.app/self-hosted/settings
+
+# The release to run, by version and digest.
+TABLEPRO_IMAGE=ghcr.io/tableproapp/tablepro-cloud:0.1.0@sha256:<index digest>
+
+# The database password: openssl rand -hex 24. Postgres keeps the first one it starts with.
+POSTGRES_PASSWORD=
+
+# The browser reaches the portal on ACCOUNT_HOST, the apps reach the API on API_HOST, both over https through your
+# reverse proxy. A license's origin is https://API_HOST.
+ACCOUNT_HOST=tablepro-account.example.com
+API_HOST=tablepro.example.com
+
+# Where your reverse proxy reaches the server. The default publishes on loopback only, for a proxy on this host.
+# TABLEPRO_PUBLISH=127.0.0.1:8080
+
+# Clients' addresses, for the rate limits, come from X-Forwarded-For as your proxy sets it. A proxy on this host
+# reaches the server from the Compose network, which the server trusts. Change the network when its range is taken.
+# TABLEPRO_SUBNET=172.28.47.0/24
+# A proxy on another machine: publish where it reaches, and trust only its own addresses, never the clients'.
+# CLIENT_ADDRESS_TRUSTED_CIDRS=192.0.2.10/32
+
+# Your identity provider, over OIDC. The redirect URI to register is https://ACCOUNT_HOST/api/auth/oidc/callback.
+OIDC_ISSUER=https://idp.example.com
+OIDC_CLIENT_ID=tablepro
+OIDC_CLIENT_SECRET=
+# Or over SAML 2.0: leave the three OIDC_ settings out, set the IdP's entityID from its metadata, and pass the metadata
+# file to credentials.sh. bootstrap prints the ACS URL, audience and start URL the IdP's application needs.
+# SAML_IDP_ENTITY_ID=
+# The IdP group, by ID, whose members are the install's admins. An OIDC IdP sends it in the groups claim unless
+# OIDC_GROUPS_CLAIM names another, a SAML IdP in the groups attribute.
+IDP_ADMIN_GROUP_ID=
+# The sign-in button's name for your identity provider.
+IDP_DISPLAY_NAME=
+
+# The server's signing and encryption keys, as one line from credentials.sh, in single quotes.
+# Keep a copy offline: a database restored without these keys cannot read the IdP tokens it holds.
+TABLEPRO_CREDENTIALS=
+```
+
+`TABLEPRO_PUBLISH`, `TABLEPRO_SUBNET` and `POSTGRES_PASSWORD` are read by the Compose file. Everything else in `.env` goes to the server as it stands; [Settings](/self-hosted/settings) lists the rest.
+
+## Start the server
+
+<Steps>
+  <Step title="Fill in .env">
+    Set `TABLEPRO_IMAGE` to the digest you verified, a new `POSTGRES_PASSWORD`, both hostnames and your IdP. With SAML, delete the `OIDC_` lines and set `SAML_IDP_ENTITY_ID`. Then `chmod 600 .env`.
+  </Step>
+  <Step title="Add the keys">
+    Remove the empty `TABLEPRO_CREDENTIALS=` line, then append the keys from `credentials.sh`, with your SAML IdP's metadata file as its second argument when you use SAML:
+
+    ```bash
+    printf "TABLEPRO_CREDENTIALS='%s'\n" "$(./credentials.sh "$TABLEPRO_IMAGE")" >> .env
+    ```
+
+    Set `TABLEPRO_IMAGE` in the shell to the value in `.env` first. Use `printf`, not `echo`: `echo` in dash turns the JSON's `\n` into line breaks.
+  </Step>
+  <Step title="Start it">
+    ```bash
+    docker compose up -d
+    ```
+  </Step>
+  <Step title="Point the reverse proxy at it">
+    Forward both hostnames to `127.0.0.1:8080` over TLS. The proxy passes `Host` unchanged and sets `X-Forwarded-For`. The server takes request bodies up to 16 MiB; a proxy with a lower limit, such as nginx's default `client_max_body_size 1m`, refuses larger Team Library publishes.
+  </Step>
+  <Step title="Install the license">
+    ```bash
+    docker compose run --rm --no-deps -T app license install - < license.jwt
+    docker compose run --rm --no-deps app license status
+    ```
+  </Step>
+  <Step title="Claim the server">
+    Register `https://tablepro-account.example.com/api/auth/oidc/callback` with an OIDC IdP, or set up the SAML application first; see [Sign-in](/self-hosted/sign-in). Then:
+
+    ```bash
+    docker compose run --rm --no-deps app bootstrap "Data Team"
+    ```
+
+    Open the printed link within the hour and sign in through the IdP. That account becomes the server's owner and the owner of the team.
+  </Step>
+</Steps>
+
+<Check>
+`docker compose ps` shows `app` as healthy, and `https://tablepro-account.example.com` opens the portal with the owner signed in.
+</Check>
+
+A proxy on another machine reaches the server from outside the Compose network. Publish on an address it reaches with `TABLEPRO_PUBLISH`, and set `CLIENT_ADDRESS_TRUSTED_CIDRS` to the proxy's own addresses.
+
+## Run a command
+
+Every server command runs in a one-off `app` container:
+
+| Command | What it does |
+|---|---|
+| `docker compose run --rm --no-deps -T app license install - < license.jwt` | Installs a license file. See [License](/self-hosted/operations#license) |
+| `docker compose run --rm --no-deps app license status` | Shows the installed license and the seats taken |
+| `docker compose run --rm --no-deps app bootstrap "<team name>"` | Prints the link that claims the server. Refused once it has an owner |
+| `docker compose run --rm --no-deps app bootstrap --replace-owner` | Prints a link that replaces an owner who can no longer sign in |
+| `docker compose run --rm --no-deps app sync new-epoch` | After a database restore, before `app` starts. See [Restore](/self-hosted/operations#restore-a-backup) |
+| `docker compose run --rm --no-deps app version` | Prints the release |
+
+Upgrades and backups are under [License and upkeep](/self-hosted/operations).
