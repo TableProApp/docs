@@ -1,11 +1,11 @@
 ---
 title: DuckDB
-description: Open local DuckDB files or connect to a remote DuckDB server over Quack
+description: Open local DuckDB files, connect to MotherDuck, or reach a remote DuckDB server over Quack
 ---
 
 import RegistryPlugin from "/snippets/registry-plugin.mdx";
 
-Pick a `.duckdb` file to open a database, or a `.parquet`, `.csv`, `.tsv`, `.json` or `.ndjson` file to read it where it sits. DuckDB 2.0.0 is compiled into the driver, so nothing runs as a server unless you point the connection at one. A `.duckdb` file the connection creates or attaches stays readable by DuckDB 1.x.
+Pick a `.duckdb` file to open a database, or a `.parquet`, `.csv`, `.tsv`, `.json` or `.ndjson` file to read it where it sits. DuckDB 2.0.1 is compiled into the driver, so nothing runs as a server unless you point the connection at one. A `.duckdb` file the connection creates or attaches stays readable by DuckDB 1.x.
 
 <RegistryPlugin name="DuckDB" plugin="DuckDB Driver" />
 
@@ -64,6 +64,19 @@ For a server this Mac cannot reach directly, Remote mode adds an **SSH & Proxies
 The macOS build links neither the `quack` extension nor `httpfs`, which carries HTTPS under every SSL Mode but Verify Fingerprint. DuckDB downloads each from `extensions.duckdb.org` the first time a connection needs it and caches it under `~/.duckdb`, so that connect needs to reach that host.
 </Info>
 
+## MotherDuck
+
+Set **Connection Type** to **MotherDuck** and paste an access token, which MotherDuck's settings issue under **Access Tokens**.
+
+| Field | Value |
+|-------|-------|
+| **Access Token** | Required. Kept in the Keychain, never in the connection's URL |
+| **Database** | One database, `my_db`, or a share, `_share/<name>/<id>`. Leave it empty to attach every database in the account's workspace |
+
+**Save & Connect** attaches MotherDuck to an in-memory DuckDB and lands on the named database, or on the account's default when **Database** is empty: `my_db` on a new account. Each MotherDuck database is a database in the sidebar, and `Cmd+K` moves between them. Files listed under **Attached Databases** on the **Advanced** pane attach beside them, so a local table and a cloud one join in one query.
+
+The first connect downloads the `motherduck` extension, about 80 MB, from `extensions.duckdb.org` and `ext.motherduck.com`. Every connect after that still checks `api.motherduck.com`.
+
 ## Connection URL
 
 ```text
@@ -72,9 +85,10 @@ quack://host:9494/alias
 quack://host:9494/alias?sslmode=verify-full
 quack://host:9494/alias?ssl_fingerprint=4A:1F:9C:02:7E:B3:58:D6:11:E0:3C:A7:92:5B:F4:08:6D:21:C9:7A:E5:30:4F:B8:17:93:DA:6E:02:C5:8B:F1
 quack+ssh://deploy@bastion.example.com/localhost:9494/alias
+md:my_db
 ```
 
-`sslmode` sets **SSL Mode**, `ssl_fingerprint` sets Verify Fingerprint and its pin, and a connection behind an SSH tunnel copies as `quack+ssh://`. [DuckDB remote](/connections/urls#duckdb-remote) has every value.
+`sslmode` sets **SSL Mode**, `ssl_fingerprint` sets Verify Fingerprint and its pin, and a connection behind an SSH tunnel copies as `quack+ssh://`. [DuckDB remote](/connections/urls#duckdb-remote) has every value. A MotherDuck connection copies as `md:` and its database, without the token, and that string fills the form back in.
 
 ## Databases and schemas
 
@@ -183,6 +197,7 @@ Verify Identity, and Automatic with any **Host** but `localhost`, `127.0.0.1` or
 - A DuckDB file takes one writer at a time. A connect against a file another process holds fails, naming that process and its process ID. Quit the `duckdb` CLI, the Python process or the other TablePro window first, or set **Release the File Lock After**.
 - A data file opened through **Choose…** is read-only, and the file on disk is left byte for byte identical. To change its contents, open a `.duckdb` database and run `CREATE TABLE t AS SELECT * FROM 'data.parquet'`.
 - Remote (Quack) lists no tables in the sidebar. Write them out by name through the alias.
+- Safe Mode counts every MotherDuck `md_` function as a write, the listing ones included, and the `md_drop_` and `md_delete_` ones as destructive. Under **Read-Only**, run `SHOW DATABASES` to list databases.
 - Local File has no tunnel. To reach a file on another machine, serve it there with `quack_serve` and connect in Remote mode.
 - Quack takes no client certificate. **Token** is the only credential a remote connection sends.
 - A remote connection's editor sees no persistent secret, an S3 one included, so a read that needs it fails. Run `CREATE SECRET` in the session instead; it lasts until the connection closes. Local File connections read persistent secrets.
@@ -216,9 +231,33 @@ The file moved or was deleted while the connection was idle with its lock releas
 
 **Token** is empty, and every Quack server has one. Find the `token` argument `quack_serve` was started with on the server, and enter it in **Token**. A token saved as a persistent DuckDB secret is not read.
 
+### Access Token is required
+
+**Access Token** is empty on a MotherDuck connection. Without one, MotherDuck would start a browser sign-in, so the connect stops first. Create a token in MotherDuck's settings, under **Access Tokens**.
+
+### MotherDuck does not accept the DuckDB version this plugin uses yet
+
+MotherDuck supports each DuckDB release on its own schedule, and this driver runs DuckDB 2.0.1. The connection works once MotherDuck supports that version; nothing changes on this Mac.
+
+### MotherDuck did not accept the Access Token
+
+The token is incomplete, expired or revoked. Copy it again from MotherDuck's settings, or create a new one.
+
+### DuckDB could not load its MotherDuck extension
+
+The download or the version check could not reach `extensions.duckdb.org`, `ext.motherduck.com` or `api.motherduck.com`. Allow those hosts through the firewall or proxy, then connect again.
+
+### TablePro could not reach MotherDuck
+
+The extension loaded, and MotherDuck itself did not answer before the connect timed out. Check the network, then connect again.
+
 ### Port must be a number between 1 and 65535
 
 **Port** holds something else. The Quack default is `9494`.
+
+### This connection sets Connection Type to MotherDuck, which the installed DuckDB driver does not support yet
+
+The loaded DuckDB driver predates MotherDuck, so the connect is refused rather than opened as a local file. Update the driver as the next entry describes.
 
 ### This connection sets SSL Mode, which the installed DuckDB driver does not support yet
 
