@@ -50,6 +50,8 @@ A `.number` field takes a whole number of 0 or more. The form keeps ASCII digits
 
 The remaining fifty-odd statics all have defaults: connection mode, URL schemes, brand color, editor language, `sqlDialect` (keywords, functions, completions), navigation model, system database names, and two dozen `supports*` capability flags. Override the ones that differ. `apple/Plugins/TableProPluginKit/DriverPlugin.swift` is the full list.
 
+Set `schemaSwitchScopesUnqualifiedNames` to `true` only when `switchSchema` changes where the server resolves unqualified names in the statements your driver runs, as `SET search_path` or `USE SCHEMA` do. It defaults to `false`, and then an MCP or AI call that runs SQL is refused any `schema`.
+
 ## Implementing PluginDatabaseDriver
 
 Twelve requirements have no default. Everything else on the protocol does.
