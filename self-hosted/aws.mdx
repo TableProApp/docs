@@ -272,7 +272,7 @@ aws ecs register-task-definition --cli-input-json file://ecs-task-definition.jso
 | `healthCheckGracePeriodSeconds` | 60 |
 | Platform version | `LATEST` |
 
-An EventBridge rule on `SERVICE_DEPLOYMENT_FAILED` to an SNS topic tells you when a deploy fails. A second rule tells you when any container in the cluster exits non-zero: a `migrate` or `serve` that refuses to start, or a one-off command that fails. Their errors are plain text, which no filter on the JSON logs matches.
+An EventBridge rule on `SERVICE_DEPLOYMENT_FAILED` to an SNS topic tells you when a deploy fails. A second rule tells you when any container in the cluster exits non-zero: a `migrate` or `serve` that refuses to start, or a one-off command that fails. It also catches wrong arguments, which print plain text that no filter on the JSON logs matches.
 
 ```json eventbridge-task-exit.json
 {
