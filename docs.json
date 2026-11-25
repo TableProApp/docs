@@ -412,7 +412,8 @@
               "self-hosted/aws",
               "self-hosted/sign-in",
               "self-hosted/roles",
-              "self-hosted/operations"
+              "self-hosted/operations",
+              "self-hosted/releases"
             ]
           },
           {

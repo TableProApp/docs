@@ -3,7 +3,7 @@ title: Self-hosted server
 description: What the Enterprise Self-Hosted preview runs, what it needs from your infrastructure, the order to set it up in, and its limits
 ---
 
-One OCI image serves your teams and their Team Library to the Macs, from your own PostgreSQL. People sign in through your identity provider. The server sends no email and no telemetry and never calls tablepro.app. Its only outbound calls go to an OIDC identity provider.
+One OCI image serves your teams and their Team Library to the Macs, from your own PostgreSQL. People sign in through your identity provider. The server sends no email and no telemetry. Its only outbound calls go to an OIDC identity provider and, when you turn on [license renewal](/self-hosted/operations#renew), to tablepro.app for the license's next file.
 
 <Info>
 This is a preview. It serves TablePro for macOS. The other apps follow. To try it, write to [hello@tablepro.app](mailto:hello@tablepro.app) with the subject "TablePro Enterprise Self-Hosted"; plans and prices are under [Enterprise Self-Hosted](/features/licensing#enterprise-self-hosted).
