@@ -37,7 +37,7 @@ A perpetual file has no end date. It covers every release dated up to its end of
 ## Upgrades
 
 - **One minor version at a time**, such as 0.1 to 0.2, then 0.2 to 0.3. Each release's migrations only promise that the release before it runs on the new schema. To skip a minor version, stop the old server first.
-- **Back up first.** Migrations only go forward, so going back to the earlier release means restoring the backup taken before the upgrade.
+- **Back up first**, as under [Back up](#back-up). Migrations only go forward, so going back to the earlier release means restoring the backup taken before the upgrade.
 - **A perpetual license** must cover the new release; `migrate up` refuses it otherwise, before it changes anything.
 
 With Docker Compose, set `TABLEPRO_IMAGE` in `.env` to the new digest, then run the migrations while the old server still serves, and start the new one only once they exit 0:
@@ -51,13 +51,28 @@ docker compose up -d --no-deps app
 A plain `docker compose up -d` removes the old `app` before `migrate` runs, so a migration that fails leaves nothing serving.
 </Warning>
 
-On AWS, register a new revision of the task definition with the new digest, then deploy it:
+On AWS, set the new digest in both task definition files, `tablepro-cloud` and `tablepro-cloud-license`, and register a new revision of each. A license task left on the old revision installs the next file with the old release. Then deploy the service with the first:
 
 ```bash
-aws ecs update-service --cluster tablepro --service tablepro-cloud --task-definition tablepro-cloud:<revision>
+revision=$(aws ecs register-task-definition --cli-input-json file://ecs-task-definition.json \
+  --query 'taskDefinition.revision' --output text)
+aws ecs register-task-definition --cli-input-json file://ecs-license-task-definition.json \
+  --query 'taskDefinition.revision' --output text
+aws ecs update-service --cluster tablepro --service tablepro-cloud --task-definition "tablepro-cloud:$revision" \
+  --query 'service.serviceName' --output text
 ```
 
 A new task whose `migrate` fails never starts `app`. The old task keeps serving and the circuit breaker rolls the deployment back, but it cannot undo a migration that ran.
+
+Wait for the rollout, then check which revision it ended on:
+
+```bash
+aws ecs wait services-stable --cluster tablepro --services tablepro-cloud
+aws ecs describe-services --cluster tablepro --services tablepro-cloud \
+  --query "services[0].deployments[?status=='PRIMARY'].[taskDefinition,rolloutState]" --output text
+```
+
+It prints the new revision and `COMPLETED`. A deployment the circuit breaker rolled back is stable too, on the old revision. Last, a one-off `version`, as under [Run a command](/self-hosted/aws#run-a-command), prints the new release.
 
 `migrate up` prints nothing when it succeeds. To check the schema, run `migrate status` as a one-off command: it lists every migration with the time it was applied, or `pending`, and the `river` rows show `yes` in place of a time. After an upgrade, no row is `pending`.
 
@@ -65,8 +80,19 @@ A new task whose `migrate` fails never starts `app`. The old task keeps serving 
 
 Back up the database, and keep the `TABLEPRO_CREDENTIALS` value next to the backups: a database restored without its `identity-tokens` key cannot read the IdP refresh tokens it holds.
 
-- **Docker Compose:** `docker compose exec -T postgres pg_dump -U tablepro -Fc tablepro > tablepro.dump`
-- **AWS:** RDS automated backups, and `aws rds create-db-snapshot` before each upgrade.
+With Docker Compose, dump the database, at least before each upgrade:
+
+```bash
+docker compose exec -T postgres pg_dump -U tablepro -Fc tablepro > tablepro.dump
+```
+
+On AWS, RDS keeps automated backups. Before each upgrade, also take a manual snapshot, and deploy only once it is available. A snapshot name takes letters, digits and single hyphens, and starts with a letter:
+
+```bash
+aws rds create-db-snapshot --db-instance-identifier <db-instance-id> \
+  --db-snapshot-identifier tablepro-before-0-1-1 --query 'DBSnapshot.Status' --output text
+aws rds wait db-snapshot-available --db-snapshot-identifier tablepro-before-0-1-1
+```
 
 ## Restore a backup
 
