@@ -1,6 +1,6 @@
 ---
 title: Sign-in through your IdP
-description: Connect the self-hosted TablePro server to AWS IAM Identity Center, another SAML 2.0 IdP such as OneLogin, or an OpenID Connect IdP, and how long sessions last
+description: Connect the self-hosted TablePro server to AWS IAM Identity Center, another SAML 2.0 IdP such as OneLogin, or an OpenID Connect IdP, how long sessions last, and the fresh sign-in a role change needs
 ---
 
 People sign in to the portal, and through it to the Mac, with one identity provider, over SAML 2.0 or OpenID Connect. `SAML_IDP_ENTITY_ID` or `OIDC_ISSUER` picks which; set exactly one.
@@ -44,7 +44,7 @@ Identity Center connects an outside application over SAML 2.0 from an organizati
     ```
   </Step>
   <Step title="Set the application properties">
-    Under **Application properties**, set **Application start URL** to `https://tablepro-account.example.com/api/auth/saml/start`, so the access portal's tile starts a sign-in the server accepts. Leave **Relay state** empty. The server does not read **Session duration**.
+    Under **Application properties**, set **Application start URL** to `https://tablepro-account.example.com/api/auth/saml/start`, so the access portal's tile starts a sign-in the server accepts. Leave **Relay state** empty. The server does not read the application's **Session duration**.
   </Step>
   <Step title="Type the application metadata">
     Under **Application metadata**, choose **Manually type your metadata values**. Set **Application ACS URL** to `https://tablepro-account.example.com/api/auth/saml/callback` and **Application SAML audience** to `https://tablepro-account.example.com/api/auth/saml/metadata`. Choose **Submit**.
@@ -83,6 +83,11 @@ Identity Center connects an outside application over SAML 2.0 from an organizati
     ```
 
     `GroupId` in the answer is the value.
+  </Step>
+  <Step title="Shorten the session">
+    A [step-up](#step-up) through Identity Center proves only that the person's Identity Center session is still alive. Keep that session short. In the IAM Identity Center console, choose **Settings**, open the **Authentication** tab, and choose **Configure** next to **Session duration**. Under **User interactive sessions**, set 15 minutes, the minimum, and choose **Save**.
+
+    The same duration applies to the AWS access portal, so people sign in there again every 15 minutes too. It applies only to sessions that start after the change. See AWS's [User interactive sessions](https://docs.aws.amazon.com/singlesignon/latest/userguide/user-interactive-sessions.html).
   </Step>
 </Steps>
 
@@ -197,3 +202,19 @@ Every `UPSTREAM_REVALIDATE`, an hour by default, an app's refresh asks the IdP a
 An app's session counts from the portal sign-in that approved it. SAML has no refresh, so the server asks a SAML IdP nothing after the sign-in, and an admin group change takes effect at the person's next sign-in.
 
 Removing someone at the IdP ends their sessions within those caps, or at the next check for an OIDC IdP that gives refresh tokens. The team API tokens they created and the invitation links they were handed stay until they are removed in the portal; see [Remove someone](/self-hosted/roles#remove-someone).
+
+## Step-up
+
+These changes in the portal need a sign-in from the last 5 minutes:
+
+- on **Server > Members**: **Make admin**, **Make member**, **Remove from server…** and **Restore…**;
+- in a team: changing a member's role, removing a member, inviting an admin or making a new link for that invitation, transferring ownership, and creating an API token.
+
+Without one, the portal shows **Confirm it's you**, and **Sign in again** sends the person through the IdP and back to the page, where they make the change again. The server asks the IdP to authenticate them again rather than answer from its session: OIDC's `max_age=0`, `prompt=login` unless the IdP's discovery leaves it out, and `auth_time` as an essential claim; SAML's `ForceAuthn`. It then reads when the IdP says the person authenticated, from `auth_time` or the assertion's `AuthnInstant`. No time, or a time more than 3 minutes before the sign-in started, confirms nothing: the portal says "Your organization's sign-in didn't ask you to sign in again, so nothing was confirmed", and the server logs `the IdP's answer does not show it authenticated the person again` at WARN.
+
+- **AWS IAM Identity Center.** Identity Center does not sign you in again for a stepped-up change; it only checks your session. Set its session duration short, as in the last step under [AWS IAM Identity Center](#aws-iam-identity-center).
+- **Okta over SAML.** In the app's **General** tab, edit **SAML Settings**, choose **Show Advanced Settings**, and set **Honor Force Authentication** to **Yes**. With **No**, Okta ignores `ForceAuthn`.
+
+<Check>
+After the owner's first sign-in, change someone's role or remove someone once, and sign in again when the portal asks. The change goes through.
+</Check>

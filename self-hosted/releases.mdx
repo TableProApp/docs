@@ -1,0 +1,51 @@
+---
+title: Self-hosted releases
+description: What each release of the self-hosted TablePro server image changed, its index digest, and what to do when you upgrade to it
+---
+
+Read the entry for a release before you upgrade to it, then follow [Upgrades](/self-hosted/operations#upgrades). Each entry names the release's index digest; [Image and keys](/self-hosted/image#verify-the-image) shows how to verify it.
+
+<Update label="0.2.0" description="November 25, 2026">
+  Index digest `sha256:de9130a22de1439e917fa621b9b22af62fd080ac9cf848b19b2e3e4c1d1885d8`, tags `0.2.0` and `0.2`.
+
+  - `LICENSE_RENEWAL=on` fetches each new file of the license from tablepro.app once a day and at each start, and installs it. It is off by default, and with it off the server makes no call to tablepro.app. A monthly license needs it. See [Renew](/self-hosted/operations#renew).
+  - `HTTPS_PROXY` and `NO_PROXY` send the server's outbound calls through a proxy, the OIDC IdP's included.
+  - Changing a role, removing or restoring someone, transferring a team, inviting an admin and creating a team API token need a sign-in from the last 5 minutes. The portal sends the person back to the IdP with OIDC's `max_age=0` and `prompt=login`, or SAML's `ForceAuthn`. See [Step-up](/self-hosted/sign-in#step-up).
+  - Through the API, a sign-in from an app no longer changes a team role, removes a member or invites an admin: it gets 403 `app_sign_in_forbidden`. A team API token still does.
+  - New log events: `license renewal on` at start, `license renewed`, `license renewal found no newer file`, and `license renewal failed` at WARN. With `LICENSE_RENEWAL=on`, `license expires soon` is not logged. See [Alerts](/self-hosted/operations#alerts).
+  - `license.installed` in the audit log carries `source`: `command` for `license install`, `renewal` for a fetched file.
+  - Each authorization response to an app names the server as its issuer (RFC 9207).
+  - A monthly license file now comes with 21 days of grace, up from 7.
+
+  To upgrade, from 0.1.0 or 0.1.1:
+
+  - Take a backup first. `migrate up` applies migrations 00036 to 00039, which add tables and columns, and going back to 0.1 means restoring the backup.
+  - Before the upgrade, check that your IdP signs people in again when asked. Okta over SAML needs **Honor Force Authentication**, and Identity Center a short session; see [Step-up](/self-hosted/sign-in#step-up). After it, change one role to try it.
+  - To fetch renewals, add `LICENSE_RENEWAL=on` to the server's settings, with `HTTPS_PROXY` and `NO_PROXY` behind a proxy.
+</Update>
+
+<Update label="0.1.1" description="November 25, 2026">
+  Index digest `sha256:53e7e128188f1c996f20cd3b8f2dbffa2b28642ed6b7179073a96fe8accde5e7`, tags `0.1.1` and `0.1`.
+
+  - A command that fails, a `serve` that refuses to start and `migrate up` included, writes one JSON line to standard error, with `"level":"ERROR"`, `"msg":"command failed"`, `command` and `error`, and exits 1. 0.1.0 wrote plain text there, which a filter on the JSON logs missed.
+  - Wrong arguments still print the error and the usage as plain text, and exit 2. Alert on the exit code for those; see [Alerts](/self-hosted/operations#alerts).
+  - An error for a `DATABASE_URL` that does not parse no longer repeats the URL, so a password in it stays out of the logs.
+  - A configuration error starts with `load config:` once, not twice.
+
+  From 0.1.0, there is no migration to apply.
+</Update>
+
+<Update label="0.1.0" description="November 24, 2026">
+  Index digest `sha256:4dc7b94fa821edf7647caacdfdf6bb410227b131a26dcdf3715e21ef369bd5e3`, tag `0.1.0`.
+
+  The first release of the Enterprise Self-Hosted preview.
+
+  - One image for `linux/amd64` and `linux/arm64`, signed with cosign, with an SPDX SBOM and SLSA v1 provenance on each platform.
+  - Reference deploys for Docker Compose and for AWS Fargate, on PostgreSQL 18.
+  - Sign-in through one IdP, over OpenID Connect or SAML 2.0, with an optional IdP group for the server's admins.
+  - Server roles owner, admin and member, and team roles owner, admin, editor and member.
+  - Team Library sync for TablePro on macOS.
+  - An offline license file for the API address sets the seats, the features and the end, installed with `license install`.
+  - JSON log lines on standard output, with the license and IdP certificate events once a day and at each start.
+  - Migrations 00001 to 00035.
+</Update>

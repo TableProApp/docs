@@ -20,11 +20,20 @@ The license file is one signed line of text that TablePro issues for your API ad
 
 ### Renew
 
-A renewal, or a change of seats, is a new file: install it the same way. A file with fewer seats than are taken keeps everyone who has one, and no one new signs in until enough seats are freed under [Remove someone](/self-hosted/roles#remove-someone).
+A renewal, or a change of seats, is a new file of the same license. Sign in at [account.tablepro.app](https://account.tablepro.app) with the email address you paid with: **Billing** lists your licenses under **Self-hosted licenses**, each with **Download**, and an email tells you when a new file is there. Install it as above, or let the server fetch it. A file with fewer seats than are taken keeps everyone who has one, and no one new signs in until enough seats are freed under [Remove someone](/self-hosted/roles#remove-someone).
+
+To fetch renewals, set `LICENSE_RENEWAL=on`. It is off by default, and with it off the server makes no call to tablepro.app. Once a day, and at each start, the server asks `https://api.tablepro.app/v2/licenses/latest` for the newest file of its license. The first fetch runs about a minute after the server starts. It sends the installed file and nothing else: no seat count, usage or version.
+
+- The server fetches renewals only from a file tablepro.app issued through **Billing**. An evaluation file fetches nothing: install the first file from **Billing** by hand, and the server fetches from then on. Until then, each try logs `license renewal failed`.
+- It installs the answer only when it is a later file of the same license for the same address, after the checks `license install` makes. The audit log records it as `license.installed` with `source` `renewal`.
+- A failed fetch logs `license renewal failed` and tries again the next day. The installed file keeps working to the end of its grace, and the file from **Billing** still installs by hand.
+- A monthly license needs it. A server that cannot reach tablepro.app takes a yearly or longer term.
+
+Behind a proxy, set `HTTPS_PROXY`, such as `http://proxy.example.com:3128`. Every outbound call of the server then goes through it, the OIDC identity provider's too: list an IdP inside your network in `NO_PROXY`. A proxy that inspects TLS needs its CA in `SSL_CERT_FILE`, as under [Settings](/self-hosted/settings#identity-provider).
 
 ### When a license ends
 
-A file with an end date has a grace after it, written into the file: 7 days for a monthly license, 30 days for every other.
+A file with an end date has a grace after it, written into the file: 21 days for a monthly license, 30 days for every other.
 
 | State | From | What works |
 |---|---|---|
@@ -35,6 +44,8 @@ A file with an end date has a grace after it, written into the file: 7 days for 
 A perpetual file has no end date. It covers every release dated up to its end of maintenance, and keeps them running for good. `migrate up`, `serve` and `license install` refuse a later release and name the last date the file covers; `migrate up` refuses before it changes the schema. Extending maintenance is a new file with a later date.
 
 ## Upgrades
+
+Read the release's notes under [Self-hosted releases](/self-hosted/releases) first.
 
 - **One minor version at a time**, such as 0.1 to 0.2, then 0.2 to 0.3. Each release's migrations only promise that the release before it runs on the new schema. To skip a minor version, stop the old server first.
 - **Back up first**, as under [Back up](#back-up). Migrations only go forward, so going back to the earlier release means restoring the backup taken before the upgrade.
@@ -90,8 +101,8 @@ On AWS, RDS keeps automated backups. Before each upgrade, also take a manual sna
 
 ```bash
 aws rds create-db-snapshot --db-instance-identifier <db-instance-id> \
-  --db-snapshot-identifier tablepro-before-0-1-1 --query 'DBSnapshot.Status' --output text
-aws rds wait db-snapshot-available --db-snapshot-identifier tablepro-before-0-1-1
+  --db-snapshot-identifier tablepro-before-0-2-0 --query 'DBSnapshot.Status' --output text
+aws rds wait db-snapshot-available --db-snapshot-identifier tablepro-before-0-2-0
 ```
 
 ## Restore a backup
@@ -136,14 +147,17 @@ The server writes one JSON object per line to standard output, with `level` and 
 | The ALB's `UnHealthyHostCount` at 1 or more for 5 minutes, and `HTTPCode_Target_5XX_Count` | The server is down or failing requests |
 | RDS `FreeStorageSpace` under 2 GB, `CPUCreditBalance` running low, `FreeableMemory` | The database is running out of room |
 
-The server also logs these events once a day and at each start. A metric filter `{ $.msg = "license*" }` catches the license ones, along with `license active` at INFO.
+The server also logs these events once a day and at each start. A metric filter `{ $.msg = "license*" && $.level != "INFO" }` catches the license ones and leaves out `license active` and `license renewed`.
 
 | `msg` | Level | When |
 |---|---|---|
 | `license not installed` | WARN | No license file verifies |
-| `license expires soon` | WARN | From 30 days before the end date |
+| `license expires soon` | WARN | From 30 days before the end date, unless `LICENSE_RENEWAL=on` |
 | `license expired, in grace` | WARN | Past the end date, within the grace |
 | `license lapsed, library pushes refused` | ERROR | Past the grace |
+| `license renewal failed` | WARN | With `LICENSE_RENEWAL=on`: no route, a proxy that refused, tablepro.app down, or an answer the server does not take. It tries again the next day |
+| `license renewed` | INFO | With `LICENSE_RENEWAL=on`: a later file was installed |
+| `license renewal found no newer file` | INFO | With `LICENSE_RENEWAL=on`: nothing newer yet |
 | `license maintenance ends soon` | WARN | A perpetual file, in the 30 days before its maintenance ends |
 | `idp certificate expiring` | WARN | A trusted SAML signing certificate ends within 30 days |
 | `idp certificate expired` | ERROR | A trusted SAML signing certificate has ended, and sign-ins it signs fail |
