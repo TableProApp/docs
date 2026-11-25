@@ -127,10 +127,11 @@ An organization that manages its devices sets these keys in the app's managed co
 | --- | --- | --- |
 | `AccountServerURL` | string | The organization's TablePro server, the default under **Server** |
 | `AllowOtherAccountServers` | boolean | `false` with `AccountServerURL` keeps the account on that server: **Server** is locked |
+| `PersonalSyncProvider` | list of strings | The sync providers this device may use: `off` and `icloud` here. One entry forces it and locks **iCloud Sync**; an empty list keeps sync off |
 | `ICloudSyncAllowed` | boolean | `false` turns iCloud Sync off and locks the switch, and saves new passwords on this device only |
 | `UsageDataAllowed` | boolean | `false` turns **Share Usage Data** off and locks the switch |
 
-First launch skips a question a key answers. A change the MDM pushes applies while the app runs, and a sign-in to a server the new values no longer allow ends.
+First launch skips a question a key answers. A change the MDM pushes applies while the app runs, and the account stops using a server the new values no longer allow.
 
 ## IAM sign-in
 
