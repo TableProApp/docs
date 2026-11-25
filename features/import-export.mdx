@@ -73,7 +73,7 @@ Ticking no column exports every column, which is also what a table with a column
 
 ### What ends up in the file
 
-A whole-table export streams from the database at constant memory, with no row-count limit, and can be cancelled from the progress dialog.
+A whole-table export streams from the database at constant memory, with no row-count limit, and can be stopped from the progress the export sheet shows while it runs.
 
 **Export Results…** writes what the tab holds in memory, which is the output of the query that filled it. The filter bar and a sorted header are part of that query, and so is column visibility on a table tab: hiding a column re-queries without it, keeping only the primary key and anything being sorted on. Two things are not part of it. A column value filter narrows the loaded rows in the grid afterwards, so it never reaches the file. And a truncated result with more rows behind it is re-run and streamed in full rather than written as far as it got.
 
@@ -326,7 +326,7 @@ On PostgreSQL, CockroachDB and KingbaseES the rows after a `COPY ... FROM STDIN`
 
 SQL Server SQL imports do not automatically commit or roll back after a file batch runs, even with **Wrap in transaction** selected and even without a `GO` line. A batch can change which transaction is open. Read the completion message: if a transaction remains open, commit or roll it back on this connection. This also applies after a successful import. Imports into a selected table from CSV, JSON, or XLSX use the row-import transaction options instead.
 
-Skip and Continue collects up to 1,000 failures with their line numbers and messages, and the summary counts successes against failures behind a **Copy Details** button. **Save Report…** writes them all to a CSV with a line, a statement and the database's own error per row, so a large import's failures can be sorted and searched rather than scrolled. An error that stops the import shows the line, the database's own message, and the failing statement, with the dialog still open behind it, ready for a changed setting and another run. The alert shows the first 10,000 characters of a longer statement and the first five errors of a batch that raised more, and **Copy Details** copies all of them.
+Skip and Continue collects up to 1,000 failures with their line numbers and messages, and the summary counts successes against failures behind a **Copy Details** button. **Save Report…** writes them all to a CSV with a line, a statement and the database's own error per row, so a large import's failures can be sorted and searched rather than scrolled. An error that stops the import shows the line, the database's own message, and the failing statement in the import sheet, where **Back** returns to the file and its options for a changed setting and another run. The result shows the first 10,000 characters of a longer statement and the first five errors of a batch that raised more, and **Copy Details** copies all of them.
 
 ### Stop an import
 
