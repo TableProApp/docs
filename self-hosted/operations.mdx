@@ -59,6 +59,8 @@ aws ecs update-service --cluster tablepro --service tablepro-cloud --task-defini
 
 A new task whose `migrate` fails never starts `app`. The old task keeps serving and the circuit breaker rolls the deployment back, but it cannot undo a migration that ran.
 
+`migrate up` prints nothing when it succeeds. To check the schema, run `migrate status` as a one-off command: it lists every migration with the time it was applied, or `pending`, and the `river` rows show `yes` in place of a time. After an upgrade, no row is `pending`.
+
 ## Back up
 
 Back up the database, and keep the `TABLEPRO_CREDENTIALS` value next to the backups: a database restored without its `identity-tokens` key cannot read the IdP refresh tokens it holds.
@@ -99,12 +101,12 @@ Everything written after the restore point is lost, including what Macs publishe
 
 ## Alerts
 
-The server writes one JSON object per line to standard output, with `level` and `msg`. Alert on:
+Once `serve` has started, it writes one JSON object per line to standard output, with `level` and `msg`. A `serve` that refuses to start writes one line of plain text to standard error instead, and so does every other command that fails, `migrate up` included. They exit 1, or 2 with the usage on wrong arguments. A filter on the JSON never sees those lines, so alert on the exit code too:
 
 | Signal | Means |
 |---|---|
-| `"level":"ERROR"` from any container. In CloudWatch, the metric filter `{ $.level = "ERROR" }` | Something failed |
-| `migrate` exiting non-zero, or `app` restarting | A start or a deploy failed |
+| `"level":"ERROR"` from `app`. In CloudWatch, the metric filter `{ $.level = "ERROR" }` | Something failed while serving |
+| `migrate`, `app` or a one-off command exiting non-zero. On AWS, the EventBridge rule under [Service](/self-hosted/aws#service); with Compose, `die` events from `docker events` | A start, a deploy or a command failed |
 | The ALB's `UnHealthyHostCount` at 1 or more for 5 minutes, and `HTTPCode_Target_5XX_Count` | The server is down or failing requests |
 | RDS `FreeStorageSpace` under 2 GB, `CPUCreditBalance` running low, `FreeableMemory` | The database is running out of room |
 
