@@ -40,6 +40,8 @@ Check your copy against the SHA-256 of its DER SubjectPublicKeyInfo, `98af193b4a
 openssl pkey -pubin -in cosign.pub -outform DER | sha256sum
 ```
 
+On a Mac without `sha256sum`, use `shasum -a 256` in its place.
+
 Then, with cosign 3:
 
 ```bash
