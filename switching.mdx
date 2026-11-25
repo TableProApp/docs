@@ -5,7 +5,7 @@ description: Move your connections and saved queries from TablePlus, Sequel Ace,
 
 import DriverCounts from "/snippets/driver-counts.mdx";
 
-Most of a migration is one dialog. **File > Import from Other App…** reads the connections and saved queries your current client already has, groups and folders included, and the source app does not need to be running.
+Most of a migration is one dialog. **File > Import > Import from Other App…** reads the connections and saved queries your current client already has, groups and folders included, and the source app does not need to be running.
 
 This page covers the rest: what does not come across, and what to do about it.
 
@@ -13,13 +13,13 @@ This page covers the rest: what does not come across, and what to do about it.
 
 <Steps>
   <Step title="Open the importer">
-    **File > Import from Other App…**
+    **File > Import > Import from Other App…**. On a Mac with no connections yet, the [setup guide](/quickstart#the-setup-guide) offers the same import at first launch and takes several apps in one pass, one after another.
   </Step>
   <Step title="Pick your current client">
-    TablePlus, Sequel Ace, DBeaver, DataGrip and Beekeeper Studio are read in place. Navicat is the exception: export first with **File > Export Connections** in Navicat, with **Export Password** turned on, then point TablePro at the `.ncx` file. Leave **Include saved queries** selected to bring the saved queries along.
+    TablePlus, Sequel Ace, DBeaver, DataGrip and Beekeeper Studio are read in place. Navicat is the exception: export first with **File > Export Connections** in Navicat, with **Export Password** turned on, then point TablePro at the `.ncx` file. **Include saved queries** starts selected when the app has some. **Include passwords** starts off for apps that keep them in the Keychain; see [About passwords](#about-passwords).
   </Step>
   <Step title="Review and import">
-    Deselect any connection or saved query you do not want, resolve duplicates, click **Import**. A connection to an engine TablePro does not support arrives unchecked, with the reason beside it. Where each app's saved queries land is in [Connection Sharing](/features/connection-sharing#import-from-other-apps).
+    Deselect any connection or saved query you do not want, resolve duplicates, click **Import**. A connection to an engine TablePro does not support arrives unchecked, with the reason beside it. Where each app's saved queries land is in [Connection Sharing](/features/connection-sharing#import-from-other-apps). When the import ends, a single imported connection opens, and several are selected in the welcome window. Connections from a file, such as a Navicat `.ncx` export or a TablePro connections file, are only selected: a file can come from someone else, so TablePro never connects to them on its own.
   </Step>
   <Step title="Open one before you delete the old app">
     Connect to a connection that had a password. That is the only check that proves the credential came across, and deleting the source app is the one step you cannot undo.
@@ -40,10 +40,12 @@ SSH tunnel and SSL settings come across with the connection. Which engines each 
 
 ## About passwords
 
-| Where your old client keeps them | What the import does |
-|---|---|
-| Its own encrypted store: DBeaver, Beekeeper Studio, Navicat | Decrypts it and runs start to finish with nothing to click |
-| The macOS Keychain: TablePlus, Sequel Ace, DataGrip | macOS asks permission once per item. Choose **Always Allow** rather than **Allow** and the run stops asking |
+| Where your old client keeps them | **Include passwords** starts | What the import does |
+|---|---|---|
+| Its own encrypted store: DBeaver, Beekeeper Studio, Navicat | On | Decrypts it and runs start to finish with nothing to click |
+| The macOS Keychain: TablePlus, Sequel Ace, DataGrip | Off | Says how many Keychain items it reads before it starts, then macOS asks permission once per item. Choose **Always Allow** rather than **Allow** and the run stops asking |
+
+A password the Keychain refuses to store does not stop the import. Its connection arrives without it, the result reads **Import Incomplete** and counts the passwords not kept, and the imported connections are selected rather than opened.
 
 A DataGrip project protected by a master password cannot be read at all. Import those connections and set their passwords in TablePro.
 
@@ -61,9 +63,9 @@ TablePlus's password dropdown comes across too. **Ask everytime** arrives as **A
 
 ## Getting your shortcuts back
 
-TablePro follows macOS conventions, so a good number of chords already match whatever you were using: `Cmd+N`, `Cmd+W`, `Cmd+S`, `Cmd+O`, `Cmd+Q`, `Cmd+F`, and `Cmd+Enter` to run a query.
+Choose your old app under **Use Shortcuts From** in **Settings > Keyboard** (`Cmd+,`), or under **Shortcuts** in the setup guide's last step. TablePlus, Sequel Ace, DBeaver, DataGrip, Beekeeper Studio, Navicat and DBX each have a preset, and [Shortcuts from another app](/features/keyboard-shortcuts#shortcuts-from-another-app) lists what one changes and what it leaves alone.
 
-Where yours differ, rebind them in **Settings > Keyboard** (`Cmd+,`). Record the chord you are used to and TablePro warns you if something else already claims it.
+A preset covers running queries, tabs, find, save and a few more. For any other key, record the chord you are used to on its row in **Settings > Keyboard**; a chord another command holds asks before it moves.
 
 <Frame caption="Settings > Keyboard, where every rebindable shortcut lives">
   <img className="block dark:hidden" src="/images/settings-keyboard.png" alt="Keyboard pane listing Editor & Query actions with their shortcuts, under a Search Shortcuts field" />

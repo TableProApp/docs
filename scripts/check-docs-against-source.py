@@ -29,6 +29,11 @@ MENU_FILES = {
     "Help": "HelpMenuBuilder.swift",
 }
 
+# Leaves a builder takes from another file: File > Import lists ImportCommand's titles.
+MENU_EXTRA_FILES = {
+    "File": ["ImportCommand.swift"],
+}
+
 # A leaf the docs name that the menu builders cannot define, because something else
 # builds it: AppKit's own items, a submenu filled at runtime from the server, or a
 # contextual menu that happens to read like a menu path.
@@ -98,6 +103,11 @@ def check_menu_paths(root: Path, docs: Path) -> list[str]:
         forms: set[str] = set()
         for leaf in localized_strings(menu_dir / file):
             forms |= leaf_forms(leaf)
+        # A missing extra file only drops its leaves, which then fail as unknown.
+        for extra in MENU_EXTRA_FILES.get(menu, []):
+            if (menu_dir / extra).is_file():
+                for leaf in localized_strings(menu_dir / extra):
+                    forms |= leaf_forms(leaf)
         per_menu[menu] = forms
 
     every_leaf: set[str] = set()
