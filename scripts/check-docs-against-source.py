@@ -15,6 +15,7 @@ import argparse
 import collections
 import re
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Optional
 
@@ -28,6 +29,11 @@ MENU_FILES = {
     "Window": "WindowMenuBuilder.swift",
     "Help": "HelpMenuBuilder.swift",
 }
+
+# A page under windows/ describes the Windows app, whose menu bar is MainWindow.xaml with its titles in the
+# en-US resources, keyed by each item's x:Uid.
+WINDOWS_APP = Path("windows") / "src" / "TablePro.App"
+XAML_UID = "{http://schemas.microsoft.com/winfx/2006/xaml}Uid"
 
 # A leaf the docs name that the menu builders cannot define, because something else
 # builds it: AppKit's own items, a submenu filled at runtime from the server, or a
@@ -44,6 +50,8 @@ SHORTCUT_ALIASES = {
     "Toggle results": "toggleResults",
     "Find": "find",
     "Jump to column": "jumpToColumn",
+    "Export tables": "export",
+    "Export results": "exportResults",
 }
 
 RUNTIME_LEAVES = {
@@ -53,28 +61,25 @@ RUNTIME_LEAVES = {
 }
 
 
+# The style guide drops a trailing ellipsis when the sentence instructs, the Windows app's
+# three periods too, and AppKit flips a Show item to Hide once its pane is open.
 def leaf_forms(leaf: str) -> set[str]:
-    """Every spelling of a menu item the docs may legitimately use.
+    def bare(text: str) -> str:
+        return text.removesuffix("...").rstrip("…").rstrip()
 
-    Two differences are conventions, not errors. The style guide drops a trailing
-    ellipsis when the sentence instructs, so `Open Quickly…` is written `Open Quickly`.
-    And AppKit rewrites a show/hide item's title at runtime, so the builder's
-    `Show Connections` appears in the menu bar as `Hide Connections` once the pane is
-    open.
-    """
-    forms = {leaf, leaf.rstrip("…").rstrip()}
+    forms = {leaf, bare(leaf)}
     for a, b in (("Show ", "Hide "), ("Hide ", "Show ")):
         if leaf.startswith(a):
             flipped = b + leaf[len(a):]
-            forms |= {flipped, flipped.rstrip("…").rstrip()}
+            forms |= {flipped, bare(flipped)}
     return forms
 
 
 DOCS = Path(__file__).resolve().parent.parent
 
 
+# The macOS app's folder. The Windows menu bar is read from the checkout beside it.
 def app_root(path: str) -> Path:
-    # Every claim checked here is about the macOS app, which lives in the checkout's apple/.
     root = Path(path).resolve() / "apple"
     if not (root / "TablePro" / "Core" / "Menu").is_dir():
         sys.exit(f"{path} is not a TablePro app checkout: it has no apple/TablePro/Core/Menu")
@@ -89,37 +94,55 @@ def doc_pages(docs: Path) -> list[Path]:
     return [p for p in sorted(docs.rglob("*.mdx")) if p.name != "changelog.mdx"]
 
 
+def windows_menus(checkout: Path) -> dict[str, set[str]]:
+    app = checkout / WINDOWS_APP
+    resources = {
+        data.get("name"): data.findtext("value", "")
+        for data in ET.parse(app / "Strings" / "en-US" / "Resources.resw").getroot().iter("data")
+    }
+    menus = {}
+    for bar_item in ET.parse(app / "MainWindow.xaml").getroot().iter():
+        if bar_item.tag.rsplit("}", 1)[-1] != "MenuBarItem":
+            continue
+        forms: set[str] = set()
+        for item in bar_item.iter():
+            text = resources.get(f"{item.get(XAML_UID)}.Text") if item is not bar_item else None
+            if text:
+                forms |= leaf_forms(text)
+        menus[resources.get(f"{bar_item.get(XAML_UID)}.Title", "")] = forms
+    return menus
+
+
 def check_menu_paths(root: Path, docs: Path) -> list[str]:
     menu_dir = root / "TablePro" / "Core" / "Menu"
-    per_menu = {}
+    mac = {}
     for menu, file in MENU_FILES.items():
         forms: set[str] = set()
         for leaf in localized_strings(menu_dir / file):
             forms |= leaf_forms(leaf)
-        per_menu[menu] = forms
-
-    every_leaf: set[str] = set()
-    for forms in per_menu.values():
-        every_leaf |= forms
+        mac[menu] = forms
+    windows = windows_menus(root.parent)
 
     failures = []
-    pattern = re.compile(r"\*\*(" + "|".join(MENU_FILES) + r") > ([^*]+)\*\*")
+    names = sorted(set(mac) | set(windows))
+    pattern = re.compile(r"\*\*(" + "|".join(map(re.escape, names)) + r") > ([^*]+)\*\*")
     for page in doc_pages(docs):
+        relative = page.relative_to(docs)
+        if relative.parts[0] == "windows":
+            per_menu, source = windows, "the Windows menu bar"
+        else:
+            per_menu, source = mac, "any builder"
         for line_no, line in enumerate(page.read_text().splitlines(), start=1):
             for menu, tail in pattern.findall(line):
                 leaf = tail.split(" > ")[-1].strip()
-                if leaf in RUNTIME_LEAVES or leaf in per_menu[menu]:
+                if leaf in RUNTIME_LEAVES or leaf in per_menu.get(menu, ()):
                     continue
-                where = f"{page.relative_to(docs)}:{line_no}"
-                if leaf in every_leaf:
-                    owner = next(m for m, s in per_menu.items() if leaf in s)
-                    failures.append(
-                        f"{where}: **{menu} > {leaf}** lives on the {owner} menu"
-                    )
+                where = f"{relative}:{line_no}"
+                owner = next((m for m, forms in per_menu.items() if leaf in forms), None)
+                if owner:
+                    failures.append(f"{where}: **{menu} > {leaf}** lives on the {owner} menu")
                 else:
-                    failures.append(
-                        f"{where}: **{menu} > {leaf}** is not a menu item in any builder"
-                    )
+                    failures.append(f"{where}: **{menu} > {leaf}** is not a menu item in {source}")
     return failures
 
 

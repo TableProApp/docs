@@ -5,7 +5,7 @@ description: "Wire contract for TablePro MCP server: protocol versions, required
 
 `2026-07-28` is the revision to write against, and two older ones still answer for clients that have not moved. This page is the wire contract; for the tools themselves see [MCP Tools](/developers/mcp-tools).
 
-Most people never read it. The bundled `tablepro-mcp` stdio bridge speaks this for you, and every client in [MCP Clients](/integrations/mcp-clients) goes through the bridge. Read on if you are writing a client against the HTTP endpoint directly.
+Most people never read it. The bundled `tablepro-mcp` stdio bridge speaks this for you, and every macOS client in [MCP Clients](/integrations/mcp-clients) goes through the bridge. Read on if you are writing a client against the HTTP endpoint directly.
 
 ## One round trip
 
@@ -63,6 +63,39 @@ The `Host` header must name a loopback host (`localhost`, `127.0.0.1`, `::1`) an
 
 The port is `23508` by default. Make it a setting: when that port is busy the server binds another one, and the **Status** row in **Settings > MCP** shows the port in use. The handshake file is [not under the contract](/developers/versioning#what-is-not-under-the-contract).
 
+## Local socket and handshake
+
+The bridge and the `tablepro` CLI send HTTP over a Unix socket, normally
+`~/Library/Application Support/TablePro/mcp.sock`. The socket has mode `0600` in a `0700` folder.
+Only processes running as the same macOS user may connect. A bearer token is still required.
+
+If the support path is too long for a Unix socket, or its folder cannot be made private, the socket
+uses the `TablePro-MCP` folder in the user's macOS temporary directory. The handshake records the
+actual path. Use the bundled bridge instead of hard-coding a path.
+
+`~/Library/Application Support/TablePro/mcp-handshake.json` uses format version `3`. It holds
+`socketPath`, `token`, `pid`, `instanceId`, `protocolVersion`, and `expiresAt`. It has no `port` field.
+This file is [outside the stable contract](/developers/versioning#what-is-not-under-the-contract).
+
+Before sending credentials, the bridge checks the file's owner and permissions, expiry, host process,
+and socket ownership and location. Before each request, the bridge and CLI check the connected
+socket's `LOCAL_PEERPID` against the trusted handshake PID and recheck that process's executable.
+It then calls `server/discover` over that socket and checks
+`app.tablepro/instanceId` against the handshake. A mismatch refuses the connection. A restart or
+socket failure requires a fresh trusted handshake; the bridge does not fall back to TCP.
+
+Every stdio client shares the bridge's token, so the bridge adds `app.tablepro/bridgeInstance` to the
+`_meta` of each request it forwards: a random id, one per bridge process. Two sessions of the same
+client send the same `clientInfo` and number their requests alike, and this id keeps a cancellation
+from one session off the other's request. The server reads it only from requests on the bridge token.
+
+A TablePro the bridge launched that does not start the server writes `mcp-start-refused.json` beside
+the handshake, with `pid`, `refusedAt` and `reason`: `turnedOff` when the **MCP server** switch is off,
+`failedToStart` when the server tried and failed. The bridge reads only a refusal written after its own
+launch request, stops polling, and exits with the matching message. A refusal with no `reason` reads as
+`turnedOff`, and one with a reason the bridge does not know reads as `failedToStart`. This file is
+outside the stable contract too.
+
 ## Protocol versions
 
 | Version | Era | Notes |
@@ -81,7 +114,7 @@ There is no handshake in the modern era: no `initialize`, no `Mcp-Session-Id`, n
 
 - `io.modelcontextprotocol/protocolVersion` (**required**): a supported version string. Missing or empty is `-32602`; unsupported is `-32022`.
 - `io.modelcontextprotocol/clientCapabilities` (**required**): a JSON object. `{}` is valid and means you support nothing extra. A non-object is `-32602`.
-- `io.modelcontextprotocol/clientInfo` (optional): `name`, `title`, `version`. It names your client in the activity log and in **Connected Clients**.
+- `io.modelcontextprotocol/clientInfo` (optional): `name`, `title`, `version`. It names your client in the activity log, which keeps `title`, else `name`, and in **Connected Clients**, which shows the app's own name and logo when `name` matches a client TablePro knows.
 - `progressToken` (optional): string or integer. See [Progress](#progress).
 - `traceparent`, `tracestate`, `baggage` (optional): W3C trace context, carried through untouched.
 
@@ -137,7 +170,7 @@ An unknown method answers HTTP `404` with JSON-RPC `-32601`. A method that exist
 
 ### `server/discover`
 
-Replaces `initialize` for stateless clients. It takes no parameters beyond `_meta` and needs no scope, so it is the first call a client should make.
+Replaces `initialize` for stateless clients. It takes no parameters beyond `_meta` and needs no scope, so it is the first call a client should make. It does not list the caller in **Connected Clients**; the first other request does.
 
 ```json
 {
@@ -220,7 +253,7 @@ Send `notifications/cancelled` with the `requestId` of a request that is still r
 { "jsonrpc": "2.0", "method": "notifications/cancelled", "params": { "requestId": 7, "reason": "user aborted" } }
 ```
 
-The notification is answered with `202` whether or not anything matched. The cancelled request finishes with `-33002`.
+The notification is answered with `202` whether or not anything matched. The cancelled request finishes with `-33002`. A write the database had already started is not stopped: it runs to the end, and the `-33002` carries `data: { "outcome": "unknown" }`. It may have been applied, so check before sending it again.
 
 Cancellation is per principal: a token can only cancel its own requests. Revoking a token cancels everything it has in flight.
 
@@ -255,7 +288,7 @@ Without `elicitation`, TablePro shows its own confirmation dialog on the user's 
 }
 ```
 
-The `description` carries the statement verbatim, line breaks and all, up to 2,000 characters. Render it as a block rather than a one-line label: it is the only thing the person sees before they approve, and a `WHERE` clause that falls off the end changes what they agreed to.
+The `description` carries the statements as they will run, with parameter values filled in and line breaks kept. The prompt names the connection, database and schema in use. Render the text as a block. If it exceeds 2,000 UTF-16 code units, the full confirmation opens on the Mac instead of sending a shortened form.
 
 Present the form, then repeat the **same** call with the answer and the state echoed back:
 
@@ -270,7 +303,7 @@ Present the form, then repeat the **same** call with the answer and the state ec
 }
 ```
 
-`requestState` is signed and bound to the token, the method, and a digest of the parameters. Change any argument between the two calls and it is rejected with `-32602`. It expires after 5 minutes. An `action` other than `accept`, or `approved: false`, fails the call with a `denied` tool error.
+`requestState` is signed and bound to the token, the method, and a digest of the parameters. Change any argument between the two calls and it is rejected with `-32602`. It expires after 5 minutes. It is also bound to where the statement runs: the connection, database and schema it resolved to, and the statements shown. If the user switches the connection's database or schema between the two calls, the second call returns a new `input_required` naming the new target, and nothing runs until that one is approved. The same happens when the connection reconnected in between, even to the same database. A call that runs several statements, such as `export_data` with several tables, asks once with every statement listed, and the approval runs them all in that call. An accepted approval is used once: sending the same `requestState` and answer again fails with `-32602`, and nothing runs. Call again without `requestState` to ask for a new approval. An `action` other than `accept`, or `approved: false`, fails the call with a `denied` tool error.
 
 A call that carries `inputResponses` or `requestState` is never cached, whatever the method's normal hint says.
 
@@ -327,7 +360,7 @@ Protocol errors are reserved for the envelope: a malformed request, a missing sc
 |-------|-------|
 | Request body | 10 MB |
 | Request headers | 16 KB |
-| Concurrent connections | 64 |
+| Concurrent connections | 64 per listener: TCP and Unix socket |
 | Idle connection timeout | 30 seconds |
 | Handler deadline | 330 seconds |
 
@@ -338,7 +371,7 @@ Per-caller request rates, auth lockouts and pairing lockouts are counted separat
 A request with no `io.modelcontextprotocol/protocolVersion` in `_meta` is treated as legacy, and legacy still works the old way:
 
 1. `POST /mcp` with `initialize` and a `protocolVersion` of `2025-11-25` or `2025-06-18`. Any other value is `-32022`.
-2. The response carries `protocolVersion`, `capabilities`, `serverInfo` and `instructions`.
+2. The response carries `protocolVersion`, `capabilities`, `serverInfo` and `instructions`. `capabilities` follows the token: `tools` needs `tools:read`, and `resources`, `prompts` and `completions` need `resources:read`.
 3. Every later request carries `Mcp-Session-Id`. A session belongs to the token that created it; presenting it under another token is `-33001`.
 4. A session lives until the server stops. The store holds at most 16 and evicts the least recently used past that. A session the server does not recognize is `-33001`, and the client has to `initialize` again.
 

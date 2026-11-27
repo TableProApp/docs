@@ -116,7 +116,7 @@ Saving reads the document again and stops if it changed after you opened it, so 
 | `PATCH users/alice?updateMask=age {"age": 31}` | Changes the named fields. Without `updateMask` the body replaces the document. Never creates one |
 | `DELETE users/alice` | Deletes a document |
 
-`POST` and `PATCH` bodies use the **Edit Document** JSON, on the same line or the lines under it. There is no `PUT`. Write a space or any of `% ? # & = /` inside an ID as its percent escape, such as `GET users/John%20Doe`. `DELETE` raises the dangerous query warning even on **Silent**. Other writes follow the connection's [Safe Mode](/features/safe-mode) level.
+`POST` and `PATCH` bodies use the **Edit Document** JSON, on the same line or the lines under it. There is no `PUT`. Write a space or any of `% ? # & = /` inside an ID as its percent escape, such as `GET users/John%20Doe`. A `DELETE` of anything but one document raises the dangerous query warning even on **Silent**. Other writes, a `DELETE` of one document included, follow the connection's [Safe Mode](/features/safe-mode) level.
 
 ## Realtime Database
 
@@ -167,7 +167,7 @@ GET /chats?orderBy="$key"&limitToFirst=20
 
 `GET`, `PUT`, `PATCH`, `POST` and `DELETE` take a path and, for writes, a JSON body on the same line or the lines under it. Query parameters apply to `GET` only, and a `PATCH` body is an object of the children to change. `PUT /` and `DELETE /` are refused: write or delete the root's children one at a time.
 
-A `DELETE`, a `PUT` that leaves the node empty and a `PATCH` that sets a child to `null` raise the dangerous query warning even on **Silent**. Other writes follow the connection's [Safe Mode](/features/safe-mode) level.
+A `DELETE`, `PUT` or `PATCH` that removes or replaces the root or a top-level node, which the sidebar lists as a table, raises the dangerous query warning even on **Silent**: a `PUT` there drops every record the new value does not hold. One that removes or replaces a node further down, one record or part of it, follows the connection's [Safe Mode](/features/safe-mode) level like any other write.
 
 ## Emulators
 

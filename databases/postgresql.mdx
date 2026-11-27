@@ -11,10 +11,10 @@ Unlike MySQL, PostgreSQL will not connect without a **Database**, and a connecti
 
 | Field | Default | Notes |
 |-------|---------|-------|
-| **Connect Using** | **Host and Port** | **Socket** connects through the server's socket on this Mac. See [Unix socket](#unix-socket) |
+| **Address** | **Host and Port** | **Unix Socket** connects through the server's socket on this Mac. See [Unix socket](#unix-socket) |
 | **Host** | `localhost` | |
-| **Port** | `5432` | With **Socket**, picks the socket file |
-| **Socket** | empty | With **Connect Using** set to **Socket**: the folder holding the socket, or the socket file |
+| **Port** | `5432` | With **Unix Socket**, picks the socket file |
+| **Socket** | empty | With **Address** set to **Unix Socket**: the folder holding the socket, or the socket file |
 | **Username** | - | Not pre-filled; most servers use `postgres`. Empty signs in as your macOS login name |
 | **Database** | - | **Required** |
 
@@ -36,7 +36,7 @@ Any server from 9.1 on works. A feature the server predates stays out of the sid
 
 ## Unix socket
 
-A server on this Mac listens on a socket as well as a port, and a server with `listen_addresses = ''` listens only there. Set **Connect Using** to **Socket** and enter the folder that holds the socket. Host leaves the form, and **Network** offers only **Direct**.
+A server on this Mac listens on a socket as well as a port, and a server with `listen_addresses = ''` listens only there. Set **Address** to **Unix Socket** and enter the folder that holds the socket in **Socket**. Host leaves the form, and so does the **SSH & Proxies** pane, since only a direct connection reaches the socket.
 
 The socket file is named after the port, `.s.PGSQL.5432` for port `5432`, so **Port** stays and picks the server. Entering the file itself, such as `/tmp/.s.PGSQL.5433`, saves its folder and sets **Port** from the name. The server lists its folders:
 
@@ -53,7 +53,7 @@ The **Socket** field suggests both. The note under it names the socket file and 
 
 A `local` line in `pg_hba.conf` decides who signs in. With `peer`, leave **Username** empty to sign in as your macOS login name.
 
-No SSL Mode applies: a socket connection never leaves this Mac, so the SSL settings leave the Network tab. Backup and restore reach the server through the same socket, and `~/.pgpass` matches it the way `psql` does: the `/tmp` folder as `localhost`, any other folder by its path.
+No SSL Mode applies: a socket connection never leaves this Mac, so the **SSL/TLS** pane leaves the sidebar. Backup and restore reach the server through the same socket, and `~/.pgpass` matches it the way `psql` does: the `/tmp` folder as `localhost`, any other folder by its path.
 
 ## Connection URL
 
@@ -69,15 +69,15 @@ postgresql://user@%2Ftmp/database
 
 ### AWS IAM
 
-Set **Authentication** to an AWS IAM option and set **Username** to a database role granted `rds_iam`. See [AWS IAM Authentication](/connections/aws-iam).
+Set **Method** under **Authentication** to an AWS IAM option and set **Username** to a database role granted `rds_iam`. See [AWS IAM Authentication](/connections/aws-iam).
 
 ### Google Cloud IAM
 
-For a Cloud SQL instance you reach directly, set **Authentication** to a Google Cloud IAM option and set **Username** to the IAM database user. See [IAM sign-in without the proxy](/connections/cloud-sql-proxy#iam-sign-in-without-the-proxy).
+For a Cloud SQL instance you reach directly, set **Method** under **Authentication** to a Google Cloud IAM option and set **Username** to the IAM database user. See [IAM sign-in without the proxy](/connections/cloud-sql-proxy#iam-sign-in-without-the-proxy).
 
 ### Kerberos
 
-For a server whose `pg_hba.conf` line uses `gss`, set **Authentication** to **Kerberos (GSSAPI)** and set **Username** to the role the server maps your principal to. Leave **Kerberos Principal** and **Password** blank to use the ticket in your credential cache, or enter `user@REALM.COM` and your domain password to have one requested at connect. Get a cached ticket with `kinit user@REALM.COM`; `klist` shows it.
+For a server whose `pg_hba.conf` line uses `gss`, set **Method** under **Authentication** to **Kerberos (GSSAPI)** and set **Username** to the role the server maps your principal to. Leave **Kerberos Principal** and **Password** blank to use the ticket in your credential cache, or enter `user@REALM.COM` and your domain password to have one requested at connect. Get a cached ticket with `kinit user@REALM.COM`; `klist` shows it.
 
 Connect by hostname, never an IP address: the ticket is for the service principal `postgres/host.domain.com@REALM.COM`, registered against the host name. Through an SSH tunnel the ticket is still for that host name. This Mac has to reach the realm's KDC, through DNS SRV records or `/etc/krb5.conf`.
 
@@ -85,7 +85,9 @@ Connect by hostname, never an IP address: the ticket is for the service principa
 
 ### Password file
 
-Turn on **Use ~/.pgpass** to read the password from `~/.pgpass` instead of typing one. Entries are `hostname:port:database:username:password`, `*` matches any field, first match wins. An empty **Username** matches your macOS login name, and a socket connection matches as described in [Unix socket](#unix-socket). The form reports what it found, including `~/.pgpass has incorrect permissions (needs chmod 0600)`, the one that silently blocks a connect.
+**Use ~/.pgpass** starts off. Turn it on to read the password from `~/.pgpass` instead of typing one. With it off, an empty password does not trigger a file lookup, including during backup and restore. Entries are `hostname:port:database:username:password`, `*` matches any field, first match wins. An empty **Username** matches your macOS login name, and a socket connection matches as described in [Unix socket](#unix-socket). The form reports what it found, including `~/.pgpass has incorrect permissions (needs chmod 0600)`, the one that silently blocks a connect.
+
+Imported or synced password-file settings need [approval on this Mac](/connections/connection-form#sign-ins-from-this-mac) before use.
 
 ## Databases and schemas
 
@@ -106,6 +108,8 @@ Rename from the same sheet, or in place: select the row and press Return.
 `pg_catalog`, `information_schema` and `pg_toast` are refused for rename, edit and drop.
 
 A partitioned table is listed once, with how many partitions it holds beside its name. Expand it for the partitions, each labelled with its bound: `FROM ('2024-01-01') TO ('2024-02-01')`, `IN ('de', 'fr')`, `WITH (modulus 4, remainder 0)`, or `DEFAULT`. Expand a partition again if it is subpartitioned.
+
+The DDL of a partitioned table, and a SQL export of it, creates every partition with what it holds of its own: a check, key, default or `NOT NULL` its parent does not have, its own indexes and its comments. A foreign table partition is written only as a comment, with its server and options, because the export reads its rows through the parent and a restore into it would write them to the remote table again. Those rows have no partition until you create it.
 
 A partition is a relation, so opening, truncating, renaming and dropping one work as they do on any table. A partition declared in another schema, `CREATE TABLE archive.orders_2023 PARTITION OF public.orders`, is reached under its parent and carries `archive` into every statement built from it.
 
@@ -165,13 +169,19 @@ A `CREATE INDEX CONCURRENTLY` or `REINDEX CONCURRENTLY` that fails or is cancell
 
 ## Cross-database tabs
 
-PostgreSQL has no in-place `USE`, so every database browsed from the [connections strip](/features/workspace-rail) gets a server connection of its own. Moving between two database entries switches between those connections without reconnecting, and each keeps its open transaction, temp tables, and `SET` values until its entry is closed or the connection ends. Closing the entry or the connection, or disconnecting, asks first when that rolls back an open transaction. A tab runs on the connection of the database it is bound to.
+PostgreSQL has no in-place `USE`, so every database browsed from the [connections strip](/features/workspace-rail) gets a server connection of its own. Moving between two database entries switches between those connections without reconnecting, and each keeps its open transaction, temp tables, and `SET` values until its entry is closed or the connection ends. Closing the entry or the connection, or disconnecting, asks first when a transaction is open there, and **Commit** commits it before the connection closes. A tab runs on the connection of the database it is bound to.
 
 A tab bound to a database that has no entry runs on a [metadata connection](/connections/connection-form#connection-health) instead. That one is shared with the Structure tab and closes after 10 minutes idle, so open the database from the strip before starting a transaction or a `CREATE TEMP TABLE` there. A database connection that died while idle is reopened on its next use; if it held a transaction, that statement is refused once with a message saying the server rolled it back. Binding itself is on [Tabs](/features/tabs#where-a-tab-points).
 
 ## Sessions on the server
 
 In `pg_stat_activity`, each database's own connection reports `application_name` as `TablePro`, one per database entry in the strip. The [metadata connections](/connections/connection-form#connection-health) that read the sidebar and the Structure tab, and the ones a tab on a database without an entry runs on, report `TablePro Metadata`. To name them yourself, put `-c application_name=reporting` in **Connection Options**: every connection then uses that name.
+
+Each connection turns off `synchronize_seqscans`, so the pages of a table with no sort order all start from the same place and no row is skipped between them. A connection through a pooler such as PgBouncer leaves the setting alone, and `-c synchronize_seqscans=on` in **Connection Options** keeps the server's behavior.
+
+## Notices
+
+`RAISE NOTICE`, `RAISE WARNING` and the other notices the server sends show with the result of the statement that raised them, as psql prints them. See [Server output](/features/query-results#server-output).
 
 ## Text encoding
 
@@ -183,7 +193,9 @@ Sessions run in `UTF8` whatever encoding the database was created with, and the 
 
 ## SSL/TLS
 
-New connections default to **Preferred** (libpq `sslmode=prefer`): TLS first, plain text if the server refuses it. Pick **Verify CA** to validate the server certificate. See [SSL/TLS](/connections/ssl).
+New connections default to **Preferred** (libpq `sslmode=prefer`): TLS first, plain text if the server refuses it. Pick **Verify Identity** to validate the server certificate and its hostname; with no CA certificate chosen it checks the roots this Mac trusts. **Verify CA** checks only the chain and needs the server's CA certificate. See [SSL/TLS](/connections/ssl#certificate-fields).
+
+Under **Required**, **Verify CA** and **Verify Identity**, once a connection has reached PostgreSQL 17 or later over TLS, the next ones to that server start TLS directly and save a round trip. A server or proxy that refuses is asked the standard way, still over TLS, and is not tried directly again until you quit TablePro.
 
 ## Limitations
 

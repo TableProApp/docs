@@ -56,7 +56,7 @@ Close or delete the session the window is drawing and the most recent live sessi
 
 Closing a window stops that connection's sessions and keeps what they said. Open one again and it continues. Nothing is replayed: a statement that was waiting for an answer when the window closed was rejected by the stop, so the assistant is asked again rather than the call being re-issued.
 
-Sessions stay on this Mac. They are not part of [iCloud sync](/features/icloud-sync).
+Sessions stay on this Mac. They are not part of [iCloud sync](/features/icloud-sync). Deleting a connection deletes its sessions and their conversations, also when the delete reaches this Mac from another one.
 
 ### From the menu bar
 
@@ -85,11 +85,11 @@ Two views of one session, chosen from the menu at the trailing end of the column
 
 A run with no rows to draw says which of three things happened: **No Rows** for a query that matched nothing, **Statement Completed** for a write, with the number of rows it changed, and **Can't Show This Result** for a reply the grid cannot read, which the conversation still has in full.
 
-`Cmd+Option+I` opens and closes this column, and the View menu's item reads **Show Result** while the mode is on. The column itself reads **No Session Open** until a session starts, and **Not Connected** while the connection is down.
+`Cmd+Option+I` opens and closes this column, and the View menu's item reads **Show Result** while the mode is on. The column itself reads **No Session Open** until a session starts, **Connecting** while the connection opens, and **Not Connected** while it is down.
 
 ## When the connection drops
 
-The conversation column is replaced by the same unavailable screen browsing shows: the error itself, **Manage Connections…**, and **Reconnect** for a connection that dropped or **Try Again** for one that failed. Reconnecting puts the same session and the same transcript back.
+While the connection [reconnects](/connections#when-a-connection-drops), the conversation stays and the reconnect bar sits above it, with **Cancel**. Once the connection is lost or a connect fails, the column is replaced by the same unavailable screen browsing shows: the error itself, **Manage Connections…**, and **Reconnect** for a connection that dropped or **Try Again** for one that failed. Reconnecting puts the same session and the same transcript back.
 
 ## What Agent mode dims
 

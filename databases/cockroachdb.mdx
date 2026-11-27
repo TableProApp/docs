@@ -31,13 +31,13 @@ cockroachdb://user:password@host:26257/defaultdb
 
 ## CockroachDB Cloud
 
-A Cloud connection string carries a cluster routing parameter that the form has no field for. Copy the host, port, user, password, and database from the Cloud console, then put the routing value in **Connection Options** on the Options tab:
+A Cloud connection string carries a cluster routing parameter that the form has no field for. Copy the host, port, user, password, and database from the Cloud console, then put the routing value in **Connection Options** on the **Advanced** pane:
 
 ```text
 --cluster=my-cluster-1234
 ```
 
-Set SSL Mode to **Verify Identity** for Cloud. **Connection Options** goes straight to libpq, so it takes any other libpq option a self-hosted cluster needs.
+Set SSL Mode to **Verify Identity** for Cloud. With no CA certificate chosen, the server is checked against the roots this Mac trusts. **Connection Options** goes straight to libpq, so it takes any other libpq option a self-hosted cluster needs.
 
 ## What is different
 

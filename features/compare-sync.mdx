@@ -3,17 +3,21 @@ title: Compare & Sync
 description: Compare two databases and generate the SQL script that brings one in line with the other
 ---
 
-Pick a source and a target, press **Compare**, and every object that differs lists in one window. Include the ones to change, generate the script, and read it before anything runs. Requires a Starter license.
+Pick a source and a target, press **Compare**, and every object that differs lists in one window. Include the ones to change, generate the script, and read it before anything runs. Requires a Pro plan.
 
 <Frame caption="A structure comparison grouped by difference, with the source and target definitions side by side">
   <img className="block dark:hidden" src="/images/compare-sync-window.png" alt="Compare and Sync window with a results table on the left and a two-up definition diff on the right" />
   <img className="hidden dark:block" src="/images/compare-sync-window-dark.png" alt="Compare and Sync window with a results table on the left and a two-up definition diff on the right" />
 </Frame>
 
+## Turn it on
+
+Compare & Sync is a module. It stays on for a Mac that ran an earlier version of TablePro and starts off on a new install. Turn it on under **Modules** in **Settings > Extensions**. That adds **Database > Compare** and **Compare & Sync With…** on a connection's right-click menu in the connection list. Turning it off removes both, stops a comparison or sync that is running and closes the window. **Reset all settings**, on the General pane, puts the switch back to where it started on that Mac.
+
 ## Opening it
 
 - **Database > Compare > Compare & Sync Databases…**
-- Right-click a connection in the connection list and choose **Compare/Sync with…**. The connection clicked becomes the source.
+- Right-click a connection in the connection list and choose **Compare & Sync With…**. The connection clicked becomes the source.
 
 The window comes back on the source, target, mode and options it last held, so running the same comparison again is one press of **Compare**. Opening it from a connection makes that connection the source, and the remembered target comes back only when it was the target of that same source.
 
@@ -137,7 +141,7 @@ A saved script is written for the target engine's own client, so each statement 
 | SQL Server | `;` and a `GO` line | `;` and a `GO` line |
 | PostgreSQL, SQLite and every other engine | `;` | `;` |
 
-Run the Oracle script in SQL*Plus or SQLcl, the Dameng script in DISQL, the MySQL script in the `mysql` client, and the SQL Server script in `sqlcmd` or SQL Server Management Studio. The query editor reads the Oracle, PostgreSQL and SQLite forms as saved, but sends a `DELIMITER` or `GO` line to the server as a statement: remove those lines before running a MySQL or SQL Server script there.
+Run the Oracle script in SQL*Plus or SQLcl, the Dameng script in DISQL, the MySQL script in the `mysql` client, and the SQL Server script in `sqlcmd` or SQL Server Management Studio. The query editor runs each of these forms as saved, its `DELIMITER` and `GO` lines included.
 
 SQL*Plus ends a plain statement at a blank line and reports `SP2-0734: unknown command` for the rest of it. When a view's definition holds a blank line, run `SET SQLBLANKLINES ON` before the script.
 
@@ -146,6 +150,8 @@ A data script is built from a fresh read of both sides. An included table that h
 A structure script is checked the same way. Both schemas are read again, and an object whose structure moved since the comparison stops the script with that object named rather than writing DDL against a schema that no longer exists.
 
 Script generation needs matching database types, with MySQL and MariaDB counting as one family. A cross-engine pair still compares, read-only: column data types are engine-specific strings, so generating DDL for one engine from another's metadata is not sound.
+
+Two schemas with different names pair their tables, views, routines and triggers by name. Tables script into the target's schema, with foreign keys to the source's own schema pointed at the target's. A view, routine or trigger whose source lives in another schema compares but is not scripted, because its definition can name the source's schema.
 
 ## Applying
 
@@ -159,7 +165,9 @@ A type narrows when the new one holds less: a shorter length, a length where the
   Applying runs the script against the target. Statements that already ran stay applied unless the whole run is inside a transaction that rolls back.
 </Warning>
 
-**On error** chooses between stopping and rolling back, stopping and keeping what ran, and skipping and continuing. A transaction cannot be combined with skip and continue, because together they leave the target half-applied.
+**On error** chooses between stopping and rolling back, stopping and keeping what ran, and skipping and continuing. A transaction cannot be combined with skip and continue, because together they leave the target half-applied. On PostgreSQL a failed statement aborts the transaction, so stopping and keeping what ran inside one keeps nothing: the run rolls back and says so.
+
+On an engine that cannot pool, such as DuckDB and PGlite, the run uses the same session as your tabs. When that session already has a transaction open, from **Manual Commit** or a `BEGIN` of your own, the run joins it instead of starting its own, and the result asks you to commit or roll it back.
 
 Whether a transaction covers the run depends on the engine. MySQL, MariaDB and Oracle commit implicitly on every DDL statement, so a structure sync on those engines runs without one rather than implying a rollback that will not happen. A data sync into a MySQL or MariaDB table on a storage engine that cannot roll back, such as MyISAM, keeps the rows a rolled-back run already wrote, and the result names those tables.
 

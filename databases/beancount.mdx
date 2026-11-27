@@ -5,13 +5,13 @@ description: Backend requirements, the table layout, source locations, includes,
 
 import RegistryPlugin from "/snippets/registry-plugin.mdx";
 
-Install `rledger` or Python Beancount before you connect. The plugin shells out to one of those two and projects the answer into the read-only SQL tables below.
+Install `rledger` or Python Beancount before you connect. The plugin runs one of those two and projects the answer into read-only SQL tables.
 
 <RegistryPlugin name="Beancount" plugin="Beancount Driver" />
 
 ## Backend requirements
 
-The compatibility fixture exercises `rledger` 0.22.0 and 0.24.0, and Python Beancount 3.2.3. Other versions may work, but are not part of that tested contract. Install `rledger` if you are choosing: it wins when both are present, it is the only one that fills `diagnostics`, and BQL runs through it and nothing else.
+The compatibility fixture exercises `rledger` 0.22.0 and 0.24.0, and Python Beancount 3.2.3. Other versions may work, but are not part of that tested contract. Install `rledger` if you are choosing: it wins when both are present, it supplies validation diagnostics, and BQL runs through it and nothing else. To control Python ledger plugins, choose the Python backend and read [Ledger plugins](#ledger-plugins).
 
 <CodeGroup>
 ```bash rledger
@@ -38,9 +38,22 @@ After connecting, TablePro's database version display names the backend it selec
 
 ## Ledger plugins
 
-A `plugin "..."` directive names Python code that Beancount imports and runs while it loads the ledger. The plugins that ship with Beancount itself, everything under `beancount.`, always run. Anything else is third-party code, so the Python backend skips it unless you turn on **Run Ledger Plugins** on the connection's Options tab.
+With the Python backend, **Run Ledger Plugins** on the connection's **Advanced** pane starts off.
+Only modules named `beancount.plugins.<name>` with no configuration argument run in that state.
+Other Python modules and configured plugins are skipped. A ledger's `insert_pythonpath` option
+does not add its folders to Python's import path while plugins run.
 
-The setting belongs to one connection, so trusting your own ledger does not trust the next ledger someone sends you. Skipped plugin names appear in `diagnostics` with phase `security`. If the ledger needs one of them to load at all, the connection fails and the error names the plugin it skipped.
+Turn on **Run Ledger Plugins** to run those directives for this connection. Their code runs on your
+Mac. Skipped names appear in `diagnostics` with phase `security`. If a skipped plugin is required
+to load the ledger, the connection fails and names it.
+
+`rledger` runs the ledger plugins it supports. **Run Ledger Plugins** does not control that backend,
+and BQL always uses it. Choose `TABLEPRO_BEANCOUNT_BACKEND=python` and keep the toggle off to read
+without third-party or configured Python ledger plugins. Use SQL against the projected tables.
+
+Both backends start in `/` with a limited environment. `PYTHONPATH` and `PYTHONHOME` are not passed
+through, and the ledger folder is not their working directory. The selected executable and its
+installed packages still run.
 
 ## Quick setup
 
@@ -49,7 +62,7 @@ The setting belongs to one connection, so trusting your own ledger does not trus
     Click **New Connection…** and choose **Beancount**.
   </Step>
   <Step title="Choose your ledger">
-    Click **Browse…** and select a `.beancount` file. No host, no port, no password, no Database field: the ledger path is the whole connection.
+    Click **Choose…** and select a `.beancount` file. No host, no port, no password, no Database field: the ledger path is the whole connection.
   </Step>
   <Step title="Connect">
     Click **Save & Connect**.
@@ -162,6 +175,6 @@ BQL values read as Beancount writes them: an amount as `19.43 USD`, a position h
 
 **BQL queries need rledger**: Install rustledger so `rledger` lands on `PATH` or in Homebrew, or point `TABLEPRO_RUSTLEDGER_BINARY` at it.
 
-**File does not exist**: The ledger moved or was renamed. Re-pick it with **Browse…** in the connection form.
+**File does not exist**: The ledger moved or was renamed. Re-pick it with **Choose…** in the connection form.
 
 **Beancount include cycle detected**: Two ledger files include each other. Break the loop in the source files.

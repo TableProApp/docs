@@ -1,0 +1,81 @@
+---
+title: Server settings
+description: Every environment variable the self-hosted TablePro server reads, with its default, and how the server learns a client's address behind a proxy
+---
+
+Every setting is an environment variable read at start. A missing or invalid value stops the process with a message that names the variable.
+
+## Server
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `PROFILE` | `saas` | Set `selfhosted`. Required |
+| `ACCOUNT_HOST` | | The account portal's hostname, such as `tablepro-account.example.com`. Required |
+| `API_HOST` | | The API's hostname, such as `tablepro.example.com`. Required, and different from `ACCOUNT_HOST`. The license file must name `https://` plus this host |
+| `DATABASE_URL` | | A PostgreSQL URL, such as `postgres://tablepro@db.example.com:5432/tablepro?sslmode=verify-full`. Required |
+| `PGPASSWORD` | | The database password, kept out of `DATABASE_URL` as the reference deploys do |
+| `LISTEN` | `:8080` in the image | The address and port `serve` listens on |
+| `GOMEMLIMIT` | | Go's soft memory limit. Set it below the container's memory, such as `700MiB` for 1 GB |
+
+The server routes requests by `Host` and answers `/healthz` and `/readyz` on any host. `tablepro-cloud healthcheck` GETs `/healthz` on the `LISTEN` port and exits 1 unless it answers 200 within 5 seconds: use it as the container's health check, since the image has no shell. `/healthz` does not check the database, so a database outage restarts nothing; `/readyz` does, for a load balancer.
+
+## Client address
+
+The server keys its rate limits by the client's address. `CLIENT_ADDRESS` says where that address comes from, and it is required.
+
+| `CLIENT_ADDRESS` | Address used | Needs |
+|---|---|---|
+| `none` | The TCP peer | Nothing else. Use it only with no proxy in front |
+| `xff` | `X-Forwarded-For`, walked from the right past the proxies | `CLIENT_ADDRESS_TRUSTED_CIDRS` |
+| `header` | One header your proxy overwrites with one address, such as `X-Real-IP`, named in `CLIENT_ADDRESS_HEADER` | `CLIENT_ADDRESS_TRUSTED_CIDRS` |
+
+`CLIENT_ADDRESS_TRUSTED_CIDRS` is a comma-separated list of the proxies' own prefixes, such as `10.0.1.0/24,10.0.2.0/24`. A request from any other peer is keyed by the peer, whatever headers it sends.
+
+<Warning>
+List only the proxies' addresses, never a range clients are in. A client inside a trusted range sets its own rate-limit key.
+</Warning>
+
+## Identity provider
+
+Set exactly one of `OIDC_ISSUER` and `SAML_IDP_ENTITY_ID`. That choice picks the protocol. [Sign-in](/self-hosted/sign-in) has the IdP side of each.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `IDP_ADMIN_GROUP_ID` | | The IdP group whose members are the server's admins, by an ID that never changes. Unset, the owner picks admins in the portal. See [Roles](/self-hosted/roles#server-roles) |
+| `IDP_DISPLAY_NAME` | | The IdP's name on the sign-in button: **Sign in with** and the name. Unset, the button reads **Sign in with your organization** |
+| `OIDC_ISSUER` | | The issuer URL, `https`, or `http` on a loopback host, with no query or fragment |
+| `OIDC_CLIENT_ID` | | Required with `OIDC_ISSUER` |
+| `OIDC_CLIENT_SECRET` | | The client secret of a confidential client. A public client takes none |
+| `OIDC_SCOPES` | `openid,email,profile,offline_access` | Comma-separated. Must include `openid` |
+| `OIDC_GROUPS_CLAIM` | `groups` | The claim that lists a person's groups |
+| `SAML_IDP_ENTITY_ID` | | The IdP's `entityID`, as its metadata states it, at most 1024 characters. Any `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_SCOPES` or `OIDC_GROUPS_CLAIM` with it stops the server |
+
+An IdP behind a private CA, or a proxy that inspects TLS: set `SSL_CERT_FILE` to a bundle that holds the public roots and that CA, or `SSL_CERT_DIR` to a directory of them, mounted into the container. On Fargate that takes an image built `FROM` this one by digest, with the bundle added.
+
+## Sessions
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `UPSTREAM_REVALIDATE` | `1h` | How long an OIDC sign-in goes before the server asks the IdP again |
+| `SESSION_MAX_AGE` | `168h` | The longest an app stays signed in from the portal sign-in that approved it |
+| `SESSION_MAX_AGE_WITHOUT_IDP_REFRESH` | `10h` | The cap when the IdP gives no refresh token, which a SAML IdP never does. Also the portal's session length. No more than `SESSION_MAX_AGE` |
+
+Durations take Go's form: `90m`, `10h`, `168h`. [Sign-in](/self-hosted/sign-in#sessions) covers what ends a session.
+
+## License renewal
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `LICENSE_RENEWAL` | `off` | `on` fetches the license's next file from tablepro.app once a day and at each start; any other value stops the server. See [Renew](/self-hosted/operations#renew) |
+| `HTTPS_PROXY` | | The proxy every outbound HTTPS call goes through, such as `http://proxy.example.com:3128` |
+| `NO_PROXY` | | Comma-separated hosts reached without the proxy, such as an IdP inside your network |
+
+## Keys
+
+`TABLEPRO_CREDENTIALS` holds the server's keys as one JSON object, from each credential's name to the file's contents. [Image and keys](/self-hosted/image#generate-the-keys) makes it. `serve` refuses to start without `oauth-access`, `entitlement` and an `identity-tokens.<n>`.
+
+`CREDENTIALS_DIRECTORY`, a directory with one file per credential named after it, takes its place when set.
+
+## Refused settings
+
+The server stops when one of tablepro.app's own settings is set, so a copied configuration cannot reach an outside service: `POLAR_*`, `SES_*`, `NEWSLETTER_LINK_KEY`, `POSTHOG_API_KEY`, `POSTHOG_HOST`, `TURNSTILE_*`, `CRISP_WEBSITE_ID`, `GITHUB_TOKEN`, `WATCHDOG_PING_URL`, `APPLE_*`, `GITHUB_CLIENT_*`, `GOOGLE_CLIENT_*`, `PASSKEY_*`, `LEGACY_*`, `LICENSE_MACHINE_BINDING_*` and `SHARE_CREATE_DISABLED`. `OIDC_ADMIN_GROUP_ID` and `OIDC_DISPLAY_NAME` stop it too: they are now `IDP_ADMIN_GROUP_ID` and `IDP_DISPLAY_NAME`.

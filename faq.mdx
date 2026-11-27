@@ -1,30 +1,30 @@
 ---
 title: FAQ
-description: Short answers on licensing, privacy, offline use, database coverage, syncing, and moving from another client
+description: Short answers on plans and accounts, privacy, offline use, database coverage, syncing, and moving from another client
 ---
 
 import DriverCounts from "/snippets/driver-counts.mdx";
 
-Short answers only, each linking to the page that carries the detail. Anything not covered is worth an issue on [GitHub](https://github.com/TableProApp/TablePro/issues), where driver requests and support questions are tracked in the open.
+Start with [your platform](/). Unless a question names another platform, these answers describe macOS. For Linux setup and support, use the [Linux guides](/linux/install). Report unanswered questions on [GitHub](https://github.com/TableProApp/TablePro/issues).
 
-## Cost and licensing
+## Cost and plans
 
 <AccordionGroup>
 
 <Accordion title="Is TablePro free?">
-Yes, and there is no trial countdown. A license adds the features in the tier table and changes nothing else. See [Licensing](/features/licensing).
+Yes, with no account and no trial countdown. A paid plan adds the features in the plan table and changes nothing else. See [Licensing](/features/licensing).
 </Accordion>
 
-<Accordion title="What does a license add?">
-Two tiers. Starter covers iCloud Sync, encrypted connection export, environment variables in connection fields, Linked Folders, Query Insights, result charts, Compare & Sync, and Data Rewind. Team adds the Team Catalog and the Team Library on top of Starter. [Licensing](/features/licensing) shows what each one does without a license, and prices are on [tablepro.app/pricing](https://tablepro.app/pricing).
+<Accordion title="What does a paid plan add?">
+Two paid plans. Pro covers iCloud Sync, encrypted connection export, environment variables in connection fields, Linked Folders, Query Insights, result charts, Compare & Sync, Data Rewind, and shared links past the Free limits. Team adds the Team Catalog and the Team Library on top of Pro. Sign in to a TablePro account to use them, on up to 3 devices. [Licensing](/features/licensing) lists prices and shows what each feature does without a plan.
 </Accordion>
 
 <Accordion title="Can I use it at work?">
-Yes. Nothing counts seats. To share connections and saved queries with teammates, the Team tier hands out seats from your account on tablepro.app, and each teammate activates with an invite code instead of a key. See [Team Plan](/features/team).
+Yes, free or paid. To share connections and saved queries with teammates, a Team plan hands out seats from your account at account.tablepro.app: each teammate accepts an emailed invitation and signs in with an account of their own. See [Teams](/features/team).
 </Accordion>
 
 <Accordion title="What license is the source code under?">
-The GNU Affero General Public License v3.0, plugins included. A TablePro license key is a separate thing: it activates the paid features, not the app.
+The GNU Affero General Public License v3.0, plugins included. A TablePro plan is a separate thing: it unlocks the paid features, not the app.
 </Accordion>
 
 </AccordionGroup>
@@ -34,11 +34,11 @@ The GNU Affero General Public License v3.0, plugins included. A TablePro license
 <AccordionGroup>
 
 <Accordion title="Is my data sent anywhere?">
-Your queries, results, and schemas stay on your Mac. One usage heartbeat goes out every 24 hours. It carries a hashed machine ID and facts about the app, such as its version and the types of the open connections, with no query text, hostnames, database names, or connection names; [Privacy](/security/privacy#usage-heartbeat) lists every field in it. Turn it off with **Share usage data** in **Settings > General**. AI is the exception, since the context you allow reaches the provider you configured.
+Ordinary queries and results go to your database. Mac usage data is on by default and, from 0.86.0, goes directly to PostHog with installation or account identifiers. Turn off **Share usage data** in **Settings > General > Privacy**. [Privacy](/security/privacy#usage-data) lists events, fields and older-version behavior. AI providers and MCP clients receive authorized context and tool results. Publishing to Team Library or sending content to support shares that content too.
 </Accordion>
 
 <Accordion title="Is my password safe?">
-Passwords go into the macOS Keychain, not the connections file. An ordinary export leaves them out, the Team Library carries the connection definition and query text only, and MCP clients query through your saved connections without seeing one. Two exceptions: **Copy Connection String** puts the password on the clipboard in plain text, and an encrypted export (Starter) carries credentials behind a passphrase. See [Connection Sharing](/features/connection-sharing).
+Passwords go into the macOS Keychain, not the connections file. An ordinary export leaves them out, the Team Library carries the connection definition and query text only, and MCP clients query through your saved connections without seeing one. Two exceptions: **Copy Connection String** puts the password on the clipboard in plain text, marked concealed so clipboard history apps that honor the marker skip it, and an encrypted export (Pro) carries credentials behind a passphrase. See [Connection Sharing](/features/connection-sharing).
 </Accordion>
 
 <Accordion title="Where does my data live on disk?">
@@ -80,19 +80,23 @@ An app update can raise the plugin interface version, and a plugin built against
 <AccordionGroup>
 
 <Accordion title="Does it work offline?">
-Connecting, browsing, and querying need nothing but the database. What does need the network: installing or updating a plugin, and any AI provider that is not local. A license keeps working for 30 days past its last successful validation when the license server cannot be reached. See [Licensing](/features/licensing).
+Connecting, browsing, and querying need nothing but the database. What does need the network: installing or updating a plugin, and any AI provider that is not local. A paid plan keeps working offline for up to 14 days after its last check, and a Mac that never goes online imports an offline file instead. See [Licensing](/features/licensing#validation-and-offline-use).
 </Accordion>
 
 <Accordion title="Does it sync between Macs?">
-Through iCloud, with a Starter or Team license. Sync is off by default and each category has its own toggle: connections, groups and tags, SSH and credential profiles, saved queries, table and database favorites, table folders, and settings. Passwords are a separate opt-in that rides iCloud Keychain, and a connection can be marked **Local only** to stay off iCloud. See [iCloud Sync](/features/icloud-sync).
+Through iCloud, with a Pro or Team plan. Sync is off by default and each category has its own toggle: connections, groups and tags, SSH and credential profiles, saved queries, table and database favorites, table folders, and settings. Passwords are a separate opt-in that rides iCloud Keychain, and a connection can be marked **Local Only** to stay off iCloud. See [iCloud Sync](/features/icloud-sync).
 </Accordion>
 
 <Accordion title="Is there an iPhone app?">
-Yes, for iPhone and iPad on iOS 18 or later. It reads the same CloudKit data as the Mac app but carries connections, groups, and tags only. See [iPhone and iPad](/ios).
+Yes. The stable iPhone and iPad app needs no account or plan. See [iPhone and iPad](/ios) for requirements, connections, queries, and sync.
 </Accordion>
 
-<Accordion title="Is there a Windows or Linux version?">
-No, macOS and iOS only. A Linux port is a prototype with nothing to install yet, and there is no Windows build at all. Progress is tracked on [GitHub](https://github.com/TableProApp/TablePro).
+<Accordion title="Is there a Linux version?">
+Yes. The public beta has its own [supported engines](/linux/connect#engines). [Install on Linux](/linux/install) covers the beta PPA, COPR, Flatpak repository, and release packages. [Licensing](/features/licensing) links to Linux account details.
+</Accordion>
+
+<Accordion title="Is there a Windows version?">
+The Windows app is in development and has no release yet. Follow progress in the [Windows source directory](https://github.com/TableProApp/TablePro/tree/main/windows).
 </Accordion>
 
 <Accordion title="How often does TablePro release, and will it keep interrupting me?">
@@ -100,7 +104,7 @@ Releases go out when the work is ready, which lately averages one every three da
 
 The one exception is a fix you need straight away, meaning data loss, a crash on a common path, or a security issue. Those are flagged so they surface immediately.
 
-**Settings > General** sets the check to daily or weekly, turns automatic installs off so you are asked each time, or turns checks off entirely. An administrator can pin all three for a fleet: see [Managed updates](/security/managed-updates).
+**Settings > General > Software Update** turns automatic installs off so you are asked each time, or turns checks off entirely. An administrator can pin both, and the check interval, for a fleet: see [Managed updates](/security/managed-updates).
 </Accordion>
 
 </AccordionGroup>

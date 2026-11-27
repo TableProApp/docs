@@ -32,7 +32,7 @@ record format every message has used since.
 | **Schema Registry User** / **Schema Registry Password** | Optional. Basic authentication for the registry, such as a Confluent Cloud API key and secret |
 
 There is no Database field. A connection is one cluster, and the sidebar shows its topics directly.
-Set the whole attempt's **Connect timeout** under **Options**; an empty field uses 30 seconds.
+Set the whole attempt's **Connect Timeout** on the **Advanced** pane; an empty field uses 30 seconds.
 
 ## Connection URL
 
@@ -139,6 +139,11 @@ says, so a mode left over from an earlier edit cannot silently encrypt a plainte
 Editing a cell, deleting a row, and sorting a column are all unavailable, and the grid dims them
 rather than failing at save time. Kafka has no update primitive, no per-message delete, and no
 server-side sort. To change what a consumer sees, produce a new message.
+
+The filter bar cannot filter a topic. **Apply** reports
+`This database cannot filter rows with these conditions.` and the grid keeps the messages it shows.
+To read less of a topic, `CONSUME` it from an offset, a time or chosen partitions; a
+[Live tab](/features/live-messages) filters new messages by key and payload.
 
 Deleting a topic is available, from the sidebar or with `DROP TOPIC <name>`. The request goes to
 the cluster controller, which accepts it and removes the log directories afterwards, so the topic

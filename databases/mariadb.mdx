@@ -18,7 +18,7 @@ mariadb://user:password@localhost/database?socket=%2Ftmp%2Fmysql.sock
 
 ## Kerberos
 
-For an account created `IDENTIFIED VIA gssapi`, set **Authentication** to **Kerberos (GSSAPI)** and set **Username** to the account name. Leave **Kerberos Principal** and **Password** blank to use the ticket in your credential cache, or enter `user@REALM.COM` and your domain password to have one requested at connect. Get a cached ticket with `kinit user@REALM.COM`.
+For an account created `IDENTIFIED VIA gssapi`, set **Method** under **Authentication** to **Kerberos (GSSAPI)** and set **Username** to the account name. Leave **Kerberos Principal** and **Password** blank to use the ticket in your credential cache, or enter `user@REALM.COM` and your domain password to have one requested at connect. Get a cached ticket with `kinit user@REALM.COM`.
 
 The server names its own service principal, set in `gssapi_principal_name`, and this Mac has to reach the realm's KDC. The option appears on MariaDB connections only: MySQL's Kerberos plugin is a different one, which the bundled connector does not have.
 

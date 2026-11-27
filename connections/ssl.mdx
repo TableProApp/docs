@@ -3,7 +3,7 @@ title: SSL/TLS
 description: Configure encrypted database connections, per-driver defaults, and certificate verification
 ---
 
-Managed databases require TLS, every one of them, from RDS and Cloud SQL to Supabase, Neon, Atlas, and ClickHouse Cloud. Use **Verify Identity** when your provider hands you a CA certificate, or when the driver checks the system trust store on its own: ClickHouse, Trino, Presto, and SQL Server. Otherwise set **Required (skip verify)**.
+Managed databases require TLS, every one of them, from RDS and Cloud SQL to Supabase, Neon, Atlas, and ClickHouse Cloud. Use **Verify Identity** when your provider hands you a CA certificate, or when the server's certificate chains to a root this Mac trusts: PostgreSQL and the engines built on it, ClickHouse, Trino, Presto, and SQL Server check the system trust store when no CA certificate is chosen. Otherwise set **Required (skip verify)**.
 
 ## Modes
 
@@ -15,23 +15,25 @@ Managed databases require TLS, every one of them, from RDS and Cloud SQL to Supa
 | Verify CA | TLS, and the certificate must chain to the CA certificate you choose. The hostname is not checked, so a CA certificate is required |
 | Verify Identity | TLS, certificate validated, and the hostname must match the certificate subject |
 
-<Frame caption="SSL mode and certificates below the transport picker">
-  <img className="block dark:hidden" src="/images/connection-ssl-settings.png" alt="SSL mode and certificate settings in the connection form" />
-  <img className="hidden dark:block" src="/images/connection-ssl-settings-dark.png" alt="SSL mode and certificate settings in the connection form" />
+<Frame caption="SSL/TLS pane at Verify CA">
+  <img className="block dark:hidden" src="/images/connection-ssl-settings.png" alt="The SSL/TLS pane with SSL Mode, a CA Certificate section and a Client Certificates section holding Certificate and Key" />
+  <img className="hidden dark:block" src="/images/connection-ssl-settings-dark.png" alt="The SSL/TLS pane with SSL Mode, a CA Certificate section and a Client Certificates section holding Certificate and Key" />
 </Frame>
 
 ## Certificate fields
 
-The certificate rows appear only once **SSL Mode** is anything but Disabled. Each takes a file path, with **Browse** to pick one.
+The certificate rows appear on the **SSL/TLS** pane only once **SSL Mode** is anything but Disabled. Each takes a file path, with **Choose…** to pick one.
 
 | Field | When it appears | What it takes |
 |---|---|---|
-| **Certificate**, under **CA Certificate** | Verify CA and Verify Identity only | The PEM or DER certificate the server's certificate chains to, for example `/path/to/ca-cert.pem`. Saving without it is blocked, except under Verify Identity on ClickHouse, Kafka, Presto, Qdrant, SAP HANA and Trino, which check the system trust store when it is empty |
-| **Client Certificate** | Any mode but Disabled | Your certificate, for a server that enforces mutual TLS. Optional otherwise |
-| **Client Key** | Any mode but Disabled | The matching private key. Required once a client certificate is set |
-| **Key Passphrase** | Once **Client Key** has a path, on drivers that support it (Cassandra, ScyllaDB and MongoDB) | The passphrase of an encrypted key. Stored in the Keychain |
+| **Certificate**, under **CA Certificate** | Verify CA and Verify Identity only | The PEM or DER certificate the server's certificate chains to, for example `/path/to/ca-cert.pem`. Saving without it is blocked, except under Verify Identity on ClickHouse, CockroachDB, Kafka, KingbaseES, PostgreSQL, Presto, Qdrant, Redshift, SAP HANA and Trino, which check the system trust store when it is empty |
+| **Certificate**, under **Client Certificates** | Any mode but Disabled | Your certificate, for a server that enforces mutual TLS. Optional otherwise |
+| **Key**, under **Client Certificates** | Any mode but Disabled | The matching private key. Required once a client certificate is set |
+| **Key Passphrase** | Once **Key** has a path, on drivers that support it (Cassandra, ScyllaDB and MongoDB) | The passphrase of an encrypted key. Stored in the Keychain |
 
 SQL Server shows no certificate fields at all and verifies against the system trust store. See [SQL Server](/databases/mssql#limitations). Under Verify Identity, SAP HANA and Kafka verify against the system trust store when **Certificate** is left empty. See [SAP HANA](/databases/sap-hana#ssl%2Ftls).
+
+PostgreSQL, Redshift, CockroachDB and KingbaseES under Verify Identity with **Certificate** empty check the server against the roots this Mac trusts, as **Keychain Access** shows them, your own and your organization's trust settings included. A `~/.postgresql/root.crt` file, which libpq reads by default, is used instead when it exists. Backups and restores with `pg_dump` and `pg_restore` check the same way. Verify CA still needs the server's CA certificate: libpq refuses it against the system roots, since anyone can get a public certificate for a host they control. A provider with its own CA, such as Amazon RDS or Supabase, still needs its CA bundle in **Certificate**.
 
 ## Per-driver defaults
 
@@ -44,12 +46,13 @@ A new connection starts on the mode that matches the driver's own default, and s
 | SQL Server | Preferred | FreeTDS `encryption=request`: the login over TLS, the rest in plain TCP unless the server forces encryption |
 | Teradata | Disabled | Opens a TLS transport, retries on a plain socket if it fails to come up |
 | MongoDB, Redis, Cassandra, ClickHouse, Elasticsearch, Typesense, SurrealDB, Weaviate, Qdrant | Disabled | Nothing. No fallback exists, so Preferred forces TLS exactly like Required |
-| etcd | Disabled | Nothing. The driver never reads these fields. Set **TLS Mode** on the Options section instead, and see [etcd](/databases/etcd) |
+| etcd | Disabled | Nothing. The driver never reads these fields. Set **TLS Mode** on the **Advanced** pane instead, and see [etcd](/databases/etcd) |
 | Trino, Presto | Disabled | Sends every request over HTTPS with no fallback, again like Required |
 | SAP HANA | Verify Identity | Nothing. No fallback exists, so Preferred forces TLS exactly like Required |
 | Oracle | Disabled | Connects in plain TCP, so it behaves like Disabled. A red warning appears under the picker; use Required to enforce TCPS |
 | Snowflake, BigQuery, Bigtable, Spanner, Firestore, Firebase Realtime Database, DynamoDB, Cloudflare D1, Cloudflare R2 SQL, libSQL / Turso | Always encrypted | These drivers are HTTPS and manage TLS themselves. No **SSL Mode** |
-| SQLite, DuckDB, Beancount, PGlite | None | Local files or an in-process engine. No **SSL Mode** |
+| DuckDB | Automatic, in Remote (Quack) | Nothing, and the editor has no **SSL/TLS** pane. A remote connection sets its own **SSL Mode** among the Remote fields on General, with no Preferred, and a local file has none. See [DuckDB](/databases/duckdb#ssl%2Ftls) |
+| SQLite, Beancount, PGlite | None | Local files or an in-process engine. No **SSL Mode** |
 
 ## Ports that mean TLS
 
@@ -77,7 +80,7 @@ A TLS failure is reported with the cause, a mode to switch to, and the driver's 
 ```text
 The server requires an encrypted connection but TablePro is configured to connect in plain text.
 
-On the connection's Network tab, set SSL Mode to Verify Identity, or to Required to skip the certificate check.
+In the connection's SSL/TLS settings, set SSL Mode to Verify Identity, or to Required to skip the certificate check.
 
 Server response: FATAL: no pg_hba.conf entry for host "…", user "…", database "…", no encryption
 ```
@@ -108,11 +111,11 @@ The certificate's CN or SAN does not cover the host you typed. Change **Host** t
 
 ### "client certificate required"
 
-The server enforces mutual TLS. Fill in **Client Certificate** and **Client Key**.
+The server enforces mutual TLS. Fill in **Certificate** and **Key** under **Client Certificates** on the **SSL/TLS** pane.
 
 ### "client private key is encrypted" / "passphrase is incorrect"
 
-Enter the key's passphrase in **Key Passphrase**, which appears once **Client Key** has a path. Trino, Presto and etcd have no **Key Passphrase**: decrypt the key first with `openssl pkey -in encrypted.key -out client.key` and choose the decrypted file.
+Enter the key's passphrase in **Key Passphrase**, which appears once **Key** under **Client Certificates** has a path. Trino, Presto and etcd have no **Key Passphrase**: decrypt the key first with `openssl pkey -in encrypted.key -out client.key` and choose the decrypted file.
 
 ## On iPhone and iPad
 

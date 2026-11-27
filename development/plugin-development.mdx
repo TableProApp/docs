@@ -13,7 +13,7 @@ A plugin is a macOS loadable bundle target with `WRAPPER_EXTENSION = tableplugin
 
 | Key | Type | Required | Purpose |
 |-----|------|----------|---------|
-| `TableProPluginKitVersion` | integer | Yes | The PluginKit ABI the plugin was built against. Current value: 41 |
+| `TableProPluginKitVersion` | integer | Yes | The PluginKit ABI the plugin was built against. Current value: 47 |
 | `TableProProvidesDatabaseTypeIds` | array of strings | Recommended | Database type IDs the plugin serves, which is what makes lazy loading possible |
 | `CFBundleShortVersionString` | string | Yes | Plugin version shown in **Settings > Extensions** |
 | `CFBundleVersion` | string | Yes | Build number. Of two copies of a plugin the higher build loads, and a registry update needs a higher build |
@@ -49,6 +49,8 @@ The host also injects three reserved `additionalFields` keys before it creates a
 A `.number` field takes a whole number of 0 or more. The form keeps ASCII digits only and will not save anything else. Use `.stepper(range:)` for a bounded or signed integer, and `.text` for a value with a decimal point.
 
 The remaining fifty-odd statics all have defaults: connection mode, URL schemes, brand color, editor language, `sqlDialect` (keywords, functions, completions), navigation model, system database names, and two dozen `supports*` capability flags. Override the ones that differ. `apple/Plugins/TableProPluginKit/DriverPlugin.swift` is the full list.
+
+Set `schemaSwitchScopesUnqualifiedNames` to `true` only when `switchSchema` changes where the server resolves unqualified names in the statements your driver runs, as `SET search_path` or `USE SCHEMA` do. It defaults to `false`, and then an MCP or AI call that runs SQL is refused any `schema`.
 
 ## Implementing PluginDatabaseDriver
 
@@ -86,7 +88,7 @@ Adopt these on top of `PluginDatabaseDriver` to reach more of the UI. The app fi
 | `PluginDefaultSortProvider` | Per-table control of default sorting: `.useAppDefault`, `.suppress`, or `.forceColumns([String])` |
 | `PluginPrincipalManagement` | Users, roles, and grants in the Users & Roles tab |
 | `PluginBrowseFilterProvider` | Control of the sidebar object filter: glob syntax, case sensitivity, type scopes |
-| `SettablePlugin` | A settings pane of your own under **Settings > Extensions** |
+| `SettablePlugin` | Settings of your own on the plugin's page in **Settings > Extensions** |
 
 ## ABI compatibility
 

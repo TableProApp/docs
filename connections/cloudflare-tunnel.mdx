@@ -7,7 +7,7 @@ import HelperPort from "/snippets/helper-port.mdx";
 
 The Access application is yours to create, in the Cloudflare dashboard. The **Cloudflare Tunnel** transport takes the hostname of one that already fronts the database, and runs `cloudflared` against it for the life of the connection.
 
-<Frame caption="Cloudflare Tunnel selected on the Network tab">
+<Frame caption="Cloudflare Tunnel selected on the SSH & Proxies pane">
   <img className="block dark:hidden" src="/images/cloudflare-tunnel-pane.png" alt="Access hostname, authentication method and local listener fields" />
   <img className="hidden dark:block" src="/images/cloudflare-tunnel-pane-dark.png" alt="Access hostname, authentication method and local listener fields" />
 </Frame>
@@ -26,13 +26,13 @@ The form looks on your `PATH` and in `/opt/homebrew/bin` and `/usr/local/bin`, a
 
 <Steps>
   <Step title="Choose the transport">
-    On the **Network** tab, set **Connect via** to **Cloudflare Tunnel**. A connection uses one transport, so choosing this one switches off whichever was selected before.
+    On the **SSH & Proxies** pane, set **Connect Via** to **Cloudflare Tunnel**. A connection uses one transport, so choosing this one switches off whichever was selected before.
   </Step>
   <Step title="Enter the hostname and sign in">
-    **Hostname** is the Access application's public hostname, `db.example.com` in the example. With **Browser Sign-In** chosen, click **Sign In with Browser…** so the first connect does not stop to ask.
+    **Hostname**, under **Access Application**, is the application's public hostname, `db.example.com` in the example. With **Method** on **Browser Sign-In**, click **Sign In with Browser…** so the first connect does not stop to ask.
   </Step>
   <Step title="Test it">
-    On **General**, click **Test Connection**. **Host** and **Port** there are never dialed while the tunnel is on: the Access application decides where it lands.
+    Click **Test Connection**. **Host** and **Port** on General are never dialed while the tunnel is on: the Access application decides where it lands.
   </Step>
 </Steps>
 
@@ -51,10 +51,10 @@ Disconnecting or quitting stops the process. One orphaned by a crash is reaped a
 | Option | What it does | Default |
 |--------|--------------|---------|
 | **Hostname** | The Access application hostname `cloudflared` connects to. | - |
-| **Expose to local network** | Binds `0.0.0.0` rather than `127.0.0.1`. | Off |
+| **Expose to Local Network** | Binds `0.0.0.0` rather than `127.0.0.1`. | Off |
 
 <Warning>
-With **Expose to local network** on, anything that reaches the port is past Cloudflare Access on your session and faces only the database's own login.
+With **Expose to Local Network** on, anything that reaches the port is past Cloudflare Access on your session and faces only the database's own login.
 </Warning>
 
 ### Authentication

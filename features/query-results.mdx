@@ -5,7 +5,7 @@ description: Choosing between results, pinning, the row cap, and what a failed o
 
 import RowCap from "/snippets/row-cap.mdx";
 
-Every statement you run gets its own result. The next run reuses an unpinned one rather than adding to the pile, so a result survives only as long as you leave it unpinned.
+Every statement you run gets its own result. The next run reuses an unpinned one rather than adding to the pile, so a result survives only as long as you leave it unpinned. A run keeps every result that returns rows unless **Results kept per run** in [Data Settings](/customization/data-settings#results-kept-per-run) sets a limit.
 
 <Frame caption="Three results as tabs above the grid, the first one pinned">
   <img className="block dark:hidden" src="/images/query-results.png" alt="Three SELECT statements in the editor over genre, artist and album result tabs, with the genre rows in the grid" />
@@ -94,17 +94,25 @@ When the cap trims a result the status bar reads **Showing N rows** and offers *
 
 ## Statements that return no rows
 
-INSERT, UPDATE, DELETE and DDL show a success view with the affected row count and the execution time.
+INSERT, UPDATE, DELETE and DDL show a success view with the affected row count and the execution time. Two or more of them in one run share one result, named after how many there were, with the row counts and times added up.
 
 ## Server output
 
-Lines a statement prints on the server show with that statement's result. On Oracle that is `DBMS_OUTPUT.PUT_LINE`, and the output is on from the moment you connect: no `SET SERVEROUTPUT ON`.
+Lines a statement prints on the server show with that statement's result.
+
+| Engine | What shows | Kept per statement |
+| --- | --- | --- |
+| Oracle | `DBMS_OUTPUT.PUT_LINE` lines. Output is on from the moment you connect: no `SET SERVEROUTPUT ON` | 10,000 lines |
+| PostgreSQL | Notices such as `RAISE NOTICE`, `RAISE WARNING` or `VACUUM VERBOSE` lines, as psql prints them: `NOTICE:  step 1 done`, with their `DETAIL` and `HINT` lines. `client_min_messages` decides which levels the server sends | 10,000 lines |
+| SQL Server | `PRINT` output and messages up to severity 10 | 1,000 messages |
 
 - A block or procedure call that returns no rows shows its lines under the success message.
 - A query that returned rows and also printed gains an **Output** mode beside **Data**.
+- A plan from `EXPLAIN ANALYZE` or an actual plan gains **Output** beside its views, since the statement ran. See [EXPLAIN Visualization](/features/explain-visualization#view-modes).
+- **Fetch All** runs the query again and shows what that run printed.
 - A statement that fails lists the first 20 lines it printed before the error, inside the error banner.
 
-The lines are read after every statement run from the editor, so each result holds only what its own statement printed. At most 10,000 lines are kept per statement; past that the result reads "The output was cut short." and the rest is discarded. Lines a trigger prints while a grid edit is saved are not read then, and show with the next statement you run from the editor.
+Each result holds only what its own statement printed. When a script runs inside a transaction the app opens, what its closing commit prints, such as a deferred trigger's notices, shows with the last statement's result. Lines printed by anything else on the connection are not shown: a trigger fired by saving a grid edit, **Commit** in the toolbar, or a statement an AI assistant or MCP client ran. Past the limit, the result reads "The output was cut short." and the rest is discarded.
 
 ## Failed statements
 

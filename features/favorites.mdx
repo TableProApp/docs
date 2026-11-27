@@ -5,7 +5,7 @@ description: Pin the databases and tables you keep returning to, save SQL, and l
 
 The query you retype every Monday is worth saving once. Give it the keyword `dau`: type those three letters in the editor and the whole statement expands, cursor already in place.
 
-The Favorites tab holds databases, tables, saved SQL, a **Team Library** on a Team license, and any linked folders of `.sql` files.
+The Favorites tab holds databases, tables, saved SQL, a **Team Library** when you hold a seat on a team, and any linked folders of `.sql` files.
 
 Reach it from the **Tables** / **Favorites** control at the top of the sidebar, or from **View > Show Favorites**, which reveals a collapsed sidebar on the way. Neither command ships with a shortcut; bind one in **Settings > Keyboard**, under **Navigation**.
 
@@ -42,7 +42,7 @@ Table favorites are scoped to the connection, database, and schema, and sync thr
 
 ## Recent tables
 
-Turn on **Show recent tables** in [General settings](/customization/general-settings) for a **Recent** section at the top of the object list. It holds the last 10 tables per connection and database, newest first, and stepping through preview tabs records only the one you stop on.
+Turn on **Show recent tables** in [Sidebar & Tabs settings](/customization/sidebar-and-tabs#sidebar) for a **Recent** section at the top of the object list. It holds the last 10 tables per connection and database, newest first, and stepping through preview tabs records only the one you stop on.
 
 Click a row to reopen the table. Right-click to remove one entry or clear the list. Recents stay on this Mac.
 
@@ -108,7 +108,9 @@ The cursor lands right after `orders.`, ready for a column name. `;;` means the 
 
 ## Working with saved queries
 
-Double-click a favorite, or press `Return`, to insert it into the editor. The right-click menu has **Insert in Editor**, **Run in New Tab**, **Copy Query**, **Edit…**, **Show History**, **Move to**, and **Delete**. Arrow keys move between rows, typing jumps to a name, and `Delete` asks first.
+Double-click a favorite, or press `Return`, to insert it into the editor. The right-click menu has **Insert in Editor**, **Run in New Tab**, **Copy Query**, **Share…**, **Edit…**, **Show History**, **Move to**, and **Delete**. Arrow keys move between rows, typing jumps to a name, and `Delete` asks first.
+
+**Share…** makes a web link to the query's SQL that anyone with the link can open; the connection never goes with it. See [Shared Links](/features/shared-links).
 
 Folders come from the same background menu. A folder's own menu has **New Favorite…**, **New Subfolder**, **Rename**, **Global**, and **Delete Folder**; deleting one moves what was inside up to the parent level. A global folder carries a globe, and **Global** changes that folder alone: the queries inside keep the scope they had, so mark them global too if you want them everywhere. Anything kept in a folder a connection cannot see is listed at that connection's top level, whether it is a global query or a global subfolder. Drag a query or a linked file out of the sidebar to drop its SQL into the editor or another app.
 
@@ -128,9 +130,9 @@ Saved queries travel in a `.tablepro` file with the connections they belong to, 
 
 ## Team Library
 
-On a Team license the Favorites tab gains a **Team Library** section holding what your team published. Double-click one, or press `Return`, to run it in a new tab.
+With a seat on a team, the Favorites tab gains a **Team Library** section holding the queries your team published, each labeled with who last changed it. Double-click one, or press `Return`, to run it in a new tab.
 
-To publish your own, right-click empty space and choose **Publish Saved Queries to Team…** It replaces everything you published before. See [Team Plan](/features/team).
+Owners and admins publish theirs by right-clicking empty space and choosing **Publish Saved Queries to Team…**. Syncing and conflicts are on [Teams](/features/team#team-library).
 
 ## Linked SQL folders
 
@@ -199,7 +201,7 @@ When a linked folder sits inside a Git working copy, a changed file carries a le
 | U | Untracked |
 | ! | Merge conflict |
 
-A file with no letter matches its last commit. Letters refresh when a file changes, when the repository changes, and when you switch back to TablePro.
+A file with no letter matches its last commit. Letters refresh when a file changes and when the repository changes.
 
 The letters come from a status read with every Git filter switched off, so a file that Git LFS or git-crypt rewrites can show **M** until you stage it.
 

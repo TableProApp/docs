@@ -134,6 +134,8 @@ Anything else returns an empty list rather than an error.
 
 `database`, `schema` and `table` need to know which connection to read. Pass it in `context.arguments` under `connection`, `connection_id`, or `id`. Without one, the result is empty.
 
+They also need that connection approved for this client, and completion never asks. It reads the connection once the user has allowed this client at **Ask Once for Each Connection**, under **Never Ask**, or on a connection whose AI policy is **Always Allow**. Otherwise the result is empty. A forgotten or revoked approval applies from the next request.
+
 For a `ref/resource` completion TablePro fills the context from the URI itself, so completing `table` in `tablepro://connections/{id}/tables/{table}` already knows the connection, and the `database` and `schema` query parameters if the URI carries them. Anything you pass in `context.arguments` wins.
 
 ### Matching and limits

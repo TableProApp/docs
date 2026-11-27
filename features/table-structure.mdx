@@ -284,7 +284,7 @@ The queue outlives everything short of an explicit discard: closing the tab, clo
   <img className="hidden dark:block" src="/images/schema-change-preview-dark.png" alt="Preview SQL sheet with ALTER TABLE statements, Cancel and Save Changes" />
 </Frame>
 
-A save runs on a connection of its own, so it never joins a transaction you have left open in a query tab.
+A save runs on a connection of its own, so it never joins a transaction you have left open in a query tab. While one is open, the save asks **A Transaction Is Open** first; see [Schema changes while a transaction is open](/features/sql-editor#schema-changes-while-a-transaction-is-open). DuckDB and PGlite have one connection, so there the save joins the open transaction and is committed or rolled back with it.
 
 Once a save has run, even partway, every tab on the table loads its rows again, in any window: the tab on screen at once, its Data view included while Structure is in front, and the rest when you next switch to them. A tab holding unsaved row edits keeps its rows, and asks first if it is the one on screen in Data. Tabs on other tables are left alone.
 

@@ -23,7 +23,9 @@ Connect as `root` with an empty password and database `default`. Set `QUERY_DEFA
 | **Database** | empty | Optional. New servers start with `default` |
 | **SSL Mode** | Preferred | TLS first, plain text if the server refuses |
 
-Host, user, password, SSH tunnels and `Cmd+K` database switching work as on [MySQL](/databases/mysql). No minimum Databend version is enforced.
+Host, user, password, SSH tunnels and `Cmd+K` database switching work as on [MySQL](/databases/mysql).
+
+Saving row edits, importing rows from a CSV, JSON or XLSX file, copying rows into a table and running a query with parameters need Databend 1.2.473 (May 2024) or later. On an older server they stop with an error before anything is sent.
 
 ## Connection URL
 

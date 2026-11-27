@@ -13,7 +13,7 @@ What this screen shows is what your account is allowed to see. An empty or half-
 | MongoDB | Only your own operations; metrics and slow queries fail | `clusterMonitor`, `dbAdmin` on the database you browse for its profiler, and `hostManager` to cancel another user's operation |
 | Redis | A panel fails with `NOPERM` naming the command | `+client\|list`, `+client\|id`, `+info` and `+slowlog\|get` in the user's ACL, plus `+client\|kill` and `+client\|unblock` to act on a client |
 
-Open it with `Cmd+Option+Shift+D`, from **Database > Server Dashboard**, from **Server Dashboard** under **Actions** in the toolbar, or by right-clicking a live connection in the [workspace rail](/features/workspace-rail).
+Open it with `Cmd+Option+Shift+D`, from **Database > Server Dashboard**, from **Server Dashboard** under **Actions** in the toolbar, or by right-clicking a live connection in the [connections strip](/features/workspace-rail).
 
 <Frame caption="Server Dashboard showing active sessions, metrics, and slow queries">
   <img
@@ -74,7 +74,7 @@ What the tile draws depends on what comes back:
 
 A tile fetches at most 2,000 rows, the most a chart draws, so a query that returns a whole table costs one page of it per refresh.
 
-A tile runs one statement, and only a read. A saved query that writes, holds more than one statement, or reads files on the server is refused on the tile with the reason and never runs. So is every tile on a connection whose [Safe Mode level](/features/safe-mode#levels) asks before reads, **Alert (Full)** and **Safe Mode (Full)**, since nobody is there to confirm a refresh.
+A tile runs one statement, and only a read, on the connection's own session: it waits for a statement a query tab is running there, and runs in the database and schema the session was on when the tile was checked. A saved query that writes, holds more than one statement, or reads files on the server is refused on the tile with the reason and never runs. So is every tile on a connection whose [Safe Mode level](/features/safe-mode#levels) asks before reads, **Alert (Full)** and **Safe Mode (Full)**, since nobody is there to confirm a refresh.
 
 Each tile refreshes with the dashboard unless you slow it down: open its **Tile Options** menu, the circled ellipsis, and pick **Every Minute**, **Every 5 Minutes**, **Every 15 Minutes**, or **Every Hour** under **Refresh**. An expensive count then runs once a minute instead of every second. A failed run keeps the last result on the tile and shows the error beneath it.
 
@@ -82,7 +82,7 @@ Drag a tile by its title to move it, or choose **Move Left** or **Move Right** i
 
 ## Refreshing
 
-The interval menu offers 1s, 2s, 5s (the default), 10s, 30s, and Off. **Pause** stops the cycle, tiles included, without changing the interval, and is dimmed while the interval is Off. **Refresh Now** runs a single pass and runs every tile, whatever its own interval. The time of the last refresh sits on the right.
+The interval menu offers 1s, 2s, 5s (the default), 10s, 30s, and Off. **Pause** stops the cycle, tiles included, without changing the interval, and is dimmed while the interval is Off. **Refresh Now** runs a single pass and runs every tile, whatever its own interval. The time of the last refresh sits on the right. While the dashboard's window is minimized, hidden or covered by other windows, the cycle waits, and it runs a pass as soon as the window shows again.
 
 ## What each engine reports
 

@@ -36,7 +36,7 @@ Both stage cell edits as pending changes. A query tab does it only when its quer
 | Tab used before this one | `Ctrl+Tab` |
 | Tab used longest ago | `Ctrl+Shift+Tab` |
 
-**Close Other Tabs**, **Close All Tabs**, **Close Tabs for Other Databases**, and **Pin Tab** ship unbound. Bind them in **Settings > Keyboard** under Navigation.
+**Close Other Tabs**, **Close All Tabs**, **Close Tabs for Other Databases**, **Pin Tab**, and **Rename Tab** ship unbound. Bind them in **Settings > Keyboard** under Navigation.
 
 ## Preview tabs
 
@@ -44,7 +44,7 @@ Clicking a table opens it immediately in a preview tab, which the next click reu
 
 A preview tab's title is italic, which marks the tab the next click takes over. The strip appears once a window holds more than one tab; from there, double-click a preview tab or choose **Keep Open** from its contextual menu to keep it. It holds its place in the strip, and the next table opens in a tab of its own.
 
-A preview tab turns permanent as soon as you sort it, filter it, or edit data, and a tab in any of those states is never replaced by a click. One still open at quit comes back permanent, and a table opened from Favorites is permanent from the start. Turn the behavior off in **Settings > General > Tabs > Enable preview tabs**.
+A preview tab turns permanent as soon as you sort it, filter it, or edit data, and a tab in any of those states is never replaced by a click. One still open at quit comes back permanent, and a table opened from Favorites is permanent from the start. Turn the behavior off in **Settings > Sidebar & Tabs > Enable preview tabs**.
 
 ## Two tabs on one table
 
@@ -63,6 +63,8 @@ Close Other Tabs and Close All Tabs act on the tabs in the strip, never on anoth
 
 **Close Tabs for Other Databases** takes every tab of the connection's other databases, never the tab in front of you, and never another connection's tabs. On engines that switch schemas instead, such as BigQuery, Spanner and Oracle, it reads **Close Tabs for Other Schemas**.
 
+A tab whose query is still running asks **Close while work is still running?** first, and **Close Anyway** stops the query. A table tab still loading its rows closes without asking. See [Work still running](/features/connection-window#work-still-running).
+
 Closing asks **Do you want to save changes?** when the tab holds unsaved cell edits, a `.sql` file that differs from disk, or staged structure, Create Table, or user and role changes. Save closes the tab once the save lands, except for user and role changes, where it opens the review sheet instead and leaves the tab open. Closing one tab selects it first, putting the work in front of you before you answer. Once it closes, or you cancel, the tab you were on comes back to the front.
 
 A bulk close asks once, and Cancel stops the rest. Save writes what it can reach in every tab it is closing: their `.sql` files and their staged structure changes, plus everything in the tab on screen. Cell edits, Create Table drafts, and staged user and role changes can only be saved from their own tab, so those tabs stay open instead and the alert says so. **Don't Save** closes all of them.
@@ -71,7 +73,7 @@ A dot on the tab marks unsaved text or unsaved edits. It is deliberately wider t
 
 ## Reopening closed tabs
 
-`Cmd+Shift+T`, or **File > Reopen Closed Tab**, brings back the last query or table tab you closed, with its SQL, cursor position, and database context. The last 20 are kept for 30 days, and deleting a connection deletes its closed tabs with it. Server Dashboard, Users & Roles, and structure tabs are not candidates.
+`Cmd+Shift+T`, or **File > Reopen Closed Tab**, brings back the last query or table tab you closed, with its SQL, cursor position, database context, and a query tab's [earlier versions](/features/sql-editor#earlier-versions). The last 20 are kept for 30 days, and deleting a connection deletes its closed tabs with it. Server Dashboard, Users & Roles, and structure tabs are not candidates.
 
 Pending cell edits are the one thing that does not come back: they are never written to disk, so **Don't Save** on the close prompt is final.
 
@@ -91,9 +93,19 @@ Pinning a preview tab keeps it, and a sidebar click never takes over a pinned ta
 
 The pin is saved with the tab, comes back after a restart, and moves with the tab to a new window or another connection. Pinning results inside a query tab is a separate command, **View > Pin Result** (`Cmd+Option+P`).
 
+## Naming tabs
+
+Double-click a query tab, or choose **Rename Tab** from its contextual menu or **Window > Rename Tab**, and type a name in the tab. `Return` or a click elsewhere keeps it, and `Esc` leaves the tab as it was. Clear the name to give the tab back its number.
+
+A name is one line of up to 100 characters. It is saved with the tab, comes back after a restart and with **Reopen Closed Tab**, and moves with the tab to a new window or another connection. A named tab keeps its name even when it reads like `Query 3`, and a sidebar click never takes it over.
+
+Only a query tab that is not saved to a file takes a name. A tab opened from a `.sql` file is named after the file, and saving a named tab to a file gives it the file's name. Like the strip, **Rename Tab** needs two or more tabs.
+
 ## Moving a tab to its own window
 
-Drag a tab down out of the strip, or right-click it and choose **Move Tab to New Window**, to open it in a window of its own. Both windows work on the same connection and the same session, so closing one leaves the other connected.
+Drag a tab out of the strip and let go over empty space, or right-click it and choose **Move Tab to New Window**, to open it in a window of its own. Both windows work on the same connection and the same session, so closing one leaves the other connected.
+
+Drop a tab on the strip of another window of the same connection to move it there.
 
 The command dims for a window's only tab, for a tab with a query or a table load still running, and while the connection is down. **Move Connection to New Window**, on the connections strip, moves a whole connection instead.
 
@@ -109,9 +121,7 @@ On the new connection the tab points at the database the sidebar is browsing. Re
 
 ## Tabs that stop fitting
 
-The strip keeps one row and scrolls it, the way every macOS tab bar does. Scroll over it with two fingers to reach the rest.
-
-**Settings > General > Tabs > When tabs stop fitting** switches to **Wrap onto more rows**, which lays the tabs out over as many rows as they need and grows the strip to match. Nothing is off screen, and the window has that much less room for the table below.
+The strip keeps one row and scrolls it, the way every macOS tab bar does. Tabs narrow toward the ends of the strip to show that more are there. Scroll over it with two fingers to reach the rest.
 
 ## Switching tabs
 
@@ -130,7 +140,7 @@ Both commands are in the **Window** menu as **Switch to Recent Tab** and **Switc
 
 ## Where a tab points
 
-A tab is bound to one connection, database, and schema, and every query, refresh, filter, sort, structure read, and structure save it runs uses that binding. Switching tabs never changes the connection's saved default database. To point an existing tab somewhere else, use the database picker in the query editor's toolbar, a schema picker on servers that switch schemas: it moves that one tab to the other database or schema, the window goes with it, and it reruns the tab when it was showing rows. A statement that writes asks before it runs. To point it at another connection, [move the tab](#moving-a-query-tab-to-another-connection).
+A tab is bound to one connection, database, and schema, and every query, refresh, filter, sort, structure read, and structure save it runs uses that binding. Switching tabs never changes the connection's saved default database. To point an existing tab somewhere else, use the database picker in the query editor's toolbar, a schema picker on servers that switch schemas: it moves that one tab to the other database or schema, the window goes with it, and it reruns the tab when it was showing rows. A statement that writes asks before it runs. The picker is dimmed while the tab runs a query, and unsaved edits in its results ask before they are discarded. To point it at another connection, [move the tab](#moving-a-query-tab-to-another-connection).
 
 The centred toolbar control names the frontmost tab's database, and clicking it switches to another. That is how you tell two tabs on one connection apart. On engines with schemas, **Database > Schema** names the one in use and switches it.
 
@@ -148,7 +158,7 @@ PostgreSQL, Redshift, and CockroachDB keep one connection per database in the co
 | Per-table filters, column widths | |
 | Tab order, pinned tabs, and which tab was frontmost | |
 
-The tab set is written when you switch tabs, a second after you stop typing, and every 30 seconds otherwise, so a crash costs at most the last half minute. On relaunch only the frontmost tab runs its query; the others load the first time you switch to them, and one that fails shows the error inline. Every connection on the [connections strip](/features/workspace-rail) comes back in the same order. One you canceled while it connected, or disconnected, comes back as **Not connected** and does not dial until you press **Connect**. A connection that cannot be reached shows the driver's error with **Try Again**, **Manage Connections…**, and **Copy Details**, and dials again at the next launch. Whether the last session reopens at all is [Startup Behavior](/customization/general-settings#startup).
+The tab set is written when you switch tabs, a second after you stop typing, and every 30 seconds otherwise, so a crash costs at most the last half minute. On relaunch only the frontmost tab runs its query; the others load the first time you switch to them, and one that fails shows the error inline. A connection first opened on one table or query, from a link or **Reopen Closed Tab**, brings its saved tabs back behind that one, so they are still there at the next launch. Every connection on the [connections strip](/features/workspace-rail) comes back in the same order. One you canceled while it connected, or disconnected, comes back as **Not connected** and does not dial until you press **Connect**. A connection that cannot be reached shows the driver's error with **Try Again**, **Manage Connections…**, and **Copy Details**, and dials again at the next launch. Whether the last session reopens at all is [Startup Behavior](/customization/general-settings#startup).
 
 ## Row limits
 

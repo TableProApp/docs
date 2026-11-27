@@ -1,7 +1,9 @@
 ---
-title: Quick Start
-description: Connect to your first database and run a query in a few minutes
+title: Quickstart on macOS
+description: Connect to your first database and run a query on macOS
 ---
+
+import PlatformGuides from "/snippets/platform-guides.mdx";
 
 With no connections saved, the welcome window offers **Open Sample Database**, a bundled Chinook SQLite file that needs no server and drops you at step 4. Reset it any time from **Help > Reset Sample Database…**.
 
@@ -11,7 +13,7 @@ With no connections saved, the welcome window offers **Open Sample Database**, a
   </Step>
 
   <Step title="Create a connection">
-    Click **New Connection…** in the welcome window, pick a type in the **Choose a Database** sheet, then click **Continue**. A type badged **Not Installed** downloads its driver before the form opens, with no restart.
+    Click **New Connection…** in the welcome window, pick a type in the **Choose a Database** sheet, then click **Continue**. A type badged **Not Installed** downloads its driver before the editor opens, with no restart.
 
     <Frame caption="Pick a database type">
       <img
@@ -32,22 +34,22 @@ With no connections saved, the welcome window offers **Open Sample Database**, a
   </Step>
 
   <Step title="Fill in the form, test it, save it">
-    The host pre-fills to `localhost` and the port to the engine's default. Username is optional: leave it empty and the database applies its own default. SQLite asks for a `.sqlite` or `.db` file instead of a host, with no credentials.
+    The editor opens on **General** with the cursor in **Host**. Leave it empty for `localhost`; the port starts at the engine's default. Name and Username are optional: an empty name takes the suggestion shown in the field, and an empty username the database's own default. SQLite asks for a `.sqlite` or `.db` file instead of a host, with no credentials.
 
     <Frame caption="PostgreSQL connection form">
       <img
         className="block dark:hidden"
         src="/images/connection-form-general.png"
-        alt="Connection form"
+        alt="Connection editor on General, with the pane list in the sidebar and the bar along the bottom"
       />
       <img
         className="hidden dark:block"
         src="/images/connection-form-general-dark.png"
-        alt="Connection form"
+        alt="Connection editor on General, with the pane list in the sidebar and the bar along the bottom"
       />
     </Frame>
 
-    Click **Test Connection** on the bar along the bottom. It turns into **Connected** with a green checkmark. Now click **Save & Connect** beside it.
+    Click **Test Connection** on the bar along the bottom. A line such as **Connected to PostgreSQL 16.4 in 42 ms** appears beside it. Now click **Save & Connect**.
 
     <Frame caption="Test Connection succeeded">
       <img
@@ -94,3 +96,5 @@ With no connections saved, the welcome window offers **Open Sample Database**, a
 ## What's next
 
 [Managing connections](/connections), [SSH tunneling](/connections/ssh-tunneling), [keyboard shortcuts](/features/keyboard-shortcuts), and [AI features](/features/ai-assistant). Anything that goes wrong is worth an [issue](https://github.com/TableProApp/TablePro/issues).
+
+<PlatformGuides />

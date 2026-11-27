@@ -23,7 +23,7 @@ The toolbar's **Instance** switcher moves between the project's instances withou
 | **Service Account Key** | A path to the JSON key file, or the JSON pasted in. Stored in the Keychain |
 | **Project ID** | The Google Cloud project. Empty takes the project the key names. Under Application Default Credentials, empty takes the credentials file's project, then `GOOGLE_CLOUD_PROJECT` |
 | **Instance ID** | The Bigtable instance. Empty opens the instance whose ID sorts first |
-| **App Profile ID** | Options tab. Routes reads and writes through that app profile. The instance's default profile when empty |
+| **App Profile ID** | **Advanced** pane. Routes reads and writes through that app profile. The instance's default profile when empty |
 
 **Project ID** and **Instance ID** stand in for a host, a port and the Database field. Any instance connects, no connection URL opens one, and [SSH Tunnel](/connections/ssh-tunneling) is not offered.
 
@@ -84,7 +84,7 @@ Each changed row is one request, and its cells change together. A save has no tr
 | Cell set to NULL, or **Remove Field** | The cell set to `null` in the `PUT`, which deletes every version of it |
 | Deleted row | `DELETE` on the key |
 
-A new row needs a `_key` and at least one cell. **Duplicate** and pasted rows copy every cell but `_key`, which shows DEFAULT until you type a key. The grid offers only the columns the rows on the page hold, so an empty table shows `_key` alone: write a table's first row, or a cell under a column the page does not show, with `INSERT` or `PUT` in the request editor. The column family must already exist, and the **DDL** tab of the Structure tab lists them under `columnFamilies`.
+A new row needs a `_key` and at least one cell. **Duplicate** copies every cell but `_key`, which shows DEFAULT until you type a key. A pasted row keeps the `_key` it carries. The grid offers only the columns the rows on the page hold, so an empty table shows `_key` alone: write a table's first row, or a cell under a column the page does not show, with `INSERT` or `PUT` in the request editor. The column family must already exist, and the **DDL** tab of the Structure tab lists them under `columnFamilies`.
 
 An existing row's key cannot change. The save is refused, so duplicate the row, give the copy the new key, and delete the old one. **Set DEFAULT** in the row inspector is refused on an existing row too; set the cell to NULL to delete it, or enter a value. Text typed into a cell or into `_key` that starts with `b64:` is written as the bytes its base64 decodes to. Cells are written with the server's clock.
 
@@ -102,9 +102,9 @@ An existing row's key cannot change. The save is refused, so duplicate the row, 
 
 The table goes before the first slash, and the key is everything after it up to a space or a `?`. A key holding either goes in JSON quotes, `GET events/"a b?c"`, and a binary key as `b64:<base64>`. A column after `DELETE` runs to the end of the line, so it may hold spaces.
 
-A request does not get the row cap in [Settings > Data](/customization/data-settings): a `READ` without `rowsLimit` returns up to 5,000,000 rows, so give it one.
+A request does not get **Query result limit** from [Settings > Data](/customization/data-settings#query-result-limit): a `READ` without `rowsLimit` returns up to 5,000,000 rows, so give it one.
 
-For [Safe Mode](/features/safe-mode), `GET`, `SCAN` and `READ` are reads and every other request is a write. A `DELETE`, or a `PUT` that sets a cell to `null`, also raises the dangerous query warning on **Silent**.
+For [Safe Mode](/features/safe-mode), `GET`, `SCAN` and `READ` are reads and every other request is a write. Each request names one row, so a `DELETE` or a `PUT` that sets a cell to `null` is a write like any other.
 
 ## SSL/TLS
 

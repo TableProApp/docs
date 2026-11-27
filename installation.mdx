@@ -1,14 +1,16 @@
 ---
-title: Installation
+title: Install on macOS
 description: Install TablePro via Homebrew or DMG on macOS 13.0+
 ---
+
+import PlatformGuides from "/snippets/platform-guides.mdx";
 
 Homebrew is the short route: `brew install --cask tablepro`. Everyone else takes the DMG.
 
 ## System requirements
 
 - **macOS**: 13.0 (Ventura) or later
-- **Architecture**: Apple Silicon (M1 or later) or Intel x86_64, one universal app for both
+- **Architecture**: Apple Silicon (M1 or later) or Intel x86_64
 
 Native Apple frameworks only, so there is no Java or .NET runtime to install first.
 
@@ -25,7 +27,7 @@ brew uninstall --zap tablepro   # remove the app and its data
 
 <Steps>
   <Step title="Download the DMG">
-    Download `TablePro-<version>.dmg` from [GitHub Releases](https://github.com/TableProApp/TablePro/releases). The same file runs on every supported Mac.
+    Download the DMG for your Mac's chip from [GitHub Releases](https://github.com/TableProApp/TablePro/releases): `TablePro-<version>-arm64.dmg` for Apple Silicon, `TablePro-<version>-x86_64.dmg` for Intel. A release with a single `TablePro-<version>.dmg` is one universal app for both.
   </Step>
   <Step title="Drag it to Applications">
     Open the DMG and drag **TablePro** onto the **Applications** shortcut.
@@ -37,7 +39,7 @@ brew uninstall --zap tablepro   # remove the app and its data
 
 ## Updates
 
-New versions download in the background and install when you quit TablePro. To install one sooner, click **Relaunch to Update** at the trailing end of a connection window's title bar; [When an update is waiting](/customization/general-settings#when-an-update-is-waiting) covers the rest. Force a check with **TablePro > Check for Updates…**, which always offers the newest build. Two switches in **Settings > General** turn the daily check and the automatic install off. Connections and settings survive an update.
+New versions download in the background and install when you quit TablePro. To install one sooner, click **Relaunch to Update** at the trailing end of a connection window's title bar; [When an update is waiting](/customization/general-settings#when-an-update-is-waiting) covers the rest. Force a check with **TablePro > Check for Updates…**, which always offers the newest build. Two switches in **Settings > General > Software Update** turn the daily check and the automatic install off. Connections and settings survive an update.
 
 ## Removing it
 
@@ -51,3 +53,5 @@ rm ~/Library/Preferences/com.TablePro.plist
 Connection passwords are in the macOS Keychain and survive both commands. Delete them in Keychain Access by searching for `com.TablePro`. Data already synced through iCloud stays in your iCloud account.
 
 Building from source is in [apple/CONTRIBUTING.md](https://github.com/TableProApp/TablePro/blob/main/apple/CONTRIBUTING.md#setup). A launch that fails or a connection that will not open is in [Troubleshooting](/troubleshooting).
+
+<PlatformGuides />
