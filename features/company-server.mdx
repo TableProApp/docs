@@ -3,7 +3,7 @@ title: Company server
 description: Sign the Mac in to your organization's own TablePro server instead of tablepro.app, and set that server, sync, usage data and the plugin registry for every Mac with a configuration profile
 ---
 
-An organization on [Enterprise Self-Hosted](/features/licensing#enterprise-self-hosted) runs its own [TablePro server](/self-hosted). People sign in to it with the company's identity provider, and Team Library syncs through it instead of tablepro.app.
+An organization on [Enterprise Self-Hosted](/features/licensing#enterprise-self-hosted) runs its own [TablePro server](/self-hosted). People sign in to it with the company's identity provider, and Team Library and [TablePro Sync](/features/sync) go through it instead of tablepro.app.
 
 ## Sign in to a company server
 
@@ -47,7 +47,8 @@ Signing in to a company server signs the Mac out of the server it used before, a
 - **Shared links** are a tablepro.app service. Signed in to a company server, **File > Share Query…**, **Share Result…**, **Manage Shared Links…** and every **Share…** item are hidden. A link someone sends still opens, unless your organization sets `AllowOtherAccountServers` to `false`.
 - **Plans and billing** belong to your organization. Gates name the feature and point to your administrator instead of a purchase, and **Settings > Account** has no **Upgrade…**, **Billing…**, **Use License Key…** or offline file.
 - **Devices** have no 3-device limit. Every seat includes Pro.
-- **After the license expires**, everything keeps working through its grace, which **Settings > Account** shows under **License**. After that, only Team Library keeps working: it still pulls, the server refuses changes, and changes you publish wait on the Mac and go out once the license is renewed.
+- **TablePro Sync** keeps your own data on your organization's server, as [Personal sync and Team Library](/self-hosted/sync) describes. Your administrator can keep passwords, query history or all of it off the server.
+- **After the license expires**, everything keeps working through its grace, which **Settings > Account** shows under **License**. After that, only Team Library and TablePro Sync keep working, and only downloading: the server refuses changes, and your changes wait on the Mac and go out once the license is renewed.
 
 ## Set the server for every Mac
 
@@ -57,13 +58,13 @@ An administrator sets these keys with a configuration profile for the `com.Table
 |---|---|---|
 | `com.TablePro.policy.AccountServerURL` | String | The company server's address. The Mac signs in to it unless the person picks another, and **Settings > Account** says your organization manages it |
 | `com.TablePro.policy.AllowOtherAccountServers` | Boolean | `false`, with `AccountServerURL` set, hides tablepro.app and **Use a Company Server…**, so the Mac signs in only to the managed server. It also keeps the Mac off tablepro.app: a shared link from tablepro.app does not open, and the AI model list stops refreshing, so the list the app shipped with, or the last one it kept, stays in use. On its own it is ignored |
-| `com.TablePro.policy.PersonalSyncProvider` | Array of strings | Where the Mac may sync your own data: `off`, `icloud` or `tablepro-sync`, spelled exactly. One entry sets it and locks **Settings > iCloud Sync**. Several let the person pick among them. An empty array turns sync off and locks it. An entry this version does not offer is left out: the Mac offers `off` and `icloud` today, so a list without `icloud` turns iCloud sync off, and a list whose only Mac entry is `icloud` turns it on. Team Library is not affected |
-| `com.TablePro.policy.ICloudSyncAllowed` | Boolean | `false` turns iCloud sync off and locks **Settings > iCloud Sync**. Passwords saved from then on stay on this Mac. Passwords already in iCloud Keychain stay there and still work, and the data already in iCloud stays |
+| `com.TablePro.policy.PersonalSyncProvider` | Array of strings | Where the Mac may sync your own data: `off`, `icloud` or `tablepro-sync`, spelled exactly. One entry sets it and locks **Sync this Mac with** under **Settings > Sync**. Several let the person pick among them. An empty array turns sync off and locks it. A required provider never moves data on its own: a Mac on another one waits for the person to review the upload or the move back. A release without TablePro Sync leaves `tablepro-sync` out of the list. Team Library is not affected |
+| `com.TablePro.policy.ICloudSyncAllowed` | Boolean | `false` turns iCloud sync off and takes **iCloud** out of **Sync this Mac with**. Passwords saved from then on stay on this Mac. Passwords already in iCloud Keychain stay there and still work, and the data already in iCloud stays |
 | `com.TablePro.policy.UsageDataAllowed` | Boolean | `false` turns **Settings > General > Privacy > Share usage data** off and locks it |
 | `com.TablePro.policy.PluginCatalogAllowed` | Boolean | `false` stops the plugin registry: no plugin is downloaded, installed or updated from it. Plugins already installed keep loading. A connection whose plugin is not installed says your organization manages plugins, so install the plugins people need before you set the key |
 
 <Note>
-TablePro reads the profile at launch and again when macOS installs or removes one. When iCloud stops being allowed, sync stops at once and stays off after the profile goes; the person turns it on again in **Settings > iCloud Sync**. When the new values no longer allow the server the Mac is signed in to, TablePro stops calling that server until it is relaunched.
+TablePro reads the profile at launch and again when macOS installs or removes one. When iCloud stops being allowed, sync stops at once and stays off after the profile goes; the person chooses it again in **Settings > Sync**. When the new values no longer allow the server the Mac is signed in to, TablePro stops calling that server until it is relaunched.
 </Note>
 
 Software updates have keys of their own: [Managed updates](/security/managed-updates). **Check for Updates…** still reads the update feed when a person picks it.

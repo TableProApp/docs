@@ -16,7 +16,8 @@ Turn off app usage data in the privacy settings if you do not want to send it. M
 | [Mac plugin catalog](#the-plugin-catalog) | `updates.tablepro.app` | On; no off switch |
 | [AI provider](#ai-providers) | Your chosen provider | No provider on a fresh install; remove it or turn off **Enable AI features** |
 | [AI model catalog](#the-ai-model-catalog), Mac, Linux and Windows | `updates.tablepro.app` | Only when a provider's model list loads; no provider on a fresh install |
-| [iCloud sync](#icloud-sync) | Your iCloud account | Off; **Settings > iCloud Sync** |
+| [iCloud sync](#icloud-sync) | Your iCloud account | Off; **Settings > Sync** |
+| [TablePro Sync](#tablepro-sync) | `api.tablepro.app`, or your organization's server | Off; **Settings > Sync** |
 | [MCP clients](#the-mcp-server) | Local HTTP and a private Unix socket | Off; **Settings > MCP** |
 | [Accounts and Team Library](#accounts-and-the-team-library) | `api.tablepro.app` | Account requests after sign-in; content uploads when published |
 | [Shared links](#shared-links) | `api.tablepro.app`; link pages on `s.tablepro.app` | Only when you open a share sheet, create or revoke a link, or open one |
@@ -120,7 +121,13 @@ Passwords are not one of those record types. The **Passwords** switch under **Wh
 That flag is set on every keychain item the app writes, not only connection passwords: AI provider keys and an older license key go through the same helper. Current account tokens never sync. MCP tokens and Google sign-in refresh tokens do not; their stores always write device-only items.
 </Warning>
 
-With password sync off, secrets are written `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, which keeps them on that one Mac. Query history, the activity log, the execution log, tab state, MCP settings, and the sync settings themselves are never synced. Individual connections can be marked **Local Only**, which also moves their secrets out of iCloud Keychain onto that one Mac. Full detail in [iCloud Sync](/features/icloud-sync#keeping-a-connection-off-icloud).
+With password sync off, secrets are written `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, which keeps them on that one Mac. Query history, the activity log, the execution log, tab state, MCP settings, and the sync settings themselves never go to iCloud. Individual connections can be marked **Local Only**, which also moves their secrets out of iCloud Keychain onto that one Mac. Full detail in [iCloud Sync](/features/icloud-sync#keeping-a-connection-off-icloud).
+
+## TablePro Sync
+
+Off by default, and it needs a paid plan or a seat on your organization's server. When it is on, records go to `/v2/sync` on the server this Mac is signed in to: `api.tablepro.app`, or your organization's own server.
+
+Passwords and other connection secrets, and query history, are sealed on the Mac with AES-256-GCM under keys that only your approved devices hold, so the server stores ciphertext. Connections, groups and tags, saved queries, favorites, table folders and settings go as records the server can read. The activity log, the execution log, tab state and MCP settings never sync. See [Sync](/features/sync).
 
 ## The MCP server
 

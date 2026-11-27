@@ -1,6 +1,6 @@
 ---
 title: License and upkeep
-description: Install, check and renew the self-hosted server's license, upgrade it one release at a time, back it up and restore it, and the log events to alert on
+description: Install, check and renew the self-hosted server's license, upgrade it one release at a time, back it up and restore it, reset lost passkeys, test the mail relay, and the log events to alert on
 ---
 
 Server commands on this page, such as `license install`, run in a one-off container. [Docker Compose](/self-hosted/docker-compose#run-a-command) and [AWS Fargate](/self-hosted/aws#run-a-command) show how on each platform.
@@ -39,7 +39,7 @@ A file with an end date has a grace after it, written into the file: 21 days for
 |---|---|---|
 | `active` | Until the end date | Everything |
 | `grace` | The end date, until the grace ends | Everything. The Mac shows the grace under **License** in **Settings > Account** |
-| `lapsed` | The end of the grace | Pulls and administration. The server refuses Team Library publishes with `license_expired`, and Macs keep only Team Library; see [Company server](/features/company-server#what-is-different-on-a-company-server) |
+| `lapsed` | The end of the grace | Pulls, administration, Sign Out, and approving and removing devices. The server refuses every other upload with `license_expired`, Team Library publishes included, and changes wait on each Mac; see [Company server](/features/company-server#what-is-different-on-a-company-server) |
 
 A perpetual file has no end date. It covers every release dated up to its end of maintenance, and keeps them running for good. `migrate up`, `serve` and `license install` refuse a later release and name the last date the file covers; `migrate up` refuses before it changes the schema. Extending maintenance is a new file with a later date.
 
@@ -101,13 +101,13 @@ On AWS, RDS keeps automated backups. Before each upgrade, also take a manual sna
 
 ```bash
 aws rds create-db-snapshot --db-instance-identifier <db-instance-id> \
-  --db-snapshot-identifier tablepro-before-0-2-0 --query 'DBSnapshot.Status' --output text
-aws rds wait db-snapshot-available --db-snapshot-identifier tablepro-before-0-2-0
+  --db-snapshot-identifier tablepro-before-0-3-0 --query 'DBSnapshot.Status' --output text
+aws rds wait db-snapshot-available --db-snapshot-identifier tablepro-before-0-3-0
 ```
 
 ## Restore a backup
 
-A restore rolls the Team Library back, while the Macs hold positions past it. `sync new-epoch` makes every Mac take a fresh copy of the library from the restored server.
+A restore rolls the server's sync data back, while the Macs hold positions past it. A new sync epoch makes every Mac take a fresh copy from the restored server, and a Mac on TablePro Sync then sends back the changes it still holds that the restore lost.
 
 <Steps>
   <Step title="Stop the server">
@@ -124,8 +124,8 @@ A restore rolls the Team Library back, while the Macs hold positions past it. `s
 
     On AWS, restore the RDS instance to a point in time as a new instance, and point `DATABASE_URL` in a new task definition revision at it.
   </Step>
-  <Step title="Start a new library epoch">
-    Once, before the server starts: `docker compose run --rm --no-deps app sync new-epoch`, or the same command as a one-off task on AWS.
+  <Step title="Start a new sync epoch">
+    Once, before the server starts: `docker compose run --rm --no-deps app sync new-epoch`, or the same command as a one-off task on AWS. It prints the epoch's ID.
   </Step>
   <Step title="Start the server">
     `docker compose up -d`, or the desired count back to 1.
@@ -133,8 +133,46 @@ A restore rolls the Team Library back, while the Macs hold positions past it. `s
 </Steps>
 
 <Danger>
-Everything written after the restore point is lost, including what Macs published after it. The Macs take the restored library and drop their newer copy.
+Everything written to the server after the restore point is lost there. Only what a Mac on TablePro Sync still holds comes back. A Mac without TablePro Sync takes the restored Team Library and drops its newer copy.
 </Danger>
+
+### The restore check
+
+`serve` also checks for a restore by itself, at start and on each new database connection. It compares the database cluster's system identifier and timeline with the ones it stored. A point-in-time recovery, a promoted standby and a dump restored into a new cluster each change one, and the server opens a new epoch at once and logs `the database was restored, so a new sync epoch started and every app refills` at WARN. A storage snapshot, or a restore into the same cluster, changes neither, so run `sync new-epoch` after every restore. A second epoch costs each Mac one more fresh copy and loses nothing.
+
+A connection pooler between the server and PostgreSQL that keeps its own server connections, such as PgBouncer in transaction mode or RDS Proxy, hides a database swapped behind it. Neither reference deploy has one; behind one, the runbook above is the only safeguard.
+
+The check reads `pg_control_system()`, `pg_current_wal_insert_lsn()` and `pg_walfile_name()`, which PostgreSQL lets every role run. When it cannot, every TablePro Sync call answers 503 `restore_check_unavailable`, Macs without TablePro Sync still get Team Library, and the server logs why at ERROR:
+
+| `msg` | Fix |
+|---|---|
+| `the restore check cannot read the database's control data, so /v2/sync answers 503 restore_check_unavailable` | The three functions were revoked, or the database has none of them. Run the `grant execute` the log line names, as a superuser |
+| `the database is a standby or still recovering, so /v2/sync answers 503 restore_check_unavailable until it is promoted` | Point `DATABASE_URL` at the primary, or promote the standby |
+| `the database holds sync writes but no identity for the restore check, so /v2/sync answers 503 restore_check_unavailable until sync new-epoch runs` | Stop the server, run `sync new-epoch`, then start it |
+
+## Lost passkeys
+
+Someone who lost every passkey can still use a synced copy at its provider, such as iCloud Keychain or a password manager. Otherwise, run `passkeys reset` with their address, as a one-off command on [Docker Compose](/self-hosted/docker-compose#run-a-command) or [AWS](/self-hosted/aws#run-a-command):
+
+```bash
+docker compose run --rm --no-deps app passkeys reset ada@example.com
+```
+
+It deletes every passkey of the account, the owner's included, and ends its portal sessions. App sessions stay. It prints the account's ID and how many it deleted, never the address, and records `account.passkeys_reset` in the audit log. With an SMTP relay set, the person gets an email. They add a new passkey at their next step-up, after the IdP signs them in again; see [Step-up](/self-hosted/sign-in#step-up).
+
+Nobody resets passkeys from the portal.
+
+Moving the portal to another host makes every passkey useless there. After the move, run `passkeys reset` for everyone who has one, starting with the owner and admins.
+
+## Test the mail relay
+
+With the `SMTP_*` settings in place, send yourself one message:
+
+```bash
+docker compose run --rm --no-deps app mail test you@example.com
+```
+
+It goes straight through the relay, not the server's queue, and prints `The relay at <host>:<port> took the test message <id>.` A failure exits 1 and names the step that failed: connect, tls, authentication, sender, recipient or data. [Email](/self-hosted/settings#email) lists the settings.
 
 ## Alerts
 
@@ -154,7 +192,7 @@ The server also logs these events once a day and at each start. A metric filter 
 | `license not installed` | WARN | No license file verifies |
 | `license expires soon` | WARN | From 30 days before the end date, unless `LICENSE_RENEWAL=on` |
 | `license expired, in grace` | WARN | Past the end date, within the grace |
-| `license lapsed, library pushes refused` | ERROR | Past the grace |
+| `license lapsed, sync pushes refused` | ERROR | Past the grace |
 | `license renewal failed` | WARN | With `LICENSE_RENEWAL=on`: no route, a proxy that refused, tablepro.app down, or an answer the server does not take. It tries again the next day |
 | `license renewed` | INFO | With `LICENSE_RENEWAL=on`: a later file was installed |
 | `license renewal found no newer file` | INFO | With `LICENSE_RENEWAL=on`: nothing newer yet |
@@ -162,4 +200,16 @@ The server also logs these events once a day and at each start. A metric filter 
 | `idp certificate expiring` | WARN | A trusted SAML signing certificate ends within 30 days |
 | `idp certificate expired` | ERROR | A trusted SAML signing certificate has ended, and sign-ins it signs fail |
 
-`email not sent` at INFO is expected: a self-hosted server sends no email.
+These events come as they happen:
+
+| `msg` | Level | When |
+|---|---|---|
+| `passkey added`, `passkey removed` | INFO | Someone added or removed a passkey. Without a relay, these lines and the audit log are the only notice outside the portal. A filter `{ $.msg = "passkey*" }` catches them |
+| `passkeys reset` | INFO | `passkeys reset` ran. The command writes it to its own standard error |
+| `email off: passkey notices are only in the audit log and these logs; set SMTP_* to send them` | WARN | At start, with no SMTP relay set |
+| `an email failed on its last attempt` | ERROR | A passkey notice never went, after about four hours of retries |
+| `the mail service refused an email` | ERROR | The relay refused the recipient or the message for good |
+| `the database was restored, so a new sync epoch started and every app refills` | WARN | The [restore check](#the-restore-check) found a restored database |
+| Three messages that end in `restore_check_unavailable` | ERROR | Sync is down until the cause is fixed; see [The restore check](#the-restore-check) |
+
+`email not sent` at INFO is expected: a self-hosted server sends no email but the passkey notices, and those only with a relay.

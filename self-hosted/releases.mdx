@@ -5,6 +5,34 @@ description: What each release of the self-hosted TablePro server image changed,
 
 Read the entry for a release before you upgrade to it, then follow [Upgrades](/self-hosted/operations#upgrades). Each entry names the release's index digest; [Image and keys](/self-hosted/image#verify-the-image) shows how to verify it.
 
+<Update label="0.3.0" description="<0.3.0 release date>">
+  Index digest `sha256:<0.3.0 index digest>`, tags `0.3.0` and `0.3`.
+
+  - The server side of TablePro Sync. `/v2/sync` keeps each person's own data and query history, and each team's library. Saved passwords and query history are end-to-end encrypted. Macs without TablePro Sync keep using Team Library as before. See [Personal sync and Team Library](/self-hosted/sync).
+  - **Server > Sync** in the portal, for the owner and admins, with three switches: **Personal sync**, **Saved passwords** and **Query history**. Each is on until someone turns it off. Turning one off deletes what the server holds for it, and turning it on again lets the apps send their copies.
+  - **Server > Audit log** in the portal, for the owner and admins, with the server's own events: license files, sync switches, members, devices, key resets and rotations, and restores found.
+  - Step-up is a passkey of the account. A role change, a removal or a restore, a transfer, an invitation to admin, a team API token, turning a sync switch off, and adding or removing a passkey need one from the last 5 minutes. The owner and admins add their first passkey after the IdP signs them in again. See [Step-up](/self-hosted/sign-in#step-up).
+  - With an SMTP relay set (`SMTP_HOST`, `SMTP_PORT`, `SMTP_TLS`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM`), the server emails a person when a passkey is added to or removed from their account, or reset. It sends no other email. `mail test <address>` checks the relay. See [Email](/self-hosted/settings#email).
+  - `passkeys reset <email>` deletes every passkey of an account, the owner's included, for someone who lost theirs.
+  - The server checks its database for a restore at start and on each new connection. A point-in-time recovery, a promoted standby or a dump restored into a new cluster opens a new sync epoch by itself, and every app refills. `sync new-epoch` is still the step after any restore, and now prints the epoch's ID.
+  - `serve` refuses to start, and `/readyz` answers 503, while the database's schema is older than the release. Run `migrate up` first, as the reference deploys do.
+  - Removing a member deletes their personal and history sync data 30 days later. Restoring them before then keeps it.
+  - An invitation to admin can be accepted only by the account whose address from the IdP is the invited one. Any other account gets 403 `invitation_address_mismatch`, and the invitation stays pending.
+  - Every member of a team can read its member list, which the apps need to name members in key alerts.
+  - An app's sign-in can ask for a step-up (RFC 9470 `acr_values`), and its tokens carry `acr` and `auth_time`.
+  - The license's lapsed event is now `license lapsed, sync pushes refused`. A filter on `license*` still catches it. Past the grace, sync pulls, Sign Out, device approval and removal and key rotation go on, and every other push is refused until a new file is installed.
+  - New log events to alert on: `passkey added`, `passkey removed` and `passkeys reset` at INFO, `email off` at start without a relay, `an email failed on its last attempt` and `the mail service refused an email` at ERROR, and the restore check's errors, which end in `restore_check_unavailable`. See [Alerts](/self-hosted/operations#alerts).
+
+  To upgrade, from 0.2.0:
+
+  - Take a backup first. `migrate up` applies migrations 00040 to 00051. 00047 moves the Team Library into the new sync store, and going back to 0.2 means restoring the backup.
+  - The portal's host must be a DNS name, not an IP address, since passkeys take no IP address: `ACCOUNT_HOST`, or the host in `ACCOUNT_BASE_URL` when you set it. `migrate up` refuses an IP address before it changes the schema.
+  - 00047 creates the `pgcrypto` extension. PostgreSQL trusts it since 13, so the database owner that `migrate up` connects as creates it, on RDS too.
+  - The restore check runs `pg_control_system()`, `pg_current_wal_insert_lsn()` and `pg_walfile_name()`, which PostgreSQL lets every role run. If they were revoked, `serve` logs the `grant execute` to run as a superuser, and `/v2/sync` answers 503 until it is run.
+  - To email passkey notices, add the `SMTP_*` settings, then run `mail test` with your own address.
+  - After the upgrade, the owner and each admin add a passkey at their first role change or other step-up action. Change one role to try it.
+</Update>
+
 <Update label="0.2.0" description="November 25, 2026">
   Index digest `sha256:de9130a22de1439e917fa621b9b22af62fd080ac9cf848b19b2e3e4c1d1885d8`, tags `0.2.0` and `0.2`.
 
