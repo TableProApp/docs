@@ -9,26 +9,34 @@ Replace every `<...>` in the files on this page with your own values.
 
 ## Network
 
-- **Load balancer.** An internet-facing ALB in two public subnets. Listener 443 with an ACM certificate for both hostnames (a wildcard covers them) and the policy `ELBSecurityPolicy-TLS13-1-2-2021-06`. Listener 80 redirects to 443.
+Six subnets across two Availability Zones: two for the ALB, two for the task and two for RDS.
+
+- **Load balancer.** An internet-facing ALB in two public subnets that hold nothing else. Listener 443 with an ACM certificate for both hostnames (a wildcard covers them) and the policy `ELBSecurityPolicy-TLS13-1-2-2021-06`. Listener 80 redirects to 443.
+- **Certificate and DNS.** Request the certificate with DNS validation, add the CNAME record ACM names for each hostname, and wait until it is issued. Then point both hostnames at the ALB's DNS name, with a CNAME or a Route 53 alias record.
+
+  ```bash
+  aws acm request-certificate --domain-name tablepro-account.example.com \
+    --subject-alternative-names tablepro.example.com --validation-method DNS
+  aws acm describe-certificate --certificate-arn <certificate-arn> \
+    --query 'Certificate.DomainValidationOptions[].ResourceRecord'
+  aws acm wait certificate-validated --certificate-arn <certificate-arn>
+  aws elbv2 describe-load-balancers --names <alb-name> --query 'LoadBalancers[0].DNSName' --output text
+  ```
+
 - **Target group.** Type `ip`, port 8080, health check path `/readyz`, matcher 200, interval 15 seconds, healthy threshold 2, unhealthy threshold 5, deregistration delay 30 seconds. No host rules: the server routes by `Host` itself.
 - **ALB attributes.** `routing.http.drop_invalid_header_fields.enabled=true`, `routing.http.preserve_host_header.enabled=true`, `routing.http.xff_header_processing.mode=append` (the default), `deletion_protection.enabled=true`.
 - **Security groups.** The ALB takes 443 and 80 from the clients. The task takes 8080 from the ALB's group only. RDS takes 5432 from the task's group only.
-- **Egress.** The task pulls the image from GHCR, and with OIDC it calls the IdP. Use private subnets with a NAT gateway, or public subnets with `assignPublicIp`. With no egress, mirror the image to ECR with `oras cp -r` ([Image and keys](/self-hosted/image#mirror-to-a-private-registry)) and run an OIDC IdP inside the VPC. A SAML IdP needs no route from the task: the browser carries its answer.
-- **Client address.** `CLIENT_ADDRESS=xff`, with `CLIENT_ADDRESS_TRUSTED_CIDRS` set to the CIDRs of the ALB's subnets, which hold nothing else. Not the VPC's CIDR: a workload elsewhere in it would set its own rate-limit key.
+- **Task subnets.** Two of their own, never the ALB's. The task pulls the image from GHCR, with OIDC it calls the IdP, and with `LICENSE_RENEWAL=on` it calls `api.tablepro.app` on 443: use private subnets with a NAT gateway, or public subnets with `assignPublicIp`.
+- **No egress.** Mirror the image to ECR with `oras cp -r` ([Image and keys](/self-hosted/image#mirror-to-a-private-registry)), run an OIDC IdP inside the VPC, and take a term other than monthly: each license file is then installed by hand. A SAML IdP needs no route from the task: the browser carries its answer.
+- **Database subnets.** Two more, for RDS's DB subnet group. They need no route out.
+- **Client address.** `CLIENT_ADDRESS=xff`, with `CLIENT_ADDRESS_TRUSTED_CIDRS` set to the CIDRs of the ALB's subnets. Not the VPC's CIDR: a workload elsewhere in it would set its own rate-limit key.
 
 ## Database
 
-- **Instance.** RDS for PostgreSQL 18, single-AZ, `db.t4g.small`, gp3 20 GB, encrypted, automated backups kept 7 to 35 days, deletion protection on. Check the class is orderable in your Region first:
+- **Instance.** RDS for PostgreSQL 18, single-AZ, `db.t4g.small`, gp3 20 GB, encrypted, automated backups kept 7 to 35 days, deletion protection on, in the database subnets. `db.t4g.micro` runs a staging install. Check the class is orderable in your Region first:
 
   ```bash
   aws rds describe-orderable-db-instance-options --engine postgres --engine-version 18.6 --db-instance-class db.t4g.small
-  ```
-
-- **Role.** Connect once as the master user and create the server's own role and database. The server never uses the master user.
-
-  ```sql
-  create role tablepro login password '<password>';
-  create database tablepro owner tablepro;
   ```
 
 - **TLS.** RDS forces TLS from PostgreSQL 15. `DATABASE_URL` checks the server against the RDS CA bundle in the image with `sslmode=verify-full&sslrootcert=/etc/ssl/rds-global-bundle.pem`.
@@ -41,9 +49,110 @@ Replace every `<...>` in the files on this page with your own values.
 | `tablepro/oidc` | The OIDC client secret, as plain text. None with SAML or a public OIDC client | `OIDC_CLIENT_SECRET` |
 | `tablepro/keys` | The output of [`credentials.sh`](/self-hosted/image#generate-the-keys) | `TABLEPRO_CREDENTIALS` |
 
+Create `tablepro/db` with a new password, and `tablepro/keys` from the `credentials.json` that `credentials.sh` wrote:
+
+```bash
+aws secretsmanager create-secret --name tablepro/db \
+  --secret-string "{\"password\":\"$(openssl rand -hex 24)\"}"
+aws secretsmanager create-secret --name tablepro/keys --secret-string file://credentials.json
+```
+
 The task execution role `tablepro-cloud-execution` has `AmazonECSTaskExecutionRolePolicy`, plus `secretsmanager:GetSecretValue` on the three secrets, and `kms:Decrypt` when they use a customer managed key.
 
 ECS reads a secret only when a task starts. After changing one, run `aws ecs update-service --cluster tablepro --service tablepro-cloud --force-new-deployment`.
+
+## Create the database role
+
+The server never uses the master user. Create its own role and database once, as the master user, with `psql` in a one-off task: RDS takes 5432 from the task's security group only, so no bastion is needed.
+
+<Steps>
+  <Step title="Create the cluster and the log group">
+    Keep the logs 30 to 90 days.
+
+    ```bash
+    aws ecs create-cluster --cluster-name tablepro
+    aws logs create-log-group --log-group-name /ecs/tablepro-cloud
+    aws logs put-retention-policy --log-group-name /ecs/tablepro-cloud --retention-in-days 30
+    ```
+  </Step>
+  <Step title="Find the master password's secret">
+    An instance with `ManageMasterUserPassword` keeps the master password in a secret RDS manages:
+
+    ```bash
+    aws rds describe-db-instances --db-instance-identifier <db-instance-id> \
+      --query 'DBInstances[0].MasterUserSecret.SecretArn' --output text
+    ```
+
+    With a master password you set yourself, store it as `{"password": "..."}` in a secret of your own and use that ARN.
+  </Step>
+  <Step title="Register the setup task">
+    Its execution role, `tablepro-db-setup-execution`, has `AmazonECSTaskExecutionRolePolicy`, plus `secretsmanager:GetSecretValue` on the master password's secret and `tablepro/db`. Keep it apart from `tablepro-cloud-execution`, so the server's tasks never read the master password.
+
+    ```json ecs-db-setup-task-definition.json
+    {
+      "family": "tablepro-db-setup",
+      "requiresCompatibilities": ["FARGATE"],
+      "networkMode": "awsvpc",
+      "cpu": "256",
+      "memory": "512",
+      "runtimePlatform": {
+        "cpuArchitecture": "ARM64",
+        "operatingSystemFamily": "LINUX"
+      },
+      "executionRoleArn": "arn:aws:iam::<account-id>:role/tablepro-db-setup-execution",
+      "containerDefinitions": [
+        {
+          "name": "psql",
+          "image": "public.ecr.aws/docker/library/postgres:18.7-alpine@sha256:0115267ab5a509022df9319c77be365cef335adb71556c75f60f5360ee247e71",
+          "essential": true,
+          "entryPoint": ["sh", "-c"],
+          "command": ["printf '%s\\n' \"$SQL\" | psql -v ON_ERROR_STOP=1 -v pw=\"$TABLEPRO_PASSWORD\""],
+          "readonlyRootFilesystem": true,
+          "linuxParameters": {
+            "capabilities": { "drop": ["ALL"] }
+          },
+          "environment": [
+            { "name": "PGHOST", "value": "<rds-endpoint>" },
+            { "name": "PGUSER", "value": "<master-user>" },
+            { "name": "PGDATABASE", "value": "postgres" },
+            { "name": "PGSSLMODE", "value": "require" },
+            { "name": "SQL", "value": "create role tablepro login password :'pw';\ngrant tablepro to current_user;\ncreate database tablepro owner tablepro;" }
+          ],
+          "secrets": [
+            { "name": "PGPASSWORD", "valueFrom": "<master-password-secret-arn>:password::" },
+            { "name": "TABLEPRO_PASSWORD", "valueFrom": "arn:aws:secretsmanager:<region>:<account-id>:secret:tablepro/db-<suffix>:password::" }
+          ],
+          "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+              "awslogs-group": "/ecs/tablepro-cloud",
+              "awslogs-region": "<region>",
+              "awslogs-stream-prefix": "db-setup"
+            }
+          }
+        }
+      ]
+    }
+    ```
+
+    ```bash
+    aws ecs register-task-definition --cli-input-json file://ecs-db-setup-task-definition.json
+    ```
+
+    The master user is no superuser on RDS. From PostgreSQL 16 it cannot give a database to a role it created until it is granted that role, so without `grant tablepro to current_user`, `create database` fails with `must be able to SET ROLE "tablepro"`.
+  </Step>
+  <Step title="Run it">
+    In the task subnets, with the task's security group:
+
+    ```bash
+    task=$(aws ecs run-task --cluster tablepro --task-definition tablepro-db-setup --launch-type FARGATE \
+      --network-configuration 'awsvpcConfiguration={subnets=[<subnet>],securityGroups=[<task-group>],assignPublicIp=<ENABLED|DISABLED>}' \
+      --query 'tasks[0].taskArn' --output text)
+    ```
+
+    Its log stream is `db-setup/psql/<task ID>`; [Read the output](#read-the-output) shows how. It ends with `CREATE DATABASE` when the role and the database exist.
+  </Step>
+</Steps>
 
 ## Task definition
 
@@ -143,7 +252,9 @@ ARM64, 0.5 vCPU and 1 GB, with `GOMEMLIMIT=700MiB`. `migrate` runs `migrate up` 
 }
 ```
 
-With a SAML IdP, replace `OIDC_ISSUER` and `OIDC_CLIENT_ID` with `SAML_IDP_ENTITY_ID` in both containers, and drop the `OIDC_CLIENT_SECRET` secret. Every container reads the IdP settings, since each checks the whole configuration at start.
+With a SAML IdP, replace `OIDC_ISSUER` and `OIDC_CLIENT_ID` with `SAML_IDP_ENTITY_ID` in every server container: `migrate` and `app` here, and `install` in the [license task definition](#install-the-license). Drop the `OIDC_CLIENT_SECRET` secret. Every server container checks the whole configuration at start, and refuses OIDC settings next to `SAML_IDP_ENTITY_ID`.
+
+With a monthly license, add `{ "name": "LICENSE_RENEWAL", "value": "on" }` to `app`'s `environment`. See [Renew](/self-hosted/operations#renew).
 
 ```bash
 aws ecs register-task-definition --cli-input-json file://ecs-task-definition.json
@@ -163,8 +274,28 @@ aws ecs register-task-definition --cli-input-json file://ecs-task-definition.jso
 | `healthCheckGracePeriodSeconds` | 60 |
 | Platform version | `LATEST` |
 
-- Create the log group `/ecs/tablepro-cloud` with a retention of 30 to 90 days before the first task starts.
-- An EventBridge rule on `SERVICE_DEPLOYMENT_FAILED` to an SNS topic tells you when a deploy fails.
+An EventBridge rule on `SERVICE_DEPLOYMENT_FAILED` to an SNS topic tells you when a deploy fails. A second rule tells you when any container in the cluster exits non-zero: a `migrate` or `serve` that refuses to start, or a one-off command that fails. It also catches wrong arguments, which print plain text that no filter on the JSON logs matches.
+
+```json eventbridge-task-exit.json
+{
+  "source": ["aws.ecs"],
+  "detail-type": ["ECS Task State Change"],
+  "detail": {
+    "clusterArn": ["arn:aws:ecs:<region>:<account-id>:cluster/tablepro"],
+    "lastStatus": ["STOPPED"],
+    "containers": {
+      "exitCode": [{ "anything-but": 0 }]
+    }
+  }
+}
+```
+
+```bash
+aws events put-rule --name tablepro-task-exit --event-pattern file://eventbridge-task-exit.json
+aws events put-targets --rule tablepro-task-exit --targets Id=alerts,Arn=<sns-topic-arn>
+```
+
+The topic's access policy must let `events.amazonaws.com` publish to it.
 
 <Warning>
 Keep one task. Each task runs the migrations as it starts, and the second half of them takes no lock. Start a one-off command only while no deploy is under way, since it runs `migrate` too.
@@ -175,16 +306,31 @@ Keep one task. Each task runs the migrations as it starts, and the second half o
 A one-off command is `aws ecs run-task` with the task definition and a command override on `app`, in the service's subnets and security group. A standalone task does not take the service's network settings: use `assignPublicIp=ENABLED` in public subnets, or it cannot pull the image, and `DISABLED` behind a NAT gateway.
 
 ```bash
-aws ecs run-task --cluster tablepro --task-definition tablepro-cloud --launch-type FARGATE \
+task=$(aws ecs run-task --cluster tablepro --task-definition tablepro-cloud --launch-type FARGATE \
   --network-configuration 'awsvpcConfiguration={subnets=[<subnet>],securityGroups=[<task-group>],assignPublicIp=<ENABLED|DISABLED>}' \
-  --overrides '{"containerOverrides":[{"name":"app","command":["bootstrap","<first team name>"]}]}'
+  --overrides '{"containerOverrides":[{"name":"app","command":["bootstrap","<first team name>"]}]}' \
+  --query 'tasks[0].taskArn' --output text)
 ```
 
-The output lands in the task's log stream under the prefix `app`. `license status`, `bootstrap --replace-owner` and `sync new-epoch` run the same way, with their words as the command.
+`license status`, `migrate status`, `bootstrap --replace-owner`, `sync new-epoch` and `version` run the same way, with their words as the command. [Docker Compose](/self-hosted/docker-compose#run-a-command) lists what each one does.
 
 <Warning>
 `bootstrap` prints the owner's claim link to the log stream, where anyone who reads the log group can use it within its hour. Running `bootstrap` again voids the earlier link.
 </Warning>
+
+### Read the output
+
+Wait for the task to stop, check each container's exit code, then read the command's log stream:
+
+```bash
+aws ecs wait tasks-stopped --cluster tablepro --tasks "$task"
+aws ecs describe-tasks --cluster tablepro --tasks "$task" \
+  --query 'tasks[0].containers[].[name,exitCode]' --output text
+aws logs get-log-events --log-group-name /ecs/tablepro-cloud --log-stream-name "app/app/${task##*/}" \
+  --start-from-head --query 'events[].[message]' --output text
+```
+
+Each container logs to the stream `<prefix>/<container>/<task ID>`: `app/app/<task ID>` for a command, `migrate/migrate/<task ID>` when `migrate` exited non-zero and `app` never started, `license/install/<task ID>` for the license, and `db-setup/psql/<task ID>` for the database role. The lines arrive a few seconds after the task stops.
 
 ## Install the license
 
@@ -264,12 +410,13 @@ A second task definition writes the license file to a volume only its own task h
 Then run it with the file. A renewal is the same run with the new file:
 
 ```bash
-aws ecs run-task --cluster tablepro --task-definition tablepro-cloud-license --launch-type FARGATE \
+task=$(aws ecs run-task --cluster tablepro --task-definition tablepro-cloud-license --launch-type FARGATE \
   --network-configuration 'awsvpcConfiguration={subnets=[<subnet>],securityGroups=[<task-group>],assignPublicIp=<ENABLED|DISABLED>}' \
   --overrides "$(jq -n --rawfile license license.jwt \
-    '{containerOverrides: [{name: "license-file", environment: [{name: "LICENSE", value: ($license | rtrimstr("\n"))}]}]}')"
+    '{containerOverrides: [{name: "license-file", environment: [{name: "LICENSE", value: ($license | rtrimstr("\n"))}]}]}')" \
+  --query 'tasks[0].taskArn' --output text)
 ```
 
-The file holds no secret. The result is in the log stream with the prefix `license`.
+The file holds no secret. `--query` keeps the response, which repeats the whole file, out of the terminal. `install` prints the installed license to the stream `license/install/<task ID>`; [read it](#read-the-output) the same way.
 
 Upgrades, restores and the log events to alert on are under [License and upkeep](/self-hosted/operations).

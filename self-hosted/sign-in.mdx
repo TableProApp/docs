@@ -1,6 +1,6 @@
 ---
 title: Sign-in through your IdP
-description: Connect the self-hosted TablePro server to AWS IAM Identity Center, another SAML 2.0 IdP such as OneLogin, or an OpenID Connect IdP, and how long sessions last
+description: Connect the self-hosted TablePro server to AWS IAM Identity Center, another SAML 2.0 IdP such as OneLogin, or an OpenID Connect IdP, how long sessions last, and the fresh sign-in a role change needs
 ---
 
 People sign in to the portal, and through it to the Mac, with one identity provider, over SAML 2.0 or OpenID Connect. `SAML_IDP_ENTITY_ID` or `OIDC_ISSUER` picks which; set exactly one.
@@ -20,25 +20,31 @@ Every sign-in URL is on the portal host. With `ACCOUNT_HOST=tablepro-account.exa
 | SAML entity ID and audience, also the SP metadata | `https://tablepro-account.example.com/api/auth/saml/metadata` |
 | OIDC redirect URI | `https://tablepro-account.example.com/api/auth/oidc/callback` |
 
-`bootstrap` prints the ones your server uses.
+Set up the IdP with these values. `bootstrap` prints them too, but it refuses to run until a license is installed, later in the setup.
 
 ## AWS IAM Identity Center
 
-Identity Center connects an outside application over SAML 2.0 from an organization instance only, and its customer managed SAML applications are created in the console only.
+Identity Center connects an outside application over SAML 2.0 from an organization instance only. Its customer managed SAML applications are created and edited in the console only; assigning people also works from the AWS CLI.
 
 <Steps>
   <Step title="Add the application">
     In the IAM Identity Center console, choose **Applications**, open the **Customer managed** tab, and choose **Add application**. Under **Setup preference**, choose **I have an application I want to set up**, under **Application type** choose **SAML 2.0**, then **Next**. Enter `TablePro` as the **Display name**.
   </Step>
   <Step title="Download the IdP metadata">
-    Under **IAM Identity Center metadata**, choose **Download** beside **IAM Identity Center SAML metadata file**. Pass this file to `credentials.sh` as its second argument, and set `SAML_IDP_ENTITY_ID` to the `entityID` of its `EntityDescriptor`:
+    Under **IAM Identity Center metadata**, choose **Download** beside **IAM Identity Center SAML metadata file**, or copy the file's URL shown there and fetch it:
+
+    ```bash
+    curl -fsS -o idp-metadata.xml 'https://portal.sso.<region>.amazonaws.com/saml/metadata/<id>'
+    ```
+
+    Pass this file to `credentials.sh` as its second argument, and set `SAML_IDP_ENTITY_ID` to the `entityID` of its `EntityDescriptor`:
 
     ```bash
     grep -o 'entityID="[^"]*"' idp-metadata.xml | head -1
     ```
   </Step>
   <Step title="Set the application properties">
-    Under **Application properties**, set **Application start URL** to `https://tablepro-account.example.com/api/auth/saml/start`, so the access portal's tile starts a sign-in the server accepts. Leave **Relay state** empty. The server does not read **Session duration**.
+    Under **Application properties**, set **Application start URL** to `https://tablepro-account.example.com/api/auth/saml/start`, so the access portal's tile starts a sign-in the server accepts. Leave **Relay state** empty. The server does not read the application's **Session duration**.
   </Step>
   <Step title="Type the application metadata">
     Under **Application metadata**, choose **Manually type your metadata values**. Set **Application ACS URL** to `https://tablepro-account.example.com/api/auth/saml/callback` and **Application SAML audience** to `https://tablepro-account.example.com/api/auth/saml/metadata`. Choose **Submit**.
@@ -56,6 +62,16 @@ Identity Center connects an outside application over SAML 2.0 from an organizati
   </Step>
   <Step title="Assign people">
     In the **Assigned users** section, choose **Assign users**, pick the users or groups who use TablePro, and choose **Assign users**. Identity Center does not support nested groups for assignments: assign the group people are direct members of.
+
+    From the AWS CLI, with a group's ID from `aws identitystore get-group-id` as in the next step, or a user's with `--principal-type USER`:
+
+    ```bash
+    aws sso-admin list-instances --query 'Instances[0].InstanceArn' --output text
+    aws sso-admin list-applications --instance-arn <instance ARN> \
+      --query "Applications[?Name=='TablePro'].ApplicationArn" --output text
+    aws sso-admin create-application-assignment --application-arn <application ARN> \
+      --principal-type GROUP --principal-id <group ID>
+    ```
   </Step>
   <Step title="Find the admin group's ID">
     `IDP_ADMIN_GROUP_ID` is the group's ID, not its name. From the AWS CLI, with your group's display name:
@@ -67,6 +83,11 @@ Identity Center connects an outside application over SAML 2.0 from an organizati
     ```
 
     `GroupId` in the answer is the value.
+  </Step>
+  <Step title="Shorten the session">
+    A [step-up](#step-up) through Identity Center proves only that the person's Identity Center session is still alive. Keep that session short. In the IAM Identity Center console, choose **Settings**, open the **Authentication** tab, and choose **Configure** next to **Session duration**. Under **User interactive sessions**, set 15 minutes, the minimum, and choose **Save**.
+
+    The same duration applies to the AWS access portal, so people sign in there again every 15 minutes too. It applies only to sessions that start after the change. See AWS's [User interactive sessions](https://docs.aws.amazon.com/singlesignon/latest/userguide/user-interactive-sessions.html).
   </Step>
 </Steps>
 
@@ -181,3 +202,19 @@ Every `UPSTREAM_REVALIDATE`, an hour by default, an app's refresh asks the IdP a
 An app's session counts from the portal sign-in that approved it. SAML has no refresh, so the server asks a SAML IdP nothing after the sign-in, and an admin group change takes effect at the person's next sign-in.
 
 Removing someone at the IdP ends their sessions within those caps, or at the next check for an OIDC IdP that gives refresh tokens. The team API tokens they created and the invitation links they were handed stay until they are removed in the portal; see [Remove someone](/self-hosted/roles#remove-someone).
+
+## Step-up
+
+These changes in the portal need a sign-in from the last 5 minutes:
+
+- on **Server > Members**: **Make admin**, **Make member**, **Remove from server…** and **Restore…**;
+- in a team: changing a member's role, removing a member, inviting an admin or making a new link for that invitation, transferring ownership, and creating an API token.
+
+Without one, the portal shows **Confirm it's you**, and **Sign in again** sends the person through the IdP and back to the page, where they make the change again. The server asks the IdP to authenticate them again rather than answer from its session: OIDC's `max_age=0`, `prompt=login` unless the IdP's discovery leaves it out, and `auth_time` as an essential claim; SAML's `ForceAuthn`. It then reads when the IdP says the person authenticated, from `auth_time` or the assertion's `AuthnInstant`. No time, or a time more than 3 minutes before the sign-in started, confirms nothing: the portal says "Your organization's sign-in didn't ask you to sign in again, so nothing was confirmed", and the server logs `the IdP's answer does not show it authenticated the person again` at WARN.
+
+- **AWS IAM Identity Center.** Identity Center does not sign you in again for a stepped-up change; it only checks your session. Set its session duration short, as in the last step under [AWS IAM Identity Center](#aws-iam-identity-center).
+- **Okta over SAML.** In the app's **General** tab, edit **SAML Settings**, choose **Show Advanced Settings**, and set **Honor Force Authentication** to **Yes**. With **No**, Okta ignores `ForceAuthn`.
+
+<Check>
+After the owner's first sign-in, change someone's role or remove someone once, and sign in again when the portal asks. The change goes through.
+</Check>

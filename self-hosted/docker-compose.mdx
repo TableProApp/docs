@@ -99,7 +99,7 @@ volumes:
 # Fill in, then chmod 600 .env. Every variable: https://docs.tablepro.app/self-hosted/settings
 
 # The release to run, by version and digest.
-TABLEPRO_IMAGE=ghcr.io/tableproapp/tablepro-cloud:0.1.0@sha256:<index digest>
+TABLEPRO_IMAGE=ghcr.io/tableproapp/tablepro-cloud:0.2.0@sha256:<index digest>
 
 # The database password: openssl rand -hex 24. Postgres keeps the first one it starts with.
 POSTGRES_PASSWORD=
@@ -123,13 +123,22 @@ OIDC_ISSUER=https://idp.example.com
 OIDC_CLIENT_ID=tablepro
 OIDC_CLIENT_SECRET=
 # Or over SAML 2.0: leave the three OIDC_ settings out, set the IdP's entityID from its metadata, and pass the metadata
-# file to credentials.sh. bootstrap prints the ACS URL, audience and start URL the IdP's application needs.
+# file to credentials.sh. The IdP's application takes the ACS URL https://ACCOUNT_HOST/api/auth/saml/callback, the
+# audience https://ACCOUNT_HOST/api/auth/saml/metadata and the start URL https://ACCOUNT_HOST/api/auth/saml/start.
+# bootstrap prints them too, once a license is installed.
 # SAML_IDP_ENTITY_ID=
 # The IdP group, by ID, whose members are the install's admins. An OIDC IdP sends it in the groups claim unless
-# OIDC_GROUPS_CLAIM names another, a SAML IdP in the groups attribute.
+# OIDC_GROUPS_CLAIM names another, a SAML IdP in the groups attribute. Empty: the owner appoints them in the portal.
 IDP_ADMIN_GROUP_ID=
 # The sign-in button's name for your identity provider.
 IDP_DISPLAY_NAME=
+
+# Fetch each new file of the license from tablepro.app once a day: on, or off, the default. A monthly license needs it.
+# It sends the installed license file to https://api.tablepro.app and nothing else.
+# LICENSE_RENEWAL=on
+# A proxy for it. Every outbound call takes it, the OIDC IdP's included: list an IdP inside your network in NO_PROXY.
+# HTTPS_PROXY=http://proxy.example.com:3128
+# NO_PROXY=idp.example.com
 
 # The server's signing and encryption keys, as one line from credentials.sh, in single quotes.
 # Keep a copy offline: a database restored without these keys cannot read the IdP tokens it holds.
@@ -166,6 +175,8 @@ TABLEPRO_CREDENTIALS=
     docker compose run --rm --no-deps -T app license install - < license.jwt
     docker compose run --rm --no-deps app license status
     ```
+
+    With a monthly license, also set `LICENSE_RENEWAL=on` in `.env`, then `docker compose up -d`. See [Renew](/self-hosted/operations#renew).
   </Step>
   <Step title="Claim the server">
     Register `https://tablepro-account.example.com/api/auth/oidc/callback` with an OIDC IdP, or set up the SAML application first; see [Sign-in](/self-hosted/sign-in). Then:
@@ -195,6 +206,7 @@ Every server command runs in a one-off `app` container:
 | `docker compose run --rm --no-deps app bootstrap "<team name>"` | Prints the link that claims the server. Refused once it has an owner |
 | `docker compose run --rm --no-deps app bootstrap --replace-owner` | Prints a link that replaces an owner who can no longer sign in |
 | `docker compose run --rm --no-deps app sync new-epoch` | After a database restore, before `app` starts. See [Restore](/self-hosted/operations#restore-a-backup) |
+| `docker compose run --rm --no-deps app migrate status` | Lists every migration with the time it was applied, or `pending`. `migrate up` prints nothing when it succeeds |
 | `docker compose run --rm --no-deps app version` | Prints the release |
 
 Upgrades and backups are under [License and upkeep](/self-hosted/operations).

@@ -112,6 +112,33 @@ Picking a SQLite file copies it into the app, and edits go to that copy, so the 
 
 A database created with **Create New Database**, or copied in by picking it, stays with its connection through an app update and a restore from backup. A file that is gone is reported as unavailable, and so is a file connection synced from another iPhone or iPad; the connection never opens an empty database, or a file of the same name on this device, in its place.
 
+## TablePro account
+
+Sign in under **Settings > TablePro Account** to see your account and its devices on this iPhone or iPad. Nothing here needs it: every feature on this page works signed out.
+
+**Sign In** opens the sign-in page in a sheet over the app, the same page the Mac uses. **Server** picks where you sign in: tablepro.app, or your organization's own TablePro server by its https address, such as `https://tablepro.example.com`. Change it while signed out. **Devices** lists every device signed in to the account; swipe left on another one to remove it, which signs it out and frees its place. When your plan's devices are all in use, the account says so, and removing one in **Devices** lets this device in. **Sign Out** asks first.
+
+<Frame caption="Signed in to an organization's own TablePro server">
+  <img className="block dark:hidden" src="/images/ios-account.png" alt="Settings with a TablePro Account section showing the signed-in name and email, the server tablepro.example.com, Devices and Sign Out" />
+  <img className="hidden dark:block" src="/images/ios-account-dark.png" alt="Settings with a TablePro Account section showing the signed-in name and email, the server tablepro.example.com, Devices and Sign Out" />
+</Frame>
+
+The sign-in and the device's ID stay on this device: they never sync, and a backup restored onto another iPhone or iPad starts it signed out.
+
+### Managed configuration
+
+An organization that manages its devices sets these keys in the app's managed configuration, in the `com.apple.configuration.managed` dictionary its MDM writes. A key of another type is ignored.
+
+| Key | Type | Effect |
+| --- | --- | --- |
+| `AccountServerURL` | string | The organization's TablePro server, the default under **Server** |
+| `AllowOtherAccountServers` | boolean | `false` with `AccountServerURL` keeps the account on that server: **Server** is locked |
+| `PersonalSyncProvider` | list of strings | The sync providers this device may use: `off` and `icloud` here. One entry forces it and locks **iCloud Sync**; an empty list keeps sync off |
+| `ICloudSyncAllowed` | boolean | `false` turns iCloud Sync off and locks the switch, and saves new passwords on this device only |
+| `UsageDataAllowed` | boolean | `false` turns **Share Usage Data** off and locks the switch |
+
+First launch skips a question a key answers. A change the MDM pushes applies while the app runs, and the account stops using a server the new values no longer allow.
+
 ## IAM sign-in
 
 Short-lived tokens replace the password for [AWS IAM](/connections/aws-iam) on Amazon RDS and Aurora (MySQL, MariaDB, PostgreSQL) and ElastiCache (Redis), and for [Google Cloud IAM](/connections/cloud-sql-proxy#iam-sign-in-without-the-proxy) on Cloud SQL (MySQL, PostgreSQL). Pick the method under **Authentication** in the connection's form, and the **Password** field goes away. Each connect signs a fresh token and never saves it.

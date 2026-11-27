@@ -50,7 +50,7 @@ Set exactly one of `OIDC_ISSUER` and `SAML_IDP_ENTITY_ID`. That choice picks the
 | `OIDC_GROUPS_CLAIM` | `groups` | The claim that lists a person's groups |
 | `SAML_IDP_ENTITY_ID` | | The IdP's `entityID`, as its metadata states it, at most 1024 characters. Any `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_SCOPES` or `OIDC_GROUPS_CLAIM` with it stops the server |
 
-An IdP behind a private CA: set `SSL_CERT_FILE` to a bundle that holds the public roots and that CA, or `SSL_CERT_DIR` to a directory of them, mounted into the container. On Fargate that takes an image built `FROM` this one by digest, with the bundle added.
+An IdP behind a private CA, or a proxy that inspects TLS: set `SSL_CERT_FILE` to a bundle that holds the public roots and that CA, or `SSL_CERT_DIR` to a directory of them, mounted into the container. On Fargate that takes an image built `FROM` this one by digest, with the bundle added.
 
 ## Sessions
 
@@ -61,6 +61,14 @@ An IdP behind a private CA: set `SSL_CERT_FILE` to a bundle that holds the publi
 | `SESSION_MAX_AGE_WITHOUT_IDP_REFRESH` | `10h` | The cap when the IdP gives no refresh token, which a SAML IdP never does. Also the portal's session length. No more than `SESSION_MAX_AGE` |
 
 Durations take Go's form: `90m`, `10h`, `168h`. [Sign-in](/self-hosted/sign-in#sessions) covers what ends a session.
+
+## License renewal
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `LICENSE_RENEWAL` | `off` | `on` fetches the license's next file from tablepro.app once a day and at each start; any other value stops the server. See [Renew](/self-hosted/operations#renew) |
+| `HTTPS_PROXY` | | The proxy every outbound HTTPS call goes through, such as `http://proxy.example.com:3128` |
+| `NO_PROXY` | | Comma-separated hosts reached without the proxy, such as an IdP inside your network |
 
 ## Keys
 

@@ -25,20 +25,20 @@ Open **Settings > AI** (`Cmd+,`). **Enable AI features** at the top turns the ch
     Paste an API key, or sign in for GitHub Copilot and ChatGPT. Leave the key empty for a Custom provider whose server checks none, such as a self-hosted vLLM or LM Studio with authentication off.
   </Step>
   <Step title="Pick a model and test">
-    Type a model name or pick one from the fetched list, then click **Test Connection**. A provider that lists several models with no default starts on **Other…** with an empty **Model ID**, so pick one before you click **Add**.
+    Pick a model from the provider's list, or type its id under **Other…**, then click **Test Connection**. The list shows each model by the provider's name for it, the default first: the one the provider marks, else the one TablePro's model catalog names. Deprecated models sit in their own section with the date they retire. **Add** waits until the list has loaded, and a provider that lists several models with no default starts on **Other…**, so pick one first.
   </Step>
 </Steps>
 
-Each provider's row says whether it can answer: **API key set**, **Signed in as …**, **Local** or the server's host when it is ready, and **Needs an API key**, **Not signed in** or **Claude Code not installed**, with a warning symbol, when it needs you. A GitHub Copilot error shows there too. The **Active provider** picker decides which one handles requests; the active one reads **Active** in the list. Setting it to **None** leaves any open conversation readable but read-only, with **No AI Provider** and a **Settings…** button under it. Click a provider's row to open its page: the account or API key, **Edit Connection…** for the name, base URL and key, the model, and **Remove Provider…**. Where a model supports reasoning effort, the page adds a **Reasoning** picker and replies render their thinking in a collapsible **Reasoning** block. Gemini and Ollama have no picker, and on a router the picker follows the model: it is gone for a model the router lists as non-reasoning.
+Each provider's row says whether it can answer: **API key set**, **Signed in as …**, **Local** or the server's host when it is ready, and **Needs an API key**, **Not signed in** or **Claude Code not installed**, with a warning symbol, when it needs you. A GitHub Copilot error shows there too. The **Active provider** picker decides which one handles requests; the active one reads **Active** in the list. Setting it to **None** leaves any open conversation readable but read-only, with **No AI Provider** and a **Settings…** button under it. Click a provider's row to open its page: the account or API key, **Edit Connection…** for the name, base URL and key, the model, and **Remove Provider…**. Where a model supports reasoning effort, the page adds a **Reasoning** picker with the levels that model takes, and replies render their thinking in a collapsible **Reasoning** block. **Default** sends no level, so the provider uses its own; **Off** appears where the model can stop reasoning; a model that always reasons lists its levels alone. Gemini and Ollama have no picker, and on a router the picker follows the model: it is gone for a model the router lists as non-reasoning.
 
 With no preference, start with Claude or OpenAI on an API key: both take a key, tools, and images with no further setup. The others each come with something to know.
 
 | Provider | Sign-in | Worth knowing |
 |---|---|---|
 | GitHub Copilot | GitHub device flow | Runs its own tool loop, so the tool call limit never applies. Its language server starts on first use or when you open the provider's page in **Settings > AI**; until then its row reads **Not started**. It stops when AI is turned off or the provider is removed |
-| ChatGPT | Your ChatGPT account, on the Codex quota from Plus, Pro, Business, and Enterprise plans. **Import from Codex CLI** reuses an existing login | Unofficial interface, may change |
-| xAI | API key from the xAI Console | Presets: Grok 4.5, Grok 4.3 |
-| Meta | API key from the Meta Model API dashboard | Presets: Muse Spark 1.3, Muse Wonder, Muse Ember. The model list shows chat models only. Reasoning has no **Off**: without an effort, Meta runs its default, which is the highest level on Muse Wonder and Muse Ember |
+| ChatGPT | Your ChatGPT account, on the Codex quota from Plus, Pro, Business, and Enterprise plans. **Import from Codex CLI** reuses an existing login | Unofficial interface, may change. The model list is the one your plan offers |
+| xAI | API key from the xAI Console | The model list and each model's reasoning levels come from xAI |
+| Meta | API key from the Meta Model API dashboard | Starts on Muse Spark 1.3. The model list shows chat models only. Reasoning has no **Off** or **Default**: without a level, Meta runs its default, which is the highest on Muse Wonder and Muse Ember |
 | Requesty | API key | An OpenAI-compatible router. The Base URL is filled in; set it to `https://router.eu.requesty.ai` for EU routing |
 | Ollama, llama.cpp, MLX | None. Start the server first | Presets fill in `http://localhost:11434` for Ollama and `http://localhost:8080` for `llama-server` and `mlx_lm.server`. Start `llama-server` with `--jinja` for tool calling |
 | Claude Agent | Claude Code's `claude` command, no key | Bills against a Claude subscription, with tradeoffs |
@@ -146,7 +146,7 @@ The command button in the composer's footer lists the built-ins, then yours unde
 
 ### Model picker
 
-The cpu icon beside the mode picker lists every configured provider and its models. A pick there overrides the active provider for this chat panel until you change it, across turns.
+The cpu icon beside the mode picker lists every configured provider and its models by name. The model a provider is set to always appears there, even when its list no longer has it. A pick there overrides the active provider for this chat panel until you change it, across turns.
 
 ### The whole window
 
