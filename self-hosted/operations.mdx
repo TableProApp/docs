@@ -39,7 +39,7 @@ A file with an end date has a grace after it, written into the file: 21 days for
 |---|---|---|
 | `active` | Until the end date | Everything |
 | `grace` | The end date, until the grace ends | Everything. The Mac shows the grace under **License** in **Settings > Account** |
-| `lapsed` | The end of the grace | Pulls, administration, Sign Out, and approving and removing devices. The server refuses every other upload with `license_expired`, Team Library publishes included, and changes wait on each Mac; see [Company server](/features/company-server#what-is-different-on-a-company-server) |
+| `lapsed` | The end of the grace | Pulls, administration, and key changes such as Sign Out, approving and removing devices, recovery and resets. The server refuses data uploads with `license_expired`, Team Library publishes included, and changes wait on each Mac; see [Company server](/features/company-server#what-is-different-on-a-company-server) |
 
 A perpetual file has no end date. It covers every release dated up to its end of maintenance, and keeps them running for good. `migrate up`, `serve` and `license install` refuse a later release and name the last date the file covers; `migrate up` refuses before it changes the schema. Extending maintenance is a new file with a later date.
 
@@ -136,11 +136,16 @@ A restore rolls the server's sync data back, while the Macs hold positions past 
 Everything written to the server after the restore point is lost there. Only what a Mac on TablePro Sync still holds comes back. A Mac without TablePro Sync takes the restored Team Library and drops its newer copy.
 </Danger>
 
+Keys come back the same way: each Mac sends back the keys its own account made that the restore lost. Two cases need a person:
+
+- A Mac whose account keys cannot go back shows **Your keys could not be restored**. The person signs out, then uses their recovery key or resets their keys; see [Sync](/features/sync#lost-the-recovery-key).
+- A team key that someone else made waits on each teammate's Mac until that person's device sends it back, then sync carries on by itself. A team key that cannot go back ends the team's keys: an owner creates a new team and shares its connections again.
+
 ### The restore check
 
 `serve` also checks for a restore by itself, at start and on each new database connection. It compares the database cluster's system identifier and timeline with the ones it stored. A point-in-time recovery, a promoted standby and a dump restored into a new cluster each change one, and the server opens a new epoch at once and logs `the database was restored, so a new sync epoch started and every app refills` at WARN. A storage snapshot, or a restore into the same cluster, changes neither, so run `sync new-epoch` after every restore. A second epoch costs each Mac one more fresh copy and loses nothing.
 
-A connection pooler between the server and PostgreSQL that keeps its own server connections, such as PgBouncer in transaction mode or RDS Proxy, hides a database swapped behind it. Neither reference deploy has one; behind one, the runbook above is the only safeguard.
+A connection pooler between the server and PostgreSQL that keeps its own server connections, such as PgBouncer in transaction mode or RDS Proxy, hides a database swapped behind it. Neither reference deploy has one. Behind one, only `sync new-epoch` after every restore opens the new epoch.
 
 The check reads `pg_control_system()`, `pg_current_wal_insert_lsn()` and `pg_walfile_name()`, which PostgreSQL lets every role run. When it cannot, every TablePro Sync call answers 503 `restore_check_unavailable`, Macs without TablePro Sync still get Team Library, and the server logs why at ERROR:
 
@@ -210,6 +215,6 @@ These events come as they happen:
 | `an email failed on its last attempt` | ERROR | A passkey notice never went, after about four hours of retries |
 | `the mail service refused an email` | ERROR | The relay refused the recipient or the message for good |
 | `the database was restored, so a new sync epoch started and every app refills` | WARN | The [restore check](#the-restore-check) found a restored database |
-| Three messages that end in `restore_check_unavailable` | ERROR | Sync is down until the cause is fixed; see [The restore check](#the-restore-check) |
+| Three messages that contain `restore_check_unavailable` | ERROR | Sync is down until the cause is fixed; see [The restore check](#the-restore-check) |
 
 `email not sent` at INFO is expected: a self-hosted server sends no email but the passkey notices, and those only with a relay.

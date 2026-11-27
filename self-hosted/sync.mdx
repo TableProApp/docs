@@ -22,7 +22,7 @@ Connections a person marks **Local only**, and the sample connections, stay on t
 
 - **The license.** TablePro Sync needs `service_sync` among the license file's features, and Team Library `team_library`. `license status` lists them; ask TablePro for a new file if one is missing.
 - **The Macs.** TablePro Sync needs a TablePro release with **Settings > Sync**. Earlier releases sync Team Library through the server as before.
-- **The switches.** Decide what the server keeps under **Server > Sync**, below. Every switch starts on.
+- **The switches.** Decide what the server keeps under **Server > Sync**; see [Sync switches](#sync-switches). Every switch starts on.
 - **Passkeys.** Removing a lost device, and a key reset that starts empty, ask the person for a passkey in the browser. Someone without one adds their first then, after the IdP signs them in again; see [Step-up](/self-hosted/sign-in#step-up).
 - **The provider, for every Mac.** `PersonalSyncProvider` set to `tablepro-sync` in a configuration profile picks TablePro Sync and locks the choice; see [Company server](/features/company-server#set-the-server-for-every-mac). Nothing uploads before the person reviews it: the Mac shows **Your Organization Uses TablePro Sync** with **Review Upload…**.
 
@@ -54,13 +54,13 @@ Each person's keys are their own. The server stores public keys and ciphertext, 
 
 ### The recovery key
 
-The first Mac a person moves to TablePro Sync sets up a recovery key before it uploads anything. It is 14 groups of letters and digits, shown once, with **Copy** and **Print…**, and the Mac asks for two of its groups back before it goes on. It belongs in a password manager or on paper.
+The first Mac a person moves to TablePro Sync sets up a recovery key before it uploads anything. The Mac shows it once, with **Copy** and **Print…**, and asks for part of it back before it goes on. It belongs in a password manager or on paper.
 
-The recovery key removes a lost device and approves a Mac when no other device is at hand. **Replace…** under **Settings > Account > End-to-End Encryption** swaps it for a new one, given the current one. Someone who loses it while a Mac still holds the keys resets them from that Mac with **Reset Keys…**: the reset waits 7 days, any of their devices can cancel it, and then their other devices sign out and join again from that Mac. Passwords and query history stay. Someone with no device and no recovery key starts over with **Reset and Start Empty…**, which needs their passkey, waits the same 7 days, and then deletes everything they synced, passwords and query history included. Team libraries stay.
+The recovery key removes a lost device and approves a Mac when no other device is at hand. **Replace…** under **Settings > Account > End-to-End Encryption** swaps it for a new one, given the current one. Someone who loses it while a Mac still holds the keys resets them from that Mac with **Reset Keys…**: after a wait in which any of their devices can cancel it, **Finish Reset…** on that Mac signs their other devices out to join again from it. Passwords and query history stay. Someone with no device and no recovery key starts over with **Reset and Start Empty…**, which needs their passkey and the same wait; **Finish Reset…** then deletes everything they synced, passwords and query history included. Team libraries stay. [Lost the recovery key](/features/sync#lost-the-recovery-key) has the wait and the steps.
 
 ### A new Mac
 
-A Mac signed in to an account that already has keys gets nothing personal until another device or the recovery key approves it. On the new Mac, **Ask Another Device…**. On a Mac that has the keys, **Approve…** under **Waiting for Approval**, then **Approve**. Both show the same five words. When they match in the same order, **The Words Match** on each Mac finishes it. A request lasts 10 minutes.
+A Mac signed in to an account that already has keys gets nothing personal until another device or the recovery key approves it. On the new Mac, **Ask Another Device…**. On a Mac that has the keys, **Approve…** under **Waiting for Approval**, then **Approve**. Both show the same five words. When they match in the same order, **The Words Match** on each Mac finishes it; see [Approve another device](/features/sync#approve-another-device).
 
 Words that differ mean someone else may be asking for the keys: **They Don't Match** approves nothing. Tell people to approve only a device they are signing in to right now.
 
@@ -78,4 +78,4 @@ Removing a person from the server signs out every one of their devices, and the 
 
 Through the grace, the Macs show **Your Server's License Has Expired** with the date sync stops taking changes. Past it they show **Uploads Paused**: they still download, changes wait on each Mac, and Sign Out and approving and removing devices still work. A new license file starts the uploads again. See [When a license ends](/self-hosted/operations#when-a-license-ends).
 
-After a database restore, every Mac takes a fresh copy and sends back what it still holds; see [Restore a backup](/self-hosted/operations#restore-a-backup).
+After a database restore, every Mac takes a fresh copy and sends back what it still holds, with the exceptions under [Restore a backup](/self-hosted/operations#restore-a-backup).

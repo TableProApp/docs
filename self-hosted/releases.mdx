@@ -20,8 +20,8 @@ Read the entry for a release before you upgrade to it, then follow [Upgrades](/s
   - An invitation to admin can be accepted only by the account whose address from the IdP is the invited one. Any other account gets 403 `invitation_address_mismatch`, and the invitation stays pending.
   - Every member of a team can read its member list, which the apps need to name members in key alerts.
   - An app's sign-in can ask for a step-up (RFC 9470 `acr_values`), and its tokens carry `acr` and `auth_time`.
-  - The license's lapsed event is now `license lapsed, sync pushes refused`. A filter on `license*` still catches it. Past the grace, sync pulls, Sign Out, device approval and removal and key rotation go on, and every other push is refused until a new file is installed.
-  - New log events to alert on: `passkey added`, `passkey removed` and `passkeys reset` at INFO, `email off` at start without a relay, `an email failed on its last attempt` and `the mail service refused an email` at ERROR, and the restore check's errors, which end in `restore_check_unavailable`. See [Alerts](/self-hosted/operations#alerts).
+  - The license's lapsed event is now `license lapsed, sync pushes refused`. A filter on `license*` still catches it. Past the grace, sync pulls and key changes go on, Sign Out, device approval and removal, recovery and resets included, and data pushes are refused until a new file is installed.
+  - New log events to alert on: `passkey added`, `passkey removed` and `passkeys reset` at INFO, `email off` at start without a relay, `an email failed on its last attempt` and `the mail service refused an email` at ERROR, and the restore check's errors, which contain `restore_check_unavailable`. See [Alerts](/self-hosted/operations#alerts).
 
   To upgrade, from 0.2.0:
 
