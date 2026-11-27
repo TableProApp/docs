@@ -1,6 +1,6 @@
 ---
 title: Connect
-description: The engines, the connect dialog, TLS, SSH tunnels and SQLite or DuckDB files in TablePro for Linux
+description: The engines, the connect dialog, the setup guide, TLS, SSH tunnels and SQLite or DuckDB files in TablePro for Linux
 tag: "Beta"
 ---
 
@@ -56,6 +56,21 @@ Redshift, CockroachDB, TiDB, OceanBase and Databend are untested on Linux. Suppo
 </Steps>
 
 For a MongoDB replica set or cluster behind a `mongodb+srv://` address, turn on **DNS Seed List**. **Authentication Database (optional)** names the database that holds the user.
+
+## Setup guide
+
+While no connection is saved, each launch opens **Set Up TablePro** in the window until you finish, skip or leave it once. **Setup Guide** in the main menu, or **Set Up…** under an empty connection list, opens it again.
+
+| Page | What you do there |
+|---|---|
+| **Set Up TablePro** | Say where your connections are now. **In Another App** goes on to the import, **In a TablePro File** closes the guide and opens **Import Connections…**, and **Nowhere Yet** goes to **First Connection** |
+| **Import Connections** | Select the apps to bring over. They are read and reviewed one at a time, and their own files never change |
+| **First Connection** | Pick a new connection or **Sample Database**, a small music store. It opens when you finish |
+| **Editor** | Set **Shortcuts**, **Vim Keybindings** and the style scheme. Each change applies at once |
+
+When the guide finds another database app's files, **Import from Another App** is already selected and names the apps it found. **Skip** on any page ends the guide the way the last page's button does, and that button names what opens: your **First Connection** pick, the one connection you imported, or several imported connections, selected in the list. Connections imported from a file are only selected, never opened.
+
+**Import from Another App…** in the main menu runs the same import for one app, and ends the same way. The Flatpak build reads the Flathub builds of DBeaver, DataGrip and Beekeeper Studio too, through read-only access to their folders under `~/.var/app`.
 
 ## Options
 

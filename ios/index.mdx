@@ -12,19 +12,25 @@ You need iOS 18 or later. Builds ship on their own schedule, so a feature in a M
 
 ## First launch
 
-A welcome sheet lists what the app does. **Continue** leads to at most two questions, each asked once:
+With no saved connections, the first launch opens on **Welcome to TablePro**, the setup guide. Pick one way in, or tap **Skip**:
+
+| Row | Does |
+| --- | --- |
+| **Turn On iCloud Sync** | Brings down the connections from TablePro on your Mac. Shown while sync is off |
+| **Import Connections** | Imports a `.tablepro` file from AirDrop, Files or Mail |
+| **Add Connection** | Opens a new connection's form |
+| **Open Sample Database** | Opens the [sample database](#the-sample-database) |
+
+Connections saved in another database app come over through the Mac: [import them there](/switching), then turn on iCloud Sync on both. The page shows once per device, and **More > Setup Guide** on the connection list opens it again.
+
+After it come at most two questions, each asked once:
 
 | Question | Shown when | If you swipe the sheet away |
 | --- | --- | --- |
-| **Sync with iCloud** | The device is signed in to iCloud | Sync stays off |
+| **Sync with iCloud** | The device is signed in to iCloud, and **Turn On iCloud Sync** was not picked | Sync stays off |
 | **Share Usage Data?** | Until you answer it | Nothing is sent |
 
 Both answers can change later, under **Settings > iCloud** and **Settings > Privacy**. After an update, a **What's New** sheet lists what changed, once per version.
-
-<Frame caption="Swipe the sheet down to skip both questions">
-  <img className="block dark:hidden" src="/images/ios-first-run.png" alt="Welcome to TablePro sheet with four feature rows and a Continue button" />
-  <img className="hidden dark:block" src="/images/ios-first-run-dark.png" alt="Welcome to TablePro sheet with four feature rows and a Continue button" />
-</Frame>
 
 ## Supported databases
 
@@ -58,7 +64,7 @@ Cassandra, BigQuery, Spanner, Snowflake and the rest have no iOS driver. Their c
 
 ## The connection list
 
-Favorites come first, then **Recent** with the five connections opened last, then your groups, nested the way the Mac nests them. The **More** menu holds **Sort By** (**Manual**, **Name**, **Database Type**, **Last Connected**), **New Group**, **Manage Tags**, **Open Sample Database**, and import and export. Type a tag's name in the search field to filter by it; with two tags or more chosen, **Match All Tags** appears in the **More** menu.
+Favorites come first, then **Recent** with the five connections opened last, then your groups, nested the way the Mac nests them. The **More** menu holds **Sort By** (**Manual**, **Name**, **Database Type**, **Last Connected**), **New Group**, **Manage Tags**, **Open Sample Database**, **Setup Guide**, and import and export. Type a tag's name in the search field to filter by it; with two tags or more chosen, **Match All Tags** appears in the **More** menu.
 
 | To | Do this |
 | --- | --- |

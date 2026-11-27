@@ -30,6 +30,11 @@ MENU_FILES = {
     "Help": "HelpMenuBuilder.swift",
 }
 
+# Leaves a builder takes from another file: File > Import lists ImportCommand's titles.
+MENU_EXTRA_FILES = {
+    "File": ["ImportCommand.swift"],
+}
+
 # A page under windows/ describes the Windows app, whose menu bar is MainWindow.xaml with its titles in the
 # en-US resources, keyed by each item's x:Uid.
 WINDOWS_APP = Path("windows") / "src" / "TablePro.App"
@@ -120,6 +125,11 @@ def check_menu_paths(root: Path, docs: Path) -> list[str]:
         forms: set[str] = set()
         for leaf in localized_strings(menu_dir / file):
             forms |= leaf_forms(leaf)
+        # A missing extra file only drops its leaves, which then fail as unknown.
+        for extra in MENU_EXTRA_FILES.get(menu, []):
+            if (menu_dir / extra).is_file():
+                for leaf in localized_strings(menu_dir / extra):
+                    forms |= leaf_forms(leaf)
         mac[menu] = forms
     windows = windows_menus(root.parent)
 

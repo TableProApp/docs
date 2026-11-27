@@ -9,7 +9,7 @@ With no connections saved, the welcome window offers **Open Sample Database**, a
 
 <Steps>
   <Step title="Install TablePro">
-    `brew install --cask tablepro`, or the DMG from GitHub Releases. See [Installation](/installation). The first launch shows a welcome sheet; click **Continue** to reach the welcome window, and choose **Help > Getting Started** to see it again.
+    `brew install --cask tablepro`, or the DMG from GitHub Releases. See [Installation](/installation). The first launch on a Mac with no saved connections opens the [setup guide](#the-setup-guide); click **Skip** to go straight to the welcome window.
   </Step>
 
   <Step title="Create a connection">
@@ -92,6 +92,21 @@ With no connections saved, the welcome window offers **Open Sample Database**, a
     ```
   </Step>
 </Steps>
+
+## The setup guide
+
+It opens at launch while no connection is saved, until you finish, skip or close it once on this Mac. **Help > Setup Guide** opens it again whatever the list holds. Every step has **Skip**.
+
+| Step | What you do there |
+|---|---|
+| **Get Started** | Under **Start Fresh**, pick a new connection or **Sample Database**. Under **Bring Your Connections**, pick **Import from Other App…** to go on to the import step, or another import, which closes the guide and opens it |
+| **Import from Other Apps** | Select the apps to import from. Each one is read and reviewed in turn, before anything is saved. [Switching to TablePro](/switching) covers what comes across |
+| **First Connection** | Choose what opens when you finish: a new connection, the sample database, or what you imported |
+| **Appearance and Keys** | Set the appearance, the editor's **Key bindings**, and **Shortcuts**, which takes the [keys of the app you used before](/features/keyboard-shortcuts#shortcuts-from-another-app). Changes apply at once |
+
+When the guide finds another database app's files, **Import from Another App** is already selected and names the apps it found; click **Continue** to pick what to import. A new connection or the sample goes straight to **Appearance and Keys**.
+
+**Done** on the last step, or **Skip** on any step, ends the guide and opens what you picked: a new connection or the sample database. With neither picked, one imported connection opens, and several are selected in the welcome window. Connections imported from a file are only selected, never opened. Closing the window ends the guide and opens nothing.
 
 ## What's next
 
