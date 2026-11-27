@@ -11,7 +11,7 @@ The driver speaks TNS in pure Swift, so Instant Client and the rest of Oracle's 
 Oracle 10g and earlier cannot connect. Their O3LOGON handshake is not implemented, and there is no setting that works around it.
 </Info>
 
-A RAC SCAN listener, a shared server, or a load balancer in front of the database needs no configuration. Neither does Native Network Encryption: the server says in its accept packet whether it wants the negotiation, and when it does, AES with a SHA-2 checksum is offered. Set **Network Encryption** to change what TablePro offers.
+A RAC SCAN listener, a shared server, or Connection Manager in front of the database needs no configuration: the connection follows the listener's redirect to the address it names, except through a tunnel ([Listener Redirect Not Followed](#listener-redirect-not-followed)). Neither does Native Network Encryption: the server says in its accept packet whether it wants the negotiation, and when it does, AES with a SHA-2 checksum is offered. Set **Network Encryption** to change what TablePro offers.
 
 <RegistryPlugin name="Oracle" plugin="Oracle Driver" />
 
@@ -210,6 +210,16 @@ TCP connected but the login never finished, so the attempt stops when the connec
 ### Connection Dropped During Handshake
 
 The server closed the connection mid-login, and the dialog names the phase it stopped at (`advancedNegotiation`, `dataTypeNegotiation`, `authentication`). Look for a firewall, VPN, or proxy that resets traffic, and confirm the host and port reach the listener itself.
+
+### Listener Redirect Not Followed
+
+The listener answered with a redirect to another address, and the dialog shows that address as the redirect target.
+
+- Through a tunnel, the tunnel forwards only to the host it was set up for. Enter the redirect target's host and port as the connection's **Host** and **Port**, and keep the tunnel.
+- When the target could not be reached, this Mac cannot resolve or route to it. RAC node addresses often resolve only on the server's network. Ask the DBA for an address clients reach, or connect to the target directly.
+- When the target expects TLS, it is a TCPS endpoint. Set an SSL mode.
+- When the listener at the target refused the connection, it does not serve that service, or, with ORA-12516, it tried to redirect the connection again. Ask the DBA to check `LOCAL_LISTENER` and `REMOTE_LISTENER`.
+- After too many redirects, the listeners point at each other. The same two settings are the place to look.
 
 ### Native Network Encryption Not Completed
 
