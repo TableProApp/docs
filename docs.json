@@ -483,7 +483,8 @@
             "pages": [
               "windows/data-grid",
               "windows/browsing",
-              "windows/account"
+              "windows/account",
+              "windows/sync"
             ]
           }
         ]
