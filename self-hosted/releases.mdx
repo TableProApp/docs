@@ -5,8 +5,8 @@ description: What each release of the self-hosted TablePro server image changed,
 
 Read the entry for a release before you upgrade to it, then follow [Upgrades](/self-hosted/operations#upgrades). Each entry names the release's index digest; [Image and keys](/self-hosted/image#verify-the-image) shows how to verify it.
 
-<Update label="0.3.0" description="<0.3.0 release date>">
-  Index digest `sha256:<0.3.0 index digest>`, tags `0.3.0` and `0.3`.
+<Update label="0.3.0" description="November 27, 2026">
+  Index digest `sha256:ecee1a9c3259b00cd3c2001ca47261dab2462ebcaee89331f6dbc992bb0b828d`, tags `0.3.0` and `0.3`.
 
   - The server side of TablePro Sync. `/v2/sync` keeps each person's own data and query history, and each team's library. Saved passwords and query history are end-to-end encrypted. Macs without TablePro Sync keep using Team Library as before. See [Personal sync and Team Library](/self-hosted/sync).
   - **Server > Sync** in the portal, for the owner and admins, with three switches: **Personal sync**, **Saved passwords** and **Query history**. Each is on until someone turns it off. Turning one off deletes what the server holds for it, and turning it on again lets the apps send their copies.
