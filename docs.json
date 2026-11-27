@@ -484,7 +484,8 @@
               "windows/data-grid",
               "windows/browsing",
               "windows/account",
-              "windows/sync"
+              "windows/sync",
+              "windows/end-to-end-encryption"
             ]
           }
         ]

@@ -1,0 +1,71 @@
+---
+title: End-to-end encryption
+description: Set up your recovery key, approve a new Windows computer, remove a lost device and reset your keys
+tag: "Preview"
+---
+
+TablePro Sync seals passwords, other secrets and query history on this computer with your account's keys before they leave it. A computer holds the keys once another device approves it, or once you use your recovery key. Open it from **Settings**, **Sync**, **End-to-end encryption**; you need to be signed in.
+
+## Set up the recovery key
+
+The first device on your account sets up the recovery key.
+
+<Steps>
+  <Step title="Start the set-up">
+    Click **Set up...** under **Set up end-to-end encryption**.
+  </Step>
+  <Step title="Keep the key">
+    The key shows once, as 14 numbered groups of four characters. Click **Copy** and save it in a password manager, or write it down. The copy stays out of the clipboard history and off your other devices.
+  </Step>
+  <Step title="Type two groups back">
+    Type the two groups the dialog asks for, then click **Set up**.
+  </Step>
+</Steps>
+
+If another device set your keys up first, the key you saw is not used: click **Ask another device...** and approve this computer from it.
+
+## Approve a new computer
+
+<Steps>
+  <Step title="Ask from the new computer">
+    Click **Ask for approval...**. The request lasts 10 minutes.
+  </Step>
+  <Step title="Approve on a device that has the keys">
+    On an approved device, open End-to-end encryption, find the computer under **Waiting for approval** and click **Approve...**, then **Approve**.
+  </Step>
+  <Step title="Compare the words">
+    Both screens show five words. Click **The words match** on each only when both show the same words in the same order.
+  </Step>
+</Steps>
+
+<Warning>
+If the words differ, click **They don't match**. Nothing is approved, and a request you did not start may be someone trying to get your keys.
+</Warning>
+
+With no approved device at hand, click **Use recovery key...** and enter your recovery key. This computer gets new keys, and your other devices ask it for approval again.
+
+## Replace the recovery key
+
+Click **Replace...** under **Recovery key** and enter the current key. Choose which devices keep your keys; only devices you compared words with can, and every other one asks for approval again. Then keep the new key and type two of its groups back.
+
+## Remove a lost device
+
+<Steps>
+  <Step title="Remove it">
+    Under **Devices with your keys**, click **Remove** next to the device, then **Remove**. Your browser asks you to confirm it's you.
+  </Step>
+  <Step title="Enter your recovery key">
+    Enter the recovery key so your account can get new keys the lost device doesn't have.
+  </Step>
+  <Step title="Review">
+    Choose the devices that keep your keys, and clear any teammate you confirmed while the lost device had them. Teammates you clear lose their seat first: click **Manage...** to remove it on the web, then **Change keys**.
+  </Step>
+</Steps>
+
+## Reset when the recovery key is lost
+
+Click **Reset...** under **Reset end-to-end encryption**. From an approved computer the reset keeps your team keys; from a computer that isn't approved, your account starts again and what was sealed before can't be read. Either way the reset waits 7 days, during which any approved device can cancel it, then the computer that asked clicks **Finish reset**.
+
+## Sign out
+
+Signing out erases this computer's keys first. If they can't be erased, choose **Try again**, **Sign out anyway**, which leaves the keys on this computer until another account signs in here, or **Cancel**.
