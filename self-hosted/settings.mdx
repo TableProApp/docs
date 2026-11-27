@@ -86,13 +86,7 @@ The server sends one kind of email: a notice to a person when a passkey is added
 
 The server checks the relay's certificate for `SMTP_HOST` against the system's roots, with TLS 1.2 or later. A relay behind a private CA needs it in `SSL_CERT_FILE` or `SSL_CERT_DIR`, as under [Identity provider](#identity-provider). `HTTPS_PROXY` does not apply to the relay.
 
-`serve` checks these settings at start and stops on a mistake, but never connects then, so a relay that is down stops nothing. It logs `email on: passkey notices go through the SMTP relay` at INFO, or `email off: passkey notices are only in the audit log and these logs; set SMTP_* to send them` at WARN. To check the relay, send yourself a test, as on [Docker Compose](/self-hosted/docker-compose#run-a-command):
-
-```bash
-docker compose run --rm --no-deps app mail test you@example.com
-```
-
-It sends one message straight through the relay and prints `The relay at <host>:<port> took the test message <id>.`, or the step that failed: connect, tls, authentication, sender, recipient or data. A notice that fails is retried for about four hours, a refused login included, so fixing the settings and restarting still sends it. A relay's permanent refusal of the recipient or the message gives up at once.
+`serve` checks these settings at start and stops on a mistake, but never connects then, so a relay that is down stops nothing. It logs `email on: passkey notices go through the SMTP relay` at INFO, or the `email off` warning under [Alerts](/self-hosted/operations#alerts). Send yourself a test with `mail test`, as under [Test the mail relay](/self-hosted/operations#test-the-mail-relay). A notice that fails is retried for about four hours, a refused login included, so fixing the settings and restarting still sends it. A relay's permanent refusal of the recipient or the message gives up at once.
 
 `MAIL_POSTAL_ADDRESS`, `MAIL_FROM_ACCOUNT`, `MAIL_FROM_NEWS` and `MAIL_REPLY_TO` are tablepro.app's. A self-hosted server sends no email they apply to, and `SMTP_FROM` is the only sender. `MAIL_POSTAL_ADDRESS` is still checked at start: a value that is not one line of at most 300 characters stops the server.
 
