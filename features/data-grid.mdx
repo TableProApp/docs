@@ -92,9 +92,9 @@ Right-click a column's header and choose **Freeze Up to This Column** to hold it
 
 Frozen columns cover at most two thirds of the grid's width. The menu item is dimmed for a column that would freeze more, and frozen columns that no longer fit after the window narrows scroll until it widens again. Sort, resize and reorder frozen columns from their own headers at any scroll position. A drag keeps a column on its side of the line, so freeze or unfreeze to move one across. On a query result they stay frozen until the tab closes or the app quits.
 
-### Large binary values
+### Large values
 
-On MySQL and MariaDB, a binary value larger than the connection's limit stays on the server until you need it, in any table with a primary key. The cell shows the value's size in italics, such as *5.2 MB*. Set the limit with **Binary Value Limit**, under **Table Data** on the connection editor's [Advanced](/connections/connection-form#advanced) pane; it is 64 KB until you change it.
+On PostgreSQL, MySQL, MariaDB and SQLite, a text, JSON, XML or binary value larger than the connection's limit stays on the server until you need it, in any table with a primary key. A text or JSON cell shows its first 256 characters in italics, ending with an ellipsis; a binary cell, or any cell in a masked column, shows the value's size, such as *5.2 MB*. On PostgreSQL, MySQL and MariaDB, a column whose declared size fits under the limit, such as `varchar(255)`, always loads whole. Set the limit with **Large Value Limit**, under **Table Data** on the connection editor's [Advanced](/connections/connection-form#advanced) pane; it is 64 KB until you change it.
 
 The value is read by its primary key when you open the cell, copy it, show its row in the inspector with one row selected, duplicate the row, list the column's values with **Filter Values…**, or export the rows with **Export Results…**. **File > Export** reads every value as before. Set NULL, paste and **Fill Column** read the value first, so undo puts it back. A table without a primary key, a sorted column and a column under a value filter load every value with the page.
 
@@ -161,7 +161,7 @@ Matching runs over the text as displayed and ignores case and accents. The optio
 | `No matches` | Every row is loaded and none match |
 | `Not on this page` | None of the loaded rows match, and more rows exist |
 
-When none of the loaded rows match and more rows exist, **Search All Rows** in the bar turns the term into a filter that runs at the database, covering the whole table. It replaces the tab's filters, so it appears only when none are applied; with a filter set, add the term to the filter bar instead. Cassandra and ScyllaDB cannot match any one of several columns, so it never appears there.
+When none of the loaded rows match and more rows exist, or the page holds [large values](#large-values) still on the server, **Search All Rows** in the bar turns the term into a filter that runs at the database, covering the whole table. It replaces the tab's filters, so it appears only when none are applied; with a filter set, add the term to the filter bar instead. Cassandra and ScyllaDB cannot match any one of several columns, so it never appears there.
 
 In an editable table, select **Replace** in the bar to show the replacement field. **Replace** changes the current match and moves to the next; **Replace All** changes every match in the loaded rows as one step, so one `Cmd+Z` puts all of them back, and the bar says how many cells changed. With a regular expression, `$1` in the replacement inserts the first capture group. Replace works on the stored value, so a match that exists only in a **Display As** form is left alone, and so is a cell you could not type into. Replacements wait in the queue like any edit until you save.
 
