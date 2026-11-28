@@ -231,6 +231,7 @@
             "icon": "plug",
             "pages": [
               "connections/index",
+              "connections/projects",
               "connections/connection-form",
               "connections/urls",
               "connections/ssh-tunneling",
@@ -483,6 +484,7 @@
             "pages": [
               "windows/data-grid",
               "windows/browsing",
+              "windows/projects",
               "windows/account",
               "windows/sync"
             ]
