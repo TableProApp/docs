@@ -12,7 +12,8 @@ Team is sold per seat, from 2 seats, monthly or yearly, at the prices under [Pla
 | Role | Can |
 |------|-----|
 | Owner | Everything an admin can, plus billing, transferring ownership and deleting the team. Exactly one per team, and never removed |
-| Admin | Change members' roles and seats, invite and remove members, publish to the team library, manage API tokens, read the audit log. Nothing that touches the owner |
+| Admin | Change members' roles and seats, invite and remove members, edit and publish to the team library, manage API tokens, read the audit log. Nothing that touches the owner |
+| Editor | Everything a member can, plus edit and publish the team library's connections and saved queries, and delete its items |
 | Member | Use the team's features and library, see the team's plan and seat counts, and leave the team |
 
 A seat turns the team's paid features on for one person, on up to 3 of their devices. The limit is per account, so a seat and a Pro plan on the same account share those 3; see [Devices](/features/licensing#devices). Someone in the team without a seat keeps a Free plan unless they have one of their own. The owner does not need a seat.
@@ -65,23 +66,33 @@ Two routes, and the choice is whether your team already shares a folder. If it d
 
 ### Team Library
 
-Every member with a seat reads the library. Owners and admins publish to it from the app, and delete any item on the team's **Library** page in your account, which lists who last changed each one.
+Every member with a seat reads the library. Owners, admins and editors also publish to it from the app and edit what is in it, and delete any item on the team's **Library** page in your account, which lists who last changed each one.
 
 To publish connections, right-click one and choose **Share > Publish to Team Library…**. Someone who publishes to several teams picks one from a submenu. Publishing again updates the team's copy.
 
-To publish saved queries, right-click empty space in the Favorites sidebar and choose **Publish Saved Queries to Team…**. Your saved queries go up with their folders, and the ones you published from this Mac and deleted since leave the library. What other people published stays.
+To publish saved queries, choose **File > Publish Saved Queries to Team** and pick the team, or right-click empty space in the Favorites sidebar and choose **Publish Saved Queries to Team…**. Your saved queries go up with their folders, and the ones you published from this Mac and deleted since leave the library. What other people published stays.
 
-Only the connection definition and the query text travel, never passwords, key passphrases or TOTP secrets. The server refuses a publish holding an item over 256 KiB or a field named like a credential, and stores none of it.
+To change a team connection, right-click it in the welcome window's **Team Library** section and choose **Edit…**. The connection form opens on the team's copy with its passwords, and **Save** publishes the change to the team, not to your own connections.
 
-TablePro pulls the library at launch, every 15 minutes and right after each publish, and sends only what changed. The **Team Library** header shows a spinner while it syncs and a warning icon after a sync that failed; hover the header for when it last updated. A publish the server cannot take right now says **Not published yet**, stays on the Mac, and goes out once the server answers.
+Everything but the [passwords](#passwords-in-team-library) travels as records the server can read. The server refuses a publish holding an item over 256 KiB or a readable field named like a credential, and stores none of it.
 
-Teammates find the connections in a **Team Library** section of the welcome window, read only, without startup SQL or a tunnel command. Queries land under **Team Library** in the Favorites sidebar, each labeled with who last changed it, or with its folder when the library names no one.
+TablePro pulls the library at launch, every 15 minutes and right after each publish, and sends only what changed. The **Team Library** header shows a spinner while it syncs and a warning icon after a sync that failed; hover the header for when it last updated. A publish the server cannot take right now says **Not published yet** and stays on the Mac, after a quit too. The header counts it, such as **1 Not Uploaded**, and it goes out once the server answers.
 
-Shared sign-in settings need [approval on each Mac](/connections/connection-form#sign-ins-from-this-mac) before using local cloud credentials or Kerberos tickets.
+Teammates find the connections in a **Team Library** section of the welcome window, without startup SQL or a tunnel command. Queries land under **Team Library** in the Favorites sidebar, each labeled with who last changed it, or with its folder when the library names no one. A teammate's change to where a connection goes or how it signs in, a lower Safe Mode or a looser AI policy [waits for your approval](/features/sync#changes-that-wait-for-your-approval) before it applies on your Mac.
+
+Before a Team Library connection uses this Mac's cloud credentials, Kerberos tickets, SSH agent or SSH keys, or a database file on this Mac, TablePro [asks once for each destination](/connections/connection-form#sign-ins-from-this-mac).
+
+### Passwords in Team Library
+
+A published connection carries its password, SSH password and TOTP secret, encrypted with the team's key, so teammates connect without typing them. Key passphrases stay on the Mac that saved them. So do key files: the team's copy names the file's path, and each teammate needs that file on their own Mac.
+
+Passwords go while the team's password sync is on, which it is from the start. On tablepro.app, owners and admins turn it off with **Sync saved passwords** on the team's **Settings** page in your account, and the server deletes the team's passwords it holds. On a company server one switch covers every team; see [Sync switches](/self-hosted/sync#sync-switches). With it off, the publish confirmation says passwords are not included, and teammates enter their own.
+
+A teammate's Mac opens the passwords once an owner or admin has confirmed that teammate's keys. Each member sets up keys of their own first, under **Settings > Account > End-to-End Encryption**; see [Set up your recovery key](/features/sync#set-up-your-recovery-key). Then an owner or admin opens **Settings > Account > Teams**, picks the team, and clicks **Confirm…** beside the member under **Members**, once the six words match the ones the member sees under **Show My Words…**. Until then, that person's Mac asks for each password, and their publishes say **Published without passwords**.
 
 ### Library conflicts
 
-A publish that changes an item someone else changed since your last sync leaves a conflict instead. The header shows **1 Conflict**; click it, or choose **Resolve Team Library Conflicts…** from a right-click. The sheet sets **Your Version** beside **Team's Version**, which names who changed it:
+A publish that changes an item someone else changed since your last sync leaves a conflict instead. The header shows **1 Conflict**; click it, or choose **Resolve Team Library Conflicts…** from a right-click. The sheet lists only the fields you both changed, **Your Version** beside **Team's Version**, and names who changed it:
 
 - **Keep Mine** replaces the team's version with yours.
 - **Keep Theirs** leaves the team's version, and holds until your copy on this Mac changes again.

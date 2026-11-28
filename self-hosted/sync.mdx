@@ -10,11 +10,14 @@ Team Library is shared by a team; TablePro Sync is each person's own. Both go th
 | Data | Comes from | On the server |
 |---|---|---|
 | Team Library: the connections and saved queries a team publishes | The team's owners, admins and editors | Readable records |
-| Connections, groups and tags, saved queries and their folders, table and database favorites, table folders, and settings | Each person on TablePro Sync, by the categories they choose | Readable records |
-| Saved passwords, key passphrases and the other secrets a connection saves | Each person on TablePro Sync, with **Passwords** on | End-to-end encrypted |
+| Team Library passwords: the password, SSH password and TOTP secret of each published connection | The team's owners, admins and editors, with **Saved passwords** on | End-to-end encrypted with the team's key |
+| Connections, groups and tags, projects, SSH and credential profiles, saved queries and their folders, table and database favorites, table folders, and settings | Each person on TablePro Sync, by the categories they choose | Readable records |
+| Saved passwords, key passphrases and TOTP secrets of each person's connections and profiles | Each person on TablePro Sync, with **Passwords** on | End-to-end encrypted |
 | Query history | Each person on TablePro Sync | End-to-end encrypted |
 
-End-to-end encrypted means the Mac seals the value with the person's own keys before it sends it, and only that person's approved devices open it. The server, its database and its backups hold ciphertext. The readable records are protected by TLS and by your database's own access controls, as Team Library always was: anyone who reads the database or a dump reads them.
+End-to-end encrypted means the Mac seals the value before it sends it: a person's own data with that person's keys, which only their approved devices open, and Team Library passwords with the team's key, which only members an owner or admin confirmed open. The server, its database and its backups hold ciphertext. The readable records are protected by TLS and by your database's own access controls, as Team Library always was: anyone who reads the database or a dump reads them.
+
+The server cannot change where a connection signs in on someone's Mac by itself. A changed host, user, SSH route, SSL setting or startup command, a lower Safe Mode, and a new connection [wait for the person's approval](/features/sync#changes-that-wait-for-your-approval) on each Mac.
 
 Connections a person marks **Local only**, and the sample connections, stay on their Mac. [Sync](/features/sync) covers the Mac's side.
 
@@ -23,6 +26,7 @@ Connections a person marks **Local only**, and the sample connections, stay on t
 - **The license.** TablePro Sync needs `service_sync` among the license file's features, and Team Library `team_library`. `license status` lists them; ask TablePro for a new file if one is missing.
 - **The Macs.** TablePro Sync needs a TablePro release with **Settings > Sync**. Earlier releases sync Team Library through the server as before.
 - **The switches.** Decide what the server keeps under **Server > Sync**; see [Sync switches](#sync-switches). Every switch starts on.
+- **Team passwords.** A member's Macs open a team's passwords only once an owner or admin of the team confirms that member's keys in the Mac app; see [Passwords in Team Library](/features/team#passwords-in-team-library).
 - **Passkeys.** Removing a lost device, and a key reset that starts empty, ask the person for a passkey in the browser. Someone without one adds their first then, after the IdP signs them in again; see [Step-up](/self-hosted/sign-in#step-up).
 - **The provider, for every Mac.** `PersonalSyncProvider` set to `tablepro-sync` in a configuration profile picks TablePro Sync and locks the choice; see [Company server](/features/company-server#set-the-server-for-every-mac). Nothing uploads before the person reviews it: the Mac shows **Your Organization Uses TablePro Sync** with **Review Upload…**.
 
