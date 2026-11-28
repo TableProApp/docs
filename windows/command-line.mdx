@@ -1,0 +1,116 @@
+---
+title: Command line
+description: Query, browse and export saved connections from PowerShell or Command Prompt, and open files and links in TablePro for Windows
+---
+
+import CliExitStatus from "/snippets/cli-exit-status.mdx";
+import CliOutputFormats from "/snippets/cli-output-formats.mdx";
+import CliSchemaCommands from "/snippets/cli-schema-commands.mdx";
+
+Installing TablePro adds a `tablepro` command to every terminal. A file or link argument opens in the app; a command such as `query` or `export` prints to standard output.
+
+## Set up
+
+```powershell
+tablepro --help
+tablepro help query
+```
+
+`tablepro --version` prints the version. The command is an app execution alias: if a terminal does not find it, check that **tablepro.exe** is on under **Apps > Advanced app settings > App execution aliases** in Windows Settings.
+
+Commands work through the app's [MCP server](/windows/mcp). Before querying, open TablePro and turn on **Enable MCP server** under **Settings > MCP server**. Commands never start the app. Each run reads the access token from Credential Manager, so there is nothing to pair, and after **Regenerate token...** the next command reads the new one.
+
+## Open files and links
+
+```powershell
+tablepro
+tablepro .\app.sqlite3 .\sales.duckdb
+tablepro .\report.sql
+tablepro "postgresql://ada@db.example.com:5432/shop"
+```
+
+With no arguments, the command starts the app or brings it forward. Database files open as [SQLite or DuckDB sessions](/windows/connect#sqlite-and-duckdb-files), a SQL file opens in a query tab without running, and a link opens as [Links and files](/windows/links) describes.
+
+`tablepro open <target>` opens a file or link too. Use it, or a path such as `.\tables`, for a file named like a command. A word that is neither an existing file nor a link exits 2.
+
+## Run a query
+
+```powershell
+tablepro query -c Staging "SELECT id, email FROM users LIMIT 5"
+tablepro query -c Staging -f report.sql --format csv > report.csv
+"SELECT count(*) FROM orders" | tablepro query -c Staging --format json
+```
+
+Pass SQL as an argument, with `-f` (`--file`), or on standard input with `-f -`.
+
+| Option | Use |
+|---|---|
+| `-c`, `--connection` | Saved connection name or id; find it with the [browse commands](#browse-a-connection) |
+| `--database` | A database open beside the connection in the app; the connection's own by default |
+| `--format` | Choose an [output format](#output-formats) |
+| `--limit` | Rows per result set, 100 by default; accepts 1 to 1,000 |
+| `--timeout` | Seconds per statement, 30 by default; accepts 1 to 300 |
+| `--read-only` | Refuse any statement that is not a read |
+
+On PostgreSQL and SQL Server, a database is open beside the connection once you switch to it in the app, which opens it as a rail item of its own. There is no `--schema` option on `query`: qualify names in SQL, such as `public.orders`. A result cut short says so on standard error. The limit bounds returned rows, not how many rows a write changes.
+
+### Open the connection
+
+Commands use connections open in the app. With standard error attached to a terminal, a command opens a closed connection and waits up to five minutes; answer any password prompt in the app.
+
+Without that terminal, as in a scheduled task, a closed connection exits 1. Open it in the app before the script runs.
+
+## Browse a connection
+
+<CliSchemaCommands />
+
+As with `query`, `--database` picks only a database open beside the connection. Omit `--schema` to use the connection's default schema.
+
+## Export
+
+```powershell
+tablepro export -c Staging --format csv orders > orders.csv
+tablepro export -c Staging --schema public --format sql --limit 1000 orders users > shop.sql
+```
+
+`--format` is required: `csv`, `json` or `sql`. SQL writes `INSERT` statements in the engine's dialect. Pass table names without SQL quotes, and `--schema` for the schema.
+
+The [query row limit](#run-a-query) applies to each table; set `--limit` to change it. A call takes up to 20 tables, and standard error names any table cut short. For every row, use [Export results](/windows/import-export#export-results) in the app.
+
+PowerShell 5.1's `>` writes UTF-16. Pipe to `Out-File -Encoding utf8` for a UTF-8 file there; PowerShell 7 writes UTF-8 already.
+
+## Check status
+
+```powershell
+tablepro status --format json
+```
+
+The report holds the app version, whether it is running, the MCP setting and port, whether a token was found, and whether the server is ready. It starts nothing.
+
+A ready server exits 0. A stopped or unreachable app exits 1. A server that is off, or a token it refuses, exits 3.
+
+## Shell completion
+
+```powershell
+tablepro completion powershell | Out-String | Invoke-Expression
+```
+
+Add that line to your `$PROFILE` to complete commands, options and format names in every new PowerShell window. Connection names are not completed. `bash`, `zsh` and `fish` scripts print too, for a shell such as Git Bash.
+
+## Output formats
+
+<CliOutputFormats />
+
+JSON keeps the value types the server returned, numbers and booleans included.
+
+## Exit status
+
+<CliExitStatus />
+
+## What a query may do
+
+A connection's [External clients](/windows/mcp#external-clients) level applies to every command that uses it. **Blocked** hides the connection, and naming it exits 2. **Read only** is the default and refuses writes.
+
+With **Read and write**, each write still waits for **Run** in the connection's window, and Safe Mode's **Read only** refuses it. `--read-only` refuses a write before anything is asked.
+
+Send one statement, or one SQL Server batch, per query. The SQL is limited to 100 KiB. A transaction a write leaves open is rolled back when the call ends.
