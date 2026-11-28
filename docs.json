@@ -487,7 +487,8 @@
               "windows/projects",
               "windows/account",
               "windows/sync",
-              "windows/end-to-end-encryption"
+              "windows/end-to-end-encryption",
+              "windows/team-library"
             ]
           }
         ]

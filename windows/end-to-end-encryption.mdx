@@ -1,10 +1,9 @@
 ---
 title: End-to-end encryption
 description: Set up your recovery key, approve a new Windows computer, remove a lost device and reset your keys
-tag: "Preview"
 ---
 
-TablePro Sync seals passwords, other secrets and query history on this computer with your account's keys before they leave it. A computer holds the keys once another device approves it, or once you use your recovery key. Open it from **Settings**, **Sync**, **End-to-end encryption**; you need to be signed in.
+TablePro Sync seals passwords, other secrets and query history on this computer with your account's keys before they leave it. A computer holds the keys once another device approves it, or once you use your recovery key. Signed in, open Settings and click **End-to-end encryption** under **Sync**.
 
 ## Set up the recovery key
 
@@ -31,7 +30,7 @@ If another device set your keys up first, the key you saw is not used: click **A
     Click **Ask for approval...**. The request lasts 10 minutes.
   </Step>
   <Step title="Approve on a device that has the keys">
-    On an approved device, open End-to-end encryption, find the computer under **Waiting for approval** and click **Approve...**, then **Approve**.
+    On an approved device, open End-to-end encryption. The request shows under **Waiting for approval** with the computer's name, its platform and when it asked. Check that it is the computer you are signing in to, click **Approve...**, then **Approve**.
   </Step>
   <Step title="Compare the words">
     Both screens show five words. Click **The words match** on each only when both show the same words in the same order.
@@ -58,14 +57,14 @@ Click **Replace...** under **Recovery key** and enter the current key. Choose wh
     Enter the recovery key so your account can get new keys the lost device doesn't have.
   </Step>
   <Step title="Review">
-    Choose the devices that keep your keys, and clear any teammate you confirmed while the lost device had them. Teammates you clear lose their seat first: click **Manage...** to remove it on the web, then **Change keys**.
+    Choose the devices that keep your keys, and clear any teammate you confirmed while the lost device had them. The new team keys leave out the teammates you clear, and **Remove their seats first** offers **Manage...** to take their seats on the web. Click **Change keys**.
   </Step>
 </Steps>
 
 ## Reset when the recovery key is lost
 
-Click **Reset...** under **Reset end-to-end encryption**. From an approved computer the reset keeps your team keys; from a computer that isn't approved, your account starts again and what was sealed before can't be read. Either way the reset waits 7 days, during which any approved device can cancel it, then the computer that asked clicks **Finish reset**.
+Click **Reset...** under **Reset end-to-end encryption**. From an approved computer, your account gets new keys and a new recovery key, and what TablePro Sync keeps for you stays readable. From a computer that isn't approved, your account starts again with new keys, after you confirm it's you in your browser, and what was sealed before can't be read. Either way the reset waits 7 days, during which any approved device can click **Cancel reset**, then the computer that asked clicks **Finish reset**.
 
 ## Sign out
 
-Signing out erases this computer's keys first. If they can't be erased, choose **Try again**, **Sign out anyway**, which leaves the keys on this computer until another account signs in here, or **Cancel**.
+Signing out erases this computer's keys, so after you sign in again it waits for approval like a new computer. [Sign out](/windows/account#sign-out) has the steps.
