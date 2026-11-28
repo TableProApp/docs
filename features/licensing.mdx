@@ -22,7 +22,7 @@ If your company needs central control over TablePro, write to [hello@tablepro.ap
 
 ### Enterprise Self-Hosted
 
-Run the TablePro sync server on your own infrastructure, as an OCI image with PostgreSQL. People sign in through your identity provider with OIDC or SAML 2.0. The preview syncs Team Library, with team roles and an audit log. Syncing query history, settings and connections through the server, with passwords end-to-end encrypted, is coming and is not in the preview. Every seat includes Pro.
+Run the TablePro sync server on your own infrastructure, as an OCI image with PostgreSQL. People sign in through your identity provider with OIDC or SAML 2.0. The preview syncs Team Library, with team roles and an audit log, and from server 0.3.0 each person's [TablePro Sync](/self-hosted/sync): connections, settings and query history, with passwords end-to-end encrypted. Every seat includes Pro.
 
 It is a preview, on macOS first, and the other apps follow. [Self-hosted server](/self-hosted) covers installing and running it. For a free 30-day evaluation, write to [hello@tablepro.app](mailto:hello@tablepro.app) with the subject "TablePro Enterprise Self-Hosted".
 
@@ -53,6 +53,7 @@ Team and Enterprise Self-Hosted include everything in Pro. A seat on a team give
 | Feature | Required plan | Without the plan |
 |---------|---------------|-------------------|
 | [iCloud Sync](/features/icloud-sync) | Pro | Choosing it under **Settings > Sync** opens a dialog saying it needs a paid plan |
+| [TablePro Sync](/features/sync) | Pro | Choosing it under **Settings > Sync** opens a dialog saying it needs a paid plan |
 | [Encrypted connection export](/features/connection-sharing) | Pro | Dimmed, with a row saying it needs a paid plan |
 | [Environment variables in connection fields](/features/connection-sharing) | Pro | References stay unresolved |
 | [Linked Folders](/features/connection-sharing) | Pro | Dimmed, with a row saying it needs a paid plan |
@@ -63,6 +64,8 @@ Team and Enterprise Self-Hosted include everything in Pro. A seat on a team give
 | [Shared links](/features/shared-links#who-can-share) past the Free limits | Pro | Free limits; Pro options carry a **Pro** tag |
 | [Team Catalog](/features/connection-sharing) | Team | Menu item hidden |
 | [Team Library](/features/team) | Team | Menu item hidden |
+
+TablePro Sync comes with Pro, monthly, yearly or bought once, and with a Team seat. A team whose plan has only Team Library does not include it. On a [company server](/features/company-server), the server's license decides; see [Before you roll it out](/self-hosted/sync#before-you-roll-it-out).
 
 The table describes macOS features. The [Linux beta](/linux/install) uses the same plans and accounts; its [account guide](https://github.com/TableProApp/TablePro/blob/main/linux/README.md#tablepro-account) covers device limits and sign-in. The Windows preview signs in to the same accounts: see [TablePro account](/windows/account). The [iPhone and iPad app](/ios) needs no plan.
 
