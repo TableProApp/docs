@@ -1,6 +1,6 @@
 ---
 title: Connect
-description: The engines, the connect dialog, TLS, SSH tunnels and SQLite or DuckDB files in TablePro for Linux
+description: The engines, the connect dialog, the setup guide, TLS, SSH tunnels and SQLite or DuckDB files in TablePro for Linux
 tag: "Beta"
 ---
 
@@ -56,6 +56,53 @@ Redshift, CockroachDB, TiDB, OceanBase and Databend are untested on Linux. Suppo
 </Steps>
 
 For a MongoDB replica set or cluster behind a `mongodb+srv://` address, turn on **DNS Seed List**. **Authentication Database (optional)** names the database that holds the user.
+
+## Setup guide
+
+While no connection is saved, each launch opens **Set Up TablePro** in the window until you finish, skip or leave it once. **Setup Guide** in the main menu, or **Set Up…** under an empty connection list, opens it again.
+
+| Page | What you do there |
+|---|---|
+| **Set Up TablePro** | Say where your connections are now. **In Another App** goes on to the import, **In a TablePro File** closes the guide and opens **Import Connections…**, and **Nowhere Yet** goes to **First Connection** |
+| **Import Connections** | Select the apps to bring over. They are read and reviewed one at a time, and their own files never change |
+| **First Connection** | Pick a new connection or **Sample Database**, a small music store. It opens when you finish |
+| **Editor** | Set **Shortcuts**, **Vim Keybindings** and the style scheme. Each change applies at once |
+
+When the guide finds another database app's files, **Import from Another App** is already selected and names the apps it found. **Skip** on any page ends the guide the way the last page's button does, and that button names what opens: your **First Connection** pick, the one connection you imported, or several imported connections, selected in the list. Connections imported from a file are only selected, never opened.
+
+**Import from Another App…** in the main menu runs the same import for one app, and ends the same way. The Flatpak build reads the Flathub builds of DBeaver, DataGrip and Beekeeper Studio too, through read-only access to their folders under `~/.var/app`.
+
+## Projects
+
+The menu button at the start of the connection list's header bar names what the list shows. **All Connections** is built in and shows everything. Pick a project there, or under **Project** in the main menu, to see only its connections.
+
+<Steps>
+  <Step title="Create a project">
+    Choose **New Project…** from the button's menu, type a name, and click **Create**.
+  </Step>
+  <Step title="Move connections in">
+    Right-click an ungrouped connection or a top-level group, choose **Move to Project**, then the project. **No Project** takes it out again.
+  </Step>
+  <Step title="Switch">
+    Pick the project, or **All Connections**, from the button's menu.
+  </Step>
+</Steps>
+
+A group takes its subgroups and connections along. A connection inside a group follows its top-level group, so it has no **Move to Project** of its own. A connection is in one project at most.
+
+With a project picked, these show its connections only:
+
+- The connection list, with its search, favorites and recent connections.
+- The connection tree in each window's sidebar. A connection the window already holds keeps its row.
+- **Query History** and **Saved Queries**.
+- **Export Connections**, which writes the project's groups and connections.
+- The [MCP server](/integrations/mcp-clients#linux-tools) and the [command line](/linux/command-line#what-a-query-may-do).
+
+Open connections stay open when you switch, and a link still opens a connection of another project. A new connection, a new group, an imported file and an import from another app land in the picked project, unless the file names a project of its own.
+
+A search with no match inside a project offers **Search All Connections**, which switches to **All Connections** and keeps the search text. An empty project reads **No Connections in** with its name, over a button that adds a connection.
+
+**Manage Projects…** lists every project with its connection count. Click a row to rename it, **Move Up** or **Move Down** to reorder, and **Delete Project** to remove it. Deleting keeps the project's connections and groups under **All Connections**. The picked project is saved per computer.
 
 ## Options
 

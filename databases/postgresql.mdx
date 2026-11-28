@@ -11,10 +11,10 @@ Unlike MySQL, PostgreSQL will not connect without a **Database**, and a connecti
 
 | Field | Default | Notes |
 |-------|---------|-------|
-| **Connect Using** | **Host and Port** | **Socket** connects through the server's socket on this Mac. See [Unix socket](#unix-socket) |
+| **Address** | **Host and Port** | **Unix Socket** connects through the server's socket on this Mac. See [Unix socket](#unix-socket) |
 | **Host** | `localhost` | |
-| **Port** | `5432` | With **Socket**, picks the socket file |
-| **Socket** | empty | With **Connect Using** set to **Socket**: the folder holding the socket, or the socket file |
+| **Port** | `5432` | With **Unix Socket**, picks the socket file |
+| **Socket** | empty | With **Address** set to **Unix Socket**: the folder holding the socket, or the socket file |
 | **Username** | - | Not pre-filled; most servers use `postgres`. Empty signs in as your macOS login name |
 | **Database** | - | **Required** |
 
@@ -36,7 +36,7 @@ Any server from 9.1 on works. A feature the server predates stays out of the sid
 
 ## Unix socket
 
-A server on this Mac listens on a socket as well as a port, and a server with `listen_addresses = ''` listens only there. Set **Connect Using** to **Socket** and enter the folder that holds the socket. Host leaves the form, and **Network** offers only **Direct**.
+A server on this Mac listens on a socket as well as a port, and a server with `listen_addresses = ''` listens only there. Set **Address** to **Unix Socket** and enter the folder that holds the socket in **Socket**. Host leaves the form, and so does the **SSH & Proxies** pane, since only a direct connection reaches the socket.
 
 The socket file is named after the port, `.s.PGSQL.5432` for port `5432`, so **Port** stays and picks the server. Entering the file itself, such as `/tmp/.s.PGSQL.5433`, saves its folder and sets **Port** from the name. The server lists its folders:
 
@@ -53,7 +53,7 @@ The **Socket** field suggests both. The note under it names the socket file and 
 
 A `local` line in `pg_hba.conf` decides who signs in. With `peer`, leave **Username** empty to sign in as your macOS login name.
 
-No SSL Mode applies: a socket connection never leaves this Mac, so the SSL settings leave the Network tab. Backup and restore reach the server through the same socket, and `~/.pgpass` matches it the way `psql` does: the `/tmp` folder as `localhost`, any other folder by its path.
+No SSL Mode applies: a socket connection never leaves this Mac, so the **SSL/TLS** pane leaves the sidebar. Backup and restore reach the server through the same socket, and `~/.pgpass` matches it the way `psql` does: the `/tmp` folder as `localhost`, any other folder by its path.
 
 ## Connection URL
 
@@ -69,15 +69,15 @@ postgresql://user@%2Ftmp/database
 
 ### AWS IAM
 
-Set **Authentication** to an AWS IAM option and set **Username** to a database role granted `rds_iam`. See [AWS IAM Authentication](/connections/aws-iam).
+Set **Method** under **Authentication** to an AWS IAM option and set **Username** to a database role granted `rds_iam`. See [AWS IAM Authentication](/connections/aws-iam).
 
 ### Google Cloud IAM
 
-For a Cloud SQL instance you reach directly, set **Authentication** to a Google Cloud IAM option and set **Username** to the IAM database user. See [IAM sign-in without the proxy](/connections/cloud-sql-proxy#iam-sign-in-without-the-proxy).
+For a Cloud SQL instance you reach directly, set **Method** under **Authentication** to a Google Cloud IAM option and set **Username** to the IAM database user. See [IAM sign-in without the proxy](/connections/cloud-sql-proxy#iam-sign-in-without-the-proxy).
 
 ### Kerberos
 
-For a server whose `pg_hba.conf` line uses `gss`, set **Authentication** to **Kerberos (GSSAPI)** and set **Username** to the role the server maps your principal to. Leave **Kerberos Principal** and **Password** blank to use the ticket in your credential cache, or enter `user@REALM.COM` and your domain password to have one requested at connect. Get a cached ticket with `kinit user@REALM.COM`; `klist` shows it.
+For a server whose `pg_hba.conf` line uses `gss`, set **Method** under **Authentication** to **Kerberos (GSSAPI)** and set **Username** to the role the server maps your principal to. Leave **Kerberos Principal** and **Password** blank to use the ticket in your credential cache, or enter `user@REALM.COM` and your domain password to have one requested at connect. Get a cached ticket with `kinit user@REALM.COM`; `klist` shows it.
 
 Connect by hostname, never an IP address: the ticket is for the service principal `postgres/host.domain.com@REALM.COM`, registered against the host name. Through an SSH tunnel the ticket is still for that host name. This Mac has to reach the realm's KDC, through DNS SRV records or `/etc/krb5.conf`.
 

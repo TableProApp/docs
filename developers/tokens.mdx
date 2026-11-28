@@ -5,9 +5,9 @@ description: Token model, scopes, connection allowlists, expiry, revocation, and
 
 **Read Only** is where the **Generate Token** sheet starts, and it is the right level for a client that only reads. Move to **Read & Write** when an agent has to change data, and to **Full Access** for destructive statements through [`confirm_destructive_operation`](/developers/mcp-tools#writing-data). The plaintext is shown once at creation and never again; what persists is a salted SHA-256 hash in the login keychain.
 
-<Frame caption="The MCP tab in Settings">
-  <img className="block dark:hidden" src="/images/mcp-tokens.png" alt="MCP tokens" />
-  <img className="hidden dark:block" src="/images/mcp-tokens-dark.png" alt="MCP tokens" />
+<Frame caption="Settings > MCP > Tokens">
+  <img className="block dark:hidden" src="/images/mcp-tokens.png" alt="Tokens page listing each token's name, permission level, connections and last use, with add and remove buttons under the list" />
+  <img className="hidden dark:block" src="/images/mcp-tokens-dark.png" alt="Tokens page listing each token's name, permission level, connections and last use, with add and remove buttons under the list" />
 </Frame>
 
 ## Permission levels
@@ -18,7 +18,7 @@ description: Token model, scopes, connection allowlists, expiry, revocation, and
 | **Read & Write** | plus `tools:write` | Non-destructive writes, connect and disconnect, switch database or schema, open and focus tabs. |
 | **Full Access** | plus `admin` | Also `confirm_destructive_operation`, the tool for destructive statements. |
 
-`connections:display` sits outside the levels. Only [pairing](/developers/pairing#scopes) grants it, and only while **Allow apps to list connections hidden from AI** is on under **Settings > MCP > Connection Access**. The **Generate Token** sheet never does. It does one thing: lets [`list_connections`](/developers/mcp-tools#listing-for-display) take `purpose: "display"`. A token holding it reads **Lists connections hidden from AI** in the token list.
+`connections:display` sits outside the levels. Only [pairing](/developers/pairing#scopes) grants it, and only while **Allow apps to list connections hidden from AI** is on under **Access** in **Settings > MCP**. The **Generate Token** sheet never does. It does one thing: lets [`list_connections`](/developers/mcp-tools#listing-for-display) take `purpose: "display"`. A token holding it reads **Lists connections hidden from AI** in the token list.
 
 `confirm_destructive_operation` also needs the connection's external access to be **Read & Write**, and no permission level skips the user's approval. [Scopes and gates](/developers/mcp-tools#scopes-and-gates) names which tools sit on which scope.
 
@@ -44,11 +44,11 @@ The effective permission is the lower of the token's scope and the connection's 
 
 ## Creating a token
 
-Pairing is the usual route: see [Pairing](/developers/pairing). To mint one by hand, open **Settings > MCP > Authentication**, click **Generate Token**, and pick a name, permission level, connection allowlist and expiry. The plaintext is shown once.
+Pairing is the usual route: see [Pairing](/developers/pairing). To mint one by hand, open **Settings > MCP > Tokens**, click **+** under the list, or **Generate Token…** while the list is empty, and pick a name, permission level, connection allowlist and expiry. Click **Generate**, and the same sheet shows the plaintext once, with **Copy** and the setup for a client. The page lists tokens only while the MCP server is running.
 
 ## Expiry
 
-Optional, and worth setting for anything with write access. The sheet offers 30, 60 and 90 days, a custom date, or **Never**. An expired token stops authenticating: requests get `-33008` with HTTP `401` and `WWW-Authenticate: Bearer error="invalid_token", error_description="token expired"`.
+Optional, and worth setting for anything with write access. **Expires** offers **Never** (the default), 1, 7, 30, 60 and 90 days, or **Custom** with a date. An expired token stops authenticating: requests get `-33008` with HTTP `401` and `WWW-Authenticate: Bearer error="invalid_token", error_description="token expired"`.
 
 ## Rotating a token
 
@@ -56,10 +56,11 @@ Mint the replacement before you retire the old one; two tokens for one client ar
 
 ## Revocation
 
-The token list in **Settings > MCP > Authentication** shows prefix, name, permission level, allowlist, last use, and expiry. Each row offers:
+The list in **Settings > MCP > Tokens** shows name, permission level, allowlist, prefix, last use, and **Active**, **Expires** with a date, **Expired** or **Revoked**. Select one or more tokens and right-click for:
 
-- **Revoke**: marks the token inactive. It stays in the list and cannot be reactivated.
-- **Delete…**: removes the row entirely.
+- **Revoke…**: asks first, then marks the tokens inactive. They stay in the list and cannot be reactivated.
+- **Copy ID**: copies the token's id, for one token.
+- **Delete…**: asks first, then removes the rows entirely. **-** under the list, or the `Delete` key, does the same.
 
 Revoking cancels every request that token has in flight and clears the connection approvals the user had granted it, so a re-issued token has to ask again. The next call gets `-33009` with HTTP `401`.
 
@@ -93,7 +94,7 @@ The plaintext is `tp_` followed by 32 base64url-encoded random bytes. Tokens liv
 
 ## Activity log
 
-Every authentication, tool call, resource read, and query is recorded in `~/Library/Application Support/TablePro/mcp-audit.db` with the token id, never the plaintext. Open it with **Settings > MCP > View Activity…**.
+Every authentication, tool call, resource read, and query is recorded in `~/Library/Application Support/TablePro/mcp-audit.db` with the token id, never the plaintext. Click **View Activity…** in **Settings > MCP** to open it.
 
 | Field | Values |
 |-------|--------|

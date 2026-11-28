@@ -106,7 +106,7 @@ not turn an approved read into a write: the driver receives it as read-only.
 
 The driver uses the engine's read-only mode where supported. Some engines still allow session or
 temporary-object changes; others depend on command checks and the database login's privileges.
-The note under **External Clients** in the connection form describes that engine's limit. Use a
+The note under **External Clients** on the connection editor's **AI & MCP** pane describes that engine's limit. Use a
 login that can only read when that limit matters. Update the driver in **Settings > Extensions**
 to get its current enforcement.
 
@@ -119,6 +119,7 @@ These requests fail at every external access level, including **Read & Write**:
   are the exception: they run in batches at `GO` lines.
 - File access or server-side code, including `COPY`, `ATTACH`, `LOAD`, `VACUUM INTO`, DuckDB's
   `read_csv`, ClickHouse's `file`, `url` and `s3`, and T-SQL string execution.
+- MotherDuck's `md_` functions, `get_md_token()`, and `PRAGMA print_md_token` with its other sign-in pragmas, on a DuckDB connection. They read the access token or act on the MotherDuck account.
 - Non-built-in function calls on a connection that loads SQLite extensions. Run those in the app.
 - Private requests built for the app's grid. Send the database statement instead.
 

@@ -4,7 +4,7 @@ description: Every key the Linux app binds, by where the focus is
 tag: "Beta"
 ---
 
-`Ctrl+?` opens the same list inside the app, as does **Keyboard Shortcuts** in the main menu. The keys are fixed; none can be rebound yet.
+`Ctrl+?` lists the keys in force inside the app, as does **Keyboard Shortcuts** in the main menu. The tables here are TablePro's own keys. A [preset](#shortcuts-from-another-app) swaps in another app's, and no key can be rebound on its own yet.
 
 Focus decides what some keys do. `Ctrl+F` searches the connection list, filters a table tab, finds in query results or finds in the editor, by where the focus is. `Escape` closes a dialog, stops a running query, or drops a selection or extra cursors.
 
@@ -133,3 +133,12 @@ While a cell is being edited:
 | Read the tables again | `F5` or `Ctrl+R` |
 | Open the selected table | `Enter` |
 | Move the selected table | `Alt+Left`, `Alt+Right`, `Alt+Up`, `Alt+Down` |
+
+## Shortcuts from another app
+
+Pick an app under **Preferences > Editor > Shortcuts** (`Ctrl+,`) to use its keys: TablePlus, DBeaver, DataGrip, Beekeeper Studio, Navicat or DBX. The [setup guide](/linux/connect#setup-guide)'s **Editor** page has the same row. **TablePro**, at the top of the list, is the set on this page.
+
+- A preset key wins. The TablePro command that held it has no key while the preset is on.
+- A TablePro key with no modifier keeps working beside the preset's chord: `Escape` still stops a run, and `Delete` still marks rows.
+- Copy, paste, cut, undo, select all, quit and zoom keep their keys under every preset, and so do the keys GNOME keeps, such as `Alt+Tab`.
+- A preset key that is `Alt` with a letter or digit is left out, and its command keeps the key on this page.

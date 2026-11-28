@@ -9,11 +9,11 @@ With no connections saved, the welcome window offers **Open Sample Database**, a
 
 <Steps>
   <Step title="Install TablePro">
-    `brew install --cask tablepro`, or the DMG from GitHub Releases. See [Installation](/installation). The first launch shows a welcome sheet; click **Continue** to reach the welcome window, and choose **Help > Getting Started** to see it again.
+    `brew install --cask tablepro`, or the DMG from GitHub Releases. See [Installation](/installation). The first launch on a Mac with no saved connections opens the [setup guide](#the-setup-guide); click **Skip** to go straight to the welcome window.
   </Step>
 
   <Step title="Create a connection">
-    Click **New Connection…** in the welcome window, pick a type in the **Choose a Database** sheet, then click **Continue**. A type badged **Not Installed** downloads its driver before the form opens, with no restart.
+    Click **New Connection…** in the welcome window, pick a type in the **Choose a Database** sheet, then click **Continue**. A type badged **Not Installed** downloads its driver before the editor opens, with no restart.
 
     <Frame caption="Pick a database type">
       <img
@@ -34,22 +34,22 @@ With no connections saved, the welcome window offers **Open Sample Database**, a
   </Step>
 
   <Step title="Fill in the form, test it, save it">
-    The host pre-fills to `localhost` and the port to the engine's default. Username is optional: leave it empty and the database applies its own default. SQLite asks for a `.sqlite` or `.db` file instead of a host, with no credentials.
+    The editor opens on **General** with the cursor in **Host**. Leave it empty for `localhost`; the port starts at the engine's default. Name and Username are optional: an empty name takes the suggestion shown in the field, and an empty username the database's own default. SQLite asks for a `.sqlite` or `.db` file instead of a host, with no credentials.
 
     <Frame caption="PostgreSQL connection form">
       <img
         className="block dark:hidden"
         src="/images/connection-form-general.png"
-        alt="Connection form"
+        alt="Connection editor on General, with the pane list in the sidebar and the bar along the bottom"
       />
       <img
         className="hidden dark:block"
         src="/images/connection-form-general-dark.png"
-        alt="Connection form"
+        alt="Connection editor on General, with the pane list in the sidebar and the bar along the bottom"
       />
     </Frame>
 
-    Click **Test Connection** on the bar along the bottom. It turns into **Connected** with a green checkmark. Now click **Save & Connect** beside it.
+    Click **Test Connection** on the bar along the bottom. A line such as **Connected to PostgreSQL 16.4 in 42 ms** appears beside it. Now click **Save & Connect**.
 
     <Frame caption="Test Connection succeeded">
       <img
@@ -92,6 +92,21 @@ With no connections saved, the welcome window offers **Open Sample Database**, a
     ```
   </Step>
 </Steps>
+
+## The setup guide
+
+It opens at launch while no connection is saved, until you finish, skip or close it once on this Mac. **Help > Setup Guide** opens it again whatever the list holds. Every step has **Skip**.
+
+| Step | What you do there |
+|---|---|
+| **Get Started** | Under **Start Fresh**, pick a new connection or **Sample Database**. Under **Bring Your Connections**, pick **Import from Other App…** to go on to the import step, or another import, which closes the guide and opens it |
+| **Import from Other Apps** | Select the apps to import from. Each one is read and reviewed in turn, before anything is saved. [Switching to TablePro](/switching) covers what comes across |
+| **First Connection** | Choose what opens when you finish: a new connection, the sample database, or what you imported |
+| **Appearance and Keys** | Set the appearance, the editor's **Key bindings**, and **Shortcuts**, which takes the [keys of the app you used before](/features/keyboard-shortcuts#shortcuts-from-another-app). Changes apply at once |
+
+When the guide finds another database app's files, **Import from Another App** is already selected and names the apps it found; click **Continue** to pick what to import. A new connection or the sample goes straight to **Appearance and Keys**.
+
+**Done** on the last step, or **Skip** on any step, ends the guide and opens what you picked: a new connection or the sample database. With neither picked, one imported connection opens, and several are selected in the welcome window. Connections imported from a file are only selected, never opened. Closing the window ends the guide and opens nothing.
 
 ## What's next
 

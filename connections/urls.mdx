@@ -115,7 +115,7 @@ Names are matched case-insensitively. Anything unrecognized is ignored, except o
 | `name` | Connection name shown in the sidebar, and part of what a trusted link is matched on | `?name=Production+DB` |
 | `safeModeLevel` | [Safe Mode](/features/safe-mode) for this connection: 0=silent, 1=alert, 2=read-only | `?safeModeLevel=2` |
 | `statusColor` | Connection color as hex, matched to the nearest palette color | `?statusColor=FF3B30` |
-| `env` | Assign an existing tag by name. `environment` is accepted too | `?env=production` |
+| `env` | The connection's **Environment**: `production` or `prod`, `staging` or `stage`, `development` or `dev`, or `local`. `environment` is accepted too | `?env=production` |
 | `socket` | MySQL and MariaDB. Socket file path, in place of host and port. Alias `unix_socket`. See [Unix socket](#unix-socket) | `?socket=%2Ftmp%2Fmysql.sock` |
 | `host`, `port` | PostgreSQL. Override the URL's own host and port. A host starting with `/` is the socket folder. See [PostgreSQL socket](#postgresql-socket) | `?host=/var/run/postgresql` |
 
@@ -285,4 +285,4 @@ Every URL opened from outside the app raises an **Open External Database Connect
 
 A link with a [filter](#filtering) asks every time and offers no **Always Allow**. Read the filter in the box under the target before choosing **Connect**: it runs on the table as soon as the connection opens.
 
-Trusted links are listed under **Settings > General**, where **Forget** drops one and **Forget All** drops every one.
+Trusted links are listed in **Settings > Connections > Trusted Links**, where **Forget** drops one and **Forget All** drops every one after a confirmation.

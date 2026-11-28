@@ -231,6 +231,7 @@
             "icon": "plug",
             "pages": [
               "connections/index",
+              "connections/projects",
               "connections/connection-form",
               "connections/urls",
               "connections/ssh-tunneling",
@@ -396,8 +397,24 @@
               "features/icloud-sync",
               "features/handoff",
               "features/licensing",
+              "features/company-server",
               "features/team",
               "features/shared-links"
+            ]
+          },
+          {
+            "group": "Self-hosted server",
+            "icon": "server",
+            "pages": [
+              "self-hosted/index",
+              "self-hosted/image",
+              "self-hosted/settings",
+              "self-hosted/docker-compose",
+              "self-hosted/aws",
+              "self-hosted/sign-in",
+              "self-hosted/roles",
+              "self-hosted/operations",
+              "self-hosted/releases"
             ]
           },
           {
@@ -406,9 +423,11 @@
               "customization/settings",
               "customization/general-settings",
               "customization/appearance",
+              "customization/notifications",
+              "customization/connection-settings",
+              "customization/sidebar-and-tabs",
               "customization/editor-settings",
-              "customization/data-settings",
-              "customization/notifications"
+              "customization/data-settings"
             ]
           },
           {
@@ -468,6 +487,7 @@
               "windows/sql-editor",
               "windows/data-grid",
               "windows/browsing",
+              "windows/projects",
               "windows/import-export",
               "windows/mcp",
               "windows/command-line",

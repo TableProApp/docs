@@ -90,7 +90,7 @@ client send the same `clientInfo` and number their requests alike, and this id k
 from one session off the other's request. The server reads it only from requests on the bridge token.
 
 A TablePro the bridge launched that does not start the server writes `mcp-start-refused.json` beside
-the handshake, with `pid`, `refusedAt` and `reason`: `turnedOff` when **Enable MCP Server** is off,
+the handshake, with `pid`, `refusedAt` and `reason`: `turnedOff` when the **MCP server** switch is off,
 `failedToStart` when the server tried and failed. The bridge reads only a refusal written after its own
 launch request, stops polling, and exits with the matching message. A refusal with no `reason` reads as
 `turnedOff`, and one with a reason the bridge does not know reads as `failedToStart`. This file is
@@ -303,7 +303,7 @@ Present the form, then repeat the **same** call with the answer and the state ec
 }
 ```
 
-`requestState` is signed and bound to the token, the method, and a digest of the parameters. Change any argument between the two calls and it is rejected with `-32602`. It expires after 5 minutes. An `action` other than `accept`, or `approved: false`, fails the call with a `denied` tool error.
+`requestState` is signed and bound to the token, the method, and a digest of the parameters. Change any argument between the two calls and it is rejected with `-32602`. It expires after 5 minutes. It is also bound to where the statement runs: the connection, database and schema it resolved to, and the statements shown. If the user switches the connection's database or schema between the two calls, the second call returns a new `input_required` naming the new target, and nothing runs until that one is approved. The same happens when the connection reconnected in between, even to the same database. A call that runs several statements, such as `export_data` with several tables, asks once with every statement listed, and the approval runs them all in that call. An accepted approval is used once: sending the same `requestState` and answer again fails with `-32602`, and nothing runs. Call again without `requestState` to ask for a new approval. An `action` other than `accept`, or `approved: false`, fails the call with a `denied` tool error.
 
 A call that carries `inputResponses` or `requestState` is never cached, whatever the method's normal hint says.
 
@@ -329,7 +329,7 @@ TablePro's own error codes live in `-33000` and above. The `-32000` block is fro
 | `-33003` | 200 | Request timeout. The statement or the handler deadline ran out. |
 | `-33005` | 413 | Payload too large. The body cap is 10 MB. |
 | `-33006` | 503 | Server disabled. |
-| `-33007` | 403 | Forbidden. Token scope, connection allowlist, AI policy, or external access rejected the call. |
+| `-33007` | 403 | Forbidden. Token scope, connection allowlist, AI policy, external access, or [the active project](/developers/mcp-tools#the-active-project) rejected the call. |
 | `-33008` | 401 | Token expired. |
 | `-33009` | 401 | Unauthenticated. No token, or an unknown or revoked one. |
 | `-33010` | 429 | Rate limited. Carries `Retry-After`. |

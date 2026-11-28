@@ -22,10 +22,10 @@ A Cassandra, ScyllaDB or Bigtable table has no header sort, and a query result t
 
 **Sort direction** in [Settings > Data](/customization/data-settings) decides which way that first click goes. It is Ascending out of the box; set it to Descending to open on the newest rows and reach them in one click.
 
-A table opens sorted by its primary key, so each page continues where the last one ended. A table with no primary key opens in the server's order. Set **Default row sort** to **First column**, or to **No sorting (engine order)** to keep the server's order everywhere. A sort the setting applies carries the same arrow as one you clicked, and clicking that header reverses it.
+A table opens sorted by its primary key, so each page continues where the last one ended. A table with no primary key opens in the server's order. Set **Default sort** to **First column**, or to **No sorting (engine order)** to keep the server's order everywhere. A sort the setting applies carries the same arrow as one you clicked, and clicking that header reverses it.
 
 <Warning>
-Sorting on a `BLOB`, `JSON`, or spatial column the server cannot order on fails the query. Sort on another column, or set **Default row sort** to **No sorting (engine order)**.
+Sorting on a `BLOB`, `JSON`, or spatial column the server cannot order on fails the query. Sort on another column, or set **Default sort** to **No sorting (engine order)**.
 </Warning>
 
 ## Filtering
@@ -69,11 +69,22 @@ Rules belong to the table, scoped to the connection, database, and schema, and f
 
 Drag a border to resize a column, or double-click it to fit the content; **Size to Fit** and **Size All Columns to Fit** on the header menu do the same. A fitted column stops at half the visible grid width.
 
-Point at a header for the column's type and, with **Show object comments** on in [General settings](/customization/general-settings), its comment.
+Point at a header for the column's type and, with **Show comments** on in [Sidebar & Tabs settings](/customization/sidebar-and-tabs#objects), its comment.
 
 Hide columns from the columns button in the status bar or from the header menu. A hidden column is not fetched, so hiding a large one makes the table load faster; the primary key and the sorted column are fetched either way. On a schemaless store the popover lists every field the grid can draw, including ones that turn up only in later documents.
 
 Widths, order, hidden and frozen columns are remembered per table, scoped to the connection, database, and schema; **Reset Columns** in the popover puts them back. Right-click a header and choose **Display As** to read a column's stored values in a different form; [Cell and Row Viewers](/features/json-viewer) lists the formats.
+
+### Wrap text
+
+Choose **View > Wrap Text**, or **Wrap Text** on the header menu, to show long values on several lines. A row grows to fit its tallest cell, up to 10 lines; a value that needs more ends in an ellipsis. A line break stored in the value starts a new line. With wrap off, every row is one line and a line break shows as a space.
+
+<Frame caption="Rows grow to fit wrapped values">
+  <img className="block dark:hidden" src="/images/data-grid-wrap-text.png" alt="Notes table with Wrap Text on: long body values run over several lines and short rows stay one line" />
+  <img className="hidden dark:block" src="/images/data-grid-wrap-text-dark.png" alt="Notes table with Wrap Text on: long body values run over several lines and short rows stay one line" />
+</Frame>
+
+Wrap applies to the whole grid of one tab, in tables, views and query results, and is saved with the tab. **Wrap text in cells** in [data settings](/customization/data-settings) sets it for new tabs.
 
 ### Freeze columns
 
@@ -81,9 +92,9 @@ Right-click a column's header and choose **Freeze Up to This Column** to hold it
 
 Frozen columns cover at most two thirds of the grid's width. The menu item is dimmed for a column that would freeze more, and frozen columns that no longer fit after the window narrows scroll until it widens again. Sort, resize and reorder frozen columns from their own headers at any scroll position. A drag keeps a column on its side of the line, so freeze or unfreeze to move one across. On a query result they stay frozen until the tab closes or the app quits.
 
-### Large binary values
+### Large values
 
-On MySQL and MariaDB, a binary value larger than the connection's limit stays on the server until you need it, in any table with a primary key. The cell shows the value's size in italics, such as *5.2 MB*. Set the limit under **Options > Load binary values up to** in the [connection form](/connections/connection-form#options); it is 64 KB until you change it.
+On PostgreSQL, MySQL, MariaDB and SQLite, a text, JSON, XML or binary value larger than the connection's limit stays on the server until you need it, in any table with a primary key. A text or JSON cell shows its first 256 characters in italics, ending with an ellipsis; a binary cell, or any cell in a masked column, shows the value's size, such as *5.2 MB*. On PostgreSQL, MySQL and MariaDB, a column whose declared size fits under the limit, such as `varchar(255)`, always loads whole. Set the limit with **Large Value Limit**, under **Table Data** on the connection editor's [Advanced](/connections/connection-form#advanced) pane; it is 64 KB until you change it.
 
 The value is read by its primary key when you open the cell, copy it, show its row in the inspector with one row selected, duplicate the row, list the column's values with **Filter Values…**, or export the rows with **Export Results…**. **File > Export** reads every value as before. Set NULL, paste and **Fill Column** read the value first, so undo puts it back. A table without a primary key, a sorted column and a column under a value filter load every value with the page.
 
@@ -126,7 +137,7 @@ Step back with **View > Back** (`Ctrl+Cmd+[`) and **View > Forward** (`Ctrl+Cmd+
 
 ## Inspector
 
-Press `Cmd+Option+I`, or click the button at the trailing end of the toolbar, to open the inspector beside the grid. The table and which row of how many is selected sit under the [pane's header](/features/connection-window#the-trailing-pane), and **Fields** and **JSON** are the two renderings of that row, picked from the header's ellipsis menu. [Cell and Row Viewers](/features/json-viewer) covers both. Turn on **Auto-show inspector on row select** in [Settings > Data](/customization/data-settings) to open it whenever a row is picked, in a query result as well as a table.
+Press `Cmd+Option+I`, or click the button at the trailing end of the toolbar, to open the inspector beside the grid. The table and which row of how many is selected sit under the [pane's header](/features/connection-window#the-trailing-pane), and **Fields** and **JSON** are the two renderings of that row, picked from the header's ellipsis menu. [Cell and Row Viewers](/features/json-viewer) covers both. Turn on **Show inspector when a row is selected** in [Settings > Data](/customization/data-settings) to open it whenever a row is picked, in a query result as well as a table.
 
 Short values sit on one line, label leading and value trailing. Long text, JSON, PHP, binary and images take the full width. Long text and JSON carry a resize handle; PHP, binary and images draw at a fixed height. `Tab` and `Shift+Tab` move between fields; the menu at the trailing edge of each field carries the same values as [Set Value](/features/change-tracking#editing-a-cell): **Set NULL**, **Set DEFAULT**, **Set EMPTY**, **Generate UUID** and **Generate UUIDv7** where the column takes them, and **SQL Functions** with the date and time functions that fit it. `Ctrl+Option+N` and `Ctrl+Option+D` set NULL and DEFAULT. With several rows selected, Generate UUID gives each row its own value. Search filters the list by column name or stored value, and the pencil button narrows it to fields already edited.
 
@@ -150,7 +161,7 @@ Matching runs over the text as displayed and ignores case and accents. The optio
 | `No matches` | Every row is loaded and none match |
 | `Not on this page` | None of the loaded rows match, and more rows exist |
 
-When none of the loaded rows match and more rows exist, **Search All Rows** in the bar turns the term into a filter that runs at the database, covering the whole table. It replaces the tab's filters, so it appears only when none are applied; with a filter set, add the term to the filter bar instead. Cassandra and ScyllaDB cannot match any one of several columns, so it never appears there.
+When none of the loaded rows match and more rows exist, or the page holds [large values](#large-values) still on the server, **Search All Rows** in the bar turns the term into a filter that runs at the database, covering the whole table. It replaces the tab's filters, so it appears only when none are applied; with a filter set, add the term to the filter bar instead. Cassandra and ScyllaDB cannot match any one of several columns, so it never appears there.
 
 In an editable table, select **Replace** in the bar to show the replacement field. **Replace** changes the current match and moves to the next; **Replace All** changes every match in the loaded rows as one step, so one `Cmd+Z` puts all of them back, and the bar says how many cells changed. With a regular expression, `$1` in the replacement inserts the first capture group. Replace works on the stored value, so a match that exists only in a **Display As** form is left alone, and so is a cell you could not type into. Replacements wait in the queue like any edit until you save.
 
@@ -162,7 +173,7 @@ A large table shows an estimated total prefixed with `~` instead of running a sl
 
 Cassandra, ScyllaDB, Bigtable and the Firebase Realtime Database have no estimate, and their count reads every partition or key, so a table there shows no total until you click **Count Exactly**.
 
-A query tab does not page. It stops at the [row cap](/customization/data-settings) instead and offers **Fetch All** to load the rest, and a query carrying its own `LIMIT`, `FETCH FIRST`, or `TOP` is never capped. `Cmd+.` cancels a running query or a Fetch All.
+A query tab does not page, and the Query menu's page commands are unavailable there. It stops at the [row cap](/customization/data-settings) instead and offers **Fetch All** to load the rest, and a query carrying its own `LIMIT`, `FETCH FIRST`, or `TOP` is never capped. `Cmd+.` cancels a running query or a Fetch All.
 
 Some engines cannot skip rows and return a fixed maximum from one query. On those, a table tab shows its leading rows only: First, Previous, Next, Last and **All rows…** are gone, the rows-per-page menu stops at the engine's maximum, and the total is counted only when you click **Count Exactly**. Filter or sort to decide which rows load. [Cloudflare R2 SQL](/databases/cloudflare-r2-sql#pagination) works this way.
 
@@ -241,7 +252,7 @@ Switch between **Data**, **Structure**, **JSON**, **Chart**, **Map**, and **Outp
 
 ### Chart mode
 
-<Info>Needs a [Pro license](/features/licensing).</Info>
+<Info>Needs a [Pro plan](/features/licensing).</Info>
 
 Pick a bar, line, area, or scatter chart, then a numeric Y column. X takes row numbers, another numeric column, a date or timestamp column, or a categorical column; an optional text, boolean, enum, or set column splits the result into series. Date and timestamp columns plot on a real time axis, whatever order the rows arrive in. Hover the plot for exact values.
 
@@ -273,7 +284,7 @@ SQL Server, Oracle, SpatiaLite, Teradata, Trino, Presto, Spanner, Cassandra and 
 
 Double-click a cell, or press `Return` on it, to edit it in place. A value that holds a line break, or runs past 256 characters, opens in a larger editor anchored to the cell instead: `Return` saves, `Option+Enter` starts a new line and `Escape` cancels. `Option+Enter` while editing in the cell moves the text into that editor. In a grid you cannot edit, the same gestures open the value in a viewer. Nothing reaches the database until you save, and [Change Tracking](/features/change-tracking) covers the type-specific editors, the row operations, and what a Save runs.
 
-With the grid focused, `Cmd+=` and `Cmd+-` make its text bigger or smaller. They change the Data Grid Font size in [data settings](/customization/data-settings), so every grid, the inspector and the cell popovers follow, and the size is kept between launches.
+With the grid focused, `Cmd+=` and `Cmd+-` make its text bigger or smaller. They change **Font size** in [data settings](/customization/data-settings#grid), so every grid, the inspector and the cell popovers follow, and the size is kept between launches.
 
 NULL renders as styled `NULL` text. That text, the date format, row height, row numbers, and alternate row backgrounds are [data settings](/customization/data-settings). Every shortcut the grid answers to, and how to rebind it, is in [Keyboard Shortcuts](/features/keyboard-shortcuts).
 

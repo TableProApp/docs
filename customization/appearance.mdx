@@ -3,11 +3,11 @@ title: Appearance
 description: Appearance mode, built-in themes, the Theme Editor, VS Code theme import, theme files, and connection colors
 ---
 
-Three popups at the top of **Settings > Appearance** decide the colors. **Appearance** picks **System** to follow macOS, or **Light** or **Dark**, and applies to this Mac only. **Light theme** and **Dark theme** each hold the theme drawn in that appearance, so setting your dark theme never means leaving Light mode.
+Three controls in **Settings > Appearance** decide the colors. **Appearance** picks **System** to follow macOS, or **Light** or **Dark**, and applies to this Mac only. **Light theme** and **Dark theme**, under **Themes**, each hold the theme drawn in that appearance, so setting your dark theme never means leaving Light mode.
 
-<Frame caption="Custom themes list first, above the built-in ones">
-  <img className="block dark:hidden" src="/images/settings-appearance.png" alt="Appearance pane with the Appearance popup, the Light theme and Dark theme popups, and the Themes list" />
-  <img className="hidden dark:block" src="/images/settings-appearance-dark.png" alt="Appearance pane with the Appearance popup, the Light theme and Dark theme popups, and the Themes list" />
+<Frame caption="Manage Themes opens the theme list">
+  <img className="block dark:hidden" src="/images/settings-appearance.png" alt="Appearance pane with the System, Light and Dark control, the Light theme and Dark theme popups, and the Manage Themes row" />
+  <img className="hidden dark:block" src="/images/settings-appearance-dark.png" alt="Appearance pane with the System, Light and Dark control, the Light theme and Dark theme popups, and the Manage Themes row" />
 </Frame>
 
 Each theme popup lists only the themes made for its appearance: the built-in ones, then yours after a divider. The two theme choices and your custom themes sync between Macs under **Settings** in [iCloud Sync](/features/icloud-sync); **Appearance** does not. When the theme a popup holds cannot be used on this Mac, for example because its file did not load or has not synced yet, the popup shows the theme in use and says why.
@@ -16,13 +16,13 @@ Each theme popup lists only the themes made for its appearance: the built-in one
 
 A theme colors content: the SQL editor and every other code view, the data grid, value viewers and inspector fields, JSON and PHP trees, diffs, record lists such as Server Dashboard sessions, ER diagrams, query plans and charts, and the loading, empty and error states that take a grid's place.
 
-Its window background fills the area behind those panes on every macOS version. On macOS 26 and later it is also the window color of the main window, data file windows, Compare & Sync and value viewers, and the sidebar, inspector, toolbar and title bar take on its tone through the system glass. With **Reduce transparency** on in **System Settings > Accessibility > Display**, that glass turns opaque, so the sidebar and inspector are filled with the window background instead. Before macOS 26 the sidebar, inspector and toolbar keep the system look. The bars along the top and bottom of a pane, such as the filter bar, drop their system material while the theme colors what is behind them, so the theme shows through them.
+Its window background fills the area behind those panes on every macOS version. On macOS 26 and later it is also the window color of the main window, data file windows, Compare & Sync and value viewers, and the sidebar, inspector, toolbar and title bar take on its tone through the system glass. With **Reduce transparency** on in **System Settings > Accessibility > Display**, that glass turns opaque, so the sidebar and inspector are filled with the window background instead. In full screen the toolbar and title bar keep the system look. Before macOS 26 the sidebar, inspector and toolbar keep the system look. The bars along the top and bottom of a pane, such as the filter bar, drop their system material while the theme colors what is behind them, so the theme shows through them.
 
 Controls, Settings, the welcome window, the connection form, sheets and popovers keep the system look and your Accent color. A code field inside one of them, such as **Startup Commands**, **Pre-Connect Script**, a favorite's query or the **Startup SQL** of a connection link, takes the editor colors.
 
 With Increase Contrast on, the window background goes back to the macOS color and the rest of the theme stays.
 
-Fonts are not part of a theme. Editor Font lives in [Editor settings](/customization/editor-settings) and Data Grid Font in [Data settings](/customization/data-settings), and both stay on the Mac you set them on.
+Fonts are not part of a theme. The editor font is under **Font** in [Editor settings](/customization/editor-settings#font) and the grid font under **Grid** in [Data settings](/customization/data-settings#grid), and both stay on the Mac you set them on.
 
 ## Built-in themes
 
@@ -44,27 +44,27 @@ The other themes keep their projects' own colors and set a **Values** color for 
 
 ## Managing themes
 
-**Themes** lists every theme on this Mac in up to three groups: **Custom**, then **Not Loaded** when a file in the themes folder could not be read, then **Built-in**. Each row names the theme and whether it is Light or Dark.
+Click **Manage Themes**, under **Themes** in **Settings > Appearance**, for the list of every theme on this Mac. It has up to three groups: **Custom**, then **Couldn't Load** when a file in the themes folder could not be read, then **Built-in**. Each row names the theme and whether it is Light or Dark, and the two themes the popups hold read **Light, in use** and **Dark, in use**.
 
 | Task | How |
 |------|-----|
 | Start a theme | Click **+**, choose **New Theme Based On**, and pick any theme. The copy opens in the Theme Editor |
 | Copy a theme | Right-click it and choose **Duplicate**. The copy takes the name with "Copy" added |
-| Edit a theme | Double-click it, press Return, or choose **Edit…** from the **...** menu. A built-in theme opens read-only |
+| Edit a theme | Double-click it, press Return, or choose **Edit…** from the **...** menu. For a built-in theme the item is **Show in Theme Editor**, and the theme opens read-only |
 | Rename a custom theme | Right-click it, choose **Rename**, type the new name and press Return. A name another theme already has is refused in the field |
 | Import | Click **+** and choose **Import…**, or drag one or more `.json` files onto the list. TablePro themes and [VS Code color themes](#importing-a-vs-code-theme) both work |
 | Export | Choose **Export…**, or drag the row to a Finder window for a `.json` copy. Built-in themes export too |
 | Use a theme | Right-click it and choose **Use for Light Appearance** or **Use for Dark Appearance** |
 | Remove a custom theme | Select it and click **-**, press Delete, or right-click it and choose **Move to Trash** |
-| Find the file | Choose **Show in Finder** |
+| Find the file | Choose **Show in Finder**. **Show Themes Folder in Finder**, at the end of the **...** menu or on a right-click in empty space, opens the folder |
 
 A right-click menu shows only what applies to that row. The **...** menu under the list acts on the selected row and dims what does not apply.
 
-**Move to Trash** moves the file to the macOS Trash. It asks first only when the theme is your **Light theme** or **Dark theme**, and that popup then goes back to Default Light or Default Dark. Press `Cmd+Z` with Settings in front to bring the theme back, popup choice included. New themes, duplicates, imports and renames undo the same way.
+**Move to Trash** moves the file to the macOS Trash. It asks first only when the theme is your **Light theme** or **Dark theme**, and that popup then goes back to Default Light or Default Dark. Press `Cmd+Z` with Settings in front, on any pane, to bring the theme back, popup choice included. New themes, duplicates, imports and renames undo the same way.
 
 An imported theme whose name is taken gets a number: a second Midnight imports as Midnight 2. When some files in an import fail, one alert lists each with its reason.
 
-A file under **Not Loaded** shows the reason it was refused. Right-click it to choose **Show in Finder**, **Try Again** or **Move to Trash**. TablePro watches the themes folder, so a file you add, fix or remove in Finder or another editor loads as soon as it is saved.
+A file under **Couldn't Load** shows the reason it was refused. Right-click it to choose **Show in Finder**, **Try Again** or **Move to Trash**. TablePro watches the themes folder, so a file you add, fix or remove in Finder or another editor loads as soon as it is saved.
 
 ## Editing a theme
 
@@ -72,7 +72,7 @@ Each theme opens in a Theme Editor window of its own, titled with the theme's na
 
 <Steps>
   <Step title="Open the theme">
-    Double-click a custom theme in **Themes**. For a built-in theme, open it and click **Duplicate** in its window: the copy opens editable in its place.
+    Double-click a custom theme in **Manage Themes**. For a built-in theme, open it and click **Duplicate** in its window: the copy opens editable in its place.
   </Step>
   <Step title="Change colors">
     Click a color well and pick a color. The preview at the top of the window repaints, and so does every window drawing with this theme.
@@ -82,7 +82,7 @@ Each theme opens in a Theme Editor window of its own, titled with the theme's na
   </Step>
 </Steps>
 
-The preview is the real SQL editor and data grid over sample content, drawn in the theme's own appearance, so a dark theme previews dark on a light Mac. It shows the current line and statement, a selection, invisibles, alternate rows, NULL, booleans, a value of every type **Values** colors, and a modified, an inserted and a deleted row.
+The preview is the real SQL editor and data grid over sample content, drawn in the theme's own appearance, so a dark theme previews dark on a light Mac. It shows the current line and statement, a selection and a selected row in the colors a focused editor and grid draw, invisibles, alternate rows, NULL, booleans, a value of every type **Values** colors, and a modified, an inserted and a deleted row.
 
 Under it, **General** holds the theme's name, its appearance (Light or Dark) and its author. The colors follow in **Window**, **Editor**, **Syntax**, **Data Grid**, **Values**, **Selection** and **Changes**.
 
@@ -119,7 +119,7 @@ If the file changes outside TablePro while its window is open, the window takes 
 
 ## Importing a VS Code theme
 
-A VS Code color theme imports like any other theme file, from **Import…** or by dropping its `.json` file on **Themes**. The import is saved as a TablePro theme; the VS Code file is not kept or read again. Themes installed in VS Code sit under `~/.vscode/extensions/`, one folder per extension, usually in its `themes` folder.
+A VS Code color theme imports like any other theme file, from **Import…** or by dropping its `.json` file on the **Manage Themes** list. The import is saved as a TablePro theme; the VS Code file is not kept or read again. Themes installed in VS Code sit under `~/.vscode/extensions/`, one folder per extension, usually in its `themes` folder.
 
 ### What carries over
 
@@ -196,7 +196,7 @@ A color is sRGB hex, `#RRGGBB`, or `#RRGGBBAA` for a translucent wash such as a 
 
 ### Files that do not load
 
-A file in the themes folder that breaks one of these is listed under **Not Loaded** with the reason, and a JSON error names the line and column:
+A file in the themes folder that breaks one of these is listed under **Couldn't Load** with the reason, and a JSON error names the line and column:
 
 - It is not plain JSON. Comments are refused here; a VS Code theme goes through **Import…** instead.
 - It has no `schema`, or a `schema` other than `3` or `4`. A theme file from TablePro 0.80 or earlier needs to be made again.
@@ -206,7 +206,7 @@ A file in the themes folder that breaks one of these is listed under **Not Loade
 
 ## Connection colors
 
-Assign one with **Color** on the connection form's **Appearance** tab: None, Red, Orange, Yellow, Green, Blue, Purple, Pink, or Gray. With None, no color cue appears. Connection groups take a color the same way, from their right-click menu on the welcome window.
+Assign one with **Color** on the connection editor's **Appearance** pane: None, Red, Orange, Yellow, Green, Blue, Purple, Pink, or Gray. With None, no color cue appears. Connection groups take a color the same way, from their right-click menu on the welcome window.
 
 The connections strip, the welcome window list and the connection switcher draw the database icon on a rounded tile, and the color fills the tile, the selected row included. The engine's symbol on it turns white or black, whichever reads on that color. With None the tile is gray and the symbol keeps its engine's own color. In the query history drawer the color tints the network symbol beside the connection's name. On the strip, the color's name is in the entry's tooltip and its VoiceOver label.
 
