@@ -494,7 +494,10 @@
               "windows/links",
               "windows/settings",
               "windows/keyboard-shortcuts",
-              "windows/account"
+              "windows/account",
+              "windows/sync",
+              "windows/end-to-end-encryption",
+              "windows/team-library"
             ]
           }
         ]

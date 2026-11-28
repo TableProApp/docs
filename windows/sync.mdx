@@ -1,0 +1,80 @@
+---
+title: TablePro Sync
+description: Keep connections, saved queries and favorites the same on every Windows computer and Mac signed in to your TablePro account
+---
+
+TablePro Sync carries your connections, saved queries and favorites through your [TablePro account](/windows/account). Passwords, other secrets and query history are end-to-end encrypted on this computer before they leave it. It needs a plan that includes TablePro Sync; see [Licensing](/features/licensing#features-by-plan).
+
+## Turn on TablePro Sync
+
+<Steps>
+  <Step title="Open Settings">
+    Choose **Settings** in the **File** menu. **Sync** follows **Account**.
+  </Step>
+  <Step title="Choose TablePro Sync">
+    Set **Sync this computer with** to **TablePro Sync**. Signed out, or on a plan without it, a dialog says **TablePro Sync needs a paid plan**, with **Sign in...** or **Buy a license**, and the choice stays **Off**.
+  </Step>
+  <Step title="Check what goes up">
+    **Upload to TablePro Sync** counts the items that go up, the passwords encrypted for TablePro Sync, and what stays on this computer: Local only and sample connections, and the categories you turned off. Click **Upload**.
+  </Step>
+</Steps>
+
+The first computer on your account sets up a recovery key before anything goes up, and every other computer is approved by one that already syncs. The upload dialog opens the step this computer needs, then comes back. See [End-to-end encryption](/windows/end-to-end-encryption).
+
+<Check>
+**Status** says **Up to date**, with **Last synced** and **Sync now**.
+</Check>
+
+<Frame caption="Sync in Settings, off and before the first upload">
+  <img className="block dark:hidden" src="/images/windows-settings-sync.png" alt="Sync section of Settings with Sync this computer with set to Off" />
+  <img className="hidden dark:block" src="/images/windows-settings-sync-dark.png" alt="Sync section of Settings with Sync this computer with set to Off" />
+</Frame>
+
+## What syncs
+
+Expand **What syncs** to choose. The switches apply before the first upload too.
+
+| Switch | What it carries |
+|---|---|
+| Connections | Every connection not set to Local only, with its project and the SSH and credential profiles it uses |
+| Passwords | The connections' passwords and other secrets, end-to-end encrypted. On from the start, and off whenever **Connections** is off. Each computer also keeps its own copy |
+| Groups and tags | The groups and tags your connections sit in |
+| Saved queries | Saved queries and their folders |
+| Table favorites | Marked tables and the table folders around them |
+| Database favorites | Marked databases |
+
+Query history syncs end-to-end encrypted, up to **Maximum runs** under **Query history** in Settings. Settings themselves stay on each computer.
+
+A sync runs when TablePro comes to the front, when the network comes back, and on its own every so often. **Sync now** runs one at once.
+
+## Status
+
+| Status | What it means |
+|---|---|
+| Up to date | The last sync finished |
+| Syncing... | A sync is running |
+| Waiting to retry | The last sync failed, and the reason shows under it. It tries again on its own |
+| Downloading only | Your plan or your server takes no changes for now; this computer keeps its own until it does |
+| Changes need approval | Changes from another device wait for approval on this computer, counted under it. See [Not on Windows yet](#not-on-windows-yet) |
+| Waiting for approval | Approve this computer from another device, or use your recovery key |
+| Recovery key needed | Set up your account's recovery key first |
+| Locked | This computer can't read your account's keys. The reason and the way back show under it |
+| Sync is unavailable | The reason shows under it |
+
+## Signed in to another account
+
+When this computer syncs with another account or server than before, nothing goes up until you choose. **Move my data** brings this computer's data into the account it now syncs with. **Start empty** takes what that account already holds instead. The note also counts the changes the earlier account never received.
+
+## Your server's settings
+
+A company server can turn off personal data, passwords or query history. Each one shows as a note under **Sync this computer with**, and what it turns off stays on this computer.
+
+## Turn sync off
+
+Set **Sync this computer with** to **Off**. Your connections and saved queries stay on this computer and stop syncing. [Team Library](/windows/team-library) and your account's keys go on syncing. Choosing **TablePro Sync** again opens the upload dialog.
+
+## Not on Windows yet
+
+- **Reviewing changes from another device.** A changed host, sign-in, SSH tunnel or SSL setting, a lower Safe Mode, startup commands, and a new connection made elsewhere wait for approval on each device. Windows has no review for them yet: **Status** says **Changes need approval** with the count, and this computer keeps its own values until it gets one.
+- **SSH and credential profile secrets.** The profiles sync with their connections, but their passwords, key passphrases and TOTP secrets stay on the device that saved them, so a connection that signs in through one has no stored password here.
+- **Local only.** Windows has no switch to mark a connection Local only.
