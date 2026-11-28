@@ -12,19 +12,25 @@ You need iOS 18 or later. Builds ship on their own schedule, so a feature in a M
 
 ## First launch
 
-A welcome sheet lists what the app does. **Continue** leads to at most two questions, each asked once:
+With no saved connections, the first launch opens on **Welcome to TablePro**, the setup guide. Pick one way in, or tap **Skip**:
+
+| Row | Does |
+| --- | --- |
+| **Turn On iCloud Sync** | Brings down the connections from TablePro on your Mac. Shown while sync is off |
+| **Import Connections** | Imports a `.tablepro` file from AirDrop, Files or Mail |
+| **Add Connection** | Opens a new connection's form |
+| **Open Sample Database** | Opens the [sample database](#the-sample-database) |
+
+Connections saved in another database app come over through the Mac: [import them there](/switching), then turn on iCloud Sync on both. The page shows once per device, and **More > Setup Guide** on the connection list opens it again.
+
+After it come at most two questions, each asked once:
 
 | Question | Shown when | If you swipe the sheet away |
 | --- | --- | --- |
-| **Sync with iCloud** | The device is signed in to iCloud | Sync stays off |
+| **Sync with iCloud** | The device is signed in to iCloud, and **Turn On iCloud Sync** was not picked | Sync stays off |
 | **Share Usage Data?** | Until you answer it | Nothing is sent |
 
 Both answers can change later, under **Settings > iCloud** and **Settings > Privacy**. After an update, a **What's New** sheet lists what changed, once per version.
-
-<Frame caption="Swipe the sheet down to skip both questions">
-  <img className="block dark:hidden" src="/images/ios-first-run.png" alt="Welcome to TablePro sheet with four feature rows and a Continue button" />
-  <img className="hidden dark:block" src="/images/ios-first-run-dark.png" alt="Welcome to TablePro sheet with four feature rows and a Continue button" />
-</Frame>
 
 ## Supported databases
 
@@ -58,7 +64,7 @@ Cassandra, BigQuery, Spanner, Snowflake and the rest have no iOS driver. Their c
 
 ## The connection list
 
-Favorites come first, then **Recent** with the five connections opened last, then your groups, nested the way the Mac nests them. The **More** menu holds **Sort By** (**Manual**, **Name**, **Database Type**, **Last Connected**), **New Group**, **Manage Tags**, **Manage Projects…**, **Open Sample Database**, and import and export. Type a tag's name in the search field to filter by it; with two tags or more chosen, **Match All Tags** appears in the **More** menu.
+Favorites come first, then **Recent** with the five connections opened last, then your groups, nested the way the Mac nests them. The **More** menu holds **Sort By** (**Manual**, **Name**, **Database Type**, **Last Connected**), **New Group**, **Manage Tags**, **Manage Projects…**, **Open Sample Database**, **Setup Guide**, and import and export. Type a tag's name in the search field to filter by it; with two tags or more chosen, **Match All Tags** appears in the **More** menu.
 
 | To | Do this |
 | --- | --- |
@@ -123,6 +129,33 @@ Picking a SQLite file copies it into the app, and edits go to that copy, so the 
 </Warning>
 
 A database created with **Create New Database**, or copied in by picking it, stays with its connection through an app update and a restore from backup. A file that is gone is reported as unavailable, and so is a file connection synced from another iPhone or iPad; the connection never opens an empty database, or a file of the same name on this device, in its place.
+
+## TablePro account
+
+Sign in under **Settings > TablePro Account** to see your account and its devices on this iPhone or iPad. Nothing here needs it: every feature on this page works signed out.
+
+**Sign In** opens the sign-in page in a sheet over the app, the same page the Mac uses. **Server** picks where you sign in: tablepro.app, or your organization's own TablePro server by its https address, such as `https://tablepro.example.com`. Change it while signed out. **Devices** lists every device signed in to the account; swipe left on another one to remove it, which signs it out and frees its place. When your plan's devices are all in use, the account says so, and removing one in **Devices** lets this device in. **Sign Out** asks first.
+
+<Frame caption="Signed in to an organization's own TablePro server">
+  <img className="block dark:hidden" src="/images/ios-account.png" alt="Settings with a TablePro Account section showing the signed-in name and email, the server tablepro.example.com, Devices and Sign Out" />
+  <img className="hidden dark:block" src="/images/ios-account-dark.png" alt="Settings with a TablePro Account section showing the signed-in name and email, the server tablepro.example.com, Devices and Sign Out" />
+</Frame>
+
+The sign-in and the device's ID stay on this device: they never sync, and a backup restored onto another iPhone or iPad starts it signed out.
+
+### Managed configuration
+
+An organization that manages its devices sets these keys in the app's managed configuration, in the `com.apple.configuration.managed` dictionary its MDM writes. A key of another type is ignored.
+
+| Key | Type | Effect |
+| --- | --- | --- |
+| `AccountServerURL` | string | The organization's TablePro server, the default under **Server** |
+| `AllowOtherAccountServers` | boolean | `false` with `AccountServerURL` keeps the account on that server: **Server** is locked |
+| `PersonalSyncProvider` | list of strings | The sync providers this device may use: `off` and `icloud` here. One entry forces it and locks **iCloud Sync**; an empty list keeps sync off |
+| `ICloudSyncAllowed` | boolean | `false` turns iCloud Sync off and locks the switch, and saves new passwords on this device only |
+| `UsageDataAllowed` | boolean | `false` turns **Share Usage Data** off and locks the switch |
+
+First launch skips a question a key answers. A change the MDM pushes applies while the app runs, and the account stops using a server the new values no longer allow.
 
 ## IAM sign-in
 

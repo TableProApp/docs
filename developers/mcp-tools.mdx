@@ -10,7 +10,7 @@ If a dedicated tool covers the job, it beats hand-written SQL. It quotes identif
 In the tables below, required arguments come first and optional ones follow in parentheses. Unless a row says otherwise:
 
 - `connection_id` is a connection UUID from `list_connections`.
-- `database` and `schema` default to whatever the connection is currently browsing, except that `search_schema` without `schema` looks in every schema. Passing them targets somewhere else **without moving the app's selection**.
+- `database` and `schema` default to whatever the connection is currently browsing, except that `search_schema` without `schema` looks in every schema. Passing them targets somewhere else **without moving the app's selection**. A connection that cannot switch databases (SQLite, Oracle, BigQuery and others) takes `database` only when it names the database the driver reports it reached, and otherwise refuses the call rather than running it where it already is. A driver that reports none, such as Oracle or Cloudflare D1, refuses any `database`, and its approvals name the connection only. Tools that run your SQL on an engine without schemas (MySQL, MariaDB, SQLite) refuse any `schema`; on SQLite the metadata tools still take an attached database as `schema`. On SQL Server, Spanner, Cloudflare R2 SQL and Neo4j a schema switch does not change where names in your SQL resolve, so `execute_query`, `confirm_destructive_operation`, `explain_query` and `export_data` refuse any `schema` there, even the one the connection is browsing: leave it out and qualify the names in the SQL. Approvals on those engines name the database only. The metadata tools still take a schema. On an engine that switches databases, a call that names no `database` runs where the connection's driver is; after SQL that may have switched it (a `USE`, `EXECUTE`, `CALL` or `EXEC`, or anything TablePro cannot read), such a call is refused until it names one.
 - An unknown argument is rejected with `-32602`. There is no silent ignoring.
 - The result comes back twice: as JSON text in `content[0]`, and as a typed object in `structuredContent`. Read `structuredContent`.
 - Timestamps are ISO 8601, error text is redacted, and "a result set" means `columns[]`, `rows[][]`, `row_count`, `rows_affected`, `execution_time_ms`, `is_truncated`, plus `status_message`, `notes`, `database` and `schema` when they apply.
@@ -98,7 +98,7 @@ To read a value that was cut, select part of it with a narrower query. To get mo
 | `switch_database` | `connection_id`, `database` | `status` (`switched`), `connection_id`, `current_database` |
 | `switch_schema` | `connection_id`, `schema` | `status` (`switched`), `connection_id`, `current_schema` |
 
-`switch_database` and `switch_schema` move what the user sees: the sidebar, and the tab strip, which lists the tabs of the database or schema the connection is on. The user's other tabs stay open under their own database.
+`switch_database` and `switch_schema` move what the user sees: the sidebar, and the tab strip, which lists the tabs of the database or schema the connection is on. The user's other tabs stay open under their own database. A connection that reaches only its own database, such as SQLite or Oracle, refuses `switch_database` with an invalid-argument error and stays where it is.
 
 `list_connections` omits connections blocked for external clients, connections whose AI policy is **Never**, connections outside the token's allowlist, and connections outside [the active project](#the-active-project). Its `database` is the session's browsed database when connected, the saved default otherwise.
 
@@ -119,7 +119,7 @@ A launcher that shows the user their connections passes `purpose: "display"`. Le
 `purpose: "display"` needs two things, or it fails with `-33007` and `data.requiredScopes` set to `["connections:display"]`:
 
 - a token issued with the `connections:display` scope, which only [pairing](/developers/pairing#scopes) grants;
-- **Allow apps to list connections hidden from AI** turned on under **Settings > MCP > Connection Access**. Turning it off stops every token at once.
+- **Allow apps to list connections hidden from AI** turned on under **Access** in **Settings > MCP**. Turning it off stops every token at once.
 
 The display list adds connections whose AI policy is **Never**. Blocked connections and connections outside the token's allowlist stay out. Each entry has `id`, `name`, `type`, `host`, `port`, `database`, `is_connected`, `tags`, `color`, `group` and `username`, and no `ai_policy`, `external_access` or `safe_mode`.
 
@@ -217,7 +217,7 @@ A batch that raises an error fails the call with the server's message and line n
 
 ### `explain_query`
 
-Pass the query with no `EXPLAIN` prefix. Without `variant` the engine's first variant runs, and every result lists them in `available_variants[]`. `analyze: true` picks the variant that runs the statement, so an analyzed write needs `tools:write` and Safe Mode approval, and it is refused when the engine has no such variant or the `variant` you pass only estimates. An analyzed write goes into query history the way an `execute_query` write does. An engine missing from the [support table](/features/explain-visualization#database-support) is refused.
+Pass the query with no `EXPLAIN` prefix. Without `variant` the engine's first variant runs, and every result lists them in `available_variants[]`. `analyze: true` picks the variant that runs the statement, so an analyzed write needs `tools:write` and Safe Mode approval, and it is refused when the engine has no such variant or the `variant` you pass only estimates. Under **Manual Commit** an analyzed write stays in the connection's open transaction until the user commits it, and `status_message` says so. An analyzed write goes into query history the way an `execute_query` write does. An engine missing from the [support table](/features/explain-visualization#database-support) is refused.
 
 `plan_text` and the plan rows share one answer, `plan_text` first. `is_truncated` appears, set to true, only when the [size limit](#answer-size) left plan rows out.
 
@@ -257,7 +257,7 @@ On Redis the three actions are `MULTI`, `EXEC` and `DISCARD`. Every command betw
 
 `create_database` takes `options` as a flat object of string values drawn from `describe_create_database_options`, and asks the user before it runs. `drop_database_object` takes `kind` as `database` or `schema`, deletes everything inside, cannot be undone, and is approved first.
 
-`run_maintenance` takes an `operation` name from `list_maintenance_operations` (`VACUUM`, `ANALYZE`, `OPTIMIZE` and whatever else the engine supports) and omits `table` for the whole database. TablePro generates the statements and runs them in order, asking for approval before each one.
+`run_maintenance` takes an `operation` name from `list_maintenance_operations` (`VACUUM`, `ANALYZE`, `OPTIMIZE` and whatever else the engine supports) and omits `table` for the whole database. TablePro generates the statements and runs them in order, with one approval listing all of them. A `schema` without `table` is refused when the engine has no form for one schema alone (REINDEX on SQLite; VACUUM, ANALYZE and REINDEX on PostgreSQL): pass `table`.
 
 <Info>
 `describe_create_database_options`, `list_maintenance_operations` and `list_session_contexts` answer `is_supported: false` on an engine that has no such concept rather than failing, and `list_partitions` answers with an empty list. Everything else that an engine cannot do comes back as an `unsupported` tool error.

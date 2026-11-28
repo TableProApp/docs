@@ -14,7 +14,7 @@ The tenant goes in the user name: `root@test` on an observer's port 2881, `root@
 | **Database** | empty | Optional. Leave it empty and open one in the tenant with `Cmd+K` |
 | **SSL Mode** | Preferred | TLS first, plain text if the server refuses |
 
-**Release the Server Connection After** is on the Options tab. AWS IAM, Cloud SQL Auth Proxy and Unix socket are not offered; reach a private cluster through an [SSH tunnel](/connections/ssh-tunneling).
+**Release the Server Connection After** is on the **Advanced** pane. AWS IAM, Cloud SQL Auth Proxy and Unix socket are not offered; reach a private cluster through an [SSH tunnel](/connections/ssh-tunneling).
 
 ## Connection URL
 
@@ -29,7 +29,7 @@ Write the `@` in the user name as `%40` and the `#` as `%23`. `oceanbase+ssh://`
 
 - Connecting reads `@@version_comment`. A server that does not answer with `OceanBase` and a version number there is refused, so a wrong host or port fails at connect.
 - The sidebar hides `information_schema`, `mysql`, `oceanbase`, `SYS`, `LBACSYS` and `ORAAUDITOR`. A tenant's `test` database stays listed.
-- The [query timeout](/customization/general-settings#query-timeout) replaces OceanBase's own 10 second statement limit, and **No limit** removes it.
+- The [query timeout](/customization/connection-settings#query-timeout) replaces OceanBase's own 10 second statement limit, and **No limit** removes it.
 - CHECK constraints appear in the Structure tab on OceanBase 4.0 and later. Adding one from the Structure tab is not offered.
 - Triggers appear in the Structure tab. Adding one from there is not offered.
 - `EXPLAIN` shows the plan as text. `EXPLAIN FORMAT=JSON` and `EXPLAIN ANALYZE` are not offered.

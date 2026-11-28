@@ -3,7 +3,7 @@ title: Keyboard Shortcuts
 description: Every keyboard shortcut in TablePro, plus how to rebind them in Settings > Keyboard
 ---
 
-Focus decides what a key does: `Cmd+[` outdents in the SQL editor and pages back in the data grid, and neither one shadows the other. Everything here is the shipped default, and most of it is rebindable in **Settings > Keyboard**.
+Focus decides what a key does: `Cmd+[` outdents in the SQL editor and pages back in the data grid, and neither one shadows the other. Everything here is the shipped default, and most of it is rebindable in **Settings > Keyboard**, one key at a time or all at once with [another app's keys](#shortcuts-from-another-app).
 
 ## Same key, different pane
 
@@ -125,6 +125,7 @@ Every row except the five find rows is built into the editor and cannot be rebou
 | Delete selected rows | `Delete`, `Forward Delete` or `Cmd+Delete` |
 | Truncate table (tables selected in the sidebar) | `Option+Delete` |
 | Preview FK reference | `Space` |
+| Open Value Editor | `Option+Enter` |
 | Include or leave out the selected rows (Compare & Sync) | `Space` |
 | Commit changes | `Cmd+S` |
 | Discard changes (**File > Discard Changes…**) | none |
@@ -356,22 +357,32 @@ Choose Vim or Emacs under **Settings > Editor > Key bindings**. Either applies o
 
 ## Customizing shortcuts
 
-Open **Settings > Keyboard** (`Cmd+,`). Each action has a recorder field: click it and press the new combination, and the menu bar updates immediately. Actions are listed under their own names there: the sidebar toggle is Toggle Table Browser. Filter with the search field, press `Delete` in a recorder field to clear a binding, click the curved-arrow button beside a changed shortcut to restore that one, or **Reset to Defaults** to restore all after a confirmation.
+Open **Settings > Keyboard** (`Cmd+,`). Each action has a shortcut button: click it, or select the row and press `Return`, then press the new combination, and the menu bar updates immediately. `Escape` cancels and `Delete` clears the binding. Actions are listed under their own names there: the sidebar toggle is Toggle Table Browser. Filter with the search field in the toolbar (`Cmd+F`), click the curved-arrow button beside a changed shortcut to restore that one, or click **Restore Defaults** under the list to restore all after a confirmation. Right-click a row for **Record Shortcut**, **Remove Shortcut** and **Reset to Default**.
 
-Some actions ship with no default and show as unassigned. That is a command waiting for a binding, not one you cleared, and **Reset to Defaults** leaves it unassigned.
+Some actions ship with no default and show as unassigned. That is a command waiting for a binding, not one you cleared, and **Restore Defaults** leaves it unassigned.
 
 <Frame caption="Keyboard shortcut customization">
-  <img className="block dark:hidden" src="/images/settings-keyboard.png" alt="Keyboard settings" />
-  <img className="hidden dark:block" src="/images/settings-keyboard-dark.png" alt="Keyboard settings" />
+  <img className="block dark:hidden" src="/images/settings-keyboard.png" alt="Keyboard pane listing actions by category, each with its shortcut button, and Restore Defaults under the list" />
+  <img className="hidden dark:block" src="/images/settings-keyboard-dark.png" alt="Keyboard pane listing actions by category, each with its shortcut button, and Restore Defaults under the list" />
 </Frame>
 
-A combination already taken by another action in the same context raises a dialog naming it: **Cancel** keeps the existing assignment, **Reassign** moves the shortcut and clears it from the other action. Editor and grid actions can share a key without conflict.
+A combination already taken by another action in the same context raises a dialog naming every action that holds it: **Cancel** keeps the existing assignment, **Reassign** moves the shortcut and clears it from the others. Editor and grid actions can share a key without conflict.
 
-Menu actions need `Cmd` or `Ctrl`, with `Option` and `Shift` available alongside them but not on their own; function keys `F1` through `F12` work bare, as do grid actions that read the key directly, like Preview FK Reference (`Space`).
+Menu actions need `Cmd` or `Ctrl`, with `Option` and `Shift` available alongside them but not on their own; function keys `F1` through `F12` work bare, as do grid actions that read the key directly, like Preview FK Reference (`Space`). Open Value Editor (`Option+Enter`) is read by the grid too, so its menu item shows no key and the combination still breaks a line while you type in a cell.
 
 <Info>
-Some shortcuts cannot be reassigned: editor built-ins such as `Cmd+/`, tab selection (`Cmd+1` through `Cmd+9`), zoom (`Cmd+=`, `Cmd+-`), and macOS system shortcuts, which are read live from System Settings. The recorder warns if you try.
+Some shortcuts cannot be reassigned: editor built-ins such as `Cmd+/`, tab selection (`Cmd+1` through `Cmd+9`), zoom (`Cmd+=`, `Cmd+-`), and macOS system shortcuts, which are read live from System Settings. Try one and the row says why under it, with a beep, and keeps recording.
 </Info>
+
+## Shortcuts from another app
+
+**Use Shortcuts From**, beside **Restore Defaults** under the list, sets the keys of the app you used before: TablePlus, Sequel Ace, DBeaver, DataGrip, Beekeeper Studio, Navicat or DBX. The [setup guide](/quickstart#the-setup-guide) offers the same list under **Shortcuts** in its last step, with the app you imported from first.
+
+- The preset is copied into your shortcuts once, over TablePro's defaults. Every row stays editable, and the summary under the list names the preset while your keys still match it.
+- A preset key wins. The TablePro command that held it is left with no key; record a new one on its row to get it back.
+- Shortcuts you changed by hand are replaced. A dialog counts them and asks first.
+- **Restore Defaults**, or **TablePro** in the same menu, puts every default back.
+- No preset moves `Cmd+C`, `Cmd+V`, `Cmd+X`, `Cmd+Z` or `Cmd+A`. Every preset key holds a modifier or is a function key, and a key the recorder refuses, such as an editor built-in or a macOS system shortcut, is skipped.
 
 ## Outside the app
 

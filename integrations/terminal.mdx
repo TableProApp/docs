@@ -19,13 +19,13 @@ With the app in `/Applications`, run this line in Terminal:
 sudo mkdir -p '/usr/local/bin' && sudo rm -f '/usr/local/bin/tablepro' && sudo ln -s '/Applications/TablePro.app/Contents/SharedSupport/bin/tablepro' '/usr/local/bin/tablepro'
 ```
 
-For a different location, copy the line from **Settings > General > Command Line**. It links `/usr/local/bin/tablepro` to the command inside that copy of the app. Enter your administrator password in Terminal when `sudo` asks.
+For a different location, copy the line from **Settings > General > Command Line Tool**. It links `/usr/local/bin/tablepro` to the command inside that copy of the app. Enter your administrator password in Terminal when `sudo` asks.
 
 A copy on a read-only volume, including a mounted disk image or an App Translocation location, offers no install line. Move the app to Applications and open it there first.
 
-<Frame caption="Copy the install or removal command from Settings > General">
-  <img className="block dark:hidden" src="/images/command-line-link.png" alt="Command Line settings showing the link status and a Terminal command" />
-  <img className="hidden dark:block" src="/images/command-line-link-dark.png" alt="Command Line settings showing the link status and a Terminal command" />
+<Frame caption="Copy the install or removal command from Settings > General > Command Line Tool">
+  <img className="block dark:hidden" src="/images/command-line-link.png" alt="Command Line Tool page showing the link status and a Terminal command" />
+  <img className="hidden dark:block" src="/images/command-line-link-dark.png" alt="Command Line Tool page showing the link status and a Terminal command" />
 </Frame>
 
 App updates also update the command. If you move the app, recreate the link. To remove the link:
@@ -55,7 +55,7 @@ Use any [connection URL](/connections/urls) or [tablepro link](/developers/url-s
 
 ## Run a query
 
-Turn on **Settings > MCP > Enable MCP Server** and [pair the command](#status-and-pairing) before running scripts.
+Turn on **MCP server** in **Settings > MCP** and [pair the command](#status-and-pairing) before running scripts.
 
 ```bash
 tablepro query -c Staging "SELECT id, email FROM users LIMIT 5"
@@ -120,7 +120,7 @@ An unattended command with no token exits 3. A rejected or expired token is remo
 
 When TablePro cannot issue the token after you approve, the browser tab says it could not finish pairing, TablePro shows why, and the command exits 1. Run `tablepro pair` again once the cause is fixed.
 
-`tablepro unpair` revokes the token and removes its Keychain copy. If the server cannot be reached, only the local copy is removed; revoke the remaining token in **Settings > MCP > Authentication**. If the server reports that it could not save the revocation, the local token stays for another attempt. These failures exit 1.
+`tablepro unpair` revokes the token and removes its Keychain copy. If the server cannot be reached, only the local copy is removed; revoke the remaining token in **Settings > MCP > Tokens**. If the server reports that it could not save the revocation, the local token stays for another attempt. These failures exit 1.
 
 ## Shell completion
 
@@ -187,4 +187,4 @@ For a local connection without a filter, an SSH tunnel, an SSH profile, a SOCKS 
   <img className="hidden dark:block" src="/images/link-trust-alert-dark.png" alt="External connection alert showing the target database and approval buttons" />
 </Frame>
 
-Remove a grant with **Forget** or **Forget All** under **Settings > General > Trusted Links**. A trusted link still asks before applying a filter (`query`, `condition` or `raw`) or running a pre-connect script.
+Remove a grant with **Forget**, or every grant with **Forget All**, in **Settings > Connections > Trusted Links**. A trusted link still asks before applying a filter (`query`, `condition` or `raw`) or running a pre-connect script.

@@ -1,0 +1,165 @@
+---
+title: License and upkeep
+description: Install, check and renew the self-hosted server's license, upgrade it one release at a time, back it up and restore it, and the log events to alert on
+---
+
+Server commands on this page, such as `license install`, run in a one-off container. [Docker Compose](/self-hosted/docker-compose#run-a-command) and [AWS Fargate](/self-hosted/aws#run-a-command) show how on each platform.
+
+## License
+
+The license file is one signed line of text that TablePro issues for your API address. It sets the seats, the features and the end of the license, and every seat includes Pro on the Mac. A staging server needs a file of its own for its own address.
+
+`license install <file>`, or `license install -` to read the file from standard input, checks the file and installs it in place of the one installed. It refuses a file that:
+
+- was not signed by TablePro, or names another address than `https://` plus `API_HOST`;
+- is past its grace;
+- is older than the installed file of the same license;
+- is perpetual, and its maintenance ended before this release.
+
+`license status` prints the license and file IDs, the type, the seats, the end and the grace, or a perpetual file's end of maintenance, the address, the features and the state, then `seats taken: <taken> of <seats>`. With no file installed, it prints `no license: no license is installed`.
+
+### Renew
+
+A renewal, or a change of seats, is a new file of the same license. Sign in at [account.tablepro.app](https://account.tablepro.app) with the email address you paid with: **Billing** lists your licenses under **Self-hosted licenses**, each with **Download**, and an email tells you when a new file is there. Install it as above, or let the server fetch it. A file with fewer seats than are taken keeps everyone who has one, and no one new signs in until enough seats are freed under [Remove someone](/self-hosted/roles#remove-someone).
+
+To fetch renewals, set `LICENSE_RENEWAL=on`. It is off by default, and with it off the server makes no call to tablepro.app. Once a day, and at each start, the server asks `https://api.tablepro.app/v2/licenses/latest` for the newest file of its license. The first fetch runs about a minute after the server starts. It sends the installed file and nothing else: no seat count, usage or version.
+
+- The server fetches renewals only from a file tablepro.app issued through **Billing**. An evaluation file fetches nothing: install the first file from **Billing** by hand, and the server fetches from then on. Until then, each try logs `license renewal failed`.
+- It installs the answer only when it is a later file of the same license for the same address, after the checks `license install` makes. The audit log records it as `license.installed` with `source` `renewal`.
+- A failed fetch logs `license renewal failed` and tries again the next day. The installed file keeps working to the end of its grace, and the file from **Billing** still installs by hand.
+- A monthly license needs it. A server that cannot reach tablepro.app takes a yearly or longer term.
+
+Behind a proxy, set `HTTPS_PROXY`, such as `http://proxy.example.com:3128`. Every outbound call of the server then goes through it, the OIDC identity provider's too: list an IdP inside your network in `NO_PROXY`. A proxy that inspects TLS needs its CA in `SSL_CERT_FILE`, as under [Settings](/self-hosted/settings#identity-provider).
+
+### When a license ends
+
+A file with an end date has a grace after it, written into the file: 21 days for a monthly license, 30 days for every other.
+
+| State | From | What works |
+|---|---|---|
+| `active` | Until the end date | Everything |
+| `grace` | The end date, until the grace ends | Everything. The Mac shows the grace under **License** in **Settings > Account** |
+| `lapsed` | The end of the grace | Pulls and administration. The server refuses Team Library publishes with `license_expired`, and Macs keep only Team Library; see [Company server](/features/company-server#what-is-different-on-a-company-server) |
+
+A perpetual file has no end date. It covers every release dated up to its end of maintenance, and keeps them running for good. `migrate up`, `serve` and `license install` refuse a later release and name the last date the file covers; `migrate up` refuses before it changes the schema. Extending maintenance is a new file with a later date.
+
+## Upgrades
+
+Read the release's notes under [Self-hosted releases](/self-hosted/releases) first.
+
+- **One minor version at a time**, such as 0.1 to 0.2, then 0.2 to 0.3. Each release's migrations only promise that the release before it runs on the new schema. To skip a minor version, stop the old server first.
+- **Back up first**, as under [Back up](#back-up). Migrations only go forward, so going back to the earlier release means restoring the backup taken before the upgrade.
+- **A perpetual license** must cover the new release; `migrate up` refuses it otherwise, before it changes anything.
+
+With Docker Compose, set `TABLEPRO_IMAGE` in `.env` to the new digest, then run the migrations while the old server still serves, and start the new one only once they exit 0:
+
+```bash
+docker compose run --rm migrate
+docker compose up -d --no-deps app
+```
+
+<Warning>
+A plain `docker compose up -d` removes the old `app` before `migrate` runs, so a migration that fails leaves nothing serving.
+</Warning>
+
+On AWS, set the new digest in both task definition files, `tablepro-cloud` and `tablepro-cloud-license`, and register a new revision of each. A license task left on the old revision installs the next file with the old release. Then deploy the service with the first:
+
+```bash
+revision=$(aws ecs register-task-definition --cli-input-json file://ecs-task-definition.json \
+  --query 'taskDefinition.revision' --output text)
+aws ecs register-task-definition --cli-input-json file://ecs-license-task-definition.json \
+  --query 'taskDefinition.revision' --output text
+aws ecs update-service --cluster tablepro --service tablepro-cloud --task-definition "tablepro-cloud:$revision" \
+  --query 'service.serviceName' --output text
+```
+
+A new task whose `migrate` fails never starts `app`. The old task keeps serving and the circuit breaker rolls the deployment back, but it cannot undo a migration that ran.
+
+Wait for the rollout, then check which revision it ended on:
+
+```bash
+aws ecs wait services-stable --cluster tablepro --services tablepro-cloud
+aws ecs describe-services --cluster tablepro --services tablepro-cloud \
+  --query "services[0].deployments[?status=='PRIMARY'].[taskDefinition,rolloutState]" --output text
+```
+
+It prints the new revision and `COMPLETED`. A deployment the circuit breaker rolled back is stable too, on the old revision. Last, a one-off `version`, as under [Run a command](/self-hosted/aws#run-a-command), prints the new release.
+
+`migrate up` prints nothing when it succeeds. To check the schema, run `migrate status` as a one-off command: it lists every migration with the time it was applied, or `pending`, and the `river` rows show `yes` in place of a time. After an upgrade, no row is `pending`.
+
+## Back up
+
+Back up the database, and keep the `TABLEPRO_CREDENTIALS` value next to the backups: a database restored without its `identity-tokens` key cannot read the IdP refresh tokens it holds.
+
+With Docker Compose, dump the database, at least before each upgrade:
+
+```bash
+docker compose exec -T postgres pg_dump -U tablepro -Fc tablepro > tablepro.dump
+```
+
+On AWS, RDS keeps automated backups. Before each upgrade, also take a manual snapshot, and deploy only once it is available. A snapshot name takes letters, digits and single hyphens, and starts with a letter:
+
+```bash
+aws rds create-db-snapshot --db-instance-identifier <db-instance-id> \
+  --db-snapshot-identifier tablepro-before-0-2-0 --query 'DBSnapshot.Status' --output text
+aws rds wait db-snapshot-available --db-snapshot-identifier tablepro-before-0-2-0
+```
+
+## Restore a backup
+
+A restore rolls the Team Library back, while the Macs hold positions past it. `sync new-epoch` makes every Mac take a fresh copy of the library from the restored server.
+
+<Steps>
+  <Step title="Stop the server">
+    `docker compose stop app`, or set the service's desired count to 0.
+  </Step>
+  <Step title="Restore the database">
+    With Compose, into an empty database:
+
+    ```bash
+    docker compose exec -T postgres dropdb -U tablepro tablepro
+    docker compose exec -T postgres createdb -U tablepro tablepro
+    docker compose exec -T postgres pg_restore -U tablepro -d tablepro < tablepro.dump
+    ```
+
+    On AWS, restore the RDS instance to a point in time as a new instance, and point `DATABASE_URL` in a new task definition revision at it.
+  </Step>
+  <Step title="Start a new library epoch">
+    Once, before the server starts: `docker compose run --rm --no-deps app sync new-epoch`, or the same command as a one-off task on AWS.
+  </Step>
+  <Step title="Start the server">
+    `docker compose up -d`, or the desired count back to 1.
+  </Step>
+</Steps>
+
+<Danger>
+Everything written after the restore point is lost, including what Macs published after it. The Macs take the restored library and drop their newer copy.
+</Danger>
+
+## Alerts
+
+The server writes one JSON object per line to standard output, with `level` and `msg`. A command that fails, a `serve` that refuses to start and `migrate up` included, writes one more JSON line to standard error, with `"level":"ERROR"`, `"msg":"command failed"`, `command` and `error`, and exits 1. Wrong arguments print the error and the usage as plain text and exit 2, which a filter on the JSON never sees, so alert on the exit code too:
+
+| Signal | Means |
+|---|---|
+| `"level":"ERROR"` from `app`, `migrate` or a one-off command. In CloudWatch, the metric filter `{ $.level = "ERROR" }` | Something failed while serving, or a command failed |
+| `migrate`, `app` or a one-off command exiting non-zero. On AWS, the EventBridge rule under [Service](/self-hosted/aws#service); with Compose, `die` events from `docker events` | A start, a deploy or a command failed |
+| The ALB's `UnHealthyHostCount` at 1 or more for 5 minutes, and `HTTPCode_Target_5XX_Count` | The server is down or failing requests |
+| RDS `FreeStorageSpace` under 2 GB, `CPUCreditBalance` running low, `FreeableMemory` | The database is running out of room |
+
+The server also logs these events once a day and at each start. A metric filter `{ $.msg = "license*" && $.level != "INFO" }` catches the license ones and leaves out `license active` and `license renewed`.
+
+| `msg` | Level | When |
+|---|---|---|
+| `license not installed` | WARN | No license file verifies |
+| `license expires soon` | WARN | From 30 days before the end date, unless `LICENSE_RENEWAL=on` |
+| `license expired, in grace` | WARN | Past the end date, within the grace |
+| `license lapsed, library pushes refused` | ERROR | Past the grace |
+| `license renewal failed` | WARN | With `LICENSE_RENEWAL=on`: no route, a proxy that refused, tablepro.app down, or an answer the server does not take. It tries again the next day |
+| `license renewed` | INFO | With `LICENSE_RENEWAL=on`: a later file was installed |
+| `license renewal found no newer file` | INFO | With `LICENSE_RENEWAL=on`: nothing newer yet |
+| `license maintenance ends soon` | WARN | A perpetual file, in the 30 days before its maintenance ends |
+| `idp certificate expiring` | WARN | A trusted SAML signing certificate ends within 30 days |
+| `idp certificate expired` | ERROR | A trusted SAML signing certificate has ended, and sign-ins it signs fail |
+
+`email not sent` at INFO is expected: a self-hosted server sends no email.

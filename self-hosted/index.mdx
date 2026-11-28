@@ -1,0 +1,71 @@
+---
+title: Self-hosted server
+description: What the Enterprise Self-Hosted preview runs, what it needs from your infrastructure, the order to set it up in, and its limits
+---
+
+One OCI image serves your teams and their Team Library to the Macs, from your own PostgreSQL. People sign in through your identity provider. The server sends no email and no telemetry. Its only outbound calls go to an OIDC identity provider and, when you turn on [license renewal](/self-hosted/operations#renew), to tablepro.app for the license's next file.
+
+<Info>
+This is a preview. It serves TablePro for macOS. The other apps follow. To try it, write to [hello@tablepro.app](mailto:hello@tablepro.app) with the subject "TablePro Enterprise Self-Hosted"; plans and prices are under [Enterprise Self-Hosted](/features/licensing#enterprise-self-hosted).
+</Info>
+
+## Requirements
+
+| Part | What it takes |
+|---|---|
+| Container host | Docker Compose on one Linux host, or AWS ECS on Fargate. The image runs on `linux/amd64` and `linux/arm64` |
+| Database | PostgreSQL 18. The Compose file brings its own; on AWS, RDS for PostgreSQL 18 |
+| Two hostnames | One for the account portal, one for the API. They must differ |
+| TLS | A reverse proxy or load balancer in front that terminates TLS for both hostnames and forwards to port 8080 |
+| Identity provider | One IdP over OpenID Connect or SAML 2.0. See [Sign-in](/self-hosted/sign-in) |
+| License file | Issued by TablePro for your API address |
+
+These pages use two example hostnames:
+
+| Host | Example | Who reaches it |
+|---|---|---|
+| Account portal, `ACCOUNT_HOST` | `tablepro-account.example.com` | Browsers: sign-in, teams, members, the Team Library page |
+| API, `API_HOST` | `tablepro.example.com` | The Macs. People type this address in [Use a Company Server](/features/company-server) |
+
+The license file names the API address as `https://` plus `API_HOST`, and the server refuses a file issued for another address. Settle the API hostname before you ask for the file.
+
+## Set it up
+
+<Steps>
+  <Step title="Get the license file">
+    Send TablePro your API address, such as `https://tablepro.example.com`. The file comes back as one line of text, `license.jwt` in these pages.
+  </Step>
+  <Step title="Pull and verify the image, then generate the keys">
+    See [Image and keys](/self-hosted/image).
+  </Step>
+  <Step title="Set up your identity provider">
+    Create the SAML application or the OIDC client first. [Sign-in](/self-hosted/sign-in) lists the values for each.
+  </Step>
+  <Step title="Start the server">
+    With [Docker Compose](/self-hosted/docker-compose) or on [AWS Fargate](/self-hosted/aws). [Settings](/self-hosted/settings) lists every variable.
+  </Step>
+  <Step title="Install the license">
+    `license install`, on the page for your platform. No one signs in until a license is installed.
+  </Step>
+  <Step title="Claim the server">
+    `bootstrap "<first team's name>"` prints a link that works for one hour. Open it and sign in through your IdP: that account becomes the server's owner and the owner of the first team.
+  </Step>
+  <Step title="Point the Macs at it">
+    Each person signs in with **Use a Company Server…**, or an MDM profile sets the address for every Mac. See [Company server](/features/company-server).
+  </Step>
+</Steps>
+
+<Check>
+`license status` prints the license and `seats taken: 1 of <seats>` once the owner has signed in.
+</Check>
+
+## Preview limits
+
+- **macOS only.** The other TablePro apps cannot sign in to a self-hosted server yet.
+- **Team Library is what syncs in the preview.** Shared links, billing and plan purchases are tablepro.app services and are not on a self-hosted server; [Company server](/features/company-server#what-is-different-on-a-company-server) lists what the Mac hides.
+- **No email.** An invitation is a link to copy and send yourself. Every email the server would send is dropped and logged as `email not sent`.
+- **One IdP, one protocol.** Moving to another IdP or protocol later gives every person a new identity, and nothing links the old accounts to the new ones.
+- **SAML is SP-initiated only.** A Response the IdP sends unasked is refused, and the server reads no encrypted assertion and sends no Single Logout.
+- **No SCIM, no LDAP.** People appear at their first sign-in. An LDAP directory goes through an OIDC broker you run, such as Keycloak's LDAP user federation or Dex's LDAP connector.
+- **One server task.** Each start migrates the database first, and two starts at once can collide. Run one `serve` container per database.
+- **Upgrades one minor version at a time**, and migrations only go forward: going back means restoring the backup taken before the upgrade. See [Upgrades](/self-hosted/operations#upgrades).

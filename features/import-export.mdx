@@ -73,7 +73,7 @@ Ticking no column exports every column, which is also what a table with a column
 
 ### What ends up in the file
 
-A whole-table export streams from the database at constant memory, with no row-count limit, and can be cancelled from the progress dialog.
+A whole-table export streams from the database at constant memory, with no row-count limit, and can be stopped from the progress the export sheet shows while it runs.
 
 **Export Results…** writes what the tab holds in memory, which is the output of the query that filled it. The filter bar and a sorted header are part of that query, and so is column visibility on a table tab: hiding a column re-queries without it, keeping only the primary key and anything being sorted on. Two things are not part of it. A column value filter narrows the loaded rows in the grid afterwards, so it never reaches the file. And a truncated result with more rows behind it is re-run and streamed in full rather than written as far as it got.
 
@@ -146,7 +146,7 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
 
     Insert mode is spelled differently on each engine: `INSERT IGNORE` and `REPLACE INTO` on MySQL and MariaDB, `INSERT OR IGNORE` and `INSERT OR REPLACE` on SQLite, `ON CONFLICT` on PostgreSQL. Updating needs a primary key to name as the conflict target. An engine with no spelling for the mode writes plain inserts, and the export summary says which tables that happened to.
 
-    Splitting writes `dump.part1.sql`, `dump.part2.sql` and so on, rotating between statements so no part ends mid-`INSERT`. The summary names the first and last part; restore them in order. Each part re-opens the session state its own statements need, so a part restores on its own: on SQL Server that means `SET IDENTITY_INSERT`, which a part boundary used to leave behind. A part that cannot be written stops the export, and the error names the parts already on disk, because a rename cannot be taken back. A gzipped export is one file, so the two settings do not combine and the summary says so.
+    Splitting writes `dump.part1.sql`, `dump.part2.sql` and so on, rotating between statements so no part ends mid-`INSERT`. The summary names the first and last part; restore them in order. Each part re-opens the session state its own statements need, so a part restores on its own, `SET IDENTITY_INSERT` on SQL Server included. With gzip on, each part is a gzip file of its own, `dump.part1.sql.gz` and so on, and the split size is the compressed size on disk. A part that cannot be written stops the export, and the error names the parts already on disk, because a rename cannot be taken back.
 
     A dump is UTF-8 and says so in every part, the way the engine's own dump tool does:
 
@@ -194,7 +194,7 @@ As SQL, a results export writes `INSERT` statements only. A result set is the ou
     | Include headers (bold first row) | Yes |
     | NULL as empty cells | Yes |
 
-    Each table becomes its own worksheet and numbers are stored as numeric cells. A table over 1,048,576 rows, Excel's limit, splits across sheets.
+    Each table becomes its own worksheet and numbers are stored as numeric cells. Excel holds 1,048,576 rows a sheet and 32,767 characters a cell: a longer table splits across sheets, and a longer value is cut to fit, with a warning that counts the values cut. Export to CSV to keep long values whole.
   </Tab>
   <Tab title="Markdown">
     GitHub-flavoured tables.
@@ -244,8 +244,8 @@ Right-click tables in the sidebar and choose **Transfer To…** to copy their ro
   <Step title="Open both connections">
     The destination list holds the connections that are already open. A connection that is not open does not appear.
   </Step>
-  <Step title="Pick the destination and its database">
-    Then tick the tables to copy.
+  <Step title="Pick the destination, its database and schema">
+    On an engine with schemas, **Schema** picks where the rows land. It starts on the source table's schema when the destination has one by that name, otherwise on the schema the destination is browsing. Then tick the tables to copy.
   </Step>
   <Step title="Transfer">
     The destination's [Safe Mode](/features/safe-mode) covers the whole transfer, with one confirmation and one Touch ID prompt where its level asks for them. Each table is wrapped in its own transaction by default, so a table that fails leaves its own rows untouched and the ones before it committed.
@@ -284,7 +284,7 @@ The extension picks the format, so one command covers all of them. A file no for
     Encoding, transaction wrapping, and error handling for SQL; parsing and column mapping for CSV and JSON. TablePro remembers the options from your last successful import, and **Reset to Defaults** restores the stock ones.
   </Step>
   <Step title="Review and import">
-    Check the preview, statement count, and file size, then click **Import**. The progress bar of a SQL file follows how much of the file has been read, and the count beside it counts statements. The connection's [Safe Mode](/features/safe-mode) asks once for the whole file where its level calls for a confirmation or Touch ID.
+    Check the preview and file size, then click **Import**. The progress bar of a SQL file follows how much of the file has been read, compressed bytes for a `.sql.gz`, and the count beside it counts the statements run so far. The connection's [Safe Mode](/features/safe-mode) asks once for the whole file where its level calls for a confirmation or Touch ID.
   </Step>
 </Steps>
 
@@ -326,7 +326,7 @@ On PostgreSQL, CockroachDB and KingbaseES the rows after a `COPY ... FROM STDIN`
 
 SQL Server SQL imports do not automatically commit or roll back after a file batch runs, even with **Wrap in transaction** selected and even without a `GO` line. A batch can change which transaction is open. Read the completion message: if a transaction remains open, commit or roll it back on this connection. This also applies after a successful import. Imports into a selected table from CSV, JSON, or XLSX use the row-import transaction options instead.
 
-Skip and Continue collects up to 1,000 failures with their line numbers and messages, and the summary counts successes against failures behind a **Copy Details** button. **Save Report…** writes them all to a CSV with a line, a statement and the database's own error per row, so a large import's failures can be sorted and searched rather than scrolled. An error that stops the import shows the line, the database's own message, and the failing statement, with the dialog still open behind it, ready for a changed setting and another run. The alert shows the first 10,000 characters of a longer statement and the first five errors of a batch that raised more, and **Copy Details** copies all of them.
+Skip and Continue collects up to 1,000 failures with their line numbers and messages, and the summary counts successes against failures behind a **Copy Details** button. **Save Report…** writes them all to a CSV with a line, a statement and the database's own error per row, so a large import's failures can be sorted and searched rather than scrolled. An error that stops the import shows the line, the database's own message, and the failing statement in the import sheet, where **Back** returns to the file and its options for a changed setting and another run. The result shows the first 10,000 characters of a longer statement and the first five errors of a batch that raised more, and **Copy Details** copies all of them.
 
 ### Stop an import
 

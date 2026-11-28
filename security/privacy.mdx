@@ -12,12 +12,13 @@ Turn off app usage data in the privacy settings if you do not want to send it. M
 | [Mac usage data](#usage-data), from 0.86.0 (first build 0.86.0-beta.1) | PostHog EU | On; **Settings > General > Privacy > Share usage data** |
 | [Linux usage data](#linux-usage-data), from 0.1.0-beta.1 | PostHog EU | On; **Preferences > General > Privacy > Share Usage Data** |
 | [iOS usage data](#iphone-and-ipad-usage-data) | PostHog EU | Off; **Settings > Privacy > Share Usage Data** |
-| [Mac update check](#update-checks) | `updates.tablepro.app` | On; **Settings > General**, under Software Update |
+| [Mac update check](#update-checks) | `updates.tablepro.app` | On; **Settings > General > Software Update** |
 | [Mac plugin catalog](#the-plugin-catalog) | `updates.tablepro.app` | On; no off switch |
-| [AI provider](#ai-providers) | Your chosen provider | No provider on a fresh install; remove it or turn off **Enable AI Features** |
-| [iCloud sync](#icloud-sync) | Your iCloud account | Off; **Settings > Sync** |
+| [AI provider](#ai-providers) | Your chosen provider | No provider on a fresh install; remove it or turn off **Enable AI features** |
+| [AI model catalog](#the-ai-model-catalog), Mac, Linux and Windows | `updates.tablepro.app` | Only when a provider's model list loads; no provider on a fresh install |
+| [iCloud sync](#icloud-sync) | Your iCloud account | Off; **Settings > iCloud Sync** |
 | [MCP clients](#the-mcp-server) | Local HTTP and a private Unix socket | Off; **Settings > MCP** |
-| [Accounts and Team Library](#license-checks-and-the-team-library) | `api.tablepro.app` | Account requests after sign-in; content uploads when published |
+| [Accounts and Team Library](#accounts-and-the-team-library) | `api.tablepro.app` | Account requests after sign-in; content uploads when published |
 | [Shared links](#shared-links) | `api.tablepro.app`; link pages on `s.tablepro.app` | Only when you open a share sheet, create or revoke a link, or open one |
 | [Database connections](#your-database-connections) | Your configured servers | When you connect |
 
@@ -80,14 +81,14 @@ Earlier versions sent a daily report to the relay endpoint above instead, also o
 
 ## AI providers
 
-Nothing reaches a model until you add a provider, and a fresh install has none: with none configured, every AI path returns before it builds a request. **Enable AI Features** in **Settings > AI** is on out of the box, but it gates an empty tab.
+Nothing reaches a model until you add a provider, and a fresh install has none: with none configured, every AI path returns before it builds a request. **Enable AI features** in **Settings > AI** is on out of the box, but with no provider it gates nothing.
 
-One provider is marked active and answers inline suggestions and the editor actions; the chat panel's own model picker can send a turn to any other provider you configured. Requests go to that provider's endpoint. The presets are `api.anthropic.com`, `api.openai.com`, `generativelanguage.googleapis.com`, `api.x.ai`, `openrouter.ai`, `router.requesty.ai`, `api.meta.ai`, `api.cursor.com` and `opencode.ai`, plus `http://localhost:11434` for Ollama and `http://localhost:8080` for llama.cpp and MLX, which keeps their traffic on the machine. Every endpoint field is editable, and a custom provider goes wherever you point it. Meta's `-contributor` models, which Meta may train on what you send, stay out of its model list; one is used only when you type its id under **Other…**.
+One provider is marked active and answers inline suggestions and the editor actions; the chat panel's own model picker can send a turn to any other provider you configured. Requests go to that provider's endpoint, and loading its model list also reads the [AI model catalog](#the-ai-model-catalog). ChatGPT's model list comes from `chatgpt.com/backend-api/codex/models`, the host its chat already uses. The presets are `api.anthropic.com`, `api.openai.com`, `generativelanguage.googleapis.com`, `api.x.ai`, `openrouter.ai`, `router.requesty.ai`, `api.meta.ai`, `api.cursor.com` and `opencode.ai`, plus `http://localhost:11434` for Ollama and `http://localhost:8080` for llama.cpp and MLX, which keeps their traffic on the machine. Every endpoint field is editable, and a custom provider goes wherever you point it. Meta's `-contributor` models, which Meta may train on what you send, stay out of its model list; one is used only when you type its id under **Other…**.
 
 A chat turn carries:
 
 - The database type and the name of the database you are connected to.
-- The schema, while **Include database schema** is on (the default): table names, estimated row counts, column names and types, primary key and NOT NULL flags, DEFAULT values, and foreign keys, for up to **Max schema tables** tables (20 by default). With more tables than that, the ones your question and current query use come first, and the rest are sent as a count, not by name.
+- The schema, while **Include database schema** is on (the default): table names, estimated row counts, column names and types, primary key and NOT NULL flags, DEFAULT values, and foreign keys, for up to **Maximum tables** tables (20 by default). With more tables than that, the ones your question and current query use come first, and the rest are sent as a count, not by name.
 - The query in the current tab, while **Include current query** is on (the default), truncated at 2,000 characters.
 - Result rows, only if you turn on **Include query results**, which is off by default. It attaches the first 10 rows of the current result, each value cut at 200 characters.
 - The connection's [AI Rules](/features/ai-assistant#per-connection-ai-rules) text, if you wrote any.
@@ -95,7 +96,7 @@ A chat turn carries:
 
 In Edit and Agent modes the model calls `execute_query` itself, and the rows it gets back become part of the conversation, so they go to the provider on the next turn. Those results are capped by the row limits in **Settings > MCP**: 500 rows by default, 10,000 at most.
 
-Per connection, the **AI Policy** picker in the connection form's Options section takes **Use Default**, **Always Allow**, **Ask Each Time**, or **Never**. The app-wide default is **Ask Each Time**, which asks once per connection per chat session before the first send. **Never** blocks the chat panel and external AI tool calls against that connection.
+Per connection, the **Policy** picker on the connection editor's **AI & MCP** pane takes **Use Default**, **Always Allow**, **Ask Each Time**, or **Never**. The app-wide default is **Ask Each Time**, which asks once per connection per chat session before the first send. **Never** blocks the chat panel and external AI tool calls against that connection.
 
 <Warning>
 **Ask Each Time** gates the chat panel only. Inline suggestions check the policy for **Never** and nothing else, so with **Enable inline suggestions while typing** on, the text before your cursor, the whole query, and the schema go to the provider after every typing pause with no prompt. That toggle is off by default.
@@ -109,28 +110,28 @@ Two provider paths run a program rather than call an endpoint. **Claude Agent** 
 
 ## iCloud sync
 
-Off by default, and it needs a Pro or Team license. When it is on, records go to the CloudKit container `iCloud.com.TablePro`, into the private database of your own iCloud account, in the Production environment.
+Off by default, and it needs a Pro or Team plan. When it is on, records go to the CloudKit container `iCloud.com.TablePro`, into the private database of your own iCloud account, in the Production environment.
 
 Synced record types are `Connection`, `ConnectionGroup`, `ConnectionTag`, `AppSettings`, `SQLFavorite`, `SQLFavoriteFolder`, `FavoriteTable`, `FavoriteDatabase`, `SSHProfile`, `CredentialProfile`, `TableFolder` and `TableFolderItem`. Credential profiles carry the name, username and password mode, never the password or command source. A connection record carries host, port, username, database, and SSH and SSL settings. Sync runs on launch, about two seconds after you change something synced, when you switch back to the app, and when iCloud notifies the app that another device changed something. That notice goes through Apple's push service, carries no record content, and asks for no notification permission. The app registers for it only while sync is on.
 
-Passwords are not one of those record types. The **Passwords** toggle nested under Connections instead marks keychain items as synchronizable, so Apple's iCloud Keychain carries them end to end encrypted. It is off by default, and it applies to items written after you turn it on.
+Passwords are not one of those record types. The **Passwords** switch under **What Syncs** instead marks keychain items as synchronizable, so Apple's iCloud Keychain carries them end to end encrypted. It is off by default, and it applies to items written after you turn it on.
 
 <Warning>
 That flag is set on every keychain item the app writes, not only connection passwords: AI provider keys and an older license key go through the same helper. Current account tokens never sync. MCP tokens and Google sign-in refresh tokens do not; their stores always write device-only items.
 </Warning>
 
-With password sync off, secrets are written `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, which keeps them on that one Mac. Query history, the activity log, the execution log, tab state, MCP settings, and the sync settings themselves are never synced. Individual connections can be marked **Local only**, which also moves their secrets out of iCloud Keychain onto that one Mac. Full detail in [iCloud Sync](/features/icloud-sync#keeping-a-connection-off-icloud).
+With password sync off, secrets are written `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`, which keeps them on that one Mac. Query history, the activity log, the execution log, tab state, MCP settings, and the sync settings themselves are never synced. Individual connections can be marked **Local Only**, which also moves their secrets out of iCloud Keychain onto that one Mac. Full detail in [iCloud Sync](/features/icloud-sync#keeping-a-connection-off-icloud).
 
 ## The MCP server
 
 Direct HTTP clients connect through IPv4 loopback. The bundled bridge and CLI use a private Unix socket that accepts only the same macOS user. Both listeners require authentication for data access. Neither has a remote mode. See [MCP transport and handshake](/developers/mcp-protocol#local-socket-and-handshake) for paths and permissions.
 
-It is off by default, and nothing starts it while **Enable MCP Server** is off: not the bundled bridge, not the pairing flow, not a `tablepro://integrations/start-mcp` link. What a paired client can reach is real data, so four gates stack:
+It is off by default, and nothing starts it while the **MCP server** switch is off: not the bundled bridge, not the pairing flow, not a `tablepro://integrations/start-mcp` link. What a paired client can reach is real data, so four gates stack:
 
 1. A token on every request. One that arrives without an `Authorization` header is refused, from your own Mac too, and no setting changes that.
 2. The token's scope and its connection allowlist.
 3. The connection's **External Clients** level: **Blocked**, **Read Only** (the default for a new connection), or **Read & Write**. The effective permission is the lower of that and the token's scope.
-4. The connection's **AI Policy** of **Never**, its [Safe Mode](/features/safe-mode) level, and the **Approval** setting under **Settings > MCP**, which decides how often a client is asked before it reaches a connection.
+4. The connection's AI **Policy** of **Never**, its [Safe Mode](/features/safe-mode) level, and the **Approval** setting under **Settings > MCP**, which decides how often a client is asked before it reaches a connection.
 
 Loopback-only describes where the server binds, not everything that can reach it. The server returns CORS headers for two remote origins, `claude.ai` and `app.cursor.com`, so a page you have open there can call your local server from your own browser. The four gates above are what stands between such a call and your data, and the first one means a page without a token gets nothing.
 
@@ -144,7 +145,7 @@ Sparkle fetches `https://updates.tablepro.app/appcast.xml` once a day, and once 
 
 Updates download from the GitHub release named in the feed. Sparkle checks the feed's EdDSA signature, and each build's, against the public key inside the app, and refuses either one that does not match before it unpacks anything.
 
-**Automatically check for updates** in **Settings > General** is on by default. With it off, only a check you start reaches the feed: **Check Now** in the same section, or **TablePro > Check for Updates…**.
+**Automatically check for updates** in **Settings > General > Software Update** is on by default. With it off, only a check you start reaches the feed: **Check Now** on the same page, or **TablePro > Check for Updates…**.
 
 **Download and install updates automatically** is also on by default, so a new build downloads without being accepted first and installs when TablePro quits. The download is the same signed archive from the same GitHub release, and nothing is sent to fetch it. Turn it off to be asked each time.
 
@@ -154,9 +155,17 @@ At launch the app asks for `https://updates.tablepro.app/plugins/v3.json`, and i
 
 Installing a plugin downloads its ZIP over HTTPS from the URL in that catalog and checks it against the SHA-256 the catalog declares.
 
+## The AI model catalog
+
+A provider's own model list leaves out facts the app needs, such as which of OpenAI's models can chat and which reasoning levels a model takes. A catalog built from [models.dev](https://models.dev) fills them in. It ships inside each app, so nothing is fetched while AI is off or no provider is set up.
+
+When the model list of Claude, OpenAI, ChatGPT, Gemini, xAI or Meta loads, the Mac app asks for `https://updates.tablepro.app/ai/models-v1.json`, at most once an hour. The Linux and Windows apps do the same when a Claude or OpenAI list loads. Each sends the ETag of the copy it holds. No key, account or model choice goes with the request; GitHub Pages sees the IP address. A newer copy replaces the bundled one until the next app update brings a newer one still.
+
 There is no setting that turns the catalog fetch off.
 
-## License checks and the team library
+<span id="license-checks-and-the-team-library" />
+
+## Accounts and the Team Library
 
 From Mac 0.86.0 (including 0.86.0-beta.1), Linux 0.1.0-beta.1 and the Windows preview, sign-in uses the account service at `https://api.tablepro.app`. `POST /v2/devices` registers the machine ID, name, platform and app/OS versions. Account access tokens and signed plan files replace routine license-key checks. On Mac, the machine ID is the SHA-256 hardware identifier; on Linux it is HMAC-SHA256 of `/etc/machine-id` with `app.tablepro.TablePro`, with a stored random fallback; on Windows it is HMAC-SHA256 of the `MachineGuid` registry value with the same key. Refresh tokens use the Mac Keychain, the Linux keyring or Windows Credential Manager; Mac account tokens never sync.
 
@@ -186,10 +195,6 @@ The execution log records every authorization decision the app makes, from the U
 
 The hash chain is tamper evident, not tamper proof: anyone who can write the file can recompute every hash after the record they changed. It is a JSON file in Application Support, no sync record type covers it, and no code path uploads it. It has no size cap. A file cut short mid-record, after a crash, is closed after its last whole record, with a copy of it as found kept as `ExecutionAudit.damaged-<date>.json`. A file with no record TablePro can read is renamed to that name and kept, and a new chain starts beside it.
 
-The table load history records how long each table load took, so a slowdown can be looked at after it happened rather than only while it is happening. One line per load, holding a timestamp, the app version and build, the macOS version, what started the load, the database type, whether the connection went through SSH, how long each phase took (schema, driver fetch, result conversion, grid reload, and the main run loop after it), how the load ended, any anomalies it reported, and four size ranges: rows, columns, result size, and open tabs. Sizes are ranges such as `101-1000` and `1-10MB`, never exact counts.
-
-Nothing identifying is in it: no query text, no rows, no database, schema or table names, no hostnames, ports or usernames, no connection names or IDs, no file paths, no error messages. It is a `.jsonl` file in Application Support, readable only by you, capped at 7 days and at 10,000 records or 5 MB, whichever comes first. No sync record type covers it and no code path uploads it. Delete the file to clear it.
-
 ### Where it lives on disk
 
 Every path here is under `~/Library/Application Support/TablePro/` unless it says otherwise.
@@ -207,7 +212,6 @@ Every path here is under `~/Library/Application Support/TablePro/` unless it say
 | `ai_chats/` | One JSON file per AI conversation, including the context attached to each turn. |
 | `AIChatImages/` | Images pasted into chat. |
 | `ExecutionAudit.json` | The execution log described in this section. |
-| `TableLoadHistory.jsonl` | The table load history described in this section, 7 days. Mode `0600`. |
 | `mcp-audit.db` | The MCP activity log, 90 days, statements as digests. Mode `0600` inside a `0700` directory. |
 | `mcp-handshake.json` | The socket path, bridge token, host process, server instance, protocol version and expiry. Mode `0600`. |
 | `mcp.sock` | The bridge and CLI socket. See [transport paths](/developers/mcp-protocol#local-socket-and-handshake) for its fallback location. |

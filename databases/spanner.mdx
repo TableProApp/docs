@@ -24,7 +24,7 @@ Click **Create Connection…**, select **Spanner**, pick an auth method, fill in
 | **Service Account Key** | Service account only | A `.json` key file path, or the key JSON itself |
 | **OAuth Client ID**, **OAuth Client Secret** | OAuth only | From Google Cloud Console > APIs & Services > Credentials |
 | **OAuth Refresh Token** | No | OAuth only. Tried before the token saved by sign-in |
-| **REST Endpoint** | No | Options tab. Empty means `https://spanner.googleapis.com` |
+| **REST Endpoint** | No | **Advanced** pane. Empty means `https://spanner.googleapis.com` |
 
 A custom **REST Endpoint** has to be an `https` address under `googleapis.com`, such as a regional or Private Service Connect endpoint. Credentials are never sent anywhere else. Any Spanner version works; it is a managed service.
 
@@ -82,7 +82,7 @@ SELECT results stream, so a large result or a full-table export is not capped at
 
 Each statement commits on its own. `BEGIN` opens a read-write transaction that holds every statement until `COMMIT` or `ROLLBACK`. While one is open, saving grid edits is refused, so a save never commits or abandons it. When Spanner aborts the transaction, later statements fail until you run `ROLLBACK`; then run them again. A single statement outside a transaction is retried automatically when Spanner aborts it.
 
-`CREATE`, `ALTER` and `DROP` go through Spanner's schema-change API, outside any transaction. The editor waits for the change up to the [query timeout](/customization/general-settings#query-timeout); a change still running then keeps running on the server.
+`CREATE`, `ALTER` and `DROP` go through Spanner's schema-change API, outside any transaction. The editor waits for the change up to the [query timeout](/customization/connection-settings#query-timeout); a change still running then keeps running on the server.
 
 ## Editing rows
 

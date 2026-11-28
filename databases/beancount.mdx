@@ -38,7 +38,7 @@ After connecting, TablePro's database version display names the backend it selec
 
 ## Ledger plugins
 
-With the Python backend, **Run Ledger Plugins** on the connection's **Options** tab starts off.
+With the Python backend, **Run Ledger Plugins** on the connection's **Advanced** pane starts off.
 Only modules named `beancount.plugins.<name>` with no configuration argument run in that state.
 Other Python modules and configured plugins are skipped. A ledger's `insert_pythonpath` option
 does not add its folders to Python's import path while plugins run.
@@ -62,7 +62,7 @@ installed packages still run.
     Click **New Connection…** and choose **Beancount**.
   </Step>
   <Step title="Choose your ledger">
-    Click **Browse…** and select a `.beancount` file. No host, no port, no password, no Database field: the ledger path is the whole connection.
+    Click **Choose…** and select a `.beancount` file. No host, no port, no password, no Database field: the ledger path is the whole connection.
   </Step>
   <Step title="Connect">
     Click **Save & Connect**.
@@ -175,6 +175,6 @@ BQL values read as Beancount writes them: an amount as `19.43 USD`, a position h
 
 **BQL queries need rledger**: Install rustledger so `rledger` lands on `PATH` or in Homebrew, or point `TABLEPRO_RUSTLEDGER_BINARY` at it.
 
-**File does not exist**: The ledger moved or was renamed. Re-pick it with **Browse…** in the connection form.
+**File does not exist**: The ledger moved or was renamed. Re-pick it with **Choose…** in the connection form.
 
 **Beancount include cycle detected**: Two ledger files include each other. Break the loop in the source files.
