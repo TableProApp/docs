@@ -38,8 +38,12 @@ One bastion, many connections. A profile holds the server (host, port, username)
 
 Deleting a profile hands its configuration and its secrets to each connection that used it, as that connection's own inline tunnel. Nothing stops connecting, and the tunnel is now editable per connection on its **SSH & Proxies** pane.
 
-## iCloud Sync
+## Sync
 
-Profiles sync across Macs with iCloud Sync on and **SSH Profiles** on under **What Syncs** in **Settings > iCloud Sync**. Passwords, key passphrases, and TOTP secrets stay in the local Keychain unless **Passwords** is on too, and that covers newly saved credentials only: re-save an existing password to include it.
+Profiles sync across Macs with **SSH Profiles** on under **What Syncs** in **Settings > Sync**, on iCloud or TablePro Sync. A new profile, and a changed server, user, authentication method, key path or jump host, [wait for your approval](/features/sync#changes-that-wait-for-your-approval) on each Mac.
+
+On iCloud, passwords, key passphrases, and TOTP secrets stay in the local Keychain unless **Passwords** is on too, and that covers newly saved credentials only: re-save an existing password to include it. On TablePro Sync they go end-to-end encrypted while its own **Passwords** switch is on, saved ones included; see [Passwords](/features/sync#passwords).
+
+Two profiles made under one name on two Macs both survive the sync. One keeps the name and the other becomes `Name (2)`, the same on every Mac.
 
 On [iPhone and iPad](/ios#ssh-profiles), a connection that uses a profile keeps the profile's server and jump hosts read only and signs in with the profile's password once it reaches iCloud Keychain. Turning **SSH Tunnel** off there unlinks the profile from that connection on every device.

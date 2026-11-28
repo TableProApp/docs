@@ -5,7 +5,7 @@ description: The server's owner, admins and members, the owner, admin, editor an
 
 A self-hosted server has two layers of roles. The server role decides who runs the server: who creates teams and who removes people. The team role decides what someone does inside one team, as on tablepro.app.
 
-Changing a role, removing or restoring someone, transferring a team and creating a team API token each need a fresh sign-in through the IdP; see [Step-up](/self-hosted/sign-in#step-up).
+Changing a role, removing or restoring someone, transferring a team and creating a team API token each need a passkey of your account; see [Step-up](/self-hosted/sign-in#step-up).
 
 ## Server roles
 
@@ -54,6 +54,7 @@ Removing someone from the IdP stops their sign-ins, but the seat and some creden
 - signs them out of the portal and every app, and they cannot sign in again until restored;
 - takes them out of every team, and makes the remover the owner of each team they owned;
 - revokes the team API tokens they created and the invitation links they were handed;
-- frees their seat.
+- frees their seat;
+- deletes what they synced with TablePro Sync 30 days later: their own data and query history.
 
-Only the owner removes an admin, and nobody removes the owner or themselves. **Restore…** lets a removed person sign in again; their next sign-in takes a seat, and their teams are not given back.
+Only the owner removes an admin, and nobody removes the owner or themselves. **Restore…** lets a removed person sign in again; their next sign-in takes a seat, and their teams are not given back. Restored within those 30 days, they keep what they synced.

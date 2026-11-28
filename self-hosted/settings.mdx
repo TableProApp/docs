@@ -10,8 +10,10 @@ Every setting is an environment variable read at start. A missing or invalid val
 | Variable | Default | Meaning |
 |---|---|---|
 | `PROFILE` | `saas` | Set `selfhosted`. Required |
-| `ACCOUNT_HOST` | | The account portal's hostname, such as `tablepro-account.example.com`. Required |
+| `ACCOUNT_HOST` | | The account portal's hostname, such as `tablepro-account.example.com`. Required, and a DNS name, not an IP address |
 | `API_HOST` | | The API's hostname, such as `tablepro.example.com`. Required, and different from `ACCOUNT_HOST`. The license file must name `https://` plus this host |
+| `ACCOUNT_BASE_URL` | `https://` plus `ACCOUNT_HOST` | The portal's address as browsers reach it, with no path. `https`, or `http` on a loopback host. Its host must be a DNS name, not an IP address: passkeys belong to it, and a passkey takes no IP address. `serve`, `migrate up` and every other command refuse an IP address. A trial on one machine over `http` on a loopback host, such as `http://account.localhost:8080` with `ACCOUNT_HOST=account.localhost`, works in Safari and the Mac app: the portal then sets its cookies without `Secure`, which WebKit drops over `http`. Set it only when the portal is not on `https://` plus `ACCOUNT_HOST` |
+| `API_BASE_URL` | `https://` plus `API_HOST` | The API's address as the apps reach it, with no path. Its host must be `API_HOST` |
 | `DATABASE_URL` | | A PostgreSQL URL, such as `postgres://tablepro@db.example.com:5432/tablepro?sslmode=verify-full`. Required |
 | `PGPASSWORD` | | The database password, kept out of `DATABASE_URL` as the reference deploys do |
 | `LISTEN` | `:8080` in the image | The address and port `serve` listens on |
@@ -70,6 +72,28 @@ Durations take Go's form: `90m`, `10h`, `168h`. [Sign-in](/self-hosted/sign-in#s
 | `HTTPS_PROXY` | | The proxy every outbound HTTPS call goes through, such as `http://proxy.example.com:3128` |
 | `NO_PROXY` | | Comma-separated hosts reached without the proxy, such as an IdP inside your network |
 
+## Email
+
+The server sends one kind of email: a notice to a person when a passkey is added to or removed from their account, or when `passkeys reset` deletes them. It goes through your SMTP relay, in the person's language, to the address the IdP gives. With no relay, the audit log and the server's log are the only notice.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `SMTP_HOST` | | The relay's host name or address. Unset sends nothing |
+| `SMTP_TLS` | | `starttls` or `implicit`. Required with `SMTP_HOST`. There is no plaintext mode, and `starttls` fails when the relay offers no STARTTLS |
+| `SMTP_PORT` | `587` with `starttls`, `465` with `implicit` | The relay's port |
+| `SMTP_USERNAME`, `SMTP_PASSWORD` | | Both, or neither for a relay that takes no login. The login is PLAIN, else LOGIN, inside TLS only |
+| `SMTP_FROM` | | One bare address, such as `tablepro@example.com`. Required with `SMTP_HOST`. The emails come from "TablePro" at it |
+
+The server checks the relay's certificate for `SMTP_HOST` against the system's roots, with TLS 1.2 or later. A relay behind a private CA needs it in `SSL_CERT_FILE` or `SSL_CERT_DIR`, as under [Identity provider](#identity-provider). `HTTPS_PROXY` does not apply to the relay.
+
+`serve` checks these settings at start and stops on a mistake, but never connects then, so a relay that is down stops nothing. It logs `email on: passkey notices go through the SMTP relay` at INFO, or the `email off` warning under [Alerts](/self-hosted/operations#alerts). Send yourself a test with `mail test`, as under [Test the mail relay](/self-hosted/operations#test-the-mail-relay). A notice that fails is retried for about four hours, a refused login included, so fixing the settings and restarting still sends it. A relay's permanent refusal of the recipient or the message gives up at once.
+
+`MAIL_POSTAL_ADDRESS`, `MAIL_FROM_ACCOUNT`, `MAIL_FROM_NEWS` and `MAIL_REPLY_TO` are tablepro.app's. A self-hosted server sends no email they apply to, and `SMTP_FROM` is the only sender. `MAIL_POSTAL_ADDRESS` is still checked at start: a value that is not one line of at most 300 characters stops the server.
+
+## Sync
+
+Sync has no environment variable. The owner and admins choose what the server keeps under **Server > Sync** in the portal; see [Personal sync and Team Library](/self-hosted/sync#sync-switches).
+
 ## Keys
 
 `TABLEPRO_CREDENTIALS` holds the server's keys as one JSON object, from each credential's name to the file's contents. [Image and keys](/self-hosted/image#generate-the-keys) makes it. `serve` refuses to start without `oauth-access`, `entitlement` and an `identity-tokens.<n>`.
@@ -78,4 +102,4 @@ Durations take Go's form: `90m`, `10h`, `168h`. [Sign-in](/self-hosted/sign-in#s
 
 ## Refused settings
 
-The server stops when one of tablepro.app's own settings is set, so a copied configuration cannot reach an outside service: `POLAR_*`, `SES_*`, `NEWSLETTER_LINK_KEY`, `POSTHOG_API_KEY`, `POSTHOG_HOST`, `TURNSTILE_*`, `CRISP_WEBSITE_ID`, `GITHUB_TOKEN`, `WATCHDOG_PING_URL`, `APPLE_*`, `GITHUB_CLIENT_*`, `GOOGLE_CLIENT_*`, `PASSKEY_*`, `LEGACY_*`, `LICENSE_MACHINE_BINDING_*` and `SHARE_CREATE_DISABLED`. `OIDC_ADMIN_GROUP_ID` and `OIDC_DISPLAY_NAME` stop it too: they are now `IDP_ADMIN_GROUP_ID` and `IDP_DISPLAY_NAME`.
+The server stops when one of tablepro.app's own settings is set, so a copied configuration cannot reach an outside service: `POLAR_*`, `SES_*`, `NEWSLETTER_LINK_KEY`, `POSTHOG_API_KEY`, `POSTHOG_HOST`, `TURNSTILE_*`, `CRISP_WEBSITE_ID`, `GITHUB_TOKEN`, `WATCHDOG_PING_URL`, `APPLE_*`, `GITHUB_CLIENT_*`, `GOOGLE_CLIENT_*`, `PASSKEY_*`, `LEGACY_*`, `LICENSE_MACHINE_BINDING_*`, `SHARE_CREATE_DISABLED`, `EMAIL_VERIFICATION_ORIGIN_TRIALS` and `EDUCATION_DOCUMENTS_*`. `PASSKEY_RP_ID` and `PASSKEY_ORIGINS` are among them: a self-hosted server's passkeys belong to the host in `ACCOUNT_BASE_URL`, with that address as their only origin. `OIDC_ADMIN_GROUP_ID` and `OIDC_DISPLAY_NAME` stop it too: they are now `IDP_ADMIN_GROUP_ID` and `IDP_DISPLAY_NAME`.

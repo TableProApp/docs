@@ -86,7 +86,7 @@ The trash button deletes exactly the entries the drawer is listing. Anything the
 
 ## Storage and retention
 
-History lives in `~/Library/Application Support/TablePro/query_history.db`, a local SQLite database with a full-text index. It never leaves the Mac that recorded it: query history is not one of the categories [iCloud sync](/features/icloud-sync) carries, so two Macs keep two separate histories.
+History lives in `~/Library/Application Support/TablePro/query_history.db`, a local SQLite database with a full-text index. [iCloud sync](/features/icloud-sync) does not carry it. On [TablePro Sync](/features/sync#what-tablepro-sync-carries), history also goes to your TablePro account, end-to-end encrypted, unless your server turns that off. Runs on a Local only connection stay on this Mac, and so does a run whose text TablePro cannot check for credentials, such as one on an engine whose SQL it does not parse.
 
 There is no export command. The file is an ordinary SQLite database, so open it as a SQLite connection and query it like anything else.
 

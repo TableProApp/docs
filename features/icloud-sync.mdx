@@ -5,11 +5,11 @@ description: Sync connections, groups, tags, and saved queries to your Macs, iPh
 
 import LocalCredentialConsent from "/snippets/local-credential-consent.mdx";
 
-Sync needs a Pro or Team [plan](/features/licensing) and starts off. Press `Cmd+,`, open **Settings > iCloud Sync**, turn on **Sync this Mac with iCloud**, pick what to sync under **What Syncs**, and click **Sync Now**. The iPhone and iPad app shares the same CloudKit data but carries connections, groups, tags, and saved queries only.
+Sync needs a Pro or Team [plan](/features/licensing) and starts off. Press `Cmd+,`, open **Settings > Sync**, choose **iCloud** under **Sync this Mac with**, pick what to sync under **What Syncs**, and click **Sync Now**. Without a plan, choosing **iCloud** opens a dialog to sign in or buy one, and the menu stays where it was. The iPhone and iPad app shares the same CloudKit data but carries connections, groups, tags, and saved queries only. [Sync](/features/sync) covers the other provider, TablePro Sync, and moving between the two.
 
-<Frame caption="iCloud Sync settings">
-  <img className="block dark:hidden" src="/images/settings-sync.png" alt="iCloud Sync pane with the Sync this Mac with iCloud switch dimmed above a row that names the plan required" />
-  <img className="hidden dark:block" src="/images/settings-sync-dark.png" alt="iCloud Sync pane with the Sync this Mac with iCloud switch dimmed above a row that names the plan required" />
+<Frame caption="iCloud still chosen on a Mac that has no plan">
+  <img className="block dark:hidden" src="/images/settings-sync.png" alt="Sync pane with iCloud chosen in the Sync this Mac with menu, above a row saying iCloud Sync needs a paid plan with Purchase License and Sign In" />
+  <img className="hidden dark:block" src="/images/settings-sync-dark.png" alt="Sync pane with iCloud chosen in the Sync this Mac with menu, above a row saying iCloud Sync needs a paid plan with Purchase License and Sign In" />
 </Frame>
 
 ## What syncs
@@ -53,13 +53,15 @@ What belongs to the connection stays on this Mac with it: its table and database
 
 ## Checking that it worked
 
-**Status**, under the switch, reads **Up to Date** after a clean run. **Last synced** is the last run that both sent this Mac's changes and brought the other devices' in, so it stops moving while uploads fail even though downloads keep arriving.
+**Status**, under the menu, reads **Up to Date** after a clean run. **Last synced** is the last run that both sent this Mac's changes and brought the other devices' in, so it stops moving while uploads fail even though downloads keep arriving.
+
+A new connection from another device, or a change there that moves where a connection signs in or loosens a protection, waits for you instead, and **Status** counts it. See [Changes that wait for your approval](/features/sync#changes-that-wait-for-your-approval).
 
 When the same connection changed on two devices, TablePro merges field by field, so a name edited on one Mac and a port edited on the other both survive. When one field changed in both places, the device that syncs last wins.
 
 ## Troubleshooting
 
-A condition that a retry cannot clear shows as a notice at the top of **Settings > iCloud Sync**, with the action that clears it. Its title also shows as a link on the welcome window that opens the pane, except **iCloud Is Not Ready**, which clears by itself. While it lasts, edits stop going up on every change: they wait on this Mac, and nothing local is deleted.
+A condition that a retry cannot clear shows as a notice at the top of **Settings > Sync**, with the action that clears it. Its title also shows as a link on the welcome window that opens the pane, except **iCloud Is Not Ready**, which clears by itself. While it lasts, edits stop going up on every change: they wait on this Mac, and nothing local is deleted.
 
 ### iCloud Storage Is Full
 
@@ -99,8 +101,8 @@ iCloud refused the changes counted under **Status** and accepted the rest. The r
 
 ### Other cases
 
-Signing in to a different iCloud account starts sync over for that account: the next sync is a full fetch rather than a delta, and changes waiting on this Mac go to the new account. Expect the first sync to take longer.
+Signing in to a different Apple Account stops uploads until you choose between **Move My Data** and **Start Empty**; see [Signed in to another account](/features/sync#signed-in-to-another-account). Expect the first sync after that to take longer: it is a full fetch rather than a delta.
 
-When your plan ends, sync stops and local data stays where it is. The row under the switch says **iCloud Sync needs a paid plan** and offers **Upgrade Plan**. The switch still turns sync off, and dims once it is off.
+When your plan ends, sync stops and local data stays where it is. The row under the menu says **iCloud Sync needs a paid plan** and offers **Upgrade Plan**. **Off** in the menu still turns sync off, and choosing **iCloud** again asks for a plan.
 
-A plan this Mac could not verify pauses sync the same way. The row under the switch says **Your plan could not be verified** and offers **Try Again**, which opens **Settings > Account** and checks again. A check that fails says why in the row.
+A plan this Mac could not verify pauses sync the same way. The row under the menu says **Your plan could not be verified** and offers **Try Again**, which opens **Settings > Account** and checks again. A check that fails says why in the row.

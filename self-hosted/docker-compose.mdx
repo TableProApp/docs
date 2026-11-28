@@ -99,7 +99,7 @@ volumes:
 # Fill in, then chmod 600 .env. Every variable: https://docs.tablepro.app/self-hosted/settings
 
 # The release to run, by version and digest.
-TABLEPRO_IMAGE=ghcr.io/tableproapp/tablepro-cloud:0.2.0@sha256:<index digest>
+TABLEPRO_IMAGE=ghcr.io/tableproapp/tablepro-cloud:0.3.0@sha256:<index digest>
 
 # The database password: openssl rand -hex 24. Postgres keeps the first one it starts with.
 POSTGRES_PASSWORD=
@@ -140,6 +140,16 @@ IDP_DISPLAY_NAME=
 # HTTPS_PROXY=http://proxy.example.com:3128
 # NO_PROXY=idp.example.com
 
+# Your mail relay, for one kind of email: a passkey added to or removed from someone's account, or reset with
+# passkeys reset. TLS always, starttls or implicit, never plaintext. Unset, the audit log and the logs are the notice.
+# Check the settings with: docker compose run --rm --no-deps app mail test you@example.com
+# SMTP_HOST=smtp.example.com
+# SMTP_PORT=587
+# SMTP_TLS=starttls
+# SMTP_USERNAME=
+# SMTP_PASSWORD=
+# SMTP_FROM=tablepro@example.com
+
 # The server's signing and encryption keys, as one line from credentials.sh, in single quotes.
 # Keep a copy offline: a database restored without these keys cannot read the IdP tokens it holds.
 TABLEPRO_CREDENTIALS=
@@ -168,7 +178,7 @@ TABLEPRO_CREDENTIALS=
     ```
   </Step>
   <Step title="Point the reverse proxy at it">
-    Forward both hostnames to `127.0.0.1:8080` over TLS. The proxy passes `Host` unchanged and sets `X-Forwarded-For`. The server takes request bodies up to 16 MiB; a proxy with a lower limit, such as nginx's default `client_max_body_size 1m`, refuses larger Team Library publishes.
+    Forward both hostnames to `127.0.0.1:8080` over TLS. The proxy passes `Host` unchanged and sets `X-Forwarded-For`. The server takes request bodies up to 16 MiB; a proxy with a lower limit, such as nginx's default `client_max_body_size 1m`, refuses larger Team Library publishes and sync uploads.
   </Step>
   <Step title="Install the license">
     ```bash
@@ -205,7 +215,9 @@ Every server command runs in a one-off `app` container:
 | `docker compose run --rm --no-deps app license status` | Shows the installed license and the seats taken |
 | `docker compose run --rm --no-deps app bootstrap "<team name>"` | Prints the link that claims the server. Refused once it has an owner |
 | `docker compose run --rm --no-deps app bootstrap --replace-owner` | Prints a link that replaces an owner who can no longer sign in |
-| `docker compose run --rm --no-deps app sync new-epoch` | After a database restore, before `app` starts. See [Restore](/self-hosted/operations#restore-a-backup) |
+| `docker compose run --rm --no-deps app sync new-epoch` | After a database restore, before `app` starts. Prints the new epoch's ID. See [Restore](/self-hosted/operations#restore-a-backup) |
+| `docker compose run --rm --no-deps app passkeys reset <email>` | Deletes every passkey of the account, for someone who lost theirs. See [Lost passkeys](/self-hosted/operations#lost-passkeys) |
+| `docker compose run --rm --no-deps app mail test <address>` | Sends one test email through the SMTP relay. See [Email](/self-hosted/settings#email) |
 | `docker compose run --rm --no-deps app migrate status` | Lists every migration with the time it was applied, or `pending`. `migrate up` prints nothing when it succeeds |
 | `docker compose run --rm --no-deps app version` | Prints the release |
 

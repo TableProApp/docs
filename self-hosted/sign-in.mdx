@@ -1,6 +1,6 @@
 ---
 title: Sign-in through your IdP
-description: Connect the self-hosted TablePro server to AWS IAM Identity Center, another SAML 2.0 IdP such as OneLogin, or an OpenID Connect IdP, how long sessions last, and the fresh sign-in a role change needs
+description: Connect the self-hosted TablePro server to AWS IAM Identity Center, another SAML 2.0 IdP such as OneLogin, or an OpenID Connect IdP, how long sessions last, and the passkey a role change needs
 ---
 
 People sign in to the portal, and through it to the Mac, with one identity provider, over SAML 2.0 or OpenID Connect. `SAML_IDP_ENTITY_ID` or `OIDC_ISSUER` picks which; set exactly one.
@@ -85,7 +85,7 @@ Identity Center connects an outside application over SAML 2.0 from an organizati
     `GroupId` in the answer is the value.
   </Step>
   <Step title="Shorten the session">
-    A [step-up](#step-up) through Identity Center proves only that the person's Identity Center session is still alive. Keep that session short. In the IAM Identity Center console, choose **Settings**, open the **Authentication** tab, and choose **Configure** next to **Session duration**. Under **User interactive sessions**, set 15 minutes, the minimum, and choose **Save**.
+    An owner's or admin's first passkey binds after the IdP signs them in again, and through Identity Center that proves only that the person's Identity Center session is still alive; see [Step-up](#step-up). Keep that session short. In the IAM Identity Center console, choose **Settings**, open the **Authentication** tab, and choose **Configure** next to **Session duration**. Under **User interactive sessions**, set 15 minutes, the minimum, and choose **Save**.
 
     The same duration applies to the AWS access portal, so people sign in there again every 15 minutes too. It applies only to sessions that start after the change. See AWS's [User interactive sessions](https://docs.aws.amazon.com/singlesignon/latest/userguide/user-interactive-sessions.html).
   </Step>
@@ -205,16 +205,48 @@ Removing someone at the IdP ends their sessions within those caps, or at the nex
 
 ## Step-up
 
-These changes in the portal need a sign-in from the last 5 minutes:
+These changes need a passkey of the account, used in the last 5 minutes:
 
 - on **Server > Members**: **Make admin**, **Make member**, **Remove from server…** and **Restore…**;
-- in a team: changing a member's role, removing a member, inviting an admin or making a new link for that invitation, transferring ownership, and creating an API token.
+- on **Server > Sync**: turning a switch off;
+- in a team: changing a member's role, removing a member, inviting an admin or making a new link for that invitation, transferring ownership, and creating an API token;
+- in the portal's **Settings**, under **Passkeys**: adding or removing a passkey.
 
-Without one, the portal shows **Confirm it's you**, and **Sign in again** sends the person through the IdP and back to the page, where they make the change again. The server asks the IdP to authenticate them again rather than answer from its session: OIDC's `max_age=0`, `prompt=login` unless the IdP's discovery leaves it out, and `auth_time` as an essential claim; SAML's `ForceAuthn`. It then reads when the IdP says the person authenticated, from `auth_time` or the assertion's `AuthnInstant`. No time, or a time more than 3 minutes before the sign-in started, confirms nothing: the portal says "Your organization's sign-in didn't ask you to sign in again, so nothing was confirmed", and the server logs `the IdP's answer does not show it authenticated the person again` at WARN.
+The IdP's sign-in never counts as a step-up, however recent. Passkeys only confirm changes: nobody signs in with one. They belong to the portal's host, and the server fetches no passkey metadata.
 
-- **AWS IAM Identity Center.** Identity Center does not sign you in again for a stepped-up change; it only checks your session. Set its session duration short, as in the last step under [AWS IAM Identity Center](#aws-iam-identity-center).
+### What owners and admins see
+
+A change without a recent step-up opens **Confirm it's you**. **Use passkey** runs the browser's passkey prompt, such as Touch ID or a security key, and the change goes through. The next changes within 5 minutes ask nothing.
+
+An account with no passkey adds one first, once:
+
+<Steps>
+  <Step title="Sign in again">
+    The change opens **Add a passkey to confirm changes**. **Sign in again** sends the person to the IdP, which must ask them to authenticate rather than answer from its session, and brings them back to the same page.
+  </Step>
+  <Step title="Add the passkey">
+    **Add a passkey** opens. **Add passkey** runs the browser's prompt, and **Passkey added** says to try the change again.
+  </Step>
+  <Step title="Make the change again">
+    It asks for the new passkey, as every later step-up does.
+  </Step>
+</Steps>
+
+After a portal sign-in, an owner or admin with no passkey is also offered one, with **Skip**. Each passkey after the first needs a step-up with one the account has, so an IdP sign-in alone never adds a second. Removing the last passkey means the next change starts with the IdP again.
+
+The server asks the IdP to authenticate the person again for that first passkey: OIDC's `max_age=0`, `prompt=login` unless the IdP's discovery leaves it out, and `auth_time` as an essential claim; SAML's `ForceAuthn`. It reads when the IdP says the person authenticated, from `auth_time` or the assertion's `AuthnInstant`. No time, or a time more than 3 minutes before the sign-in started, adds nothing: the portal says "Your organization's sign-in didn't ask you to sign in again, so nothing was confirmed", and the server logs `the IdP's answer does not show it authenticated the person again` at WARN.
+
+- **AWS IAM Identity Center.** Identity Center does not sign you in again when asked; it only checks your session. A first passkey then rests on a live Identity Center session. Set its session duration short, as in the last step under [AWS IAM Identity Center](#aws-iam-identity-center).
 - **Okta over SAML.** In the app's **General** tab, edit **SAML Settings**, choose **Show Advanced Settings**, and set **Honor Force Authentication** to **Yes**. With **No**, Okta ignores `ForceAuthn`.
 
+### What members see
+
+Someone who is an owner or admin of neither the server nor a team meets the portal's step-up only when adding or removing a passkey under **Settings**. The Mac asks too: removing a device from **Settings > Account > End-to-End Encryption**, or a key reset that starts empty, opens the browser for a passkey, and someone with none adds a first one through the IdP, as under [What owners and admins see](#what-owners-and-admins-see). See [Sync](/features/sync#end-to-end-encryption).
+
+### Lost passkeys
+
+Another of the account's passkeys still works, and so does a synced copy at its provider. Otherwise, the person who runs the server deletes them all with `passkeys reset`; see [Lost passkeys](/self-hosted/operations#lost-passkeys). The person adds a new one at their next step-up, after the IdP signs them in again. With an [SMTP relay](/self-hosted/settings#email), the server emails the person whenever a passkey is added, removed or reset.
+
 <Check>
-After the owner's first sign-in, change someone's role or remove someone once, and sign in again when the portal asks. The change goes through.
+After the owner's first sign-in, change someone's role once. The portal asks to sign in again, then to add a passkey, then for that passkey, and the change goes through.
 </Check>

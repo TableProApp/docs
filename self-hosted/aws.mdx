@@ -26,7 +26,7 @@ Six subnets across two Availability Zones: two for the ALB, two for the task and
 - **Target group.** Type `ip`, port 8080, health check path `/readyz`, matcher 200, interval 15 seconds, healthy threshold 2, unhealthy threshold 5, deregistration delay 30 seconds. No host rules: the server routes by `Host` itself.
 - **ALB attributes.** `routing.http.drop_invalid_header_fields.enabled=true`, `routing.http.preserve_host_header.enabled=true`, `routing.http.xff_header_processing.mode=append` (the default), `deletion_protection.enabled=true`.
 - **Security groups.** The ALB takes 443 and 80 from the clients. The task takes 8080 from the ALB's group only. RDS takes 5432 from the task's group only.
-- **Task subnets.** Two of their own, never the ALB's. The task pulls the image from GHCR, with OIDC it calls the IdP, and with `LICENSE_RENEWAL=on` it calls `api.tablepro.app` on 443: use private subnets with a NAT gateway, or public subnets with `assignPublicIp`.
+- **Task subnets.** Two of their own, never the ALB's. The task pulls the image from GHCR, with OIDC it calls the IdP, with `LICENSE_RENEWAL=on` it calls `api.tablepro.app` on 443, and with `SMTP_HOST` set it reaches the relay on `SMTP_PORT`: use private subnets with a NAT gateway, or public subnets with `assignPublicIp`.
 - **No egress.** Mirror the image to ECR with `oras cp -r` ([Image and keys](/self-hosted/image#mirror-to-a-private-registry)), run an OIDC IdP inside the VPC, and take a term other than monthly: each license file is then installed by hand. A SAML IdP needs no route from the task: the browser carries its answer.
 - **Database subnets.** Two more, for RDS's DB subnet group. They need no route out.
 - **Client address.** `CLIENT_ADDRESS=xff`, with `CLIENT_ADDRESS_TRUSTED_CIDRS` set to the CIDRs of the ALB's subnets. Not the VPC's CIDR: a workload elsewhere in it would set its own rate-limit key.
@@ -57,7 +57,7 @@ aws secretsmanager create-secret --name tablepro/db \
 aws secretsmanager create-secret --name tablepro/keys --secret-string file://credentials.json
 ```
 
-The task execution role `tablepro-cloud-execution` has `AmazonECSTaskExecutionRolePolicy`, plus `secretsmanager:GetSecretValue` on the three secrets, and `kms:Decrypt` when they use a customer managed key.
+The task execution role `tablepro-cloud-execution` has `AmazonECSTaskExecutionRolePolicy`, plus `secretsmanager:GetSecretValue` on the three secrets and on an SMTP password's secret when you add one, and `kms:Decrypt` when they use a customer managed key.
 
 ECS reads a secret only when a task starts. After changing one, run `aws ecs update-service --cluster tablepro --service tablepro-cloud --force-new-deployment`.
 
@@ -256,6 +256,8 @@ With a SAML IdP, replace `OIDC_ISSUER` and `OIDC_CLIENT_ID` with `SAML_IDP_ENTIT
 
 With a monthly license, add `{ "name": "LICENSE_RENEWAL", "value": "on" }` to `app`'s `environment`. See [Renew](/self-hosted/operations#renew).
 
+To email passkey notices, add `SMTP_HOST`, `SMTP_TLS`, `SMTP_FROM` and, for a relay that takes a login, `SMTP_USERNAME` to `app`'s `environment`, and `SMTP_PASSWORD` to its `secrets` from a secret of its own. See [Email](/self-hosted/settings#email).
+
 ```bash
 aws ecs register-task-definition --cli-input-json file://ecs-task-definition.json
 ```
@@ -312,7 +314,7 @@ task=$(aws ecs run-task --cluster tablepro --task-definition tablepro-cloud --la
   --query 'tasks[0].taskArn' --output text)
 ```
 
-`license status`, `migrate status`, `bootstrap --replace-owner`, `sync new-epoch` and `version` run the same way, with their words as the command. [Docker Compose](/self-hosted/docker-compose#run-a-command) lists what each one does.
+`license status`, `migrate status`, `bootstrap --replace-owner`, `sync new-epoch`, `passkeys reset <email>`, `mail test <address>` and `version` run the same way, with their words as the command. [Docker Compose](/self-hosted/docker-compose#run-a-command) lists what each one does.
 
 <Warning>
 `bootstrap` prints the owner's claim link to the log stream, where anyone who reads the log group can use it within its hour. Running `bootstrap` again voids the earlier link.

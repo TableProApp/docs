@@ -40,7 +40,7 @@ A link can open any pane or page directly: see [Open a settings pane](/developer
   <Card title="AI" icon="sparkles" href="/features/ai-assistant">Providers, inline suggestions, context, slash commands, default AI policy.</Card>
   <Card title="MCP" icon="network-wired" href="/features/mcp">MCP server, approvals, tokens, clients, outside servers.</Card>
   <Card title="Extensions" icon="puzzle-piece" href="/features/plugins">Modules, drivers and formats.</Card>
-  <Card title="iCloud Sync" icon="cloud" href="/features/icloud-sync">iCloud sync and what it carries.</Card>
+  <Card title="Sync" icon="cloud" href="/features/sync">iCloud or TablePro Sync, moving between them, and what each carries.</Card>
   <Card title="Account" icon="key" href="/features/licensing">Sign-in, plan, devices, teams, offline file and license key.</Card>
 </CardGroup>
 
@@ -131,11 +131,11 @@ What a fresh install ships with, so one glance down this column says what you ch
 | Extensions | Routine Debugger | Off |
 | Extensions | Live Messages | Off |
 | Extensions | Compare & Sync | Off. On for a Mac that ran an earlier version |
-| iCloud Sync | Sync this Mac with iCloud | Off |
-| iCloud Sync | Passwords | Off |
+| Sync | Sync this Mac with | Off |
+| Sync | Passwords | Off for iCloud, on for TablePro Sync |
 
 Keyboard, Profiles and Account are not in the table. Stock keyboard chords are on [Keyboard Shortcuts](/features/keyboard-shortcuts), and Profiles and Account hold no value of their own.
 
 ## Where settings live
 
-The file is `~/Library/Preferences/com.TablePro.plist`. **Reset…** beside **Reset all settings** on the General pane puts every pane back to its stock value after a confirmation, and turns iCloud sync off, password sync included. Each module goes back to the default it had on that Mac. Saved connections, AI providers with their API keys, the **Enable AI features** switch, **Share usage data**, linked folders, trusted links, query history, and MCP tokens survive it.
+The file is `~/Library/Preferences/com.TablePro.plist`. **Reset…** beside **Reset all settings** on the General pane puts every pane back to its stock value after a confirmation, and turns sync off, password sync included. Each module goes back to the default it had on that Mac. Saved connections, AI providers with their API keys, the **Enable AI features** switch, **Share usage data**, linked folders, trusted links, query history, and MCP tokens survive it.

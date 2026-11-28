@@ -394,6 +394,7 @@
             "group": "Sync and licensing",
             "icon": "arrows-rotate",
             "pages": [
+              "features/sync",
               "features/icloud-sync",
               "features/handoff",
               "features/licensing",
@@ -413,6 +414,7 @@
               "self-hosted/aws",
               "self-hosted/sign-in",
               "self-hosted/roles",
+              "self-hosted/sync",
               "self-hosted/operations",
               "self-hosted/releases"
             ]

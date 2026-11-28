@@ -1,0 +1,85 @@
+---
+title: Personal sync and Team Library
+description: What a self-hosted server keeps for each person and each team, which of it is end-to-end encrypted, the switches that limit it, and what to tell people about their keys before they turn on TablePro Sync
+---
+
+Team Library is shared by a team; TablePro Sync is each person's own. Both go through your server once the Macs sign in to it. Team Library needs nothing more. TablePro Sync starts when a person chooses it under **Settings > Sync**, or when a configuration profile chooses it for them, and each person then holds end-to-end keys that nobody running the server can recover.
+
+## What the server keeps
+
+| Data | Comes from | On the server |
+|---|---|---|
+| Team Library: the connections and saved queries a team publishes | The team's owners, admins and editors | Readable records |
+| Team Library passwords: the password, SSH password and TOTP secret of each published connection | The team's owners, admins and editors, with **Saved passwords** on | End-to-end encrypted with the team's key |
+| Connections, groups and tags, projects, SSH and credential profiles, saved queries and their folders, table and database favorites, table folders, and settings | Each person on TablePro Sync, by the categories they choose | Readable records |
+| Saved passwords, key passphrases and TOTP secrets of each person's connections and profiles | Each person on TablePro Sync, with **Passwords** on | End-to-end encrypted |
+| Query history | Each person on TablePro Sync | End-to-end encrypted |
+
+End-to-end encrypted means the Mac seals the value before it sends it: a person's own data with that person's keys, which only their approved devices open, and Team Library passwords with the team's key, which only members an owner or admin confirmed open. The server, its database and its backups hold ciphertext. The readable records are protected by TLS and by your database's own access controls, as Team Library always was: anyone who reads the database or a dump reads them.
+
+The server cannot change where a connection signs in on someone's Mac by itself. A changed host, user, SSH route, SSL setting or startup command, a lower Safe Mode, and a new connection [wait for the person's approval](/features/sync#changes-that-wait-for-your-approval) on each Mac.
+
+Connections a person marks **Local only**, and the sample connections, stay on their Mac. [Sync](/features/sync) covers the Mac's side.
+
+## Before you roll it out
+
+- **The license.** TablePro Sync needs `service_sync` among the license file's features, and Team Library `team_library`. `license status` lists them; ask TablePro for a new file if one is missing.
+- **The Macs.** TablePro Sync needs a TablePro release with **Settings > Sync**. Earlier releases sync Team Library through the server as before.
+- **The switches.** Decide what the server keeps under **Server > Sync**; see [Sync switches](#sync-switches). Every switch starts on.
+- **Team passwords.** A member's Macs open a team's passwords only once an owner or admin of the team confirms that member's keys in the Mac app; see [Passwords in Team Library](/features/team#passwords-in-team-library).
+- **Passkeys.** Removing a lost device, and a key reset that starts empty, ask the person for a passkey in the browser. Someone without one adds their first then, after the IdP signs them in again; see [Step-up](/self-hosted/sign-in#step-up).
+- **The provider, for every Mac.** `PersonalSyncProvider` set to `tablepro-sync` in a configuration profile picks TablePro Sync and locks the choice; see [Company server](/features/company-server#set-the-server-for-every-mac). Nothing uploads before the person reviews it: the Mac shows **Your Organization Uses TablePro Sync** with **Review Upload…**.
+
+## Sync switches
+
+**Server > Sync** in the portal holds three switches, for the owner and admins. Each change is in **Server > Audit log**.
+
+| Switch | Covers | Turned off |
+|---|---|---|
+| **Personal sync** | Each person's own connections, settings, saved passwords and query history | The server deletes everyone's personal data and query history, and takes no more. Each Mac keeps what it has. Team Library keeps working |
+| **Saved passwords** | Passwords saved on personal and team connections | The server deletes every saved password it holds, personal and team. Each Mac keeps its own |
+| **Query history** | Each person's query history | The server deletes the history it holds. Each Mac keeps its own |
+
+Turning a switch off asks first, then for your passkey if you have not used it in the last 5 minutes. Turning it on again needs neither, and the Macs send their copies back up.
+
+A Mac on TablePro Sync says under **Settings > Sync** what the server leaves out:
+
+| Off | The Mac says |
+|---|---|
+| **Personal sync** | "Your server does not keep personal data, so this Mac keeps its own. Team Library goes on syncing." It is the only notice then, and **Passwords** under **What Syncs** is dimmed |
+| **Saved passwords** | "Your server does not sync passwords. Each one stays on this Mac." **Passwords** is dimmed |
+| **Query history** | "Your server does not sync query history. It stays on this Mac." |
+
+With **Personal sync** off, **TablePro Sync** is no longer offered to a Mac that is not on it yet. A Mac already on it stays there and keeps its own data.
+
+## Keys
+
+Each person's keys are their own. The server stores public keys and ciphertext, never a key that opens them, so nobody who runs it can recover a person's passwords or history. These are the four things to tell people. [End-to-end encryption](/features/sync#end-to-end-encryption) has the steps.
+
+### The recovery key
+
+The first Mac a person moves to TablePro Sync sets up a recovery key before it uploads anything. The Mac shows it once, with **Copy** and **Print…**, and asks for part of it back before it goes on. It belongs in a password manager or on paper.
+
+The recovery key removes a lost device and approves a Mac when no other device is at hand. **Replace…** under **Settings > Account > End-to-End Encryption** swaps it for a new one, given the current one. Someone who loses it while a Mac still holds the keys resets them from that Mac with **Reset Keys…**: after a wait in which any of their devices can cancel it, **Finish Reset…** on that Mac signs their other devices out to join again from it. Passwords and query history stay. Someone with no device and no recovery key starts over with **Reset and Start Empty…**, which needs their passkey and the same wait; **Finish Reset…** then deletes everything they synced, passwords and query history included. Team libraries stay. [Lost the recovery key](/features/sync#lost-the-recovery-key) has the wait and the steps.
+
+### A new Mac
+
+A Mac signed in to an account that already has keys gets nothing personal until another device or the recovery key approves it. On the new Mac, **Ask Another Device…**. On a Mac that has the keys, **Approve…** under **Waiting for Approval**, then **Approve**. Both show the same five words. When they match in the same order, **The Words Match** on each Mac finishes it; see [Approve another device](/features/sync#approve-another-device).
+
+Words that differ mean someone else may be asking for the keys: **They Don't Match** approves nothing. Tell people to approve only a device they are signing in to right now.
+
+### A lost Mac
+
+From any other approved device, **Remove…** beside the lost Mac under **Devices With Your Keys**. The browser opens for the person's passkey, then the recovery key changes their keys. The lost Mac is signed out and reads nothing synced after that. Before the keys change, the person picks which of their devices keep them and checks the teammates they confirmed while the lost Mac had the keys.
+
+Removing a person from the server signs out every one of their devices, and the server deletes what they synced 30 days later; see [Remove someone](/self-hosted/roles#remove-someone).
+
+### Signing out
+
+**Sign Out** under **Settings > Account** erases that Mac's keys and its Team Library data. After the next sign-in, the Mac waits for approval like a new one.
+
+## When the license ends
+
+Through the grace, the Macs show **Your Server's License Has Expired** with the date sync stops taking changes. Past it they show **Uploads Paused**: they still download, changes wait on each Mac, and Sign Out and approving and removing devices still work. A new license file starts the uploads again. See [When a license ends](/self-hosted/operations#when-a-license-ends).
+
+After a database restore, every Mac takes a fresh copy and sends back what it still holds, with the exceptions under [Restore a backup](/self-hosted/operations#restore-a-backup).

@@ -3,22 +3,22 @@ title: Image and keys
 description: Pull the TablePro server image from GHCR, verify its cosign signature, SBOM and provenance, mirror it to a private registry, and generate the server's keys
 ---
 
-Pull from `ghcr.io/tableproapp/tablepro-cloud`. It is public and built for `linux/amd64` and `linux/arm64`. The current release is `0.2.0`; [Self-hosted releases](/self-hosted/releases) lists every release and what it changed.
+Pull from `ghcr.io/tableproapp/tablepro-cloud`. It is public and built for `linux/amd64` and `linux/arm64`. The current release is `0.3.0`; [Self-hosted releases](/self-hosted/releases) lists every release and what it changed.
 
 | | |
 |---|---|
-| Tags | `X.Y.Z` and `X.Y`, such as `0.2.0` and `0.2`. There is no `latest` |
+| Tags | `X.Y.Z` and `X.Y`, such as `0.3.0` and `0.3`. There is no `latest` |
 | Base | `gcr.io/distroless/static-debian13:nonroot`. No shell |
 | User | 65532. The root filesystem can be read-only |
 | Entry point | `/tablepro-cloud`, default command `serve`, listening on `:8080` |
-| `version` | Prints the release, such as `0.2.0` |
+| `version` | Prints the release, such as `0.3.0` |
 | Third-party notices | `/usr/share/doc/tablepro-cloud/THIRD_PARTY_NOTICES` |
 | Amazon RDS CA bundle | `/etc/ssl/rds-global-bundle.pem`, for `sslrootcert` in `DATABASE_URL` |
 
-Deploy by digest, not by tag. The index digest of `0.2.0` is `sha256:de9130a22de1439e917fa621b9b22af62fd080ac9cf848b19b2e3e4c1d1885d8`. Check it, or get another release's, with:
+Deploy by digest, not by tag. The index digest of `0.3.0` is `sha256:ecee1a9c3259b00cd3c2001ca47261dab2462ebcaee89331f6dbc992bb0b828d`. Check it, or get another release's, with:
 
 ```bash
-docker buildx imagetools inspect ghcr.io/tableproapp/tablepro-cloud:0.2.0
+docker buildx imagetools inspect ghcr.io/tableproapp/tablepro-cloud:0.3.0
 ```
 
 `Digest:` at the top is the index digest. Each entry under `Manifests:` names one platform's digest.
@@ -57,7 +57,7 @@ The signatures are also in Sigstore's public Rekor log, which `cosign verify` ch
 ### Mirror to a private registry
 
 ```bash
-oras cp -r ghcr.io/tableproapp/tablepro-cloud@sha256:<index digest> registry.example.com/tablepro-cloud:0.2.0
+oras cp -r ghcr.io/tableproapp/tablepro-cloud@sha256:<index digest> registry.example.com/tablepro-cloud:0.3.0
 ```
 
 ORAS 1.3 or later copies the signatures and attestations with the image, since cosign 3 stores them as OCI referrers. `cosign copy` 3.1 leaves them behind. Run the verify commands against the mirror afterwards.
@@ -117,10 +117,10 @@ Run it once per install, with the image by digest, and with your SAML IdP's meta
 chmod +x credentials.sh
 
 # OIDC
-./credentials.sh ghcr.io/tableproapp/tablepro-cloud:0.2.0@sha256:<index digest> > credentials.json
+./credentials.sh ghcr.io/tableproapp/tablepro-cloud:0.3.0@sha256:<index digest> > credentials.json
 
 # SAML 2.0: the IdP's metadata file as the second argument
-./credentials.sh ghcr.io/tableproapp/tablepro-cloud:0.2.0@sha256:<index digest> idp-metadata.xml > credentials.json
+./credentials.sh ghcr.io/tableproapp/tablepro-cloud:0.3.0@sha256:<index digest> idp-metadata.xml > credentials.json
 ```
 
 <Warning>

@@ -3,7 +3,7 @@ title: Self-hosted server
 description: What the Enterprise Self-Hosted preview runs, what it needs from your infrastructure, the order to set it up in, and its limits
 ---
 
-One OCI image serves your teams and their Team Library to the Macs, from your own PostgreSQL. People sign in through your identity provider. The server sends no email and no telemetry. Its only outbound calls go to an OIDC identity provider and, when you turn on [license renewal](/self-hosted/operations#renew), to tablepro.app for the license's next file.
+One OCI image serves your teams, their Team Library and each person's [TablePro Sync](/self-hosted/sync) to the Macs, from your own PostgreSQL. People sign in through your identity provider. The server sends no telemetry. Its only outbound calls go to an OIDC identity provider, to your SMTP relay when you [set one](/self-hosted/settings#email) for passkey notices, and, when you turn on [license renewal](/self-hosted/operations#renew), to tablepro.app for the license's next file.
 
 <Info>
 This is a preview. It serves TablePro for macOS. The other apps follow. To try it, write to [hello@tablepro.app](mailto:hello@tablepro.app) with the subject "TablePro Enterprise Self-Hosted"; plans and prices are under [Enterprise Self-Hosted](/features/licensing#enterprise-self-hosted).
@@ -15,10 +15,11 @@ This is a preview. It serves TablePro for macOS. The other apps follow. To try i
 |---|---|
 | Container host | Docker Compose on one Linux host, or AWS ECS on Fargate. The image runs on `linux/amd64` and `linux/arm64` |
 | Database | PostgreSQL 18. The Compose file brings its own; on AWS, RDS for PostgreSQL 18 |
-| Two hostnames | One for the account portal, one for the API. They must differ |
+| Two hostnames | One for the account portal, one for the API. They must differ, and the portal's must be a DNS name: passkeys take no IP address |
 | TLS | A reverse proxy or load balancer in front that terminates TLS for both hostnames and forwards to port 8080 |
 | Identity provider | One IdP over OpenID Connect or SAML 2.0. See [Sign-in](/self-hosted/sign-in) |
 | License file | Issued by TablePro for your API address |
+| SMTP relay | Optional. It sends the passkey notices; see [Email](/self-hosted/settings#email) |
 
 These pages use two example hostnames:
 
@@ -62,8 +63,8 @@ The license file names the API address as `https://` plus `API_HOST`, and the se
 ## Preview limits
 
 - **macOS only.** The other TablePro apps cannot sign in to a self-hosted server yet.
-- **Team Library is what syncs in the preview.** Shared links, billing and plan purchases are tablepro.app services and are not on a self-hosted server; [Company server](/features/company-server#what-is-different-on-a-company-server) lists what the Mac hides.
-- **No email.** An invitation is a link to copy and send yourself. Every email the server would send is dropped and logged as `email not sent`.
+- **Team Library and TablePro Sync are what sync.** Shared links, billing and plan purchases are tablepro.app services and are not on a self-hosted server; [Company server](/features/company-server#what-is-different-on-a-company-server) lists what the Mac hides.
+- **Passkey notices are the only email.** An invitation is a link to copy and send yourself. Every other email the server would send is dropped and logged as `email not sent`.
 - **One IdP, one protocol.** Moving to another IdP or protocol later gives every person a new identity, and nothing links the old accounts to the new ones.
 - **SAML is SP-initiated only.** A Response the IdP sends unasked is refused, and the server reads no encrypted assertion and sends no Single Logout.
 - **No SCIM, no LDAP.** People appear at their first sign-in. An LDAP directory goes through an OIDC broker you run, such as Keycloak's LDAP user federation or Dex's LDAP connector.
