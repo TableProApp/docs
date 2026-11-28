@@ -270,6 +270,7 @@
               "databases/firebase",
               "databases/bigquery",
               "databases/bigtable",
+              "databases/hydradb",
               "databases/influxdb",
               "databases/kafka",
               "databases/kingbasees",
