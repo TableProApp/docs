@@ -476,16 +476,28 @@
         ]
       },
       {
-        "tab": "Windows preview",
+        "tab": "Windows",
         "icon": "windows",
         "groups": [
           {
             "group": "TablePro for Windows",
             "pages": [
+              "windows/install",
+              "windows/connect",
+              "windows/sql-editor",
               "windows/data-grid",
               "windows/browsing",
               "windows/projects",
-              "windows/account"
+              "windows/import-export",
+              "windows/mcp",
+              "windows/command-line",
+              "windows/links",
+              "windows/settings",
+              "windows/keyboard-shortcuts",
+              "windows/account",
+              "windows/sync",
+              "windows/end-to-end-encryption",
+              "windows/team-library"
             ]
           }
         ]
